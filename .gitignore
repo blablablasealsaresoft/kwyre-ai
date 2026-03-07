@@ -13,3 +13,4 @@ build/
 .pytest_cache/
 server_out.txt
 alpaca_data.json
+.wrangler/

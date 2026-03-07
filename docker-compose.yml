@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Model weights are mounted at runtime — never baked into image.
 # Set HF_CACHE to your HuggingFace cache path (e.g. C:\Users\...\.cache\huggingface on Windows).
 services:
@@ -12,6 +10,7 @@ services:
       - KWYRE_API_KEYS=${KWYRE_API_KEYS:-sk-kwyre-dev-local:admin}
       - HF_HUB_OFFLINE=1
       - TRANSFORMERS_OFFLINE=1
+      - KWYRE_BIND_HOST=0.0.0.0
     ports:
       - "127.0.0.1:8000:8000"
     volumes:

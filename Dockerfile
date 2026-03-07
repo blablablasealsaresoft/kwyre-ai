@@ -1,14 +1,16 @@
 # Kwyre AI inference server
 # Model weights are mounted at runtime via volume — never baked into image.
-FROM pytorch/pytorch:2.6.0-cuda12.4-cudnn9-runtime
+FROM pytorch/pytorch:2.6.0-cuda12.4-cudnn9-devel
 
 RUN apt-get update && apt-get install -y --no-install-recommends curl \
     && rm -rf /var/lib/apt/lists/*
 
+ENV CC=gcc
 WORKDIR /workspace
 
 COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r requirements.txt
 
 COPY server/ ./server/
 COPY model/spike_serve.py ./model/spike_serve.py
