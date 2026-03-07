@@ -8,7 +8,10 @@ and a k-curriculum that gradually increases quantization aggressiveness.
 import argparse
 import math
 import os
+import sys
 import time
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 import torch
 from datasets import load_dataset
@@ -274,8 +277,16 @@ def main():
     trainer.save_model(final_dir)
     tokenizer.save_pretrained(final_dir)
 
-    final_stats = get_qat_sparsity_stats()
     final_k = k_scheduler.get_k(total_steps)
+    set_k(final_k)
+    set_qat_tracking(True)
+    reset_qat_stats()
+    with torch.no_grad():
+        dummy = tokenizer("Summarize the confidentiality obligations in a mutual NDA.",
+                          return_tensors="pt", max_length=64, truncation=True).to(model.device)
+        model(dummy.input_ids, attention_mask=dummy.attention_mask)
+    set_qat_tracking(False)
+    final_stats = get_qat_sparsity_stats()
 
     print("\n" + "=" * 60)
     print("Training Complete")
