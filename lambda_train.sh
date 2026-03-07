@@ -14,7 +14,7 @@ echo "============================================================"
 echo "Kwyre QAT Training — Lambda GH200 Setup"
 echo "============================================================"
 
-pip install --upgrade pip
+pip install --upgrade pip Pillow
 pip install torch torchvision torchaudio
 pip install transformers accelerate bitsandbytes peft trl datasets
 pip install psutil safetensors tokenizers scipy pyyaml huggingface_hub
