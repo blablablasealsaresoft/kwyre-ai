@@ -1,0 +1,25 @@
+version: '3.8'
+
+# Model weights are mounted at runtime — never baked into image.
+# Set HF_CACHE to your HuggingFace cache path (e.g. C:\Users\...\.cache\huggingface on Windows).
+services:
+  kwyre:
+    build: .
+    container_name: kwyre-inference
+    runtime: nvidia
+    environment:
+      - NVIDIA_VISIBLE_DEVICES=0
+      - KWYRE_API_KEYS=${KWYRE_API_KEYS:-sk-kwyre-dev-local:admin}
+      - HF_HUB_OFFLINE=1
+      - TRANSFORMERS_OFFLINE=1
+    ports:
+      - "127.0.0.1:8000:8000"
+    volumes:
+      # Model weights: read-only mount of HuggingFace cache
+      - ${HF_CACHE:-~/.cache/huggingface}:/root/.cache/huggingface:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3

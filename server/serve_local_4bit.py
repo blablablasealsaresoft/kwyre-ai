@@ -1,4 +1,8 @@
 import os
+
+os.environ["HF_HUB_OFFLINE"] = "1"
+os.environ["TRANSFORMERS_OFFLINE"] = "1"
+
 import re
 import sys
 import time
@@ -18,8 +22,10 @@ _server_dir = os.path.dirname(os.path.abspath(__file__))
 _project_root = os.path.dirname(_server_dir)
 sys.path.insert(0, _server_dir)
 sys.path.insert(0, os.path.join(_project_root, "model"))
+sys.path.insert(0, os.path.join(_project_root, "security"))
 from tools import route_tools
 from spike_serve import apply_spike_hooks, get_sparsity_stats, reset_sparsity_stats, set_tracking
+from verify_deps import startup_check
 
 MODEL_ID = "Qwen/Qwen3.5-9B"
 PORT = 8000
@@ -36,9 +42,9 @@ BIND_HOST = "127.0.0.1"
 # LAYER 4: Model weight integrity
 # ---------------------------------------------------------------------------
 KNOWN_WEIGHT_HASHES: dict[str, str] = {
-    # Populate via generate_weight_hashes() on first clean run
-    # "config.json": "sha256_here",
-    # "tokenizer_config.json": "sha256_here",
+    "config.json": "d0883072e01861ed0b2d47be3c16c36a8e81c224c7ffaa310c6558fb3f932b05",
+    "tokenizer_config.json": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
+    "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
 }
 
 def generate_weight_hashes(model_path: str) -> dict:
@@ -356,9 +362,11 @@ LOCAL_MODEL_PATH = os.path.join(
 if not verify_model_integrity(LOCAL_MODEL_PATH):
     sys.exit(1)
 
-print(f"Loading tokenizer for {MODEL_ID}...")
+startup_check(abort_on_failure=True)
+
+print(f"Loading tokenizer from {LOCAL_MODEL_PATH}...")
 tokenizer = AutoTokenizer.from_pretrained(
-    MODEL_ID, padding_side="left", truncation_side="left", trust_remote_code=True
+    LOCAL_MODEL_PATH, padding_side="left", truncation_side="left", trust_remote_code=True
 )
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
@@ -370,29 +378,22 @@ quant_config = BitsAndBytesConfig(
     bnb_4bit_use_double_quant=True,
 )
 
-print(f"Loading {MODEL_ID} with 4-bit quantization...")
-try:
-    model = AutoModelForCausalLM.from_pretrained(
-        MODEL_ID, trust_remote_code=True,
-        quantization_config=quant_config,
-        device_map="auto", dtype=torch.bfloat16,
-    )
-except Exception as e:
-    print(f"AutoModelForCausalLM failed ({e}), trying AutoModel...")
-    from transformers import AutoModel
-    model = AutoModel.from_pretrained(
-        MODEL_ID, trust_remote_code=True,
-        quantization_config=quant_config,
-        device_map="auto", dtype=torch.bfloat16,
-    )
+print(f"Loading {MODEL_ID} with 4-bit NF4 quantization (local weights)...")
+model = AutoModelForCausalLM.from_pretrained(
+    LOCAL_MODEL_PATH, trust_remote_code=True,
+    quantization_config=quant_config,
+    device_map="auto", dtype=torch.bfloat16,
+)
 model.eval()
 
 SPIKE_SKIP = [
     "embed", "lm_head", "layernorm", "norm", "visual", "merger",
     "q_proj", "k_proj", "v_proj", "o_proj",
 ]
-print(f"Measuring spike activation sparsity (k={SPIKE_K})...")
-spike_hooks, n_converted = apply_spike_hooks(
+
+# Phase 1: Measurement pass — measure sparsity with measure_only=True, then remove
+print(f"SpikeServe: measuring activation sparsity (k={SPIKE_K})...")
+measurement_hooks, n_converted = apply_spike_hooks(
     model, k=SPIKE_K, max_spike=SPIKE_MAX,
     skip_patterns=SPIKE_SKIP, measure_only=True,
 )
@@ -403,11 +404,20 @@ with torch.no_grad():
     model(dummy.input_ids, attention_mask=dummy.attention_mask)
 set_tracking(False)
 STARTUP_SPARSITY = get_sparsity_stats()
-for h in spike_hooks:
+for h in measurement_hooks:
     h.remove()
-spike_hooks = []
-print(f"SpikeServe: {n_converted} MLP layers | "
-      f"sparsity {STARTUP_SPARSITY['avg_sparsity']}% at k={SPIKE_K}")
+measurement_hooks = []
+
+# Phase 2: Active inference hooks — apply spike encoding during inference (permanent)
+print(f"SpikeServe: attaching active spike encoding hooks ({n_converted} layers)...")
+active_spike_hooks, _ = apply_spike_hooks(
+    model, k=SPIKE_K, max_spike=SPIKE_MAX,
+    skip_patterns=SPIKE_SKIP, measure_only=False,
+)
+# active_spike_hooks stay attached — do NOT remove; they encode activations at inference time
+
+print(f"SpikeServe ACTIVE: {n_converted} MLP layers | "
+      f"measured sparsity {STARTUP_SPARSITY['avg_sparsity']}% at k={SPIKE_K}")
 
 gpu_mem = torch.cuda.memory_allocated() / 1e9
 gpu_total = torch.cuda.get_device_properties(0).total_memory / 1e9
@@ -472,6 +482,55 @@ class ChatHandler(BaseHTTPRequestHandler):
             sid = secrets.token_hex(16)
         return sid
 
+    def _parse_json_body(self, required: bool = False) -> tuple[dict | None, str | None]:
+        """
+        Safely parse JSON body from POST request.
+        Returns (body_dict, error_msg). If error_msg is not None, body_dict is None.
+        Handles missing Content-Length, invalid Content-Length, and malformed JSON.
+        """
+        try:
+            raw_len = self.headers.get("Content-Length")
+            if raw_len is None or raw_len.strip() == "":
+                if required:
+                    return None, "Missing Content-Length header."
+                return {}, None
+            length = int(raw_len)
+        except ValueError:
+            return None, "Invalid Content-Length header."
+        if length < 0:
+            return None, "Invalid Content-Length: negative value."
+        if length > 10 * 1024 * 1024:  # 10MB limit
+            return None, "Content-Length exceeds 10MB limit."
+        raw = self.rfile.read(length)
+        if length > 0 and not raw:
+            return None, "Failed to read request body."
+        if length == 0:
+            if required:
+                return None, "Request body required."
+            return {}, None
+        try:
+            body = json.loads(raw.decode("utf-8", errors="replace"))
+        except json.JSONDecodeError as e:
+            return None, f"Invalid JSON: {e}"
+        if not isinstance(body, dict):
+            return None, "Request body must be a JSON object."
+        return body, None
+
+    def _send_json_error(self, status: int, message: str):
+        self.send_response(status)
+        self.send_header("Content-Type", "application/json")
+        self.end_headers()
+        self.wfile.write(json.dumps({"error": message}).encode())
+
+    def do_OPTIONS(self):
+        """Handle CORS preflight for browsers. Same-origin typically doesn't need it, but safe to support."""
+        self.send_response(204)
+        self.send_header("Content-Length", "0")
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
+        self.send_header("Access-Control-Max-Age", "86400")
+        self.end_headers()
+
     def do_POST(self):
         if self.path == "/v1/chat/completions":
             user = self._check_auth()
@@ -480,8 +539,10 @@ class ChatHandler(BaseHTTPRequestHandler):
             if not self._check_rate_limit(user):
                 return
 
-            length = int(self.headers.get("Content-Length", 0))
-            body = json.loads(self.rfile.read(length))
+            body, err = self._parse_json_body(required=True)
+            if err is not None:
+                self._send_json_error(400, err)
+                return
             messages = body.get("messages", [])
             max_tokens = body.get("max_tokens", 2048)
             temperature = body.get("temperature", 0.7)
@@ -570,8 +631,10 @@ class ChatHandler(BaseHTTPRequestHandler):
             user = self._check_auth()
             if user is None:
                 return
-            length = int(self.headers.get("Content-Length", 0))
-            body = json.loads(self.rfile.read(length)) if length else {}
+            body, err = self._parse_json_body(required=False)
+            if err is not None:
+                self._send_json_error(400, err)
+                return
             sid = body.get("session_id", "")
             if sid:
                 session_store.wipe_session(sid, reason="user_request")
@@ -616,11 +679,13 @@ class ChatHandler(BaseHTTPRequestHandler):
                 "base": "Qwen3.5-9B",
                 "quantization": "4-bit NF4",
                 "security": {
-                    "bind_address": f"{BIND_HOST}:{PORT}",
+                    "l1_network_binding": f"{BIND_HOST}:{PORT} (localhost only)",
+                    "l2_process_lockdown": "os-configured (iptables/firewall, not verified by server)",
+                    "l3_dependency_integrity": "verified",
+                    "l4_weight_integrity": "configured" if KNOWN_WEIGHT_HASHES else "first-run",
+                    "l5_conversation_storage": "RAM-only",
+                    "l6_intrusion_watchdog": watchdog.get_status(),
                     "sessions_active": session_store.active_count(),
-                    "weight_integrity": "configured" if KNOWN_WEIGHT_HASHES else "first-run",
-                    "conversation_storage": "RAM-only",
-                    "watchdog": watchdog.get_status(),
                 },
                 "spike_analysis": {
                     "k": SPIKE_K,
@@ -642,11 +707,13 @@ class ChatHandler(BaseHTTPRequestHandler):
                 "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                 "active_sessions": session_store.active_count(),
                 "security_controls": {
-                    "network_binding": f"{BIND_HOST}:{PORT} (localhost only)",
-                    "weight_integrity": "enabled" if KNOWN_WEIGHT_HASHES else "unconfigured",
-                    "conversation_storage": "RAM-only",
-                    "session_wipe": "on_close + idle_timeout_1hr + shutdown + intrusion",
-                    "intrusion_watchdog": watchdog.get_status(),
+                    "l1_network_binding": f"{BIND_HOST}:{PORT} (localhost only)",
+                    "l2_process_lockdown": "os-configured (iptables/firewall)",
+                    "l3_dependency_integrity": "verified at startup",
+                    "l4_weight_integrity": "enabled" if KNOWN_WEIGHT_HASHES else "unconfigured",
+                    "l5_conversation_storage": "RAM-only",
+                    "l5_session_wipe": "on_close + idle_timeout_1hr + shutdown + intrusion",
+                    "l6_intrusion_watchdog": watchdog.get_status(),
                     "content_logging": "NEVER",
                 },
                 "note": "Metadata only. No conversation content is ever logged or persisted.",
@@ -695,12 +762,13 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 if __name__ == "__main__":
     server = ThreadedHTTPServer((BIND_HOST, PORT), ChatHandler)
     print(f"\nKwyre AI ready at http://{BIND_HOST}:{PORT}")
-    print(f"  {n_converted} spike layers  |  4-bit NF4  |  all 6 security layers active")
+    print(f"  SpikeServe ACTIVE ({n_converted} layers)  |  4-bit NF4  |  all 6 security layers active")
     print("  POST /v1/chat/completions  — inference")
     print("  POST /v1/session/end       — wipe session from RAM")
     print("  GET  /health               — status + watchdog state")
     print("  GET  /audit                — metadata-only compliance log")
     print("\n  [L1] Network: localhost only")
+    print("  [L3] Dependencies: SHA256 manifest verified at startup")
     print("  [L4] Integrity: SHA256 weight verification at startup")
     print("  [L5] Storage: RAM-only sessions, wiped on close")
     print("  [L6] Watchdog: intrusion detection active")

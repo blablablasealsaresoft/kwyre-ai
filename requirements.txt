@@ -1,19 +1,18 @@
-torch==2.7.1
-transformers==4.55.2
-triton==3.3.1
-flash_attn==2.8.3
-flash-linear-attention==0.1
-vllm==0.10.0
-scipy
-pyyaml
-decorator
-setuptools
-setuptools-scm
+# Kwyre AI — inference server dependencies
+torch>=2.6.0
+transformers>=5.3.0
+bitsandbytes>=0.49.0
+accelerate>=1.11.0
+psutil>=7.1.0
+huggingface_hub>=1.6.0
+safetensors>=0.6.0
+tokenizers>=0.22.0
 
-# QAT training dependencies
-peft>=0.14.0
-datasets>=3.0
-trl>=0.15.0
-bitsandbytes>=0.45.0
-accelerate>=1.0
-wandb
+# QAT training dependencies (not required for inference only)
+peft>=0.18.0
+datasets>=4.6.0
+trl>=0.29.0
+
+# Utilities
+pyyaml>=6.0.0
+scipy>=1.16.0

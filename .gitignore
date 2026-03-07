@@ -3,6 +3,7 @@
 qat_output/
 qat_output_v1/
 __pycache__/
+*.pyc
 .env
 kwyre_dep_manifest.json
 wandb/
@@ -10,3 +11,5 @@ wandb/
 dist/
 build/
 .pytest_cache/
+server_out.txt
+alpaca_data.json

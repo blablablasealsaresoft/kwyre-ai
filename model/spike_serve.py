@@ -77,22 +77,22 @@ def apply_spike_hooks(model, k=3.0, max_spike=7, skip_patterns=None,
 
         def _make_hook(layer_name, k_val, max_s, passive):
             def _hook(mod, args):
-                if not _track_stats:
-                    return None if passive else args
                 x = args[0]
                 if not x.is_floating_point() or x.dim() < 2:
                     return None if passive else args
 
                 spikes_int, vth = dynamic_spikes(x, k=k_val, max_spike=max_s)
-                total = spikes_int.numel()
-                zeros = (spikes_int == 0).sum().item()
-                st = _spike_stats[layer_name]
-                st["total"] += total
-                st["zeros"] += zeros
-                st["calls"] += 1
+
+                if _track_stats:
+                    total = spikes_int.numel()
+                    zeros = (spikes_int == 0).sum().item()
+                    st = _spike_stats[layer_name]
+                    st["total"] += total
+                    st["zeros"] += zeros
+                    st["calls"] += 1
 
                 if passive:
-                    return None  # don't modify activations
+                    return None  # don't modify activations (measure-only mode)
 
                 x_approx = (spikes_int * vth).to(x.dtype)
                 return (x_approx,) + args[1:] if len(args) > 1 else (x_approx,)
