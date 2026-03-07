@@ -1,0 +1,19 @@
+torch==2.7.1
+transformers==4.55.2
+triton==3.3.1
+flash_attn==2.8.3
+flash-linear-attention==0.1
+vllm==0.10.0
+scipy
+pyyaml
+decorator
+setuptools
+setuptools-scm
+
+# QAT training dependencies
+peft>=0.14.0
+datasets>=3.0
+trl>=0.15.0
+bitsandbytes>=0.45.0
+accelerate>=1.0
+wandb

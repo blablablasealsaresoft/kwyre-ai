@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SpikeServe — Kwyre AI</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #0a0a0f;
+  --surface: #12121a;
+  --surface2: #1a1a26;
+  --border: #2a2a3a;
+  --accent: #00e5a0;
+  --accent2: #00b4d8;
+  --accent3: #7b61ff;
+  --text: #e8e8f0;
+  --text2: #8888a0;
+  --danger: #ff4466;
+}
+
+body {
+  font-family: 'Space Grotesk', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.grain {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.03;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+.container { max-width: 900px; margin: 0 auto; padding: 0 24px; position: relative; z-index: 1; }
+
+/* --- HEADER --- */
+header { padding: 48px 0 32px; text-align: center; }
+
+.logo {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 14px;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 20px;
+}
+
+h1 {
+  font-size: clamp(28px, 5vw, 44px);
+  font-weight: 700;
+  line-height: 1.15;
+  margin-bottom: 14px;
+  background: linear-gradient(135deg, var(--text) 0%, var(--accent) 50%, var(--accent2) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.subtitle {
+  font-size: 16px;
+  color: var(--text2);
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* --- FEATURES --- */
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin: 32px 0 40px;
+}
+
+.feature {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 22px;
+  transition: border-color 0.3s, transform 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.feature:hover { border-color: var(--accent); transform: translateY(-2px); }
+.feature:hover::before { opacity: 1; }
+
+.feature-icon {
+  width: 36px; height: 36px;
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px;
+  margin-bottom: 12px;
+}
+
+.feature:nth-child(1) .feature-icon { background: rgba(0,229,160,0.12); }
+.feature:nth-child(2) .feature-icon { background: rgba(0,180,216,0.12); }
+.feature:nth-child(3) .feature-icon { background: rgba(123,97,255,0.12); }
+
+.feature h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.feature p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+.tag {
+  display: inline-block;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  margin-top: 10px;
+  letter-spacing: 0.5px;
+}
+
+.tag-green { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+.tag-blue { background: rgba(0,180,216,0.1); color: var(--accent2); border: 1px solid rgba(0,180,216,0.2); }
+.tag-purple { background: rgba(123,97,255,0.1); color: var(--accent3); border: 1px solid rgba(123,97,255,0.2); }
+
+/* --- STATS BAR --- */
+.stats {
+  display: flex;
+  justify-content: center;
+  gap: 32px;
+  margin-bottom: 32px;
+  flex-wrap: wrap;
+}
+
+.stat {
+  text-align: center;
+}
+
+.stat-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.stat-label {
+  font-size: 11px;
+  color: var(--text2);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-top: 2px;
+}
+
+/* --- COMPARISON --- */
+.comparison { margin-bottom: 36px; }
+
+.section-title {
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 20px;
+  background: linear-gradient(135deg, var(--text), var(--accent2));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.comparison-table-wrap {
+  overflow-x: auto;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.comparison-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  min-width: 640px;
+}
+
+.comparison-table thead { background: var(--surface2); }
+
+.comparison-table th {
+  padding: 14px 16px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--text2);
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.comparison-table th.highlight-col {
+  color: var(--accent);
+  position: relative;
+}
+
+.comparison-table td {
+  padding: 12px 16px;
+  border-bottom: 1px solid rgba(42,42,58,0.5);
+  color: var(--text2);
+  line-height: 1.4;
+}
+
+.comparison-table td.highlight-col {
+  color: var(--text);
+  background: rgba(0,229,160,0.03);
+  font-weight: 500;
+}
+
+.comparison-table td.row-label {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.comparison-table tbody tr:last-child td { border-bottom: none; }
+.comparison-table tbody tr { background: var(--surface); }
+.comparison-table tbody tr:hover { background: var(--surface2); }
+
+.check { color: var(--accent); font-weight: 700; margin-right: 4px; }
+.x-mark { color: var(--danger); font-weight: 700; margin-right: 4px; opacity: 0.7; }
+
+/* --- API KEY --- */
+.api-key-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.api-key-bar input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.api-key-bar input:focus { border-color: var(--accent); }
+.api-key-bar input::placeholder { color: var(--text2); }
+
+.api-key-bar .status-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--text2);
+  align-self: center;
+  transition: background 0.3s;
+  flex-shrink: 0;
+}
+
+.api-key-bar .status-dot.connected { background: var(--accent); box-shadow: 0 0 8px rgba(0,229,160,0.5); }
+.api-key-bar .status-dot.error { background: var(--danger); }
+
+/* --- CHAT --- */
+.chat-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  overflow: hidden;
+  margin-bottom: 48px;
+}
+
+.chat-messages {
+  height: 420px;
+  overflow-y: auto;
+  padding: 24px;
+  scroll-behavior: smooth;
+}
+
+.chat-messages::-webkit-scrollbar { width: 4px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.message {
+  margin-bottom: 20px;
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.message-role {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+}
+
+.message-role.user { color: var(--accent2); }
+.message-role.assistant { color: var(--accent); }
+
+.message-content {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+  padding-left: 12px;
+  border-left: 2px solid var(--border);
+}
+
+.message.user .message-content { border-left-color: rgba(0,180,216,0.3); }
+.message.assistant .message-content { border-left-color: rgba(0,229,160,0.3); }
+
+.typing-indicator {
+  display: inline-flex; gap: 4px; padding-left: 12px;
+  border-left: 2px solid rgba(0,229,160,0.3);
+}
+
+.typing-indicator span {
+  width: 6px; height: 6px;
+  background: var(--accent);
+  border-radius: 50%;
+  animation: pulse 1.2s ease-in-out infinite;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes pulse { 0%, 100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1); } }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text2);
+  font-size: 14px;
+  gap: 8px;
+}
+
+.empty-state span { font-size: 32px; }
+
+/* --- INPUT --- */
+.chat-input {
+  display: flex;
+  gap: 10px;
+  padding: 16px 24px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+}
+
+.chat-input textarea {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 14px;
+  resize: none;
+  outline: none;
+  min-height: 46px;
+  max-height: 120px;
+  transition: border-color 0.2s;
+}
+
+.chat-input textarea:focus { border-color: var(--accent); }
+.chat-input textarea::placeholder { color: var(--text2); }
+
+.send-btn {
+  align-self: flex-end;
+  background: var(--accent);
+  border: none;
+  border-radius: 10px;
+  padding: 12px 20px;
+  color: var(--bg);
+  font-family: 'Space Grotesk', sans-serif;
+  font-weight: 600;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.1s;
+}
+
+.send-btn:hover { background: #00ffb3; }
+.send-btn:active { transform: scale(0.96); }
+.send-btn:disabled { background: var(--border); cursor: not-allowed; }
+
+/* --- FOOTER --- */
+footer {
+  text-align: center;
+  padding: 0 0 32px;
+  font-size: 12px;
+  color: var(--text2);
+}
+
+footer a { color: var(--accent); text-decoration: none; }
+
+/* --- TOOL BADGES --- */
+.tool-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 8px;
+  padding-left: 12px;
+}
+
+.tool-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 20px;
+  background: rgba(0,229,160,0.08);
+  border: 1px solid rgba(0,229,160,0.2);
+  color: var(--accent);
+  letter-spacing: 0.3px;
+  animation: fadeIn 0.4s ease;
+}
+
+.tool-badge::before {
+  content: '⚡';
+  font-size: 9px;
+}
+
+.spike-meta {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 10px;
+  color: var(--accent);
+  opacity: 0.6;
+  padding-left: 14px;
+  margin-top: 6px;
+  letter-spacing: 0.3px;
+}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<div class="container">
+
+<header>
+  <div class="logo">⚡ Kwyre AI</div>
+  <h1>Qwen3.5-9B &times; SpikeServe</h1>
+  <p class="subtitle">
+    Production-grade Qwen3.5-9B with SpikingBrain's spike-encoded activations layered on top of 4-bit weight quantization.
+    Dual compression. Zero data leakage. Fully yours.
+  </p>
+</header>
+
+<div class="features">
+  <div class="feature">
+    <div class="feature-icon">🧠</div>
+    <h3>Dual-Layer Compression</h3>
+    <p>4-bit NF4 weight quantization <strong>plus</strong> SpikingBrain's dynamic spike activation encoding. Two orthogonal compression methods stacked — nobody else does this.</p>
+    <span class="tag tag-green">WEIGHTS + ACTIVATIONS</span>
+  </div>
+  <div class="feature">
+    <div class="feature-icon">🔒</div>
+    <h3>100% Private Infrastructure</h3>
+    <p>Your prompts never touch third-party servers. No OpenAI, no cloud APIs. All inference runs on dedicated hardware you control.</p>
+    <span class="tag tag-blue">ZERO DATA LEAKAGE</span>
+  </div>
+  <div class="feature">
+    <div class="feature-icon">⚡</div>
+    <h3>Qwen3.5-9B Base Model</h3>
+    <p>Gated Delta Networks + sparse Mixture-of-Experts. 262K context window, 201 language support, native reasoning and tool-calling.</p>
+    <span class="tag tag-purple">GATED DELTANET + MOE</span>
+  </div>
+  <div class="feature">
+    <div class="feature-icon">🌐</div>
+    <h3>19 Live API Integrations</h3>
+    <p>Real-time weather, crypto prices, news, math, dictionary, geo-IP, earthquakes, space news, exchange rates and more — no extra cost.</p>
+    <span class="tag tag-green">TOOL-AUGMENTED AI</span>
+  </div>
+</div>
+
+<div class="stats">
+  <div class="stat"><div class="stat-value">Qwen3.5</div><div class="stat-label">Base Model</div></div>
+  <div class="stat"><div class="stat-value">9B</div><div class="stat-label">Parameters</div></div>
+  <div class="stat"><div class="stat-value">4-bit</div><div class="stat-label">Weight Quant</div></div>
+  <div class="stat"><div class="stat-value" id="sparsityStat">—</div><div class="stat-label">Activation Sparsity</div></div>
+  <div class="stat"><div class="stat-value">19</div><div class="stat-label">Live APIs</div></div>
+  <div class="stat"><div class="stat-value">HTTPS</div><div class="stat-label">Encrypted</div></div>
+</div>
+
+<div class="comparison">
+  <h2 class="section-title">Why Kwyre is Different</h2>
+  <div class="comparison-table-wrap">
+    <table class="comparison-table">
+      <thead>
+        <tr>
+          <th></th>
+          <th class="highlight-col">Kwyre AI</th>
+          <th>OpenAI</th>
+          <th>Claude</th>
+          <th>Gemini</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="row-label">Data Privacy</td>
+          <td class="highlight-col"><span class="check">&#10003;</span> Your hardware, zero collection</td>
+          <td><span class="x-mark">&#10007;</span> Data stored on their servers</td>
+          <td><span class="x-mark">&#10007;</span> Data stored on their servers</td>
+          <td><span class="x-mark">&#10007;</span> Data used for training</td>
+        </tr>
+        <tr>
+          <td class="row-label">Spike Encoding</td>
+          <td class="highlight-col"><span class="check">&#10003;</span> Neuromorphic activation sparsity</td>
+          <td><span class="x-mark">&#10007;</span> Dense compute only</td>
+          <td><span class="x-mark">&#10007;</span> Dense compute only</td>
+          <td><span class="x-mark">&#10007;</span> Dense compute only</td>
+        </tr>
+        <tr>
+          <td class="row-label">Monthly Cost</td>
+          <td class="highlight-col"><span class="check">&#10003;</span> $0 — your own GPU</td>
+          <td>$20–200+ / seat</td>
+          <td>$20–100+ / seat</td>
+          <td>$20+ / seat</td>
+        </tr>
+        <tr>
+          <td class="row-label">API Access</td>
+          <td class="highlight-col"><span class="check">&#10003;</span> Unlimited, no per-token fees</td>
+          <td>$2–60 / 1M tokens</td>
+          <td>$3–75 / 1M tokens</td>
+          <td>$0.10–10 / 1M tokens</td>
+        </tr>
+        <tr>
+          <td class="row-label">Architecture</td>
+          <td class="highlight-col"><span class="check">&#10003;</span> Gated DeltaNet + MoE + SpikeServe</td>
+          <td>Standard transformer</td>
+          <td>Standard transformer</td>
+          <td>Standard transformer</td>
+        </tr>
+        <tr>
+          <td class="row-label">You Own the Model</td>
+          <td class="highlight-col"><span class="check">&#10003;</span> Full control, open weights</td>
+          <td><span class="x-mark">&#10007;</span> Closed source</td>
+          <td><span class="x-mark">&#10007;</span> Closed source</td>
+          <td><span class="x-mark">&#10007;</span> Closed source</td>
+        </tr>
+        <tr>
+          <td class="row-label">Live Data APIs</td>
+          <td class="highlight-col"><span class="check">&#10003;</span> 19 free integrations (weather, crypto, news...)</td>
+          <td>Plugin marketplace ($20+/mo)</td>
+          <td>MCP / limited tools</td>
+          <td>Google Search grounding</td>
+        </tr>
+        <tr>
+          <td class="row-label">Vendor Lock-in</td>
+          <td class="highlight-col"><span class="check">&#10003;</span> None — OpenAI-compatible API</td>
+          <td><span class="x-mark">&#10007;</span> Proprietary</td>
+          <td><span class="x-mark">&#10007;</span> Proprietary</td>
+          <td><span class="x-mark">&#10007;</span> Proprietary</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="api-key-bar">
+  <div class="status-dot" id="statusDot"></div>
+  <input type="password" id="apiKeyInput" placeholder="Enter your API key (sk-kwyre-...)" autocomplete="off">
+</div>
+
+<div class="chat-container">
+  <div class="chat-messages" id="chatMessages">
+    <div class="empty-state">
+      <span>⚡</span>
+      <div>Enter your API key and start chatting</div>
+    </div>
+  </div>
+  <div class="chat-input">
+    <textarea id="msgInput" placeholder="Send a message..." rows="1" disabled></textarea>
+    <button class="send-btn" id="sendBtn" disabled>Send</button>
+  </div>
+</div>
+
+<footer>
+  Powered by <a href="#">SpikeServe</a> — Qwen3.5-9B + SpikingBrain spike encoding &times; Kwyre
+</footer>
+
+</div>
+
+<script>
+const API_BASE = window.location.origin;
+const chatMessages = document.getElementById('chatMessages');
+const msgInput = document.getElementById('msgInput');
+const sendBtn = document.getElementById('sendBtn');
+const apiKeyInput = document.getElementById('apiKeyInput');
+const statusDot = document.getElementById('statusDot');
+
+let messages = [];
+let isGenerating = false;
+
+const saved = localStorage.getItem('kwyre_api_key');
+if (saved) { apiKeyInput.value = saved; validateKey(saved); }
+
+apiKeyInput.addEventListener('input', () => {
+  const key = apiKeyInput.value.trim();
+  if (key.startsWith('sk-kwyre-') && key.length > 20) {
+    localStorage.setItem('kwyre_api_key', key);
+    validateKey(key);
+  } else {
+    statusDot.className = 'status-dot';
+    msgInput.disabled = true;
+    sendBtn.disabled = true;
+  }
+});
+
+async function validateKey(key) {
+  try {
+    const r = await fetch(`${API_BASE}/v1/models`, { headers: { 'Authorization': `Bearer ${key}` } });
+    if (r.ok) {
+      statusDot.className = 'status-dot connected';
+      msgInput.disabled = false;
+      sendBtn.disabled = false;
+      if (chatMessages.querySelector('.empty-state')) {
+        chatMessages.innerHTML = '';
+        addMessage('assistant', 'Connected to Kwyre AI. How can I help you?');
+      }
+    } else {
+      statusDot.className = 'status-dot error';
+      msgInput.disabled = true;
+      sendBtn.disabled = true;
+    }
+  } catch {
+    statusDot.className = 'status-dot error';
+  }
+}
+
+msgInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
+
+msgInput.addEventListener('input', () => {
+  msgInput.style.height = 'auto';
+  msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + 'px';
+});
+
+sendBtn.addEventListener('click', send);
+
+function addMessage(role, content, toolsUsed, spikeStats, usage) {
+  messages.push({ role, content });
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+  let toolHtml = '';
+  if (toolsUsed && toolsUsed.length > 0) {
+    toolHtml = '<div class="tool-badges">' +
+      toolsUsed.map(t => `<span class="tool-badge">${escapeHtml(t)}</span>`).join('') +
+      '</div>';
+  }
+  let metaHtml = '';
+  if (role === 'assistant' && (spikeStats || usage)) {
+    const parts = [];
+    if (spikeStats && spikeStats.activation_sparsity_pct > 0)
+      parts.push(`sparsity: ${spikeStats.activation_sparsity_pct}%`);
+    if (spikeStats && spikeStats.spike_encoded_layers > 0)
+      parts.push(`${spikeStats.spike_encoded_layers} spike layers`);
+    if (usage && usage.tokens_per_second > 0)
+      parts.push(`${usage.tokens_per_second} tok/s`);
+    if (parts.length > 0)
+      metaHtml = `<div class="spike-meta">${parts.join(' · ')}</div>`;
+  }
+  div.innerHTML = `
+    <div class="message-role ${role}">${role}</div>
+    ${toolHtml}
+    <div class="message-content">${escapeHtml(content)}</div>
+    ${metaHtml}
+  `;
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return div;
+}
+
+function showTyping() {
+  const div = document.createElement('div');
+  div.className = 'message assistant';
+  div.id = 'typing';
+  div.innerHTML = `
+    <div class="message-role assistant">assistant</div>
+    <div class="typing-indicator"><span></span><span></span><span></span></div>
+  `;
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing');
+  if (el) el.remove();
+}
+
+function escapeHtml(text) {
+  const d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+
+async function send() {
+  const content = msgInput.value.trim();
+  if (!content || isGenerating) return;
+
+  const key = apiKeyInput.value.trim();
+  if (!key) return;
+
+  addMessage('user', content);
+  msgInput.value = '';
+  msgInput.style.height = 'auto';
+  isGenerating = true;
+  sendBtn.disabled = true;
+  showTyping();
+
+  try {
+    const apiMessages = messages.map(m => ({ role: m.role, content: m.content }));
+    const r = await fetch(`${API_BASE}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+      body: JSON.stringify({ messages: apiMessages, max_tokens: 2048, temperature: 0.7 }),
+    });
+
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({ error: 'Request failed' }));
+      removeTyping();
+      addMessage('assistant', `Error: ${err.error || r.statusText}`);
+      return;
+    }
+
+    const data = await r.json();
+    const reply = data.choices?.[0]?.message?.content || 'No response.';
+    const toolsUsed = data.tools_used || [];
+    const spikeStats = data.spike_stats || {};
+    const usage = data.usage || {};
+    removeTyping();
+    addMessage('assistant', reply, toolsUsed, spikeStats, usage);
+
+    if (spikeStats.activation_sparsity_pct > 0) {
+      document.getElementById('sparsityStat').textContent =
+        spikeStats.activation_sparsity_pct + '%';
+    }
+  } catch (err) {
+    removeTyping();
+    addMessage('assistant', `Connection error: ${err.message}`);
+  } finally {
+    isGenerating = false;
+    sendBtn.disabled = false;
+    msgInput.focus();
+  }
+}
+</script>
+</body>
+</html>

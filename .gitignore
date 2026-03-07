@@ -1,0 +1,12 @@
+*.safetensors
+*.bin
+qat_output/
+qat_output_v1/
+__pycache__/
+.env
+kwyre_dep_manifest.json
+wandb/
+*.egg-info/
+dist/
+build/
+.pytest_cache/
