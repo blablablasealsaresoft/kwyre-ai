@@ -14,10 +14,17 @@ echo "============================================================"
 echo "Kwyre QAT Training — Lambda GH200 Setup"
 echo "============================================================"
 
-pip install --upgrade pip Pillow
-pip install --force-reinstall torch torchvision torchaudio
+if [ -z "${VIRTUAL_ENV:-}" ]; then
+    echo "[Setup] Creating clean virtual environment to avoid Lambda system package conflicts..."
+    python3 -m venv ~/venv
+    source ~/venv/bin/activate
+    echo "[Setup] Virtual environment activated: $VIRTUAL_ENV"
+fi
+
+pip install --upgrade pip
+pip install torch torchvision torchaudio
 pip install transformers accelerate bitsandbytes peft trl datasets
-pip install psutil safetensors tokenizers scipy pyyaml huggingface_hub
+pip install psutil safetensors tokenizers scipy pyyaml huggingface_hub Pillow
 
 echo "[Setup] Dependencies installed."
 
