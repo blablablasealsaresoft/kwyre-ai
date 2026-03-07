@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kwyre AI — Air-Gapped Inference</title>
+<meta name="description" content="Air-gapped AI inference for analysts who cannot afford a breach. 6-layer security stack. Zero data leaves your machine.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #05060a;
+  --surface: #0b0d14;
+  --surface2: #10131c;
+  --surface3: #161a27;
+  --border: #1c2033;
+  --border-hi: #2a3050;
+  --accent: #3b82f6;
+  --accent-dim: rgba(59,130,246,0.12);
+  --accent-glow: rgba(59,130,246,0.25);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --amber: #f59e0b;
+  --text: #e2e4ea;
+  --text2: #6b7294;
+  --text3: #3d4466;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Instrument Sans', -apple-system, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: #fff; }
+
+/* --- GRID OVERLAY --- */
+.grid-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.grid-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.06), transparent 70%);
+}
+
+/* --- LAYOUT --- */
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+.section { padding: 80px 0; }
+.section + .section { border-top: 1px solid var(--border); }
+
+/* --- NAV --- */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(5,6,10,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+
+.nav-brand {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--text);
+  text-decoration: none;
+}
+
+.nav-brand span { color: var(--accent); }
+
+.nav-links { display: flex; gap: 32px; align-items: center; }
+
+.nav-links a {
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text2);
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--text); }
+
+.nav-cta {
+  font-family: var(--mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  padding: 8px 20px;
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-radius: 4px;
+  transition: box-shadow 0.2s, transform 0.1s !important;
+}
+
+.nav-cta:hover { box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-1px) !important; }
+
+/* --- HERO --- */
+.hero {
+  padding: 160px 0 100px;
+  text-align: center;
+  position: relative;
+}
+
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 28px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+}
+
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent));
+}
+
+.hero-eyebrow::after { background: linear-gradient(90deg, var(--accent), transparent); }
+
+.hero h1 {
+  font-size: clamp(36px, 5.5vw, 64px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -1.5px;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.hero h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.hero-sub {
+  font-size: 18px;
+  color: var(--text2);
+  max-width: 640px;
+  margin: 0 auto 48px;
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+.hero-sub strong { color: var(--text); font-weight: 600; }
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.hero-stat {
+  flex: 1;
+  padding: 20px 16px;
+  background: var(--surface);
+  text-align: center;
+  min-width: 0;
+}
+
+.hero-stat-val {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+  white-space: nowrap;
+}
+
+.hero-stat-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+/* --- THREAT BAR --- */
+.threat-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-top: 40px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.threat-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(34,197,94,0.5);
+  animation: threat-pulse 2s ease-in-out infinite;
+}
+
+@keyframes threat-pulse {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+}
+
+.threat-bar span {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  letter-spacing: 0.5px;
+}
+
+.threat-bar strong { color: var(--green); font-weight: 500; }
+
+/* --- BUYERS --- */
+.buyers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 48px;
+}
+
+.buyer-card {
+  background: var(--surface);
+  padding: 28px 24px;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.buyer-card:hover { background: var(--surface2); }
+
+.buyer-role {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.buyer-pain {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.buyer-solve {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+/* --- SECTION HEADERS --- */
+.sh {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.sh-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.sh h2 {
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+
+.sh p {
+  font-size: 16px;
+  color: var(--text2);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* --- SECURITY STACK --- */
+.sec-layers {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 48px;
+}
+
+.sec-layer {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 20px;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: border-color 0.3s, background 0.2s;
+  position: relative;
+}
+
+.sec-layer:hover { border-color: var(--border-hi); background: var(--surface2); }
+
+.sec-layer-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  letter-spacing: 1px;
+  padding-top: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.sec-layer-num .lnum {
+  width: 36px; height: 36px;
+  border-radius: 4px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sec-layer-body h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.sec-layer-body p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+.sec-layer-body .sec-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  margin-top: 10px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(34,197,94,0.15);
+}
+
+/* --- FEATURES GRID --- */
+.feat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 48px;
+}
+
+.feat-cell {
+  background: var(--surface);
+  padding: 32px 24px;
+  transition: background 0.2s;
+}
+
+.feat-cell:hover { background: var(--surface2); }
+
+.feat-cell-icon {
+  width: 32px; height: 32px;
+  border-radius: 4px;
+  background: var(--accent-dim);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+
+.feat-cell-icon svg { width: 16px; height: 16px; stroke: var(--accent); fill: none; stroke-width: 1.5; }
+
+.feat-cell h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.feat-cell p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+/* --- MATRIX TABLE --- */
+.matrix-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  margin-top: 48px;
+}
+
+.matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: 780px;
+}
+
+.matrix thead { background: var(--surface2); }
+
+.matrix th {
+  padding: 14px 16px;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.matrix th.m-kwyre { color: var(--accent); }
+
+.matrix td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  font-size: 12px;
+}
+
+.matrix td.m-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.matrix td.m-kwyre {
+  color: var(--text);
+  background: rgba(59,130,246,0.03);
+  font-weight: 500;
+}
+
+.matrix tbody tr { background: var(--surface); transition: background 0.15s; }
+.matrix tbody tr:hover { background: var(--surface2); }
+.matrix tbody tr:last-child td { border-bottom: none; }
+
+.m-y { color: var(--green); font-family: var(--mono); font-weight: 600; }
+.m-n { color: var(--text3); font-family: var(--mono); }
+
+/* --- ARCHITECTURE --- */
+.arch-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 40px;
+  margin-top: 48px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text2);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.arch-block .a-accent { color: var(--accent); }
+.arch-block .a-green { color: var(--green); }
+.arch-block .a-dim { color: var(--text3); }
+
+/* --- PRICING --- */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 48px;
+}
+
+.price-card {
+  background: var(--surface);
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  transition: background 0.2s;
+}
+
+.price-card:hover { background: var(--surface2); }
+.price-card.featured { background: var(--surface2); }
+.price-card.featured .price-name { color: var(--accent); }
+
+.price-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 20px;
+}
+
+.price-amount {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.price-type {
+  font-size: 13px;
+  color: var(--text3);
+  margin-bottom: 24px;
+}
+
+.price-features {
+  list-style: none;
+  flex: 1;
+}
+
+.price-features li {
+  font-size: 13px;
+  color: var(--text2);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.price-features li:last-child { border-bottom: none; }
+
+.price-features li::before {
+  content: '';
+  width: 4px; height: 4px;
+  border-radius: 1px;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+/* --- CTA SECTION --- */
+.cta-final {
+  text-align: center;
+  padding: 100px 0;
+}
+
+.cta-final h2 {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 16px;
+}
+
+.cta-final p {
+  font-size: 16px;
+  color: var(--text2);
+  max-width: 480px;
+  margin: 0 auto 40px;
+  line-height: 1.6;
+}
+
+.cta-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 16px var(--accent-glow);
+}
+
+.btn-primary:hover { box-shadow: 0 4px 28px var(--accent-glow); transform: translateY(-1px); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+
+.btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+
+/* --- FOOTER --- */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 0;
+}
+
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-brand {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text3);
+  text-transform: uppercase;
+}
+
+.footer-legal {
+  font-size: 12px;
+  color: var(--text3);
+  max-width: 500px;
+  line-height: 1.5;
+}
+
+/* --- LOCAL CHAT (only on localhost) --- */
+.api-key-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.api-key-bar input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.api-key-bar input:focus { border-color: var(--accent); }
+.api-key-bar input::placeholder { color: var(--text3); }
+
+.api-key-bar .status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--text3);
+  align-self: center;
+  transition: background 0.3s;
+  flex-shrink: 0;
+}
+
+.api-key-bar .status-dot.connected { background: var(--green); box-shadow: 0 0 8px rgba(34,197,94,0.5); }
+.api-key-bar .status-dot.error { background: var(--red); }
+
+.chat-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 48px;
+}
+
+.chat-messages {
+  height: 420px;
+  overflow-y: auto;
+  padding: 24px;
+  scroll-behavior: smooth;
+}
+
+.chat-messages::-webkit-scrollbar { width: 3px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.message { margin-bottom: 20px; animation: fadeUp 0.3s ease; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.message-role {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+  color: var(--text3);
+}
+
+.message.user .message-role { color: var(--accent); }
+.message.assistant .message-role { color: var(--green); }
+
+.message-content {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
+}
+
+.message.user .message-content { border-left-color: rgba(59,130,246,0.3); }
+.message.assistant .message-content { border-left-color: rgba(34,197,94,0.3); }
+
+.typing-indicator {
+  display: inline-flex; gap: 4px; padding-left: 12px;
+  border-left: 1px solid rgba(34,197,94,0.3);
+}
+
+.typing-indicator span {
+  width: 5px; height: 5px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: tdot 1.2s ease-in-out infinite;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes tdot { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text3);
+  font-size: 13px;
+  gap: 8px;
+  font-family: var(--mono);
+}
+
+.chat-input {
+  display: flex;
+  gap: 10px;
+  padding: 16px 24px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+}
+
+.chat-input textarea {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  resize: none;
+  outline: none;
+  min-height: 46px;
+  max-height: 120px;
+  transition: border-color 0.2s;
+}
+
+.chat-input textarea:focus { border-color: var(--accent); }
+.chat-input textarea::placeholder { color: var(--text3); }
+
+.send-btn {
+  align-self: flex-end;
+  background: var(--accent);
+  border: none;
+  border-radius: 4px;
+  padding: 12px 24px;
+  color: #fff;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.1s;
+}
+
+.send-btn:hover { box-shadow: 0 0 16px var(--accent-glow); }
+.send-btn:active { transform: scale(0.97); }
+.send-btn:disabled { background: var(--border); cursor: not-allowed; box-shadow: none; }
+
+.tool-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+  padding-left: 12px;
+}
+
+.tool-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(59,130,246,0.15);
+  color: var(--accent);
+  letter-spacing: 0.3px;
+}
+
+.spike-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--green);
+  opacity: 0.6;
+  padding-left: 14px;
+  margin-top: 4px;
+  letter-spacing: 0.3px;
+}
+
+.hidden { display: none !important; }
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  .nav-links a:not(.nav-cta) { display: none; }
+  .hero { padding: 120px 0 60px; }
+  .hero-stats { flex-direction: column; }
+  .feat-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .buyers-grid { grid-template-columns: 1fr; }
+  .wrap { padding: 0 20px; }
+  .sec-layer { grid-template-columns: 1fr; }
+  .sec-layer-num { flex-direction: row; }
+  .footer-inner { flex-direction: column; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { letter-spacing: -0.5px; }
+  .section { padding: 60px 0; }
+}
+</style>
+</head>
+<body>
+<div class="grid-bg"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-brand"><span>K</span>WYRE</a>
+    <div class="nav-links">
+      <a href="#security">Security</a>
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="mailto:contact@kwyre.com" class="nav-cta">Request Access</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="wrap">
+    <div class="hero-eyebrow">Air-Gapped Inference</div>
+    <h1>AI for analysts who<br>cannot afford <em>a breach</em></h1>
+    <p class="hero-sub">
+      The only local AI that protects your data <strong>even if your machine is compromised.</strong>
+      Six layers of active defense. Zero data leaves your machine. Not to a cloud. Not to us. Not to anyone.
+    </p>
+
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <div class="hero-stat-val">Qwen3.5-9B</div>
+        <div class="hero-stat-label">Base Model</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">4-bit NF4</div>
+        <div class="hero-stat-label">Quantization</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">6.5 GB</div>
+        <div class="hero-stat-label">VRAM Required</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">6 Layers</div>
+        <div class="hero-stat-label">Security Stack</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val" id="sparsityStat">~60%</div>
+        <div class="hero-stat-label">Act. Sparsity</div>
+      </div>
+    </div>
+
+    <div class="threat-bar">
+      <div class="threat-dot"></div>
+      <span>All systems operational &mdash; <strong>zero outbound connections</strong></span>
+    </div>
+  </div>
+</div>
+
+<!-- WHO IT'S FOR -->
+<div class="section" id="buyers">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow">Use Cases</div>
+      <h2>Built for adversarial environments</h2>
+      <p>Kwyre exists because these professionals cannot upload their work to cloud AI. Not legally. Not ethically. Not safely.</p>
+    </div>
+
+    <div class="buyers-grid">
+      <div class="buyer-card">
+        <div class="buyer-role">Forensic Investigators</div>
+        <div class="buyer-pain">Cannot upload $3B fraud evidence to ChatGPT during an active federal case.</div>
+        <div class="buyer-solve">Full local inference, zero telemetry, no chain-of-custody risk.</div>
+      </div>
+      <div class="buyer-card">
+        <div class="buyer-role">Criminal Defense Attorneys</div>
+        <div class="buyer-pain">Attorney-client privilege prohibits cloud AI on case materials.</div>
+        <div class="buyer-solve">Air-gapped by architecture, not policy.</div>
+      </div>
+      <div class="buyer-card">
+        <div class="buyer-role">M&amp;A Law Firms</div>
+        <div class="buyer-pain">Associates uploading NDA-protected deal docs to ChatGPT is malpractice liability.</div>
+        <div class="buyer-solve">Verified zero outbound connections, auditable.</div>
+      </div>
+      <div class="buyer-card">
+        <div class="buyer-role">Insurance Underwriters</div>
+        <div class="buyer-pain">Actuarial models and cedent PII cannot touch cloud APIs under compliance rules.</div>
+        <div class="buyer-solve">Compliance documentation package for your legal team.</div>
+      </div>
+      <div class="buyer-card">
+        <div class="buyer-role">Cleared Defense Contractors</div>
+        <div class="buyer-pain">Sensitive unclassified data. Can't use classified AI, can't use ChatGPT.</div>
+        <div class="buyer-solve">Local, offline, no cleared facility required.</div>
+      </div>
+      <div class="buyer-card">
+        <div class="buyer-role">Forensic Accountants</div>
+        <div class="buyer-pain">SEC whistleblower cases, active DOJ investigations. Evidence integrity is paramount.</div>
+        <div class="buyer-solve">RAM-only storage, cryptographic wipe on session end.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECURITY STACK -->
+<div class="section" id="security">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow">Defense Architecture</div>
+      <h2>Six layers of active security</h2>
+      <p>Every local AI tool treats "local" as the security boundary. Kwyre treats the machine itself as potentially compromised.</p>
+    </div>
+
+    <div class="sec-layers">
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L1</div></div>
+        <div class="sec-layer-body">
+          <h3>Network Isolation</h3>
+          <p>Server binds to 127.0.0.1 only &mdash; physically unreachable from any network at the OS level. No firewall rules required. The OS itself blocks all external connections.</p>
+          <span class="sec-tag">OS-Level Enforcement</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L2</div></div>
+        <div class="sec-layer-body">
+          <h3>Process-Level Network Lockdown</h3>
+          <p>iptables rules scoped to the inference process. All outbound traffic blocked except localhost. Even a fully compromised server process cannot make outbound connections.</p>
+          <span class="sec-tag">Kernel-Level Enforcement</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L3</div></div>
+        <div class="sec-layer-body">
+          <h3>Dependency Integrity</h3>
+          <p>SHA256 hash manifest of every installed Python package generated on clean install. Verified at server startup. Tampered torch, transformers, or any dependency causes immediate abort.</p>
+          <span class="sec-tag">Supply Chain Defense</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L4</div></div>
+        <div class="sec-layer-body">
+          <h3>Model Weight Integrity</h3>
+          <p>SHA256 hashes of all model config files verified at every startup. Tampered or replaced model weights cause immediate process abort with clear error.</p>
+          <span class="sec-tag">Cryptographic Verification</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L5</div></div>
+        <div class="sec-layer-body">
+          <h3>Secure RAM Session Storage</h3>
+          <p>Conversations stored only in RAM. Each session gets a unique 32-byte random key. On session end: secure_wipe() overwrites all content with random bytes before clearing references. RAM scraping returns garbage.</p>
+          <span class="sec-tag">Cryptographic Wipe</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L6</div></div>
+        <div class="sec-layer-body">
+          <h3>Intrusion Detection + Auto-Wipe</h3>
+          <p>Background watchdog monitors for unexpected outbound connections and known analysis tools (Wireshark, x64dbg, Fiddler, Ghidra, IDA). On confirmed intrusion: all sessions wiped, server terminated.</p>
+          <span class="sec-tag">Active Threat Response</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FEATURES -->
+<div class="section" id="features">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow">Capabilities</div>
+      <h2>Production inference engine</h2>
+      <p>Frontier-class model with dual-layer compression. Spike QAT training plus 4-bit quantization. Nobody else does this.</p>
+    </div>
+
+    <div class="feat-grid">
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <h3>Spike QAT Training</h3>
+        <p>Custom pipeline using Straight-Through Estimator spike encoding with k-curriculum annealing (k=50&#8594;5). The model learns to tolerate spike-encoded activations.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <h3>SpikeServe Activation Encoding</h3>
+        <p>Dynamic spike encoding at inference time. Significant activation sparsity without quality loss. Dual compression: weights AND activations.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Zero Content Logging</h3>
+        <p>Metadata only. No telemetry, no analytics, no error reporting, no update pings, no license callbacks. Verify yourself with Wireshark.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <h3>OpenAI-Compatible API</h3>
+        <p>POST /v1/chat/completions drop-in replacement. Works with any OpenAI SDK. Session management and compliance endpoints built in.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+        <h3>LoRA Fine-Tuning</h3>
+        <p>Adapters targeting MLP layers (gate_proj, up_proj, down_proj). Fine-tuning with 0.2% trainable parameters. QLoRA rank 64, alpha 128.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
+        <h3>Compliance & Audit</h3>
+        <p>GET /audit for metadata-only compliance logs. GET /health for full security stack status. Architecture designed for HIPAA, FINRA, SOC2-adjacent requirements.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPETITIVE MATRIX -->
+<div class="section" id="matrix">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow">Competitive Analysis</div>
+      <h2>Every security feature is unique to Kwyre</h2>
+      <p>No other local inference tool targets the compliance and adversarial environment use case.</p>
+    </div>
+
+    <div class="matrix-wrap">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Capability</th>
+            <th class="m-kwyre">Kwyre</th>
+            <th>ChatGPT</th>
+            <th>Ollama</th>
+            <th>LM Studio</th>
+            <th>Jan.ai</th>
+            <th>LocalAI</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="m-label">Fully local</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td></tr>
+          <tr><td class="m-label">Open source</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td></tr>
+          <tr><td class="m-label">Localhost-only binding</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Process outbound block</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Dependency integrity</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Model weight verification</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">RAM-only sessions</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Cryptographic session wipe</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Intrusion detection + auto-wipe</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Compliance documentation</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Audit endpoint</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Anonymous payment (XMR)</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td>free</td><td>free</td><td>free</td><td>free</td></tr>
+          <tr><td class="m-label">Spike activation encoding</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Custom QAT training</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- PRICING -->
+<div class="section" id="pricing">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow">Pricing</div>
+      <h2>One-time. No subscription.</h2>
+      <p>Credit card or Monero. No email required for Monero purchases. No recurring billing. No statement entries.</p>
+    </div>
+
+    <div class="pricing-grid">
+      <div class="price-card">
+        <div class="price-name">Personal</div>
+        <div class="price-amount">$299</div>
+        <div class="price-type">One-time &middot; 1 machine</div>
+        <ul class="price-features">
+          <li>Full inference server</li>
+          <li>6-layer security stack</li>
+          <li>Compliance documentation</li>
+          <li>OpenAI-compatible API</li>
+        </ul>
+      </div>
+      <div class="price-card featured">
+        <div class="price-name">Professional</div>
+        <div class="price-amount">$799</div>
+        <div class="price-type">One-time &middot; 3 machines</div>
+        <ul class="price-features">
+          <li>Everything in Personal</li>
+          <li>Priority support</li>
+          <li>Multi-seat deployment</li>
+          <li>Full audit package</li>
+        </ul>
+      </div>
+      <div class="price-card">
+        <div class="price-name">Air-Gapped Kit</div>
+        <div class="price-amount">$1,499</div>
+        <div class="price-type">One-time &middot; 5 machines</div>
+        <ul class="price-features">
+          <li>Everything in Professional</li>
+          <li>Offline installer</li>
+          <li>Full audit package</li>
+          <li>White-glove setup</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CTA -->
+<div id="ctaSection" class="cta-final hidden">
+  <div class="wrap">
+    <h2>Your data stays yours.</h2>
+    <p>No cloud. No subscriptions. No data collection. Runs on a $3,500 workstation in 10 minutes.</p>
+    <div class="cta-actions">
+      <a href="mailto:contact@kwyre.com" class="btn btn-primary">Request Access</a>
+      <a href="#security" class="btn btn-ghost">Review Architecture</a>
+    </div>
+  </div>
+</div>
+
+<!-- LOCAL CHAT (localhost only) -->
+<div id="localChat" class="section">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow">Console</div>
+      <h2>Inference terminal</h2>
+    </div>
+    <div class="api-key-bar">
+      <div class="status-dot" id="statusDot"></div>
+      <input type="password" id="apiKeyInput" placeholder="sk-kwyre-..." autocomplete="off">
+    </div>
+    <div class="chat-container">
+      <div class="chat-messages" id="chatMessages">
+        <div class="empty-state">
+          <div>AWAITING AUTHENTICATION</div>
+        </div>
+      </div>
+      <div class="chat-input">
+        <textarea id="msgInput" placeholder="Enter query..." rows="1" disabled></textarea>
+        <button class="send-btn" id="sendBtn" disabled>Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-inner">
+      <div class="footer-brand">KWYRE &middot; APOLLO CyberSentinel LLC</div>
+      <div class="footer-legal">All inference runs 100% locally. No data leaves your machine. This is not legal advice. Verify your own compliance requirements.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+const isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
+const API_BASE = window.location.origin;
+
+if (!isLocal) {
+  document.getElementById('ctaSection').classList.remove('hidden');
+  document.getElementById('localChat').classList.add('hidden');
+}
+
+const chatMessages = document.getElementById('chatMessages');
+const msgInput = document.getElementById('msgInput');
+const sendBtn = document.getElementById('sendBtn');
+const apiKeyInput = document.getElementById('apiKeyInput');
+const statusDot = document.getElementById('statusDot');
+
+let messages = [];
+let isGenerating = false;
+
+if (isLocal) {
+  const saved = localStorage.getItem('kwyre_api_key');
+  if (saved) { apiKeyInput.value = saved; validateKey(saved); }
+}
+
+apiKeyInput.addEventListener('input', () => {
+  const key = apiKeyInput.value.trim();
+  if (key.startsWith('sk-kwyre-') && key.length > 20) {
+    localStorage.setItem('kwyre_api_key', key);
+    validateKey(key);
+  } else {
+    statusDot.className = 'status-dot';
+    msgInput.disabled = true;
+    sendBtn.disabled = true;
+  }
+});
+
+async function validateKey(key) {
+  try {
+    const r = await fetch(`${API_BASE}/v1/models`, { headers: { 'Authorization': `Bearer ${key}` } });
+    if (r.ok) {
+      statusDot.className = 'status-dot connected';
+      msgInput.disabled = false;
+      sendBtn.disabled = false;
+      if (chatMessages.querySelector('.empty-state')) {
+        chatMessages.innerHTML = '';
+        addMessage('assistant', 'Kwyre AI online. All security layers active. Ready for queries.');
+      }
+    } else {
+      statusDot.className = 'status-dot error';
+      msgInput.disabled = true;
+      sendBtn.disabled = true;
+    }
+  } catch {
+    statusDot.className = 'status-dot error';
+  }
+}
+
+msgInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
+
+msgInput.addEventListener('input', () => {
+  msgInput.style.height = 'auto';
+  msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + 'px';
+});
+
+sendBtn.addEventListener('click', send);
+
+function addMessage(role, content, toolsUsed, spikeStats, usage) {
+  messages.push({ role, content });
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+  let toolHtml = '';
+  if (toolsUsed && toolsUsed.length > 0) {
+    toolHtml = '<div class="tool-badges">' +
+      toolsUsed.map(t => `<span class="tool-badge">${escapeHtml(t)}</span>`).join('') +
+      '</div>';
+  }
+  let metaHtml = '';
+  if (role === 'assistant' && (spikeStats || usage)) {
+    const parts = [];
+    if (spikeStats && spikeStats.activation_sparsity_pct > 0)
+      parts.push(`sparsity: ${spikeStats.activation_sparsity_pct}%`);
+    if (spikeStats && spikeStats.spike_encoded_layers > 0)
+      parts.push(`${spikeStats.spike_encoded_layers} spike layers`);
+    if (usage && usage.tokens_per_second > 0)
+      parts.push(`${usage.tokens_per_second} tok/s`);
+    if (parts.length > 0)
+      metaHtml = `<div class="spike-meta">${parts.join(' \u00b7 ')}</div>`;
+  }
+  div.innerHTML = `
+    <div class="message-role ${role}">${role}</div>
+    ${toolHtml}
+    <div class="message-content">${escapeHtml(content)}</div>
+    ${metaHtml}
+  `;
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+  return div;
+}
+
+function showTyping() {
+  const div = document.createElement('div');
+  div.className = 'message assistant';
+  div.id = 'typing';
+  div.innerHTML = `
+    <div class="message-role assistant">assistant</div>
+    <div class="typing-indicator"><span></span><span></span><span></span></div>
+  `;
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing');
+  if (el) el.remove();
+}
+
+function escapeHtml(text) {
+  const d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+
+async function send() {
+  const content = msgInput.value.trim();
+  if (!content || isGenerating) return;
+
+  const key = apiKeyInput.value.trim();
+  if (!key) return;
+
+  addMessage('user', content);
+  msgInput.value = '';
+  msgInput.style.height = 'auto';
+  isGenerating = true;
+  sendBtn.disabled = true;
+  showTyping();
+
+  try {
+    const apiMessages = messages.map(m => ({ role: m.role, content: m.content }));
+    const r = await fetch(`${API_BASE}/v1/chat/completions`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+      body: JSON.stringify({ messages: apiMessages, max_tokens: 2048, temperature: 0.7 }),
+    });
+
+    if (!r.ok) {
+      const err = await r.json().catch(() => ({ error: 'Request failed' }));
+      removeTyping();
+      addMessage('assistant', `Error: ${err.error || r.statusText}`);
+      return;
+    }
+
+    const data = await r.json();
+    const reply = data.choices?.[0]?.message?.content || 'No response.';
+    const toolsUsed = data.tools_used || [];
+    const spikeStats = data.spike_stats || {};
+    const usage = data.usage || {};
+    removeTyping();
+    addMessage('assistant', reply, toolsUsed, spikeStats, usage);
+
+    if (spikeStats.activation_sparsity_pct > 0) {
+      document.getElementById('sparsityStat').textContent =
+        spikeStats.activation_sparsity_pct + '%';
+    }
+  } catch (err) {
+    removeTyping();
+    addMessage('assistant', `Connection error: ${err.message}`);
+  } finally {
+    isGenerating = false;
+    sendBtn.disabled = false;
+    msgInput.focus();
+  }
+}
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+</script>
+</body>
+</html>
