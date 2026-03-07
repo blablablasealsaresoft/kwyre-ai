@@ -114,9 +114,11 @@ GET  /chat                  Browser UI
 
 | Config | GPU | VRAM | RAM | Speed |
 |--------|-----|------|-----|-------|
-| Recommended | RTX 4090 / 3090 | 8GB+ | 16GB | 25-40 tok/s |
-| Minimum | RTX 3060 12GB | 8GB | 16GB | 15-25 tok/s |
+| Recommended | RTX 4090 / 3090 | 8GB+ | 8GB | 25-40 tok/s |
+| Minimum | RTX 3060 12GB | 8GB | 8GB | 15-25 tok/s |
 | CPU-only (roadmap) | None | — | 32GB | 5-10 tok/s |
+
+> **Why only 8GB RAM?** The model weights live entirely in GPU VRAM (~6.5GB at 4-bit NF4). System RAM only runs the Python process, tokenizer, and HTTP server (~2-3GB). Conversations are held in RAM but are just text — negligible. No database, no disk cache, no logging buffer. Kwyre's zero-storage architecture means minimal system RAM.
 
 > **For reference:** ChatGPT streams at ~40-60 tok/s over the internet. Kwyre on a 4090 matches that speed with zero data leaving your machine.
 
