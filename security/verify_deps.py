@@ -118,9 +118,9 @@ def generate_manifest():
         pkg_info = get_package_hash(name)
         manifest["packages"][name] = pkg_info
         if pkg_info["status"] == "ok":
-            print(f"  ✓ {name}=={pkg_info['version']}")
+            print(f"  [OK] {name}=={pkg_info['version']}")
         else:
-            print(f"  ? {name} — {pkg_info['status']}")
+            print(f"  [??] {name} -- {pkg_info['status']}")
 
     with open(MANIFEST_PATH, "w") as f:
         json.dump(manifest, f, indent=2)
@@ -222,11 +222,11 @@ def verify_required_only() -> bool:
         pkg_lower = pkg.lower()
         current = get_package_hash(pkg_lower)
         if current["status"] != "ok":
-            print(f"  ? {pkg} — {current['status']}")
+            print(f"  [??] {pkg} -- {current['status']}")
             continue
 
         if pkg_lower not in known:
-            print(f"  ? {pkg} — not in manifest")
+            print(f"  [??] {pkg} -- not in manifest")
             continue
 
         expected = known[pkg_lower]
@@ -236,7 +236,7 @@ def verify_required_only() -> bool:
               and expected["record_hash"] not in ("no-record", "error")):
             failures.append(f"{pkg}: hash mismatch")
         else:
-            print(f"  ✓ {pkg}=={current['version']}")
+            print(f"  [OK] {pkg}=={current['version']}")
 
     if failures:
         print("\n[Layer 3] CORE DEPENDENCY FAILURES:")
