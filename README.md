@@ -160,7 +160,30 @@ GET  /chat                  Browser UI
 
 ## Quick Start
 
-### Option 1: Docker (recommended)
+### Option 1: One-Click Installer (recommended)
+
+**Windows:**
+```powershell
+# Download installer from kwyre.com or run from source:
+powershell -ExecutionPolicy Bypass -File installer\install_windows.ps1
+# Creates Start Menu shortcut, installs firewall rules, ready to go
+```
+
+**Linux (Ubuntu/Debian):**
+```bash
+sudo bash installer/install_linux.sh
+# Installs to /opt/kwyre, creates systemd service, installs iptables rules
+sudo systemctl start kwyre
+```
+
+**macOS:**
+```bash
+sudo bash installer/install_macos.sh
+# Installs to /opt/kwyre, creates launchd service, installs PF firewall rules
+sudo launchctl start com.kwyre.ai.server
+```
+
+### Option 2: Docker
 ```bash
 git clone https://github.com/blablablasealsaresoft/kwyre-ai
 cd kwyre-ai
@@ -171,7 +194,7 @@ docker compose up
 # Models auto-download on first run (~3.3 GB)
 ```
 
-### Option 2: Direct Python
+### Option 3: Direct Python (development)
 ```bash
 git clone https://github.com/blablablasealsaresoft/kwyre-ai
 cd kwyre-ai
@@ -184,10 +207,9 @@ pip install -r requirements-inference.txt
 python server/serve_local_4bit.py
 ```
 
-### Option 3: With pre-quantized models (fastest)
+### Option 4: Pre-quantized models (fastest startup)
 ```bash
-# Download pre-quantized models from kwyre.com
-# Extract to dist/ folder
+# Download pre-quantized models from kwyre.com → extract to dist/
 
 # Or quantize yourself from HuggingFace:
 python model/quantize_nf4.py --model Qwen/Qwen3-4B --output ./dist/kwyre-4b-nf4
@@ -328,7 +350,8 @@ Set via environment variables or `.env` file:
 - [x] Security headers on all HTTP response paths
 - [x] Watchdog child process monitoring
 - [x] 107 security tests across 3 test suites
-- [ ] Windows one-click installer
+- [x] Windows, Linux, and macOS one-click installers
+- [x] Nuitka build pipeline — compiled binary distribution (source protection)
 
 **v0.4**
 - [ ] Apple Silicon / MLX support (targets legal market on Mac)
@@ -341,6 +364,59 @@ Set via environment variables or `.env` file:
 - [ ] SOC2-friendly deployment guide
 - [ ] Enterprise audit package
 - [ ] Multi-user air-gapped server mode
+
+---
+
+## Building from Source (Nuitka Protected Binary)
+
+Kwyre ships compiled binaries to paying customers. The server Python code is compiled into a standalone executable via Nuitka — no Python source files are distributed, making it significantly harder to reverse-engineer or share the AI server code.
+
+```bash
+# Install build dependencies
+pip install nuitka ordered-set zstandard
+
+# Compile + build installer for current platform
+python build.py all
+
+# Or step by step:
+python build.py compile       # Nuitka compile → build/kwyre-dist/kwyre-server[.exe]
+python build.py package       # Stage data files (chat/, docs/, security/)
+python build.py installer     # Build platform installer (.exe/.deb/.pkg)
+
+# Cross-platform installer generation
+python build.py installer --platform windows   # Inno Setup .exe
+python build.py installer --platform linux      # .deb + AppImage script
+python build.py installer --platform macos      # .pkg + launchd plist
+
+# Clean build artifacts
+python build.py clean
+```
+
+**What gets compiled (protected):**
+- `server/serve_local_4bit.py` — inference server, API endpoints, security layers
+- `server/tools.py` — external API tool router
+- `security/verify_deps.py` — Layer 3 dependency integrity
+- `security/license.py` — Ed25519 license validation
+- `model/spike_serve.py` — SpikeServe inference encoding
+
+**What stays as data (not compiled):**
+- `chat/*.html` — frontend UI (served as-is)
+- `docs/` — compliance documentation
+- `.env.example` — configuration template
+- Model weights (`.safetensors`) — loaded at runtime
+
+**Build outputs:**
+
+| Platform | Installer | Location |
+|----------|-----------|----------|
+| Windows | Inno Setup `.exe` | `build/installers/kwyre-ai-setup-0.3.0-win64.exe` |
+| Linux | `.deb` package | `build/installers/kwyre-ai_0.3.0_amd64.deb` |
+| Linux | AppImage | `build/installers/Kwyre-AI-0.3.0-x86_64.AppImage` |
+| macOS | `.pkg` | `build/installers/kwyre-ai-0.3.0-macos.pkg` |
+
+> **Windows:** Requires [Inno Setup 6](https://jrsoftware.org/isdl.php) (`winget install JRSoftware.InnoSetup`)
+> **Linux AppImage:** Requires [appimagetool](https://github.com/AppImage/appimagetool/releases)
+> **macOS .pkg:** Built with native `pkgbuild` (Xcode CLI tools)
 
 ---
 
