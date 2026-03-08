@@ -8,7 +8,7 @@
 [![Quantization](https://img.shields.io/badge/quant-4--bit%20NF4-green.svg)]()
 [![Security](https://img.shields.io/badge/security-6--layer%20stack-red.svg)]()
 [![Docker](https://img.shields.io/badge/deploy-docker--compose%20up-blue.svg)]()
-[![Status](https://img.shields.io/badge/status-v0.5%20active-brightgreen.svg)]()
+[![Status](https://img.shields.io/badge/status-v1.0%20production-brightgreen.svg)]()
 [![Pentest](https://img.shields.io/badge/pentest-47%2F47%20resolved-brightgreen.svg)]()
 [![Streaming](https://img.shields.io/badge/SSE-streaming-blue.svg)]()
 
@@ -566,11 +566,11 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] Inference queue — serialized GPU access, HTTP threads stay responsive during generation
 - [x] Frontend streaming UI — `chat.html` renders tokens live as they arrive
 
-**v1.0**
-- [ ] Hardware-bound license keys (machine fingerprint)
-- [ ] Code signing for releases
-- [ ] Windows one-click GUI installer
-- [ ] Auto-update mechanism (air-gap safe — manual download)
+**v1.0 (Current — Production Ready)**
+- [x] Hardware-bound license keys — machine fingerprint binding with `machine_ids` in license payload, `register_machine()` activation flow
+- [x] Code signing for releases — Ed25519-signed `MANIFEST.sig.json` for every build artifact, `python build.py sign`
+- [x] Windows one-click GUI installer — tkinter wizard with dark theme, 5-page flow, threaded installation
+- [x] Auto-update mechanism (air-gap safe) — `.kwyre-update` packages with signed manifests, local-only update scanning, automatic rollback
 
 ---
 
@@ -579,20 +579,24 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 ```bash
 pip install nuitka ordered-set zstandard
 
-python build.py all          # Compile + package + installer
+python build.py all              # Compile + package + installer + sign
 
 # Or step by step:
-python build.py compile      # Nuitka → build/kwyre-dist/kwyre-server[.exe]
-python build.py package      # Stage data files
-python build.py installer    # Platform installer (.exe/.deb/.pkg)
-python build.py clean        # Clean artifacts
+python build.py compile          # Nuitka → build/kwyre-dist/kwyre-server[.exe]
+python build.py package          # Stage data files
+python build.py installer        # Platform installer (.exe/.deb/.pkg)
+python build.py sign             # Ed25519 sign all build artifacts
+python build.py update-package   # Create .kwyre-update for air-gap updates
+python build.py clean            # Clean artifacts
 ```
 
 **What gets compiled (protected):**
 - `server/serve_local_4bit.py` — inference server, streaming, KV cache, security layers
 - `server/tools.py` — external API tool router
 - `security/verify_deps.py` — Layer 3 dependency integrity
-- `security/license.py` — Ed25519 license validation
+- `security/license.py` — Ed25519 license validation + hardware-bound fingerprint
+- `security/codesign.py` — Ed25519 release signing and verification
+- `security/updater.py` — air-gap safe update mechanism
 - `model/spike_serve.py` — SpikeServe inference encoding
 
 **Build outputs:**
@@ -734,14 +738,17 @@ kwyre/
 │   └── convert_mlx.py         # HuggingFace → MLX converter
 ├── security/
 │   ├── verify_deps.py         # Layer 3 — dependency integrity
-│   └── license.py             # Ed25519 offline license validation
+│   ├── license.py             # Ed25519 license + hardware fingerprint binding
+│   ├── codesign.py            # Ed25519 release signing and verification
+│   └── updater.py             # Air-gap safe update mechanism
 ├── chat/
 │   ├── landing.html           # Marketing landing page
 │   ├── chat.html              # Chat UI (SSE streaming)
 │   ├── main.html              # Main product page
 │   └── pay.html               # Payment + license download gate
 ├── installer/
-│   ├── install_windows.ps1    # Windows installer
+│   ├── install_windows.ps1    # Windows CLI installer
+│   ├── install_windows_gui.py # Windows GUI installer (tkinter wizard)
 │   ├── install_linux.sh       # Linux installer (systemd + iptables)
 │   └── install_macos.sh       # macOS installer (launchd + PF)
 ├── finetune/                  # Domain-specific fine-tuning pipeline

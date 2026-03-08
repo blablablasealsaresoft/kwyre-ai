@@ -23,6 +23,10 @@ import shutil
 import subprocess
 import sys
 
+from security.codesign import sign_release as codesign_release
+
+VERSION = "0.3.0"
+
 PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 BUILD_DIR = os.path.join(PROJECT_ROOT, "build")
 DIST_BUILD_DIR = os.path.join(BUILD_DIR, "kwyre-dist")
@@ -700,6 +704,16 @@ echo "    -ov $INSTALLERS/kwyre-ai-0.3.0-macos.dmg"
         print("  [INFO] Run build-macos-pkg.sh on macOS to generate the .pkg")
 
 
+def sign_release():
+    """Sign the distribution directory with Ed25519."""
+    print("\n=== Code Signing ===")
+    if not os.path.isdir(DIST_BUILD_DIR):
+        print(f"[FAIL] Distribution directory not found: {DIST_BUILD_DIR}")
+        print(f"       Run 'python build.py package' first.")
+        sys.exit(1)
+    codesign_release(DIST_BUILD_DIR, "0.3.0", PLAT)
+
+
 def clean():
     """Remove all build artifacts."""
     if os.path.exists(BUILD_DIR):
@@ -715,8 +729,9 @@ def main():
     )
     parser.add_argument(
         "command",
-        choices=["compile", "installer", "all", "clean", "package"],
-        help="compile=Nuitka build, installer=platform pkg, all=both, package=stage dist, clean=remove artifacts"
+        choices=["compile", "installer", "all", "clean", "package", "sign", "update-package"],
+        help="compile=Nuitka build, installer=platform pkg, all=both, package=stage dist, "
+             "sign=code sign dist, update-package=create .kwyre-update, clean=remove artifacts"
     )
     parser.add_argument(
         "--platform",
@@ -727,7 +742,7 @@ def main():
     args = parser.parse_args()
 
     print("=" * 60)
-    print(f"  Kwyre AI Build Pipeline v0.3.0")
+    print(f"  Kwyre AI Build Pipeline v{VERSION}")
     print(f"  Platform: {PLAT} ({platform.machine()})")
     print(f"  Python:   {sys.version.split()[0]}")
     print("=" * 60)
@@ -750,6 +765,27 @@ def main():
             build_linux_installer()
         if target in ("darwin", "macos", "all"):
             build_macos_installer()
+
+    if args.command in ("sign", "all"):
+        sign_release()
+
+    if args.command == "update-package":
+        if not os.path.isdir(DIST_BUILD_DIR):
+            print("[!] Distribution not found. Run 'python build.py package' first.")
+            sys.exit(1)
+        from security.updater import KwyreUpdater
+        updater = KwyreUpdater()
+        installer_out = os.path.join(BUILD_DIR, "installers")
+        os.makedirs(installer_out, exist_ok=True)
+        output_path = os.path.join(installer_out, f"kwyre-{VERSION}.kwyre-update")
+        out = updater.create_update_package(
+            source_dir=DIST_BUILD_DIR,
+            version=VERSION,
+            changelog=f"Kwyre AI v{VERSION} release",
+            output_path=output_path,
+        )
+        size_mb = os.path.getsize(out) / (1024 * 1024)
+        print(f"\n[OK] Update package: {out} ({size_mb:.1f} MB)")
 
     print("\n" + "=" * 60)
     print("  Build complete.")

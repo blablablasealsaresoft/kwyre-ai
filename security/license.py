@@ -19,11 +19,20 @@ Usage:
   # Issue a license
   python license.py issue --tier professional --machines 3 --customer "anon-hash-123"
 
+  # Issue a machine-bound license
+  python license.py issue --tier professional --fingerprints abc123 def456
+
+  # Bind an existing license to specific machines
+  python license.py bind --key "KWYRE-..." --fingerprints abc123 def456
+
   # Validate a license key
   python license.py validate --key "KWYRE-..."
 
   # Validate from file
   python license.py validate --file ./kwyre.license
+
+  # Show this machine's fingerprint
+  python license.py fingerprint
 """
 
 import argparse
@@ -138,28 +147,99 @@ def get_machine_fingerprint() -> str:
         platform.processor(),
     ]
     try:
+        import subprocess
         if sys.platform == "win32":
-            import subprocess
-            result = subprocess.run(
-                ["wmic", "bios", "get", "serialnumber"],
-                capture_output=True, text=True, timeout=5
-            )
-            bios = result.stdout.strip().split("\n")[-1].strip()
-            if bios and bios != "To be filled by O.E.M.":
-                parts.append(bios)
+            uuid_val = None
+            try:
+                result = subprocess.run(
+                    ["wmic", "csproduct", "get", "uuid"],
+                    capture_output=True, text=True, timeout=5
+                )
+                uuid_val = result.stdout.strip().split("\n")[-1].strip()
+                if uuid_val and uuid_val.lower() not in ("", "ffffffff-ffff-ffff-ffff-ffffffffffff"):
+                    parts.append(uuid_val)
+                else:
+                    uuid_val = None
+            except Exception:
+                uuid_val = None
+
+            if not uuid_val:
+                try:
+                    result = subprocess.run(
+                        ["wmic", "bios", "get", "serialnumber"],
+                        capture_output=True, text=True, timeout=5
+                    )
+                    bios = result.stdout.strip().split("\n")[-1].strip()
+                    if bios and bios != "To be filled by O.E.M.":
+                        parts.append(bios)
+                except Exception:
+                    pass
+
+            try:
+                result = subprocess.run(
+                    ["wmic", "diskdrive", "get", "serialnumber"],
+                    capture_output=True, text=True, timeout=5
+                )
+                lines = [l.strip() for l in result.stdout.strip().split("\n")[1:] if l.strip()]
+                if lines:
+                    parts.append(lines[0])
+            except Exception:
+                pass
+
+        elif sys.platform == "darwin":
+            try:
+                result = subprocess.run(
+                    ["ioreg", "-rd1", "-c", "IOPlatformExpertDevice"],
+                    capture_output=True, text=True, timeout=5
+                )
+                for line in result.stdout.split("\n"):
+                    if "IOPlatformUUID" in line:
+                        uuid_val = line.split("=")[-1].strip().strip('"')
+                        if uuid_val:
+                            parts.append(uuid_val)
+                        break
+            except Exception:
+                pass
+
         elif sys.platform == "linux":
             mid_path = Path("/etc/machine-id")
             if mid_path.exists():
                 parts.append(mid_path.read_text().strip())
+            product_uuid = Path("/sys/class/dmi/id/product_uuid")
+            try:
+                if product_uuid.exists():
+                    parts.append(product_uuid.read_text().strip())
+            except Exception:
+                pass
     except Exception:
         pass
 
     raw = "|".join(parts)
-    return hashlib.sha256(raw.encode()).hexdigest()[:16]
+    return hashlib.sha256(raw.encode()).hexdigest()[:32]
+
+
+def _sign_and_encode(payload: dict) -> str:
+    payload_bytes = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode()
+
+    priv = _load_private_key()
+    signature = priv.sign(payload_bytes)
+
+    token_data = {
+        "p": base64.b64encode(payload_bytes).decode(),
+        "s": base64.b64encode(signature).decode(),
+    }
+
+    raw_token = base64.b64encode(
+        json.dumps(token_data, separators=(",", ":")).encode()
+    ).decode()
+
+    chunks = [raw_token[i:i+48] for i in range(0, len(raw_token), 48)]
+    return "KWYRE-" + "-".join(chunks)
 
 
 def issue_license(tier: str, machines: int = None, customer: str = "",
-                  perpetual: bool = True, days: int = 0) -> str:
+                  perpetual: bool = True, days: int = 0,
+                  machine_ids: list = None) -> str:
     """Issue a signed license key."""
     if not HAS_CRYPTO:
         print("[License] Install cryptography: pip install cryptography")
@@ -182,24 +262,10 @@ def issue_license(tier: str, machines: int = None, customer: str = "",
         "expires_at": None if perpetual else int(time.time() + days * 86400),
     }
 
-    payload_bytes = json.dumps(payload, separators=(",", ":"), sort_keys=True).encode()
+    if machine_ids is not None:
+        payload["machine_ids"] = list(machine_ids)
 
-    priv = _load_private_key()
-    signature = priv.sign(payload_bytes)
-
-    token_data = {
-        "p": base64.b64encode(payload_bytes).decode(),
-        "s": base64.b64encode(signature).decode(),
-    }
-
-    raw_token = base64.b64encode(
-        json.dumps(token_data, separators=(",", ":")).encode()
-    ).decode()
-
-    chunks = [raw_token[i:i+48] for i in range(0, len(raw_token), 48)]
-    key = "KWYRE-" + "-".join(chunks)
-
-    return key
+    return _sign_and_encode(payload)
 
 
 def validate_license(key: str, pubkey_b64: str = "",
@@ -241,6 +307,11 @@ def validate_license(key: str, pubkey_b64: str = "",
     if payload.get("expires_at") and payload["expires_at"] < time.time():
         raise ValueError(f"License expired on {time.strftime('%Y-%m-%d', time.localtime(payload['expires_at']))}")
 
+    if check_machine and payload.get("machine_ids"):
+        current_fp = get_machine_fingerprint()
+        if current_fp not in payload["machine_ids"]:
+            raise ValueError("License not valid for this machine (fingerprint mismatch)")
+
     return payload
 
 
@@ -273,7 +344,7 @@ def startup_validate(key_source: str = None, pubkey_b64: str = "") -> dict:
         return None
 
     try:
-        payload = validate_license(key, pubkey_b64=pubkey_b64)
+        payload = validate_license(key, pubkey_b64=pubkey_b64, check_machine=True)
         print(f"[License] Valid — {payload['label']} ({payload['machines']} machine(s))")
         if payload.get("expires_at"):
             exp = time.strftime("%Y-%m-%d", time.localtime(payload["expires_at"]))
@@ -284,6 +355,35 @@ def startup_validate(key_source: str = None, pubkey_b64: str = "") -> dict:
     except ValueError as e:
         print(f"[License] INVALID: {e}")
         return None
+
+
+def register_machine(key: str, fingerprint: str = None,
+                     pubkey_b64: str = "") -> str:
+    """
+    Add a machine fingerprint to an existing license and re-sign it.
+    Requires the private key. If fingerprint is None, uses the current machine's.
+    Returns the new license key string.
+    """
+    if not HAS_CRYPTO:
+        raise ValueError("cryptography library not installed")
+
+    if fingerprint is None:
+        fingerprint = get_machine_fingerprint()
+
+    payload = validate_license(key, pubkey_b64=pubkey_b64, check_machine=False)
+
+    existing = payload.get("machine_ids", [])
+    if fingerprint in existing:
+        return key
+
+    max_machines = payload.get("machines", 1)
+    if len(existing) >= max_machines:
+        raise ValueError(
+            f"Machine limit reached ({max_machines}). Cannot register additional machines."
+        )
+
+    payload["machine_ids"] = existing + [fingerprint]
+    return _sign_and_encode(payload)
 
 
 def main():
@@ -298,6 +398,8 @@ def main():
     issue_p.add_argument("--customer", default="")
     issue_p.add_argument("--days", type=int, default=0, help="Expiry in days (0=perpetual)")
     issue_p.add_argument("--out", default="", help="Write key to file")
+    issue_p.add_argument("--fingerprints", nargs="*", default=None,
+                         help="Bind license to specific machine fingerprints")
 
     val_p = sub.add_parser("validate", help="Validate a license key")
     val_p.add_argument("--key", default="")
@@ -305,18 +407,26 @@ def main():
 
     fp_p = sub.add_parser("fingerprint", help="Show this machine's fingerprint")
 
+    bind_p = sub.add_parser("bind", help="Bind an existing license to machine fingerprints")
+    bind_p.add_argument("--key", required=True, help="Existing license key")
+    bind_p.add_argument("--fingerprints", nargs="+", required=True,
+                        help="Machine fingerprints to bind")
+
     args = parser.parse_args()
 
     if args.command == "keygen":
         keygen()
     elif args.command == "issue":
         perpetual = args.days == 0
-        key = issue_license(args.tier, args.machines, args.customer, perpetual, args.days)
+        key = issue_license(args.tier, args.machines, args.customer, perpetual, args.days,
+                            machine_ids=args.fingerprints)
         print(f"\n{'='*60}")
         print(f"  License Key — {TIERS[args.tier]['label']}")
         print(f"{'='*60}\n")
         print(key)
         print()
+        if args.fingerprints:
+            print(f"Bound to {len(args.fingerprints)} machine(s): {', '.join(args.fingerprints)}")
         if args.out:
             Path(args.out).write_text(key)
             print(f"Written to {args.out}")
@@ -333,6 +443,20 @@ def main():
             print(json.dumps(payload, indent=2))
         except ValueError as e:
             print(f"[License] INVALID: {e}")
+            sys.exit(1)
+    elif args.command == "bind":
+        try:
+            payload = validate_license(args.key, check_machine=False)
+            payload["machine_ids"] = list(args.fingerprints)
+            new_key = _sign_and_encode(payload)
+            print(f"\n{'='*60}")
+            print(f"  Re-issued License — bound to {len(args.fingerprints)} machine(s)")
+            print(f"{'='*60}\n")
+            print(new_key)
+            print()
+            print(f"Fingerprints: {', '.join(args.fingerprints)}")
+        except ValueError as e:
+            print(f"[License] ERROR: {e}")
             sys.exit(1)
     elif args.command == "fingerprint":
         print(f"Machine fingerprint: {get_machine_fingerprint()}")
