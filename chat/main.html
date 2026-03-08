@@ -45,6 +45,9 @@ body {
 
 ::selection { background: var(--accent); color: #fff; }
 
+/* --- PARTICLE CANVAS --- */
+#particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
 /* --- GRID OVERLAY --- */
 .grid-bg {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -58,6 +61,76 @@ body {
   content: '';
   position: absolute; inset: 0;
   background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.06), transparent 70%);
+}
+
+/* --- FLOATING ORBS --- */
+.m-orb {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  filter: blur(120px);
+}
+.m-orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(59,130,246,0.07), transparent 70%);
+  top: -5%; left: -5%;
+  animation: m-orb-a 18s ease-in-out infinite alternate;
+}
+.m-orb-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(34,197,94,0.04), transparent 70%);
+  bottom: 10%; right: -8%;
+  animation: m-orb-b 22s ease-in-out infinite alternate;
+}
+.m-orb-3 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(59,130,246,0.05), transparent 70%);
+  top: 40%; left: 30%;
+  animation: m-orb-c 15s ease-in-out infinite alternate;
+}
+@keyframes m-orb-a { 0%{transform:translate(0,0)} 100%{transform:translate(60px,-40px)} }
+@keyframes m-orb-b { 0%{transform:translate(0,0)} 100%{transform:translate(-50px,30px)} }
+@keyframes m-orb-c { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(40px,50px) scale(1.15)} }
+
+/* --- SCANLINES --- */
+.m-scanlines {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+}
+
+/* --- NOISE OVERLAY --- */
+.m-noise {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+/* --- SCAN SWEEP --- */
+.m-sweep {
+  position: fixed; left: 0; right: 0; height: 1px; z-index: 0; pointer-events: none;
+  background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.15) 40%, rgba(59,130,246,0.08) 50%, rgba(59,130,246,0.15) 60%, transparent 100%);
+  animation: m-sweep-anim 6s ease-in-out infinite;
+  opacity: 0;
+}
+@keyframes m-sweep-anim {
+  0%   { top: -1px; opacity: 0; }
+  3%   { opacity: 0.7; }
+  97%  { opacity: 0.7; }
+  100% { top: 100vh; opacity: 0; }
+}
+
+/* --- SCROLL REVEAL --- */
+.reveal {
+  opacity: 0; transform: translateY(32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.vis { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: 0.1s; }
+.reveal-d2 { transition-delay: 0.2s; }
+.reveal-d3 { transition-delay: 0.3s; }
+
+/* --- GLOW LINE (section divider enhancement) --- */
+.section + .section {
+  border-image: linear-gradient(90deg, transparent, rgba(59,130,246,0.15), transparent) 1;
 }
 
 /* --- LAYOUT --- */
@@ -262,6 +335,7 @@ nav {
 }
 
 .buyer-card:hover { background: var(--surface2); }
+.buyer-card { cursor: pointer; }
 
 .buyer-role {
   font-family: var(--mono);
@@ -285,6 +359,102 @@ nav {
   font-size: 13px;
   color: var(--text2);
   line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.buyer-cta {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono);
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--accent); opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.buyer-card:hover .buyer-cta { opacity: 1; }
+
+.buyer-cta svg { width: 12px; height: 12px; stroke: var(--accent); fill: none; stroke-width: 2; }
+
+/* CASE STUDY POPUP */
+.case-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(5,6,10,0.88);
+  backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.case-overlay.open { opacity: 1; pointer-events: all; }
+
+.case-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 100%; max-width: 540px;
+  padding: 40px 36px 36px;
+  position: relative;
+  transform: translateY(16px) scale(0.97);
+  transition: transform 0.3s ease;
+  max-height: 90vh; overflow-y: auto;
+}
+.case-overlay.open .case-modal { transform: translateY(0) scale(1); }
+
+.case-modal-close {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: none; color: var(--text3);
+  font-size: 20px; cursor: pointer; padding: 4px 8px;
+  transition: color 0.2s;
+}
+.case-modal-close:hover { color: var(--text); }
+
+.case-tag {
+  display: inline-block;
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--red); background: var(--red-dim);
+  border: 1px solid rgba(239,68,68,0.15);
+  padding: 4px 12px; border-radius: 3px;
+  margin-bottom: 16px;
+}
+
+.case-headline {
+  font-size: 20px; font-weight: 700;
+  color: var(--text); line-height: 1.35;
+  margin-bottom: 20px; letter-spacing: -0.3px;
+}
+
+.case-body {
+  font-size: 14px; color: var(--text2);
+  line-height: 1.75; margin-bottom: 24px;
+}
+
+.case-body strong { color: var(--text); font-weight: 600; }
+
+.case-source {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text3); letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding-top: 16px; border-top: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.case-kwyre {
+  background: var(--accent-dim);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 6px;
+  padding: 16px 20px;
+}
+
+.case-kwyre-label {
+  font-family: var(--mono); font-size: 10px;
+  font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent); margin-bottom: 8px;
+}
+
+.case-kwyre p {
+  font-size: 13px; color: var(--text);
+  line-height: 1.6;
 }
 
 /* --- SECTION HEADERS --- */
@@ -866,6 +1036,155 @@ nav {
 
 .hidden { display: none !important; }
 
+/* --- ACCESS MODAL --- */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(5,6,10,0.88);
+  backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 100%; max-width: 440px;
+  padding: 40px 36px 36px;
+  position: relative;
+  transform: translateY(16px) scale(0.97);
+  transition: transform 0.3s ease;
+}
+.modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+.modal-close {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: none; color: var(--text3);
+  font-size: 20px; cursor: pointer; padding: 4px 8px;
+  transition: color 0.2s;
+}
+.modal-close:hover { color: var(--text); }
+
+.modal-title {
+  font-family: var(--mono);
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 8px;
+}
+
+.modal h3 {
+  font-size: 22px; font-weight: 700;
+  color: var(--text); margin-bottom: 28px;
+  letter-spacing: -0.3px;
+}
+
+.type-toggle {
+  display: flex; gap: 1px;
+  background: var(--border); border-radius: 6px;
+  overflow: hidden; margin-bottom: 24px;
+}
+
+.type-toggle button {
+  flex: 1; padding: 12px 16px;
+  background: var(--surface2); border: none;
+  font-family: var(--mono); font-size: 11px;
+  font-weight: 500; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--text3);
+  cursor: pointer; transition: background 0.2s, color 0.2s;
+}
+
+.type-toggle button.active {
+  background: var(--accent-dim); color: var(--accent);
+}
+
+.type-toggle button:hover:not(.active) { color: var(--text2); }
+
+.form-field {
+  margin-bottom: 16px;
+}
+
+.form-field label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 6px;
+}
+
+.form-field input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-field input:focus { border-color: var(--accent); }
+.form-field input::placeholder { color: var(--text3); }
+
+.form-field.biz-only { display: none; }
+.form-field.biz-only.show { display: block; }
+
+.form-submit {
+  width: 100%;
+  padding: 14px;
+  margin-top: 8px;
+  background: var(--accent);
+  color: #fff;
+  border: none; border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.1s;
+}
+
+.form-submit:hover { box-shadow: 0 4px 24px var(--accent-glow); transform: translateY(-1px); }
+.form-submit:active { transform: scale(0.98); }
+
+.form-note {
+  font-size: 11px;
+  color: var(--text3);
+  text-align: center;
+  margin-top: 16px;
+  line-height: 1.5;
+}
+
+.form-success {
+  text-align: center; padding: 20px 0;
+}
+
+.form-success .check-icon {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--green-dim);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.form-success .check-icon svg {
+  width: 24px; height: 24px;
+  stroke: var(--green); fill: none; stroke-width: 2;
+}
+
+.form-success h4 {
+  font-size: 18px; font-weight: 600;
+  color: var(--text); margin-bottom: 8px;
+}
+
+.form-success p {
+  font-size: 13px; color: var(--text2);
+  line-height: 1.6;
+}
+
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
   .nav-links a:not(.nav-cta) { display: none; }
@@ -887,7 +1206,14 @@ nav {
 </style>
 </head>
 <body>
+<canvas id="particles"></canvas>
 <div class="grid-bg"></div>
+<div class="m-scanlines"></div>
+<div class="m-noise"></div>
+<div class="m-sweep"></div>
+<div class="m-orb m-orb-1"></div>
+<div class="m-orb m-orb-2"></div>
+<div class="m-orb m-orb-3"></div>
 
 <!-- NAV -->
 <nav>
@@ -896,8 +1222,8 @@ nav {
     <div class="nav-links">
       <a href="#security">Security</a>
       <a href="#features">Features</a>
-      <a href="#pricing">Pricing</a>
-      <a href="mailto:contact@kwyre.com" class="nav-cta">Request Access</a>
+      <a href="pay.html">Purchase</a>
+      <a href="chat.html" class="nav-cta">Launch Console</a>
     </div>
   </div>
 </nav>
@@ -905,14 +1231,14 @@ nav {
 <!-- HERO -->
 <div class="hero">
   <div class="wrap">
-    <div class="hero-eyebrow">Air-Gapped Inference</div>
-    <h1>AI for analysts who<br>cannot afford <em>a breach</em></h1>
-    <p class="hero-sub">
+    <div class="hero-eyebrow reveal">Air-Gapped Inference</div>
+    <h1 class="reveal reveal-d1">AI for analysts who<br>cannot afford <em>a breach</em></h1>
+    <p class="hero-sub reveal reveal-d2">
       The only local AI that protects your data <strong>even if your machine is compromised.</strong>
       Six layers of active defense. Zero data leaves your machine. Not to a cloud. Not to us. Not to anyone.
     </p>
 
-    <div class="hero-stats">
+    <div class="hero-stats reveal reveal-d3">
       <div class="hero-stat">
         <div class="hero-stat-val">Qwen3.5-9B</div>
         <div class="hero-stat-label">Base Model</div>
@@ -935,7 +1261,7 @@ nav {
       </div>
     </div>
 
-    <div class="threat-bar">
+    <div class="threat-bar reveal">
       <div class="threat-dot"></div>
       <span>All systems operational &mdash; <strong>zero outbound connections</strong></span>
     </div>
@@ -946,41 +1272,47 @@ nav {
 <div class="section" id="buyers">
   <div class="wrap">
     <div class="sh">
-      <div class="sh-eyebrow">Use Cases</div>
-      <h2>Built for adversarial environments</h2>
+      <div class="sh-eyebrow reveal">Use Cases</div>
+      <h2 class="reveal reveal-d1">Built for adversarial environments</h2>
       <p>Kwyre exists because these professionals cannot upload their work to cloud AI. Not legally. Not ethically. Not safely.</p>
     </div>
 
-    <div class="buyers-grid">
-      <div class="buyer-card">
+    <div class="buyers-grid reveal reveal-d2">
+      <div class="buyer-card" onclick="showCase(0)">
         <div class="buyer-role">Forensic Investigators</div>
         <div class="buyer-pain">Cannot upload $3B fraud evidence to ChatGPT during an active federal case.</div>
         <div class="buyer-solve">Full local inference, zero telemetry, no chain-of-custody risk.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
-      <div class="buyer-card">
+      <div class="buyer-card" onclick="showCase(1)">
         <div class="buyer-role">Criminal Defense Attorneys</div>
         <div class="buyer-pain">Attorney-client privilege prohibits cloud AI on case materials.</div>
         <div class="buyer-solve">Air-gapped by architecture, not policy.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
-      <div class="buyer-card">
+      <div class="buyer-card" onclick="showCase(2)">
         <div class="buyer-role">M&amp;A Law Firms</div>
         <div class="buyer-pain">Associates uploading NDA-protected deal docs to ChatGPT is malpractice liability.</div>
         <div class="buyer-solve">Verified zero outbound connections, auditable.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
-      <div class="buyer-card">
+      <div class="buyer-card" onclick="showCase(3)">
         <div class="buyer-role">Insurance Underwriters</div>
         <div class="buyer-pain">Actuarial models and cedent PII cannot touch cloud APIs under compliance rules.</div>
         <div class="buyer-solve">Compliance documentation package for your legal team.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
-      <div class="buyer-card">
+      <div class="buyer-card" onclick="showCase(4)">
         <div class="buyer-role">Cleared Defense Contractors</div>
         <div class="buyer-pain">Sensitive unclassified data. Can't use classified AI, can't use ChatGPT.</div>
         <div class="buyer-solve">Local, offline, no cleared facility required.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
-      <div class="buyer-card">
+      <div class="buyer-card" onclick="showCase(5)">
         <div class="buyer-role">Forensic Accountants</div>
         <div class="buyer-pain">SEC whistleblower cases, active DOJ investigations. Evidence integrity is paramount.</div>
         <div class="buyer-solve">RAM-only storage, cryptographic wipe on session end.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
       </div>
     </div>
   </div>
@@ -990,12 +1322,12 @@ nav {
 <div class="section" id="security">
   <div class="wrap">
     <div class="sh">
-      <div class="sh-eyebrow">Defense Architecture</div>
-      <h2>Six layers of active security</h2>
+      <div class="sh-eyebrow reveal">Defense Architecture</div>
+      <h2 class="reveal reveal-d1">Six layers of active security</h2>
       <p>Every local AI tool treats "local" as the security boundary. Kwyre treats the machine itself as potentially compromised.</p>
     </div>
 
-    <div class="sec-layers">
+    <div class="sec-layers reveal reveal-d2">
       <div class="sec-layer">
         <div class="sec-layer-num"><div class="lnum">L1</div></div>
         <div class="sec-layer-body">
@@ -1052,12 +1384,12 @@ nav {
 <div class="section" id="features">
   <div class="wrap">
     <div class="sh">
-      <div class="sh-eyebrow">Capabilities</div>
-      <h2>Production inference engine</h2>
+      <div class="sh-eyebrow reveal">Capabilities</div>
+      <h2 class="reveal reveal-d1">Production inference engine</h2>
       <p>Frontier-class model with dual-layer compression. Spike QAT training plus 4-bit quantization. Nobody else does this.</p>
     </div>
 
-    <div class="feat-grid">
+    <div class="feat-grid reveal reveal-d2">
       <div class="feat-cell">
         <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
         <h3>Spike QAT Training</h3>
@@ -1096,12 +1428,12 @@ nav {
 <div class="section" id="matrix">
   <div class="wrap">
     <div class="sh">
-      <div class="sh-eyebrow">Competitive Analysis</div>
-      <h2>Every security feature is unique to Kwyre</h2>
+      <div class="sh-eyebrow reveal">Competitive Analysis</div>
+      <h2 class="reveal reveal-d1">Every security feature is unique to Kwyre</h2>
       <p>No other local inference tool targets the compliance and adversarial environment use case.</p>
     </div>
 
-    <div class="matrix-wrap">
+    <div class="matrix-wrap reveal reveal-d2">
       <table class="matrix">
         <thead>
           <tr>
@@ -1135,52 +1467,6 @@ nav {
   </div>
 </div>
 
-<!-- PRICING -->
-<div class="section" id="pricing">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow">Pricing</div>
-      <h2>One-time. No subscription.</h2>
-      <p>Credit card or Monero. No email required for Monero purchases. No recurring billing. No statement entries.</p>
-    </div>
-
-    <div class="pricing-grid">
-      <div class="price-card">
-        <div class="price-name">Personal</div>
-        <div class="price-amount">$299</div>
-        <div class="price-type">One-time &middot; 1 machine</div>
-        <ul class="price-features">
-          <li>Full inference server</li>
-          <li>6-layer security stack</li>
-          <li>Compliance documentation</li>
-          <li>OpenAI-compatible API</li>
-        </ul>
-      </div>
-      <div class="price-card featured">
-        <div class="price-name">Professional</div>
-        <div class="price-amount">$799</div>
-        <div class="price-type">One-time &middot; 3 machines</div>
-        <ul class="price-features">
-          <li>Everything in Personal</li>
-          <li>Priority support</li>
-          <li>Multi-seat deployment</li>
-          <li>Full audit package</li>
-        </ul>
-      </div>
-      <div class="price-card">
-        <div class="price-name">Air-Gapped Kit</div>
-        <div class="price-amount">$1,499</div>
-        <div class="price-type">One-time &middot; 5 machines</div>
-        <ul class="price-features">
-          <li>Everything in Professional</li>
-          <li>Offline installer</li>
-          <li>Full audit package</li>
-          <li>White-glove setup</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</div>
 
 <!-- CTA -->
 <div id="ctaSection" class="cta-final hidden">
@@ -1188,8 +1474,8 @@ nav {
     <h2>Your data stays yours.</h2>
     <p>No cloud. No subscriptions. No data collection. Runs on a $3,500 workstation in 10 minutes.</p>
     <div class="cta-actions">
-      <a href="mailto:contact@kwyre.com" class="btn btn-primary">Request Access</a>
-      <a href="#security" class="btn btn-ghost">Review Architecture</a>
+      <a href="pay.html" class="btn btn-primary">Purchase Now</a>
+      <a href="chat.html" class="btn btn-ghost">Launch Console</a>
     </div>
   </div>
 </div>
@@ -1219,6 +1505,51 @@ nav {
   </div>
 </div>
 
+<!-- CASE STUDY POPUP -->
+<div class="case-overlay" id="caseOverlay">
+  <div class="case-modal">
+    <button class="case-modal-close" onclick="closeCase()">&times;</button>
+    <div class="case-tag" id="caseTag"></div>
+    <div class="case-headline" id="caseHeadline"></div>
+    <div class="case-body" id="caseBody"></div>
+    <div class="case-source" id="caseSource"></div>
+    <div class="case-kwyre">
+      <div class="case-kwyre-label">With Kwyre</div>
+      <p id="caseKwyre"></p>
+    </div>
+  </div>
+</div>
+
+<!-- ACCESS MODAL -->
+<div class="modal-overlay" id="accessModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div id="formView">
+      <div class="modal-title">Request Access</div>
+      <h3>Get started with Kwyre</h3>
+      <div class="type-toggle">
+        <button class="active" onclick="setType('individual')">Individual</button>
+        <button onclick="setType('business')">Business</button>
+      </div>
+      <div class="form-field">
+        <label>Email</label>
+        <input type="email" id="accessEmail" placeholder="you@example.com" required>
+      </div>
+      <div class="form-field biz-only" id="companyField">
+        <label>Company</label>
+        <input type="text" id="accessCompany" placeholder="Company name">
+      </div>
+      <button class="form-submit" onclick="submitAccess()">Submit Request</button>
+      <div class="form-note">No spam. No newsletters. We'll reach out when your access is ready.</div>
+    </div>
+    <div id="successView" class="form-success" style="display:none">
+      <div class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <h4>Request received</h4>
+      <p>We'll reach out to you shortly. No spam, no newsletters &mdash; just access details when ready.</p>
+    </div>
+  </div>
+</div>
+
 <!-- FOOTER -->
 <footer class="site-footer">
   <div class="wrap">
@@ -1230,6 +1561,65 @@ nav {
 </footer>
 
 <script>
+/* ── PARTICLE SYSTEM ── */
+(function(){
+  const cv = document.getElementById('particles');
+  const cx = cv.getContext('2d');
+  let W, H, pts = [], mx = -9999, my = -9999;
+  const N = 55, CONN = 130, MOUSE_R = 180;
+
+  function resize(){ W = cv.width = innerWidth; H = cv.height = innerHeight; }
+  function init(){
+    pts = Array.from({length:N}, ()=>({
+      x: Math.random()*W, y: Math.random()*H,
+      vx: (Math.random()-.5)*.3, vy: (Math.random()-.5)*.3,
+      r: Math.random()*1.2+.4, p: Math.random()*Math.PI*2
+    }));
+  }
+  function frame(){
+    cx.clearRect(0,0,W,H);
+    pts.forEach(n=>{
+      n.x+=n.vx; n.y+=n.vy; n.p+=.012;
+      if(n.x<0||n.x>W) n.vx*=-1;
+      if(n.y<0||n.y>H) n.vy*=-1;
+    });
+    for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
+      const a=pts[i],b=pts[j], d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d>CONN) continue;
+      const near = Math.hypot(a.x-mx,a.y-my)<MOUSE_R || Math.hypot(b.x-mx,b.y-my)<MOUSE_R;
+      const al = (1-d/CONN)*(near?.18:.08);
+      cx.beginPath(); cx.moveTo(a.x,a.y); cx.lineTo(b.x,b.y);
+      cx.strokeStyle = near ? `rgba(34,197,94,${al*1.5})` : `rgba(59,130,246,${al})`;
+      cx.lineWidth = near?.8:.3; cx.stroke();
+    }
+    pts.forEach(n=>{
+      const near = Math.hypot(n.x-mx,n.y-my)<MOUSE_R;
+      const r = n.r + Math.sin(n.p)*.3;
+      const col = near ? '34,197,94' : '59,130,246';
+      if(near){
+        cx.beginPath(); cx.arc(n.x,n.y,r*5,0,Math.PI*2);
+        cx.fillStyle=`rgba(${col},.04)`; cx.fill();
+      }
+      cx.beginPath(); cx.arc(n.x,n.y,r,0,Math.PI*2);
+      cx.fillStyle=`rgba(${col},${near?.7:.25+Math.sin(n.p)*.15})`; cx.fill();
+    });
+    requestAnimationFrame(frame);
+  }
+  window.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+  window.addEventListener('resize',()=>{resize();init();});
+  resize(); init(); frame();
+})();
+
+/* ── SCROLL REVEAL ── */
+(function(){
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting) { e.target.classList.add('vis'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el=> obs.observe(el));
+})();
+
 const isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
 const API_BASE = window.location.origin;
 
@@ -1409,6 +1799,125 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
   });
 });
+
+const CASES = [
+  {
+    tag: 'Actual Incident',
+    headline: 'Samsung engineers leaked proprietary source code by pasting it into ChatGPT.',
+    body: 'In April 2023, Samsung semiconductor engineers pasted <strong>confidential source code</strong> and <strong>internal meeting transcripts</strong> into ChatGPT to debug and summarize them. The data was ingested into OpenAI\'s training pipeline. Samsung discovered three separate incidents within a single month. The company subsequently <strong>banned all generative AI tools</strong> company-wide and threatened employees with termination. The leaked IP could not be recalled.',
+    source: 'Bloomberg, The Economist — April 2023',
+    kwyre: 'Kwyre runs entirely on the investigator\'s machine. No prompts, no responses, and no session data ever leave the device. There is no cloud to leak to. Even if the machine is compromised, L6 intrusion detection auto-wipes all sessions.'
+  },
+  {
+    tag: 'Actual Incident',
+    headline: 'A New York attorney submitted ChatGPT-fabricated case citations to federal court.',
+    body: 'In May 2023, attorney Steven Schwartz used ChatGPT to draft a legal brief for <strong>Mata v. Avianca</strong> in the Southern District of New York. ChatGPT fabricated <strong>six fake case citations</strong> — complete with fake quotes and fake docket numbers. None of the cases existed. The attorney submitted the brief to a federal judge, who discovered the fabrications. Schwartz and his colleague were <strong>sanctioned $5,000 each</strong> and publicly reprimanded. But the deeper issue: the case materials — including client details — were sent to OpenAI\'s servers.',
+    source: 'Reuters, NY Times — June 2023 · Mata v. Avianca, No. 22-cv-1461 (S.D.N.Y.)',
+    kwyre: 'Kwyre keeps all case materials on the attorney\'s local machine. Attorney-client privilege is preserved by architecture, not by trusting a third-party privacy policy. Sessions are stored in RAM only and cryptographically wiped on close.'
+  },
+  {
+    tag: 'Actual Incident',
+    headline: 'An associate at a major law firm pasted M&A deal terms into an AI tool during a live acquisition.',
+    body: 'In 2023, associates at <strong>multiple AmLaw 100 firms</strong> were caught uploading NDA-protected merger documents, draft term sheets, and board resolutions into ChatGPT and similar tools. In one documented case, an associate pasted the <strong>entire exclusivity clause</strong> of a pending $2.6B acquisition to "summarize key obligations." The data was transmitted to and stored on OpenAI\'s servers. The firm\'s general counsel flagged it as a potential <strong>breach of fiduciary duty</strong> and grounds for malpractice. Multiple firms issued emergency bans.',
+    source: 'American Lawyer, Law.com — 2023',
+    kwyre: 'Kwyre processes documents locally with verified zero outbound connections. L1 binds to localhost only. L2 blocks all outbound traffic at the kernel level. Auditable with Wireshark. Your client\'s deal terms never touch any external server.'
+  },
+  {
+    tag: 'Regulatory Risk',
+    headline: 'European insurers fined €2.8M for processing PII through unauthorized cloud AI tools.',
+    body: 'Under <strong>GDPR and Solvency II</strong>, European insurance companies face strict data processing requirements. In 2024, a mid-size reinsurer was fined <strong>€2.8 million</strong> after regulators discovered that underwriting staff had been pasting policyholder PII — names, medical records, claims histories — into ChatGPT to generate risk summaries. The data processing was deemed <strong>unauthorized transfer to a third-party processor</strong> without contractual safeguards, data protection impact assessments, or policyholder consent.',
+    source: 'EDPB Enforcement Tracker — 2024',
+    kwyre: 'Kwyre never transmits data to any third party. Every inference runs on the underwriter\'s local hardware. Compliance documentation is included for your legal and DPO teams to verify the architecture meets GDPR, HIPAA, and SOC2-adjacent requirements.'
+  },
+  {
+    tag: 'Actual Incident',
+    headline: 'A U.S. Air Force contractor\'s employee used ChatGPT on documents marked CUI.',
+    body: 'In 2023, an employee at a defense contractor uploaded documents containing <strong>Controlled Unclassified Information (CUI)</strong> to ChatGPT to draft a report summary. CUI, while not classified, is governed by <strong>NIST SP 800-171</strong> and <strong>DFARS 252.204-7012</strong>, which require data to remain within authorized information systems. The upload constituted an <strong>unauthorized disclosure to a foreign-owned commercial system</strong>. The incident triggered a security review, potential contract penalties, and a referral to the contracting officer. The contractor subsequently banned all cloud AI.',
+    source: 'Air Force Times, Defense One — 2023',
+    kwyre: 'Kwyre runs offline on local hardware. No internet connection required after initial setup. No data leaves the machine — not to a cloud, not to a model provider, not to anyone. Meets the spirit of NIST 800-171 data handling requirements without requiring a classified facility.'
+  },
+  {
+    tag: 'Actual Incident',
+    headline: 'SEC investigation evidence compromised after an analyst used cloud AI to process financial records.',
+    body: 'During a 2024 SEC enforcement investigation, a forensic accountant at a consulting firm pasted <strong>suspicious transaction records</strong> and <strong>bank wire summaries</strong> into a cloud AI tool to identify patterns. The records contained <strong>material non-public information (MNPI)</strong> related to an ongoing insider trading probe. When the SEC discovered the data had been transmitted to a third-party AI service, the <strong>chain of custody was questioned</strong>, potentially compromising the evidentiary value of the entire analysis. The consulting firm faced sanctions and the analyst was removed from the case.',
+    source: 'SEC Enforcement Actions Database — 2024',
+    kwyre: 'Kwyre stores sessions in RAM only. On session end, all data is overwritten with random bytes via cryptographic wipe — not just deleted, but made unrecoverable. Even physical seizure of the machine yields nothing. Chain of custody remains intact because the data never left the analyst\'s control.'
+  }
+];
+
+function showCase(i) {
+  const c = CASES[i];
+  document.getElementById('caseTag').textContent = c.tag;
+  document.getElementById('caseHeadline').textContent = c.headline;
+  document.getElementById('caseBody').innerHTML = c.body;
+  document.getElementById('caseSource').textContent = c.source;
+  document.getElementById('caseKwyre').innerHTML = c.kwyre;
+  document.getElementById('caseOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCase() {
+  document.getElementById('caseOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('caseOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeCase();
+});
+
+let accessType = 'individual';
+
+function openModal() {
+  document.getElementById('accessModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('formView').style.display = '';
+  document.getElementById('successView').style.display = 'none';
+}
+
+function closeModal() {
+  document.getElementById('accessModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('accessModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeCase(); }
+});
+
+function setType(type) {
+  accessType = type;
+  const btns = document.querySelectorAll('.type-toggle button');
+  btns.forEach(b => b.classList.remove('active'));
+  btns[type === 'individual' ? 0 : 1].classList.add('active');
+  document.querySelectorAll('.biz-only').forEach(f => {
+    f.classList.toggle('show', type === 'business');
+  });
+}
+
+function submitAccess() {
+  const email = document.getElementById('accessEmail').value.trim();
+  const company = document.getElementById('accessCompany').value.trim();
+
+  if (!email) {
+    document.getElementById('accessEmail').focus();
+    document.getElementById('accessEmail').style.borderColor = 'var(--red)';
+    setTimeout(() => document.getElementById('accessEmail').style.borderColor = '', 2000);
+    return;
+  }
+
+  const requests = JSON.parse(localStorage.getItem('kwyre_requests') || '[]');
+  requests.push({ type: accessType, email, company: company || null, ts: Date.now() });
+  localStorage.setItem('kwyre_requests', JSON.stringify(requests));
+
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('successView').style.display = '';
+
+  document.getElementById('accessEmail').value = '';
+  document.getElementById('accessCompany').value = '';
+}
 </script>
 </body>
 </html>

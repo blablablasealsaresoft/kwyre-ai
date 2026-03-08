@@ -1,24 +1,75 @@
-# Model weights are mounted at runtime — never baked into image.
-# Set HF_CACHE to your HuggingFace cache path (e.g. C:\Users\...\.cache\huggingface on Windows).
+# Kwyre AI — single-command production deployment
+# Usage:  docker compose up          (foreground)
+#         docker compose up -d       (detached)
+#
+# Model weights are downloaded on first run and cached in the HF_CACHE volume.
+# They are NEVER baked into the image.
+
 services:
   kwyre:
     build: .
     container_name: kwyre-inference
-    runtime: nvidia
+    env_file: .env
+
     environment:
-      - NVIDIA_VISIBLE_DEVICES=0
+      # GPU visibility (comma-separated IDs for multi-GPU, e.g. "0,1")
+      - NVIDIA_VISIBLE_DEVICES=${NVIDIA_VISIBLE_DEVICES:-0}
+
+      # API authentication — colon-separated key:role pairs, semicolon between entries
       - KWYRE_API_KEYS=${KWYRE_API_KEYS:-sk-kwyre-dev-local:admin}
-      - HF_HUB_OFFLINE=1
-      - TRANSFORMERS_OFFLINE=1
+
+      # Model configuration
+      - KWYRE_MODEL=${KWYRE_MODEL:-Qwen/Qwen3.5-9B}
+      - KWYRE_QUANT=${KWYRE_QUANT:-nf4}
+      - KWYRE_SPECULATIVE=${KWYRE_SPECULATIVE:-1}
+      - KWYRE_MERGE_LORA=${KWYRE_MERGE_LORA:-0}
+
+      # License key (commercial deployments)
+      - KWYRE_LICENSE_KEY=${KWYRE_LICENSE_KEY:-}
+
+      # Skip L3 dep check in Docker (container IS the controlled environment)
+      - KWYRE_SKIP_DEP_CHECK=1
+
+      # Disable torch.compile (not needed for inference, avoids dynamo bugs)
+      - TORCHDYNAMO_DISABLE=1
+
+      # Network binding — always 0.0.0.0 inside the container;
+      # external access is restricted by the ports mapping below.
       - KWYRE_BIND_HOST=0.0.0.0
+
     ports:
+      # Bind to loopback only — not exposed to the network
       - "127.0.0.1:8000:8000"
+
     volumes:
-      # Model weights: read-only mount of HuggingFace cache
-      - ${HF_CACHE:-~/.cache/huggingface}:/root/.cache/huggingface:ro
+      # HuggingFace model cache (read-write so first-run download persists)
+      - ${HF_CACHE:-./.cache/huggingface}:/root/.cache/huggingface
+      # QAT / LoRA adapters (read-only; optional)
+      - ${QAT_PATH:-./qat_output_v1/final}:/workspace/qat_output_v1/final:ro
+      # License key file (read-only; optional — uncomment if you have a license)
+      # - ./kwyre.license:/workspace/kwyre.license:ro
+
+    # Modern compose GPU reservation (replaces deprecated "runtime: nvidia")
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+
+    shm_size: '8gb'
     restart: unless-stopped
+
     healthcheck:
       test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
+      start_period: 120s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"

@@ -1254,7 +1254,7 @@ if (isLocal) {
 
 apiKeyInput.addEventListener('input', () => {
   const key = apiKeyInput.value.trim();
-  if (key.startsWith('sk-kwyre-') && key.length > 20) {
+  if (key.startsWith('sk-kwyre-') && key.length >= 14) {
     localStorage.setItem('kwyre_api_key', key);
     validateKey(key);
   } else {

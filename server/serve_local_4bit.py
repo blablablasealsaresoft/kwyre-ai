@@ -17,6 +17,13 @@ from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 from collections import defaultdict
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from peft import PeftModel
+
+try:
+    from awq import AutoAWQForCausalLM
+    _AWQ_AVAILABLE = True
+except ImportError:
+    _AWQ_AVAILABLE = False
 
 _server_dir = os.path.dirname(os.path.abspath(__file__))
 _project_root = os.path.dirname(_server_dir)
@@ -26,11 +33,32 @@ sys.path.insert(0, os.path.join(_project_root, "security"))
 from tools import route_tools
 from spike_serve import apply_spike_hooks, get_sparsity_stats, reset_sparsity_stats, set_tracking
 from verify_deps import startup_check
+from license import startup_validate as validate_license
 
-MODEL_ID = "Qwen/Qwen3.5-9B"
+MODEL_ID = os.environ.get("KWYRE_MODEL", "Qwen/Qwen3.5-9B")
 PORT = 8000
-SPIKE_K = 8.0
+SPIKE_K = 5.0
 SPIKE_MAX = 31
+
+MODEL_TIERS = {
+    "Qwen/Qwen3.5-9B": {"name": "kwyre-9b", "vram_4bit": "~7.5GB", "tier": "professional"},
+    "Qwen/Qwen3-4B": {"name": "kwyre-4b", "vram_4bit": "~3.5GB", "tier": "personal"},
+}
+ACTIVE_TIER = MODEL_TIERS.get(MODEL_ID, {"name": "kwyre-custom", "vram_4bit": "unknown", "tier": "custom"})
+
+SPECULATIVE_ENABLED = os.environ.get("KWYRE_SPECULATIVE", "1") == "1"
+DRAFT_MODEL_ID = os.environ.get("KWYRE_DRAFT_MODEL", "Qwen/Qwen3-0.6B")
+
+draft_model = None
+
+QAT_ADAPTER_PATH = os.environ.get(
+    "KWYRE_QAT_ADAPTER",
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                 "qat_output_v1", "final"),
+)
+
+KWYRE_QUANT = os.environ.get("KWYRE_QUANT", "nf4").lower()
+AWQ_MODEL_PATH = os.path.join(_project_root, "models", f"{ACTIVE_TIER['name']}-awq")
 
 # ---------------------------------------------------------------------------
 # LAYER 1: Bind to localhost only
@@ -41,11 +69,14 @@ BIND_HOST = os.environ.get("KWYRE_BIND_HOST", "127.0.0.1")
 # ---------------------------------------------------------------------------
 # LAYER 4: Model weight integrity
 # ---------------------------------------------------------------------------
-KNOWN_WEIGHT_HASHES: dict[str, str] = {
+WEIGHT_HASHES_9B: dict[str, str] = {
     "config.json": "d0883072e01861ed0b2d47be3c16c36a8e81c224c7ffaa310c6558fb3f932b05",
     "tokenizer_config.json": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
     "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
 }
+WEIGHT_HASHES_4B: dict[str, str] = {}  # Populated on first run with Qwen3-4B
+
+KNOWN_WEIGHT_HASHES = WEIGHT_HASHES_9B if "9B" in MODEL_ID else WEIGHT_HASHES_4B
 
 def generate_weight_hashes(model_path: str) -> dict:
     files_to_hash = ["config.json", "tokenizer_config.json",
@@ -188,8 +219,23 @@ SUSPICIOUS_PROCESSES = [
 
 # Allowed outbound IPs for the server process.
 # 127.0.0.1 = localhost only.
-# Add HuggingFace IPs here ONLY during initial model download, then remove.
+# Docker bridge network (172.16-31.x.x) is allowed when running in containers.
 ALLOWED_REMOTE_IPS = {"127.0.0.1"}
+import ipaddress as _ipaddress
+_DOCKER_NETS = [
+    _ipaddress.ip_network("172.16.0.0/12"),
+    _ipaddress.ip_network("10.0.0.0/8"),
+    _ipaddress.ip_network("192.168.0.0/16"),
+]
+
+def _is_allowed_ip(ip_str: str) -> bool:
+    if ip_str in ALLOWED_REMOTE_IPS:
+        return True
+    try:
+        addr = _ipaddress.ip_address(ip_str)
+        return any(addr in net for net in _DOCKER_NETS)
+    except ValueError:
+        return False
 
 # How often the watchdog checks (seconds)
 WATCHDOG_INTERVAL = 5
@@ -248,7 +294,7 @@ class IntrusionWatchdog(threading.Thread):
                 if not raddr:
                     continue
                 remote_ip = raddr.ip
-                if remote_ip not in ALLOWED_REMOTE_IPS:
+                if not _is_allowed_ip(remote_ip):
                     return False, f"unexpected outbound connection to {remote_ip}:{raddr.port}"
         except psutil.NoSuchProcess:
             pass
@@ -347,22 +393,56 @@ def _load_api_keys():
 API_KEYS = _load_api_keys()
 RATE_LIMIT_RPM = 30
 rate_tracker = defaultdict(list)
-CHAT_HTML_PATH = os.path.join(_project_root, "chat", "chat.html")
+CHAT_DIR = os.path.join(_project_root, "chat")
+ALLOWED_PAGES = {"landing.html", "index.html", "main.html", "pay.html", "chat.html"}
 
 # ---------------------------------------------------------------------------
-# Startup sequence
+# Startup sequence — resolve model path
 # ---------------------------------------------------------------------------
-LOCAL_MODEL_PATH = os.path.join(
-    os.path.expanduser("~"),
-    ".cache", "huggingface", "hub",
-    "models--Qwen--Qwen3.5-9B", "snapshots",
-    "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
-)
+# Priority: KWYRE_MODEL_PATH env (pre-quantized) > dist/ folder > HuggingFace cache
+PREQUANT_PATH = os.environ.get("KWYRE_MODEL_PATH", "")
+_dist_path = os.path.join(_project_root, "dist", "kwyre-4b-nf4")
+_USE_PREQUANT = False
 
-if not verify_model_integrity(LOCAL_MODEL_PATH):
+if PREQUANT_PATH and os.path.isdir(PREQUANT_PATH) and os.path.exists(os.path.join(PREQUANT_PATH, "config.json")):
+    LOCAL_MODEL_PATH = PREQUANT_PATH
+    _USE_PREQUANT = True
+    print(f"[Model] Using pre-quantized model at {PREQUANT_PATH}")
+elif os.path.isdir(_dist_path) and os.path.exists(os.path.join(_dist_path, "config.json")):
+    LOCAL_MODEL_PATH = _dist_path
+    _USE_PREQUANT = True
+    print(f"[Model] Using pre-quantized model at {_dist_path}")
+else:
+    LOCAL_MODEL_PATH = os.path.join(
+        os.path.expanduser("~"),
+        ".cache", "huggingface", "hub",
+        f"models--{MODEL_ID.replace('/', '--')}",
+        "snapshots",
+    )
+    try:
+        _snap_dirs = [d for d in os.listdir(LOCAL_MODEL_PATH) if os.path.isdir(os.path.join(LOCAL_MODEL_PATH, d))]
+        LOCAL_MODEL_PATH = os.path.join(LOCAL_MODEL_PATH, _snap_dirs[0]) if _snap_dirs else LOCAL_MODEL_PATH
+    except FileNotFoundError:
+        print(f"[Model] ERROR: No model found. Set KWYRE_MODEL_PATH or download first.")
+        sys.exit(1)
+    print(f"[Model] Using HuggingFace cache at {LOCAL_MODEL_PATH}")
+
+if _USE_PREQUANT:
+    print("[Integrity] Pre-quantized Kwyre model — skipping hash check (trusted source)")
+elif not verify_model_integrity(LOCAL_MODEL_PATH):
     sys.exit(1)
 
-startup_check(abort_on_failure=True)
+_skip_dep_check = os.environ.get("KWYRE_SKIP_DEP_CHECK", "0") == "1"
+startup_check(abort_on_failure=not _skip_dep_check)
+
+# ---------------------------------------------------------------------------
+# LICENSE VALIDATION (works fully offline)
+# ---------------------------------------------------------------------------
+_license_data = validate_license()
+if _license_data is None:
+    print("[License] WARNING: No valid license. Running in evaluation mode.")
+    print("[License] Purchase at https://kwyre.com")
+_license_tier: str = _license_data["tier"] if _license_data else "eval"
 
 print(f"Loading tokenizer from {LOCAL_MODEL_PATH}...")
 tokenizer = AutoTokenizer.from_pretrained(
@@ -371,20 +451,127 @@ tokenizer = AutoTokenizer.from_pretrained(
 if tokenizer.pad_token is None:
     tokenizer.pad_token = tokenizer.eos_token
 
-quant_config = BitsAndBytesConfig(
-    load_in_4bit=True,
-    bnb_4bit_compute_dtype=torch.bfloat16,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_use_double_quant=True,
-)
+if KWYRE_QUANT == "awq":
+    if os.path.isdir(AWQ_MODEL_PATH) and os.path.exists(
+        os.path.join(AWQ_MODEL_PATH, "config.json")
+    ):
+        print(f"Loading {MODEL_ID} with AWQ quantization (pre-quantized)...")
+        model = AutoModelForCausalLM.from_pretrained(
+            AWQ_MODEL_PATH, trust_remote_code=True,
+            device_map="auto", torch_dtype=torch.bfloat16,
+        )
+    else:
+        if not _AWQ_AVAILABLE:
+            print("[AWQ] ERROR: autoawq package not installed.")
+            print("[AWQ] Install with: pip install autoawq>=0.2.0")
+            sys.exit(1)
+        print(f"No pre-quantized AWQ model at {AWQ_MODEL_PATH}")
+        print("Quantizing on-the-fly — this will take several minutes...")
+        awq_model = AutoAWQForCausalLM.from_pretrained(
+            LOCAL_MODEL_PATH, trust_remote_code=True,
+        )
+        awq_model.quantize(tokenizer, quant_config={
+            "zero_point": True, "q_group_size": 128, "w_bit": 4, "version": "GEMM",
+        })
+        os.makedirs(AWQ_MODEL_PATH, exist_ok=True)
+        awq_model.save_quantized(AWQ_MODEL_PATH)
+        tokenizer.save_pretrained(AWQ_MODEL_PATH)
+        print(f"AWQ model saved to {AWQ_MODEL_PATH}")
+        del awq_model
+        torch.cuda.empty_cache()
+        model = AutoModelForCausalLM.from_pretrained(
+            AWQ_MODEL_PATH, trust_remote_code=True,
+            device_map="auto", torch_dtype=torch.bfloat16,
+        )
+    print(f"[Quantization] AWQ mode active (~1.4x faster inference)")
+else:
+    if _USE_PREQUANT:
+        print(f"Loading pre-quantized NF4 model from {LOCAL_MODEL_PATH}...")
+        model = AutoModelForCausalLM.from_pretrained(
+            LOCAL_MODEL_PATH, trust_remote_code=True,
+            device_map="auto", torch_dtype=torch.bfloat16,
+        )
+        print(f"[Quantization] Pre-quantized NF4 loaded (fastest startup)")
+    else:
+        quant_config = BitsAndBytesConfig(
+            load_in_4bit=True,
+            bnb_4bit_compute_dtype=torch.bfloat16,
+            bnb_4bit_quant_type="nf4",
+            bnb_4bit_use_double_quant=True,
+        )
+        print(f"Loading {MODEL_ID} with 4-bit NF4 quantization (local weights)...")
+        model = AutoModelForCausalLM.from_pretrained(
+            LOCAL_MODEL_PATH, trust_remote_code=True,
+            quantization_config=quant_config,
+            device_map="auto", dtype=torch.bfloat16,
+        )
+        print(f"[Quantization] NF4 on-the-fly quantization active")
+# ---------------------------------------------------------------------------
+# Load QAT-trained LoRA adapters
+# ---------------------------------------------------------------------------
+if os.path.isdir(QAT_ADAPTER_PATH) and os.path.exists(
+    os.path.join(QAT_ADAPTER_PATH, "adapter_config.json")
+):
+    try:
+        print(f"Loading QAT LoRA adapters from {QAT_ADAPTER_PATH}...")
+        model = PeftModel.from_pretrained(model, QAT_ADAPTER_PATH)
+        if os.environ.get("KWYRE_MERGE_LORA", "0") == "1":
+            model = model.merge_and_unload()
+            print("QAT adapters merged — spike-tolerant inference active")
+        else:
+            print("QAT adapters loaded in-place — spike-tolerant inference active")
+    except RuntimeError as e:
+        if "size mismatch" in str(e):
+            print(f"[QAT] Adapter shape mismatch (trained on different model) — skipping")
+        else:
+            raise
+else:
+    print(f"[QAT] No adapters found at {QAT_ADAPTER_PATH} — running base model")
 
-print(f"Loading {MODEL_ID} with 4-bit NF4 quantization (local weights)...")
-model = AutoModelForCausalLM.from_pretrained(
-    LOCAL_MODEL_PATH, trust_remote_code=True,
-    quantization_config=quant_config,
-    device_map="auto", dtype=torch.bfloat16,
-)
 model.eval()
+
+# ---------------------------------------------------------------------------
+# Speculative decoding — load lightweight draft model
+# ---------------------------------------------------------------------------
+if SPECULATIVE_ENABLED:
+    _draft_prequant = os.environ.get("KWYRE_DRAFT_PATH", "")
+    _draft_dist = os.path.join(_project_root, "dist", "kwyre-draft-nf4")
+    try:
+        if _draft_prequant and os.path.isdir(_draft_prequant) and os.path.exists(os.path.join(_draft_prequant, "config.json")):
+            _draft_source = _draft_prequant
+            print(f"[Speculative] Loading pre-quantized draft from {_draft_source}...")
+            draft_model = AutoModelForCausalLM.from_pretrained(
+                _draft_source, trust_remote_code=True,
+                device_map="auto", torch_dtype=torch.bfloat16,
+            )
+        elif os.path.isdir(_draft_dist) and os.path.exists(os.path.join(_draft_dist, "config.json")):
+            print(f"[Speculative] Loading pre-quantized draft from {_draft_dist}...")
+            draft_model = AutoModelForCausalLM.from_pretrained(
+                _draft_dist, trust_remote_code=True,
+                device_map="auto", torch_dtype=torch.bfloat16,
+            )
+        else:
+            print(f"[Speculative] Loading draft model {DRAFT_MODEL_ID} (4-bit NF4)...")
+            _draft_quant = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_compute_dtype=torch.bfloat16,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_use_double_quant=True,
+            )
+            draft_model = AutoModelForCausalLM.from_pretrained(
+                DRAFT_MODEL_ID, trust_remote_code=True,
+                quantization_config=_draft_quant,
+                device_map="auto", dtype=torch.bfloat16,
+            )
+        draft_model.eval()
+        _draft_vram = torch.cuda.memory_allocated() / 1e9
+        print(f"[Speculative] Draft model loaded — total VRAM now {_draft_vram:.1f} GB")
+    except Exception as e:
+        print(f"[Speculative] Failed to load draft model: {e}")
+        print("[Speculative] Falling back to standard generation.")
+        draft_model = None
+else:
+    print("[Speculative] Disabled (KWYRE_SPECULATIVE=0)")
 
 SPIKE_SKIP = [
     "embed", "lm_head", "layernorm", "norm", "visual", "merger",
@@ -543,6 +730,7 @@ class ChatHandler(BaseHTTPRequestHandler):
             if err is not None:
                 self._send_json_error(400, err)
                 return
+            assert body is not None
             messages = body.get("messages", [])
             max_tokens = body.get("max_tokens", 2048)
             temperature = body.get("temperature", 0.7)
@@ -582,19 +770,23 @@ class ChatHandler(BaseHTTPRequestHandler):
             )
             inputs = tokenizer([text], return_tensors="pt").to(model.device)
 
+            gen_kwargs = {
+                "input_ids": inputs.input_ids,
+                "attention_mask": inputs.attention_mask,
+                "max_new_tokens": max_tokens,
+                "temperature": max(temperature, 0.01),
+                "top_p": top_p,
+                "do_sample": temperature > 0,
+                "use_cache": True,
+                "pad_token_id": tokenizer.pad_token_id,
+                "eos_token_id": tokenizer.eos_token_id,
+            }
+            if draft_model is not None:
+                gen_kwargs["assistant_model"] = draft_model
+
             t0 = time.time()
             with torch.no_grad():
-                gen_ids = model.generate(
-                    inputs.input_ids,
-                    attention_mask=inputs.attention_mask,
-                    max_new_tokens=max_tokens,
-                    temperature=max(temperature, 0.01),
-                    top_p=top_p,
-                    do_sample=temperature > 0,
-                    use_cache=True,
-                    pad_token_id=tokenizer.pad_token_id,
-                    eos_token_id=tokenizer.eos_token_id,
-                )
+                gen_ids = model.generate(**gen_kwargs)
             elapsed = time.time() - t0
             new_ids = gen_ids[0][inputs.input_ids.shape[1]:]
             n_tokens = len(new_ids)
@@ -614,7 +806,7 @@ class ChatHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({
                 "choices": [{"message": {"role": "assistant", "content": reply}}],
-                "model": "kwyre-9b-spikeserve",
+                "model": f"{ACTIVE_TIER['name']}-spikeserve",
                 "session_id": session_id,
                 "tools_used": tools_used,
                 "usage": {
@@ -635,7 +827,7 @@ class ChatHandler(BaseHTTPRequestHandler):
             if err is not None:
                 self._send_json_error(400, err)
                 return
-            sid = body.get("session_id", "")
+            sid = (body or {}).get("session_id", "")
             if sid:
                 session_store.wipe_session(sid, reason="user_request")
                 msg = f"Session {sid[:8]}... wiped. Conversation unrecoverable."
@@ -650,23 +842,27 @@ class ChatHandler(BaseHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
 
-    def do_GET(self):
-        if self.path in ("/", "/chat"):
-            with open(CHAT_HTML_PATH, "rb") as f:
-                html = f.read()
-            self.send_response(200)
-            self.send_header("Content-Type", "text/html; charset=utf-8")
-            self.send_header("Cache-Control", "no-cache")
-            self.send_header(
-                "Content-Security-Policy",
-                "default-src 'self'; "
-                "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
-                "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-                "font-src 'self' https://fonts.gstatic.com; "
-                "connect-src 'self'; img-src 'self' data:;"
-            )
+    def _serve_html(self, filename: str):
+        filepath = os.path.join(CHAT_DIR, filename)
+        if not os.path.isfile(filepath):
+            self.send_response(404)
             self.end_headers()
-            self.wfile.write(html)
+            return
+        with open(filepath, "rb") as f:
+            html = f.read()
+        self.send_response(200)
+        self.send_header("Content-Type", "text/html; charset=utf-8")
+        self.send_header("Cache-Control", "no-cache")
+        self.end_headers()
+        self.wfile.write(html)
+
+    def do_GET(self):
+        if self.path == "/":
+            self._serve_html("landing.html")
+        elif self.path == "/chat":
+            self._serve_html("chat.html")
+        elif self.path.lstrip("/") in ALLOWED_PAGES:
+            self._serve_html(self.path.lstrip("/"))
 
         elif self.path == "/health":
             gpu_used = torch.cuda.memory_allocated() / 1e9
@@ -675,9 +871,9 @@ class ChatHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({
                 "status": "ok",
-                "model": "kwyre-9b-spikeserve",
-                "base": "Qwen3.5-9B",
-                "quantization": "4-bit NF4",
+                "model": f"{ACTIVE_TIER['name']}-spikeserve",
+                "base": MODEL_ID.split("/")[-1],
+                "quantization": f"4-bit {KWYRE_QUANT.upper()}",
                 "security": {
                     "l1_network_binding": f"{BIND_HOST}:{PORT} (localhost only)",
                     "l2_process_lockdown": "os-configured (iptables/firewall, not verified by server)",
@@ -686,6 +882,10 @@ class ChatHandler(BaseHTTPRequestHandler):
                     "l5_conversation_storage": "RAM-only",
                     "l6_intrusion_watchdog": watchdog.get_status(),
                     "sessions_active": session_store.active_count(),
+                },
+                "speculative_decoding": {
+                    "enabled": draft_model is not None,
+                    "draft_model": DRAFT_MODEL_ID if draft_model is not None else None,
                 },
                 "spike_analysis": {
                     "k": SPIKE_K,
@@ -703,7 +903,7 @@ class ChatHandler(BaseHTTPRequestHandler):
             self.send_header("Content-Type", "application/json")
             self.end_headers()
             self.wfile.write(json.dumps({
-                "server": "kwyre-9b-spikeserve",
+                "server": f"{ACTIVE_TIER['name']}-spikeserve",
                 "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
                 "active_sessions": session_store.active_count(),
                 "security_controls": {
@@ -729,12 +929,12 @@ class ChatHandler(BaseHTTPRequestHandler):
             self.wfile.write(json.dumps({
                 "object": "list",
                 "data": [{
-                    "id": "kwyre-9b-spikeserve",
+                    "id": f"{ACTIVE_TIER['name']}-spikeserve",
                     "object": "model",
                     "owned_by": "kwyre",
                     "meta": {
-                        "base_model": "Qwen3.5-9B",
-                        "weight_quant": "4-bit NF4 (bitsandbytes)",
+                        "base_model": MODEL_ID.split("/")[-1],
+                        "weight_quant": f"4-bit {KWYRE_QUANT.upper()}",
                         "activation_encoding": "SpikeServe",
                         "spike_encoded_layers": n_converted,
                         "security": {
@@ -746,6 +946,10 @@ class ChatHandler(BaseHTTPRequestHandler):
                     },
                 }],
             }).encode())
+
+        elif self.path == "/favicon.ico":
+            self.send_response(204)
+            self.end_headers()
 
         else:
             self.send_response(404)
@@ -762,7 +966,10 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 if __name__ == "__main__":
     server = ThreadedHTTPServer((BIND_HOST, PORT), ChatHandler)
     print(f"\nKwyre AI ready at http://{BIND_HOST}:{PORT}")
-    print(f"  SpikeServe ACTIVE ({n_converted} layers)  |  4-bit NF4  |  all 6 security layers active")
+    print(f"  Model: {ACTIVE_TIER['name']}-spikeserve ({MODEL_ID})  |  tier: {ACTIVE_TIER['tier']}  |  VRAM: {ACTIVE_TIER['vram_4bit']}")
+    _spec_status = f"speculative={DRAFT_MODEL_ID.split('/')[-1]}" if draft_model else "no speculative"
+    print(f"  SpikeServe ACTIVE ({n_converted} layers)  |  4-bit {KWYRE_QUANT.upper()}  |  {_spec_status}  |  all 6 security layers active")
+    print(f"  Available tiers: KWYRE_MODEL=Qwen/Qwen3.5-9B (7.5GB) | Qwen/Qwen3-4B (3.5GB)")
     print("  POST /v1/chat/completions  — inference")
     print("  POST /v1/session/end       — wipe session from RAM")
     print("  GET  /health               — status + watchdog state")

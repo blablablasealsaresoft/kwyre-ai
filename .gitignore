@@ -14,3 +14,6 @@ build/
 server_out.txt
 alpaca_data.json
 .wrangler/
+.keys/
+*.license
+kwyre.license

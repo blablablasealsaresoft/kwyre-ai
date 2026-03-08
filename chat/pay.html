@@ -1,0 +1,952 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kwyre AI — Secure Payment</title>
+<meta name="description" content="Purchase Kwyre AI inference server. One-time payment. No subscription. Monero (XMR) accepted.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #05060a;
+  --surface: #0b0d14;
+  --surface2: #10131c;
+  --surface3: #161a27;
+  --border: #1c2033;
+  --border-hi: #2a3050;
+  --accent: #3b82f6;
+  --accent-dim: rgba(59,130,246,0.12);
+  --accent-glow: rgba(59,130,246,0.25);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --amber: #f59e0b;
+  --text: #e2e4ea;
+  --text2: #6b7294;
+  --text3: #3d4466;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Instrument Sans', -apple-system, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: #fff; }
+
+#particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+.grid-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.grid-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.06), transparent 70%);
+}
+
+.m-orb {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  filter: blur(120px);
+}
+.m-orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(59,130,246,0.07), transparent 70%);
+  top: -5%; left: -5%;
+  animation: m-orb-a 18s ease-in-out infinite alternate;
+}
+.m-orb-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(34,197,94,0.04), transparent 70%);
+  bottom: 10%; right: -8%;
+  animation: m-orb-b 22s ease-in-out infinite alternate;
+}
+.m-orb-3 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(59,130,246,0.05), transparent 70%);
+  top: 40%; left: 30%;
+  animation: m-orb-c 15s ease-in-out infinite alternate;
+}
+@keyframes m-orb-a { 0%{transform:translate(0,0)} 100%{transform:translate(60px,-40px)} }
+@keyframes m-orb-b { 0%{transform:translate(0,0)} 100%{transform:translate(-50px,30px)} }
+@keyframes m-orb-c { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(40px,50px) scale(1.15)} }
+
+.m-scanlines {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+}
+
+.m-noise {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+.m-sweep {
+  position: fixed; left: 0; right: 0; height: 1px; z-index: 0; pointer-events: none;
+  background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.15) 40%, rgba(59,130,246,0.08) 50%, rgba(59,130,246,0.15) 60%, transparent 100%);
+  animation: m-sweep-anim 6s ease-in-out infinite;
+  opacity: 0;
+}
+@keyframes m-sweep-anim {
+  0%   { top: -1px; opacity: 0; }
+  3%   { opacity: 0.7; }
+  97%  { opacity: 0.7; }
+  100% { top: 100vh; opacity: 0; }
+}
+
+.reveal {
+  opacity: 0; transform: translateY(32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.vis { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: 0.1s; }
+.reveal-d2 { transition-delay: 0.2s; }
+.reveal-d3 { transition-delay: 0.3s; }
+.reveal-d4 { transition-delay: 0.4s; }
+
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+.section { padding: 80px 0; }
+.section + .section { border-top: 1px solid var(--border); }
+
+/* --- NAV --- */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(5,6,10,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+
+.nav-brand {
+  font-family: var(--mono);
+  font-size: 13px; font-weight: 600;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--text); text-decoration: none;
+}
+.nav-brand span { color: var(--accent); }
+
+.nav-links { display: flex; gap: 32px; align-items: center; }
+
+.nav-links a {
+  font-size: 13px; font-weight: 500;
+  color: var(--text2); text-decoration: none;
+  letter-spacing: 0.3px; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--text); }
+
+.nav-cta {
+  font-family: var(--mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  padding: 8px 20px;
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-radius: 4px;
+  transition: box-shadow 0.2s, transform 0.1s !important;
+}
+.nav-cta:hover { box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-1px) !important; }
+
+/* --- HERO --- */
+.hero {
+  padding: 160px 0 80px;
+  text-align: center;
+  position: relative;
+}
+
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 28px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+}
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content: ''; width: 40px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent));
+}
+.hero-eyebrow::after { background: linear-gradient(90deg, var(--accent), transparent); }
+
+.hero h1 {
+  font-size: clamp(36px, 5.5vw, 64px);
+  font-weight: 700; line-height: 1.08;
+  letter-spacing: -1.5px; margin-bottom: 24px;
+  color: var(--text);
+}
+.hero h1 em { font-style: normal; color: var(--accent); }
+
+.hero-sub {
+  font-size: 18px; color: var(--text2);
+  max-width: 640px; margin: 0 auto;
+  line-height: 1.7; font-weight: 400;
+}
+.hero-sub strong { color: var(--text); font-weight: 600; }
+
+/* --- PRICING GRID --- */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 48px;
+}
+
+.price-card {
+  background: var(--surface);
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  transition: background 0.2s;
+  position: relative;
+}
+.price-card:hover { background: var(--surface2); }
+
+.price-card.featured {
+  background: var(--surface2);
+  box-shadow: inset 0 2px 0 var(--accent);
+}
+.price-card.featured::before {
+  content: 'MOST POPULAR';
+  position: absolute; top: 0; left: 0; right: 0;
+  font-family: var(--mono);
+  font-size: 9px; font-weight: 600;
+  letter-spacing: 2px; text-align: center;
+  color: var(--accent); padding: 6px;
+}
+
+.price-name {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text2); margin-bottom: 20px;
+}
+.price-card.featured .price-name { color: var(--accent); margin-top: 12px; }
+
+.price-amount {
+  font-size: 40px; font-weight: 700;
+  color: var(--text); margin-bottom: 4px;
+  letter-spacing: -1px;
+}
+
+.price-type {
+  font-size: 13px; color: var(--text3);
+  margin-bottom: 6px;
+}
+
+.price-license {
+  font-family: var(--mono);
+  font-size: 11px; color: var(--text2);
+  margin-bottom: 24px;
+  display: flex; align-items: center; gap: 6px;
+}
+.price-license .dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 6px rgba(34,197,94,0.4);
+}
+
+.price-features {
+  list-style: none; flex: 1;
+}
+
+.price-features li {
+  font-size: 13px; color: var(--text2);
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.price-features li:last-child { border-bottom: none; }
+
+.price-features li::before {
+  content: '';
+  width: 4px; height: 4px;
+  border-radius: 1px;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+.price-select-btn {
+  display: block; width: 100%;
+  margin-top: 24px; padding: 14px;
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: transparent;
+  color: var(--text2);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.price-select-btn:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-dim);
+}
+.price-select-btn.active {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 2px 16px var(--accent-glow);
+}
+.price-card.featured .price-select-btn {
+  background: var(--accent);
+  color: #fff;
+  border-color: var(--accent);
+  box-shadow: 0 2px 16px var(--accent-glow);
+}
+.price-card.featured .price-select-btn:hover {
+  box-shadow: 0 4px 28px var(--accent-glow);
+  transform: translateY(-1px);
+}
+
+/* --- PAYMENT METHOD --- */
+.pay-section { padding: 80px 0; }
+
+.pay-method-toggle {
+  display: flex; gap: 1px;
+  background: var(--border); border-radius: 6px;
+  overflow: hidden; margin-bottom: 32px;
+  max-width: 400px; margin-left: auto; margin-right: auto;
+}
+
+.pay-method-toggle button {
+  flex: 1; padding: 14px 20px;
+  background: var(--surface2); border: none;
+  font-family: var(--mono); font-size: 12px;
+  font-weight: 500; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--text3);
+  cursor: pointer; transition: background 0.2s, color 0.2s;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+.pay-method-toggle button.active {
+  background: var(--accent-dim); color: var(--accent);
+}
+.pay-method-toggle button:hover:not(.active) { color: var(--text2); }
+
+.pay-method-toggle .recommended {
+  font-size: 8px; letter-spacing: 1.5px;
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(34,197,94,0.15);
+  padding: 2px 6px; border-radius: 2px;
+  text-transform: uppercase; font-weight: 600;
+}
+
+.pay-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 40px;
+  max-width: 560px;
+  margin: 0 auto;
+}
+
+.pay-panel-hidden { display: none; }
+
+.xmr-panel { text-align: center; }
+
+.xmr-selected-tier {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 8px;
+}
+
+.xmr-amount-usd {
+  font-size: 32px; font-weight: 700;
+  color: var(--text); margin-bottom: 4px;
+}
+
+.xmr-rate-note {
+  font-size: 12px; color: var(--text3);
+  margin-bottom: 28px;
+  font-family: var(--mono);
+  letter-spacing: 0.3px;
+}
+
+.qr-container {
+  display: inline-block;
+  background: #fff;
+  padding: 12px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+
+.qr-container canvas,
+.qr-container img {
+  display: block;
+}
+
+.xmr-address-wrap {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px;
+  margin-bottom: 16px;
+  position: relative;
+}
+
+.xmr-address-label {
+  font-family: var(--mono);
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 10px;
+  text-align: left;
+}
+
+.xmr-address {
+  font-family: var(--mono);
+  font-size: 11px; color: var(--text);
+  word-break: break-all;
+  line-height: 1.7;
+  text-align: left;
+  user-select: all;
+}
+
+.copy-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 28px;
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  background: var(--accent);
+  color: #fff; border: none;
+  border-radius: 4px; cursor: pointer;
+  transition: all 0.2s;
+  margin-top: 4px;
+}
+.copy-btn:hover {
+  box-shadow: 0 4px 24px var(--accent-glow);
+  transform: translateY(-1px);
+}
+.copy-btn.copied {
+  background: var(--green);
+  box-shadow: 0 4px 24px rgba(34,197,94,0.25);
+}
+
+.copy-btn svg {
+  width: 14px; height: 14px;
+  stroke: currentColor; fill: none; stroke-width: 2;
+}
+
+.cc-panel {
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.cc-panel .cc-icon {
+  width: 56px; height: 56px;
+  border-radius: 50%;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+}
+
+.cc-panel .cc-icon svg {
+  width: 24px; height: 24px;
+  stroke: var(--text3); fill: none; stroke-width: 1.5;
+}
+
+.cc-panel h3 {
+  font-size: 18px; font-weight: 600;
+  color: var(--text); margin-bottom: 12px;
+}
+
+.cc-panel p {
+  font-size: 14px; color: var(--text2);
+  line-height: 1.6;
+}
+
+.cc-panel .cc-highlight {
+  color: var(--green); font-weight: 500;
+}
+
+/* --- AFTER PAYMENT --- */
+.after-pay {
+  max-width: 560px;
+  margin: 48px auto 0;
+  text-align: center;
+}
+
+.after-pay-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 32px;
+}
+
+.after-pay-step {
+  display: flex; align-items: flex-start; gap: 16px;
+  text-align: left;
+  padding: 16px 0;
+}
+.after-pay-step + .after-pay-step {
+  border-top: 1px solid var(--border);
+}
+
+.after-pay-num {
+  width: 32px; height: 32px; flex-shrink: 0;
+  border-radius: 4px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 13px; font-weight: 600;
+}
+
+.after-pay-text h4 {
+  font-size: 14px; font-weight: 600;
+  color: var(--text); margin-bottom: 4px;
+}
+
+.after-pay-text p {
+  font-size: 13px; color: var(--text2);
+  line-height: 1.5;
+}
+
+.after-pay-text a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+.after-pay-text a:hover { text-decoration: underline; }
+
+.after-pay-note {
+  margin-top: 20px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: var(--mono);
+  font-size: 11px; color: var(--text2);
+  letter-spacing: 0.5px;
+}
+
+.after-pay-note .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(34,197,94,0.5);
+  animation: pulse 2s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+}
+
+/* --- SECTION HEADERS --- */
+.sh { text-align: center; margin-bottom: 48px; }
+
+.sh-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 16px;
+}
+
+.sh h2 {
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 700; letter-spacing: -0.5px;
+  line-height: 1.15; margin-bottom: 16px;
+}
+
+.sh p {
+  font-size: 16px; color: var(--text2);
+  max-width: 560px; margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* --- FOOTER --- */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 0;
+}
+
+.footer-inner {
+  display: flex; justify-content: space-between;
+  align-items: center; flex-wrap: wrap; gap: 16px;
+}
+
+.footer-brand {
+  font-family: var(--mono);
+  font-size: 11px; letter-spacing: 2px;
+  color: var(--text3); text-transform: uppercase;
+}
+
+.footer-legal {
+  font-size: 12px; color: var(--text3);
+  max-width: 500px; line-height: 1.5;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  .nav-links a:not(.nav-cta) { display: none; }
+  .hero { padding: 120px 0 60px; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .wrap { padding: 0 20px; }
+  .pay-panel { padding: 28px 20px; }
+  .footer-inner { flex-direction: column; text-align: center; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { letter-spacing: -0.5px; }
+  .section { padding: 60px 0; }
+  .pay-section { padding: 60px 0; }
+}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="grid-bg"></div>
+<div class="m-scanlines"></div>
+<div class="m-noise"></div>
+<div class="m-sweep"></div>
+<div class="m-orb m-orb-1"></div>
+<div class="m-orb m-orb-2"></div>
+<div class="m-orb m-orb-3"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="main.html" class="nav-brand"><span>K</span>WYRE</a>
+    <div class="nav-links">
+      <a href="main.html#security">Security</a>
+      <a href="main.html#features">Features</a>
+      <a href="chat.html" class="nav-cta">Launch Console</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="wrap">
+    <div class="hero-eyebrow reveal">Secure Payment</div>
+    <h1 class="reveal reveal-d1">One-time. <em>No subscription.</em></h1>
+    <p class="hero-sub reveal reveal-d2">
+      Pay once, own your inference server forever. <strong>No recurring fees.</strong>
+      No usage caps. No data collection. Your machine, your AI.
+    </p>
+  </div>
+</div>
+
+<!-- PRICING TIERS -->
+<div class="section" id="pricing">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow reveal">Pricing</div>
+      <h2 class="reveal reveal-d1">Choose your deployment</h2>
+      <p class="reveal reveal-d2">Every tier includes the full 6-layer security stack and compliance documentation.</p>
+    </div>
+
+    <div class="pricing-grid reveal reveal-d3">
+      <div class="price-card" data-tier="personal" data-price="299">
+        <div class="price-name">Personal</div>
+        <div class="price-amount">$299</div>
+        <div class="price-type">One-time payment</div>
+        <div class="price-license"><span class="dot"></span> 1 machine license</div>
+        <ul class="price-features">
+          <li>Full inference server</li>
+          <li>6-layer security stack</li>
+          <li>Compliance docs</li>
+          <li>OpenAI-compatible API</li>
+        </ul>
+        <button class="price-select-btn" onclick="selectTier('personal')">Select Plan</button>
+      </div>
+
+      <div class="price-card featured" data-tier="professional" data-price="799">
+        <div class="price-name">Professional</div>
+        <div class="price-amount">$799</div>
+        <div class="price-type">One-time payment</div>
+        <div class="price-license"><span class="dot"></span> 3 machine licenses</div>
+        <ul class="price-features">
+          <li>Everything in Personal</li>
+          <li>Priority support</li>
+          <li>Multi-seat deployment</li>
+          <li>Full audit package</li>
+        </ul>
+        <button class="price-select-btn active" onclick="selectTier('professional')">Select Plan</button>
+      </div>
+
+      <div class="price-card" data-tier="airgapped" data-price="1499">
+        <div class="price-name">Air-Gapped Kit</div>
+        <div class="price-amount">$1,499</div>
+        <div class="price-type">One-time payment</div>
+        <div class="price-license"><span class="dot"></span> 5 machine licenses</div>
+        <ul class="price-features">
+          <li>Everything in Professional</li>
+          <li>Offline installer</li>
+          <li>Full audit package</li>
+          <li>White-glove setup</li>
+        </ul>
+        <button class="price-select-btn" onclick="selectTier('airgapped')">Select Plan</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT METHOD -->
+<div class="pay-section section" id="payment">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow reveal">Payment Method</div>
+      <h2 class="reveal reveal-d1">How would you like to pay?</h2>
+    </div>
+
+    <div class="reveal reveal-d2">
+      <div class="pay-method-toggle">
+        <button class="active" onclick="setPayMethod('xmr')">
+          Monero (XMR)
+          <span class="recommended">Recommended</span>
+        </button>
+        <button onclick="setPayMethod('cc')">Credit Card</button>
+      </div>
+    </div>
+
+    <!-- Monero Panel -->
+    <div class="pay-panel xmr-panel reveal reveal-d3" id="xmrPanel">
+      <div class="xmr-selected-tier" id="xmrTierLabel">Professional</div>
+      <div class="xmr-amount-usd" id="xmrAmountUsd">$799</div>
+      <div class="xmr-rate-note">Contact for current XMR rate</div>
+
+      <div id="qrCode" class="qr-container"></div>
+
+      <div class="xmr-address-wrap">
+        <div class="xmr-address-label">Monero (XMR) Address</div>
+        <div class="xmr-address" id="xmrAddress">84GhsVq5sQ3RE9DxMaRrmaX8L3am6VpJdfjz3KG3PFEiMVMjnFqYEochJCWBwREmUPNi7mYbSabKvP3kCB1oG4uiKxvpTvH</div>
+      </div>
+
+      <button class="copy-btn" id="copyBtn" onclick="copyAddress()">
+        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+        <span id="copyLabel">Copy Address</span>
+      </button>
+    </div>
+
+    <!-- Credit Card Panel -->
+    <div class="pay-panel cc-panel pay-panel-hidden" id="ccPanel">
+      <div class="cc-icon">
+        <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+      </div>
+      <h3>Coming soon</h3>
+      <p>Credit card processing is not yet available.<br>Use <span class="cc-highlight">Monero for immediate access</span> &mdash; no waiting, no intermediaries.</p>
+    </div>
+
+    <!-- After Payment -->
+    <div class="after-pay reveal reveal-d4">
+      <div class="after-pay-box">
+        <div class="after-pay-step">
+          <div class="after-pay-num">1</div>
+          <div class="after-pay-text">
+            <h4>Send payment</h4>
+            <p>Send the XMR amount to the address above. Double-check the address before confirming.</p>
+          </div>
+        </div>
+        <div class="after-pay-step">
+          <div class="after-pay-num">2</div>
+          <div class="after-pay-text">
+            <h4>Email your Transaction ID</h4>
+            <p>After sending payment, email your Transaction ID to <a href="mailto:payments@kwyre.com">payments@kwyre.com</a></p>
+          </div>
+        </div>
+        <div class="after-pay-step">
+          <div class="after-pay-num">3</div>
+          <div class="after-pay-text">
+            <h4>Receive your license key</h4>
+            <p>You'll receive your license key within 24 hours.</p>
+          </div>
+        </div>
+      </div>
+      <div class="after-pay-note">
+        <span class="dot"></span>
+        All transactions verified manually for your security
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-inner">
+      <div class="footer-brand">KWYRE &middot; APOLLO CyberSentinel LLC</div>
+      <div class="footer-legal">All inference runs 100% locally. No data leaves your machine. This is not legal advice. Verify your own compliance requirements.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+/* ── PARTICLE SYSTEM ── */
+(function(){
+  const cv = document.getElementById('particles');
+  const cx = cv.getContext('2d');
+  let W, H, pts = [], mx = -9999, my = -9999;
+  const N = 55, CONN = 130, MOUSE_R = 180;
+
+  function resize(){ W = cv.width = innerWidth; H = cv.height = innerHeight; }
+  function init(){
+    pts = Array.from({length:N}, ()=>({
+      x: Math.random()*W, y: Math.random()*H,
+      vx: (Math.random()-.5)*.3, vy: (Math.random()-.5)*.3,
+      r: Math.random()*1.2+.4, p: Math.random()*Math.PI*2
+    }));
+  }
+  function frame(){
+    cx.clearRect(0,0,W,H);
+    pts.forEach(n=>{
+      n.x+=n.vx; n.y+=n.vy; n.p+=.012;
+      if(n.x<0||n.x>W) n.vx*=-1;
+      if(n.y<0||n.y>H) n.vy*=-1;
+    });
+    for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
+      const a=pts[i],b=pts[j], d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d>CONN) continue;
+      const near = Math.hypot(a.x-mx,a.y-my)<MOUSE_R || Math.hypot(b.x-mx,b.y-my)<MOUSE_R;
+      const al = (1-d/CONN)*(near?.18:.08);
+      cx.beginPath(); cx.moveTo(a.x,a.y); cx.lineTo(b.x,b.y);
+      cx.strokeStyle = near ? `rgba(34,197,94,${al*1.5})` : `rgba(59,130,246,${al})`;
+      cx.lineWidth = near?.8:.3; cx.stroke();
+    }
+    pts.forEach(n=>{
+      const near = Math.hypot(n.x-mx,n.y-my)<MOUSE_R;
+      const r = n.r + Math.sin(n.p)*.3;
+      const col = near ? '34,197,94' : '59,130,246';
+      if(near){
+        cx.beginPath(); cx.arc(n.x,n.y,r*5,0,Math.PI*2);
+        cx.fillStyle=`rgba(${col},.04)`; cx.fill();
+      }
+      cx.beginPath(); cx.arc(n.x,n.y,r,0,Math.PI*2);
+      cx.fillStyle=`rgba(${col},${near?.7:.25+Math.sin(n.p)*.15})`; cx.fill();
+    });
+    requestAnimationFrame(frame);
+  }
+  window.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+  window.addEventListener('resize',()=>{resize();init();});
+  resize(); init(); frame();
+})();
+
+/* ── SCROLL REVEAL ── */
+(function(){
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting) { e.target.classList.add('vis'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el=> obs.observe(el));
+})();
+
+/* ── TIER SELECTION ── */
+const TIERS = {
+  personal:     { label: 'Personal',     price: '$299' },
+  professional: { label: 'Professional', price: '$799' },
+  airgapped:    { label: 'Air-Gapped Kit', price: '$1,499' }
+};
+let selectedTier = 'professional';
+
+function selectTier(tier) {
+  selectedTier = tier;
+
+  document.querySelectorAll('.price-select-btn').forEach(btn => {
+    btn.classList.remove('active');
+    btn.textContent = 'Select Plan';
+  });
+
+  const card = document.querySelector(`[data-tier="${tier}"]`);
+  const btn = card.querySelector('.price-select-btn');
+  btn.classList.add('active');
+  btn.textContent = 'Selected';
+
+  document.getElementById('xmrTierLabel').textContent = TIERS[tier].label;
+  document.getElementById('xmrAmountUsd').textContent = TIERS[tier].price;
+
+  document.getElementById('payment').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ── PAYMENT METHOD TOGGLE ── */
+function setPayMethod(method) {
+  const btns = document.querySelectorAll('.pay-method-toggle button');
+  btns.forEach(b => b.classList.remove('active'));
+  btns[method === 'xmr' ? 0 : 1].classList.add('active');
+
+  document.getElementById('xmrPanel').classList.toggle('pay-panel-hidden', method !== 'xmr');
+  document.getElementById('ccPanel').classList.toggle('pay-panel-hidden', method !== 'cc');
+}
+
+/* ── QR CODE GENERATION ── */
+(function(){
+  const addr = '84GhsVq5sQ3RE9DxMaRrmaX8L3am6VpJdfjz3KG3PFEiMVMjnFqYEochJCWBwREmUPNi7mYbSabKvP3kCB1oG4uiKxvpTvH';
+  const qr = qrcode(0, 'L');
+  qr.addData('monero:' + addr);
+  qr.make();
+
+  const container = document.getElementById('qrCode');
+  const cellSize = 4;
+  const modules = qr.getModuleCount();
+  const size = modules * cellSize;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = size;
+  canvas.height = size;
+  canvas.style.width = (size * 1.5) + 'px';
+  canvas.style.height = (size * 1.5) + 'px';
+  canvas.style.imageRendering = 'pixelated';
+
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = '#05060a';
+
+  for (let row = 0; row < modules; row++) {
+    for (let col = 0; col < modules; col++) {
+      if (qr.isDark(row, col)) {
+        ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
+      }
+    }
+  }
+
+  container.appendChild(canvas);
+})();
+
+/* ── COPY ADDRESS ── */
+function copyAddress() {
+  const addr = document.getElementById('xmrAddress').textContent;
+  navigator.clipboard.writeText(addr).then(() => {
+    const btn = document.getElementById('copyBtn');
+    const label = document.getElementById('copyLabel');
+    btn.classList.add('copied');
+    label.textContent = 'Copied!';
+    setTimeout(() => {
+      btn.classList.remove('copied');
+      label.textContent = 'Copy Address';
+    }, 2000);
+  });
+}
+
+/* ── SET INITIAL STATE ── */
+selectTier('professional');
+document.querySelector('[data-tier="professional"] .price-select-btn').textContent = 'Selected';
+</script>
+</body>
+</html>
