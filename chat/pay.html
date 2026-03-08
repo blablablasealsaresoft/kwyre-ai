@@ -205,6 +205,22 @@ nav {
 }
 .hero-sub strong { color: var(--text); font-weight: 600; }
 
+.coming-soon-bar {
+  display: flex; align-items: center; justify-content: center;
+  gap: 10px; padding: 14px 24px;
+  background: rgba(245,158,11,0.06);
+  border: 1px solid rgba(245,158,11,0.18);
+  border-radius: 6px; margin-top: 32px;
+  max-width: 560px; margin-left: auto; margin-right: auto;
+}
+.coming-soon-bar span {
+  font-family: var(--mono); font-size: 12px;
+  color: var(--text2); letter-spacing: 0.3px;
+}
+.coming-soon-bar strong { color: var(--amber); font-weight: 600; }
+.coming-soon-bar a { color: var(--accent); text-decoration: none; }
+.coming-soon-bar a:hover { text-decoration: underline; }
+
 /* --- PRICING GRID --- */
 .pricing-grid {
   display: grid;
@@ -636,7 +652,7 @@ nav {
     <div class="nav-links">
       <a href="main.html#security">Security</a>
       <a href="main.html#features">Features</a>
-      <a href="chat.html" class="nav-cta">Launch Console</a>
+      <a href="main.html#trial" class="nav-cta">Try Free</a>
     </div>
   </div>
 </nav>
@@ -650,6 +666,10 @@ nav {
       Pay once, own your inference server forever. <strong>No recurring fees.</strong>
       No usage caps. No data collection. Your machine, your AI.
     </p>
+    <div class="coming-soon-bar reveal reveal-d3">
+      <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--amber)" fill="none" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+      <span>Payments are <strong>not yet active</strong>. Check back soon or <a href="mailto:contact@kwyre.com">contact us</a> for early access.</span>
+    </div>
   </div>
 </div>
 
