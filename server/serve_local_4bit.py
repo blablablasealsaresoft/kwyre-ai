@@ -12,10 +12,11 @@ import hashlib
 import secrets
 import signal
 import threading
+import queue
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 from collections import defaultdict
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
+from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, TextIteratorStreamer
 from peft import PeftModel
 
 from security_core import (
@@ -351,37 +352,160 @@ SPIKE_SKIP = [
     "q_proj", "k_proj", "v_proj", "o_proj",
 ]
 
-# Phase 1: Measurement pass — measure sparsity with measure_only=True, then remove
-print(f"SpikeServe: measuring activation sparsity (k={SPIKE_K})...")
-measurement_hooks, n_converted = apply_spike_hooks(
-    model, k=SPIKE_K, max_spike=SPIKE_MAX,
-    skip_patterns=SPIKE_SKIP, measure_only=True,
-)
-reset_sparsity_stats()
-set_tracking(True)
-with torch.no_grad():
-    dummy = tokenizer("Hello world", return_tensors="pt").to(model.device)
-    model(dummy.input_ids, attention_mask=dummy.attention_mask)
-set_tracking(False)
-STARTUP_SPARSITY = get_sparsity_stats()
-for h in measurement_hooks:
-    h.remove()
-measurement_hooks = []
+# SpikeServe hooks go on the DRAFT model (speed matters, accuracy tolerant)
+# NOT the main model (accuracy is critical for speculative validation)
+n_converted = 0
+if draft_model is not None:
+    print(f"SpikeServe: attaching spike encoding to DRAFT model (k={SPIKE_K})...")
+    active_spike_hooks, n_converted = apply_spike_hooks(
+        draft_model, k=SPIKE_K, max_spike=SPIKE_MAX,
+        skip_patterns=SPIKE_SKIP, measure_only=False,
+    )
+    print(f"SpikeServe ACTIVE on draft: {n_converted} MLP layers | k={SPIKE_K}")
+    print(f"  Main model runs at full fidelity for accurate speculative validation")
+else:
+    print(f"[SpikeServe] No draft model — skipping (hooks only apply to draft)")
+    active_spike_hooks = []
 
-# Phase 2: Active inference hooks — apply spike encoding during inference (permanent)
-print(f"SpikeServe: attaching active spike encoding hooks ({n_converted} layers)...")
-active_spike_hooks, _ = apply_spike_hooks(
-    model, k=SPIKE_K, max_spike=SPIKE_MAX,
-    skip_patterns=SPIKE_SKIP, measure_only=False,
-)
-# active_spike_hooks stay attached — do NOT remove; they encode activations at inference time
+# Lazy sparsity measurement — runs on first real inference request
+_sparsity_measured = False
+_sparsity_lock = threading.Lock()
+STARTUP_SPARSITY = {"avg_sparsity": 0.0, "layers": n_converted, "total_calls": 0}
 
-print(f"SpikeServe ACTIVE: {n_converted} MLP layers | "
-      f"measured sparsity {STARTUP_SPARSITY['avg_sparsity']}% at k={SPIKE_K}")
+def _measure_sparsity_lazy():
+    """Measure sparsity on first real request instead of blocking startup."""
+    global _sparsity_measured, STARTUP_SPARSITY
+    with _sparsity_lock:
+        if _sparsity_measured:
+            return
+        _sparsity_measured = True
+    stats = get_sparsity_stats()
+    if stats["total_calls"] > 0:
+        STARTUP_SPARSITY = stats
+        print(f"[SpikeServe] Measured sparsity: {stats['avg_sparsity']}% "
+              f"across {stats['layers']} layers ({stats['total_calls']} calls)")
 
 gpu_mem = torch.cuda.memory_allocated() / 1e9
 gpu_total = torch.cuda.get_device_properties(0).total_memory / 1e9
 print(f"GPU VRAM: {gpu_mem:.1f} / {gpu_total:.1f} GB")
+
+# ---------------------------------------------------------------------------
+# KV cache store — per-session cache for multi-turn conversations
+# Avoids re-encoding the entire conversation on every follow-up message.
+# ---------------------------------------------------------------------------
+_KV_CACHE_MAX_SESSIONS = int(os.environ.get("KWYRE_KV_CACHE_MAX", "8"))
+_KV_CACHE_MAX_VRAM_GB = float(os.environ.get("KWYRE_KV_CACHE_VRAM_GB", "2.0"))
+
+class KVCacheStore:
+    def __init__(self, max_sessions: int, max_vram_gb: float):
+        self._cache: dict[str, dict] = {}  # sid -> {"past_key_values": ..., "seq_len": int}
+        self._access_order: list[str] = []
+        self._lock = threading.Lock()
+        self._max_sessions = max_sessions
+        self._max_vram_bytes = int(max_vram_gb * 1e9)
+
+    def get(self, session_id: str):
+        with self._lock:
+            entry = self._cache.get(session_id)
+            if entry is not None:
+                if session_id in self._access_order:
+                    self._access_order.remove(session_id)
+                self._access_order.append(session_id)
+            return entry
+
+    def put(self, session_id: str, past_key_values, seq_len: int):
+        with self._lock:
+            self._evict_if_needed()
+            self._cache[session_id] = {
+                "past_key_values": past_key_values,
+                "seq_len": seq_len,
+            }
+            if session_id in self._access_order:
+                self._access_order.remove(session_id)
+            self._access_order.append(session_id)
+
+    def evict(self, session_id: str):
+        with self._lock:
+            entry = self._cache.pop(session_id, None)
+            if entry and entry.get("past_key_values"):
+                del entry["past_key_values"]
+            if session_id in self._access_order:
+                self._access_order.remove(session_id)
+
+    def _evict_if_needed(self):
+        while len(self._cache) >= self._max_sessions and self._access_order:
+            oldest = self._access_order.pop(0)
+            entry = self._cache.pop(oldest, None)
+            if entry and entry.get("past_key_values"):
+                del entry["past_key_values"]
+        if torch.cuda.is_available():
+            kv_vram = sum(
+                sum(t.nelement() * t.element_size() for layer in e["past_key_values"] for t in layer)
+                for e in self._cache.values() if e.get("past_key_values")
+            )
+            while kv_vram > self._max_vram_bytes and self._access_order:
+                oldest = self._access_order.pop(0)
+                entry = self._cache.pop(oldest, None)
+                if entry and entry.get("past_key_values"):
+                    evicted_size = sum(
+                        t.nelement() * t.element_size() for layer in entry["past_key_values"] for t in layer
+                    )
+                    kv_vram -= evicted_size
+                    del entry["past_key_values"]
+
+    def wipe_all(self):
+        with self._lock:
+            for entry in self._cache.values():
+                if entry.get("past_key_values"):
+                    del entry["past_key_values"]
+            self._cache.clear()
+            self._access_order.clear()
+
+    def stats(self) -> dict:
+        with self._lock:
+            kv_vram = 0
+            if self._cache:
+                for e in self._cache.values():
+                    if e.get("past_key_values"):
+                        kv_vram += sum(
+                            t.nelement() * t.element_size() for layer in e["past_key_values"] for t in layer
+                        )
+            return {
+                "cached_sessions": len(self._cache),
+                "max_sessions": self._max_sessions,
+                "kv_cache_vram_mb": round(kv_vram / 1e6, 1),
+                "max_vram_mb": round(self._max_vram_bytes / 1e6, 1),
+            }
+
+kv_cache_store = KVCacheStore(_KV_CACHE_MAX_SESSIONS, _KV_CACHE_MAX_VRAM_GB)
+print(f"[KV Cache] Enabled — max {_KV_CACHE_MAX_SESSIONS} sessions, {_KV_CACHE_MAX_VRAM_GB} GB VRAM cap")
+
+# ---------------------------------------------------------------------------
+# Inference queue — serializes GPU access, lets HTTP threads stay responsive
+# ---------------------------------------------------------------------------
+_inference_queue: queue.Queue = queue.Queue()
+_INFERENCE_WORKERS = 1  # GPU can only run one generation at a time
+
+def _inference_worker():
+    """Background thread that pulls generation tasks off the queue."""
+    while True:
+        task = _inference_queue.get()
+        if task is None:
+            break
+        try:
+            task["fn"](*task["args"], **task["kwargs"])
+        except Exception as e:
+            print(f"[inference-worker] Error: {e}")
+            if "error_cb" in task:
+                try:
+                    task["error_cb"](e)
+                except Exception:
+                    pass
+        finally:
+            _inference_queue.task_done()
+
+_worker_thread = threading.Thread(target=_inference_worker, daemon=True, name="InferenceWorker")
+_worker_thread.start()
 
 # Start security subsystems
 session_store = SessionStore()
@@ -390,9 +514,11 @@ watchdog.start()
 
 
 def _shutdown_handler(signum, frame):
-    print("\n[Shutdown] Wiping all sessions before exit...")
+    print("\n[Shutdown] Wiping all sessions and KV cache before exit...")
     watchdog.stop()
+    kv_cache_store.wipe_all()
     session_store.wipe_all(reason="server_shutdown")
+    _inference_queue.put(None)
     sys.exit(0)
 
 signal.signal(signal.SIGTERM, _shutdown_handler)
@@ -539,6 +665,8 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
         if _license_tier == "eval":
             max_tokens = min(max_tokens, _MAX_EVAL_TOKENS)
 
+        stream = body.get("stream", False)
+
         if MULTI_USER:
             if not self._mu_check_session_limit(user):
                 return
@@ -588,6 +716,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             enable_thinking=False,
         )
         inputs = tokenizer([text], return_tensors="pt").to(model.device)
+        input_len = inputs.input_ids.shape[1]
 
         gen_kwargs = {
             "input_ids": inputs.input_ids,
@@ -603,11 +732,70 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
         if draft_model is not None:
             gen_kwargs["assistant_model"] = draft_model
 
-        t0 = time.time()
-        with torch.no_grad():
-            gen_ids = model.generate(**gen_kwargs)
-        elapsed = time.time() - t0
-        new_ids = gen_ids[0][inputs.input_ids.shape[1]:]
+        if stream:
+            self._handle_stream_gpu(
+                gen_kwargs, input_len, session_id, session, user, tools_used,
+            )
+        else:
+            self._handle_blocking_gpu(
+                gen_kwargs, input_len, session_id, session, user, tools_used,
+            )
+
+    def _handle_blocking_gpu(self, gen_kwargs, input_len, session_id, session,
+                             user, tools_used):
+        done_event = threading.Event()
+        result_holder: dict = {}
+
+        cached = kv_cache_store.get(session_id)
+        if cached and cached.get("past_key_values"):
+            cached_len = cached["seq_len"]
+            if cached_len < input_len:
+                gen_kwargs["past_key_values"] = cached["past_key_values"]
+                gen_kwargs["input_ids"] = gen_kwargs["input_ids"][:, cached_len:]
+                gen_kwargs["attention_mask"] = gen_kwargs["attention_mask"][:, :input_len]
+                print(f"[KV Cache] HIT {session_id[:8]}... — "
+                      f"reusing {cached_len} tokens, encoding {input_len - cached_len} new")
+            else:
+                kv_cache_store.evict(session_id)
+
+        def _run_inference():
+            t0 = time.time()
+            with torch.no_grad():
+                outputs = model.generate(**gen_kwargs, return_dict_in_generate=True)
+            elapsed = time.time() - t0
+            gen_ids = outputs.sequences
+            new_ids = gen_ids[0][input_len:]
+            result_holder["new_ids"] = new_ids
+            result_holder["elapsed"] = elapsed
+            if hasattr(outputs, "past_key_values") and outputs.past_key_values:
+                total_seq = gen_ids.shape[1]
+                try:
+                    detached_kv = tuple(
+                        tuple(t.detach() for t in layer)
+                        for layer in outputs.past_key_values
+                    )
+                    kv_cache_store.put(session_id, detached_kv, total_seq)
+                except Exception:
+                    pass
+            _measure_sparsity_lazy()
+            done_event.set()
+
+        _inference_queue.put({
+            "fn": _run_inference, "args": (), "kwargs": {},
+            "error_cb": lambda e: (result_holder.update({"error": str(e)}), done_event.set()),
+        })
+
+        done_event.wait(timeout=300)
+
+        if "error" in result_holder:
+            self._send_json_error(500, f"Inference error: {result_holder['error']}")
+            return
+        if not done_event.is_set():
+            self._send_json_error(504, "Inference timed out.")
+            return
+
+        new_ids = result_holder["new_ids"]
+        elapsed = result_holder["elapsed"]
         n_tokens = len(new_ids)
         tps = n_tokens / elapsed if elapsed > 0 else 0
 
@@ -622,7 +810,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             audit_log.record_request(user["id"], user.get("username", ""), tokens=n_tokens)
             label = f"{user['username']}@{session_id.split(':', 1)[-1][:8]}"
         else:
-            label = session_id[:8]
+            label = session_id[:8] if isinstance(user, str) else session_id[:8]
         print(f"[inference] {label}... | {n_tokens} tokens "
               f"in {elapsed:.1f}s ({tps:.1f} tok/s)")
 
@@ -642,6 +830,100 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             },
         })
 
+    def _handle_stream_gpu(self, gen_kwargs, input_len, session_id, session,
+                           user, tools_used):
+        self.send_response(200)
+        self.send_header("Content-Type", "text/event-stream")
+        self.send_header("Cache-Control", "no-cache")
+        self.send_header("Connection", "keep-alive")
+        self.send_header("X-Accel-Buffering", "no")
+        self._send_security_headers()
+        self.end_headers()
+        self.wfile.write(b": stream opened\n\n")
+        self.wfile.flush()
+
+        streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
+        gen_kwargs["streamer"] = streamer
+        gen_kwargs.pop("assistant_model", None)
+        gen_kwargs.pop("return_dict_in_generate", None)
+
+        full_reply: list[str] = []
+        n_tokens = 0
+        t0 = time.time()
+
+        gen_error: list[Exception] = []
+        def _run_generation():
+            try:
+                with torch.no_grad():
+                    model.generate(**gen_kwargs)
+            except Exception as e:
+                gen_error.append(e)
+                streamer.end()
+
+        gen_thread = threading.Thread(target=_run_generation, daemon=True)
+        gen_thread.start()
+
+        model_name = f"{ACTIVE_TIER['name']}-spikeserve"
+        response_sid = session_id.split(":", 1)[-1] if MULTI_USER else session_id
+        try:
+            for text_chunk in streamer:
+                if not text_chunk:
+                    continue
+                full_reply.append(text_chunk)
+                n_tokens += 1
+                sse_data = json.dumps({
+                    "choices": [{"delta": {"content": text_chunk}}],
+                    "model": model_name,
+                    "session_id": response_sid,
+                })
+                self.wfile.write(f"data: {sse_data}\n\n".encode())
+                self.wfile.flush()
+
+            gen_thread.join(timeout=5)
+
+            if gen_error:
+                print(f"[inference] Stream generation error: {gen_error[0]}")
+
+            elapsed = time.time() - t0
+            tps = n_tokens / elapsed if elapsed > 0 else 0
+
+            reply_text = "".join(full_reply)
+            reply_text = re.sub(r"<think>.*?</think>", "", reply_text, flags=re.DOTALL)
+            reply_text = re.sub(r"<think>.*", "", reply_text, flags=re.DOTALL)
+            reply_text = reply_text.strip()
+            session.add_message("assistant", reply_text)
+
+            _measure_sparsity_lazy()
+
+            done_data = json.dumps({
+                "choices": [{"delta": {}, "finish_reason": "stop"}],
+                "model": model_name,
+                "session_id": response_sid,
+                "tools_used": tools_used,
+                "usage": {
+                    "completion_tokens": n_tokens,
+                    "tokens_per_second": round(tps, 1),
+                },
+                "spike_stats": {
+                    "activation_sparsity_pct": STARTUP_SPARSITY["avg_sparsity"],
+                    "spike_encoded_layers": n_converted,
+                },
+            })
+            self.wfile.write(f"data: {done_data}\n\n".encode())
+            self.wfile.write(b"data: [DONE]\n\n")
+            self.wfile.flush()
+
+            if MULTI_USER:
+                audit_log.record_request(user["id"], user.get("username", ""), tokens=n_tokens)
+                label = f"{user['username']}@{response_sid[:8]}"
+            else:
+                label = response_sid[:8]
+            print(f"[inference] {label}... | {n_tokens} tokens "
+                  f"in {elapsed:.1f}s ({tps:.1f} tok/s) [stream]")
+
+        except (BrokenPipeError, ConnectionResetError):
+            print(f"[inference] {response_sid[:8]}... | client disconnected during stream")
+
     def _handle_session_end(self):
         if MULTI_USER:
             user = self._mu_check_auth()
@@ -659,10 +941,12 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
         if raw_sid:
             if MULTI_USER:
                 namespaced = f"{user['id']}:{raw_sid}"
+                kv_cache_store.evict(namespaced)
                 session_store.wipe_session(namespaced, reason="user_request")
             else:
+                kv_cache_store.evict(raw_sid)
                 session_store.wipe_session(raw_sid, reason="user_request")
-            msg = f"Session {raw_sid[:8]}... wiped. Conversation unrecoverable."
+            msg = f"Session {raw_sid[:8]}... wiped. Conversation and KV cache unrecoverable."
         else:
             msg = "No session_id provided."
         self._send_json(200, {"status": "wiped", "message": msg})
@@ -737,6 +1021,8 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
         if target is None:
             self._send_json_error(404, f"User '{username}' not found.")
             return
+        for sid in session_store.get_sessions_for_user(target["id"]):
+            kv_cache_store.evict(sid)
         session_store.wipe_user_sessions(target["id"], reason=f"user_deleted:{username}")
         _user_manager.remove_user(username)
         audit_log.record_security_event(
@@ -762,6 +1048,8 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             self._send_json_error(404, f"User '{target_username}' not found.")
             return
         count = session_store.count_sessions_for_user(target["id"])
+        for sid in session_store.get_sessions_for_user(target["id"]):
+            kv_cache_store.evict(sid)
         session_store.wipe_user_sessions(target["id"], reason=f"admin_wipe:{admin['username']}")
         audit_log.record_security_event(
             admin["id"], "admin_session_wipe",
@@ -825,10 +1113,15 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                     "draft_model": DRAFT_MODEL_ID if draft_model is not None else None,
                 },
                 "spike_analysis": {
+                    "target": "draft_model" if draft_model is not None else "disabled",
                     "k": SPIKE_K,
-                    "projected_sparsity_pct": STARTUP_SPARSITY["avg_sparsity"],
+                    "measured_sparsity_pct": STARTUP_SPARSITY["avg_sparsity"],
                     "spike_encoded_layers": n_converted,
+                    "measured": _sparsity_measured,
                 },
+                "streaming": True,
+                "inference_queue": True,
+                "kv_cache": kv_cache_store.stats(),
                 "gpu_vram_gb": round(gpu_used, 1),
             })
         self._send_json(200, health_data)
@@ -880,8 +1173,10 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 "meta": {
                     "base_model": MODEL_ID.split("/")[-1],
                     "weight_quant": f"4-bit {KWYRE_QUANT.upper()}",
-                    "activation_encoding": "SpikeServe",
+                    "activation_encoding": "SpikeServe (draft model)",
                     "spike_encoded_layers": n_converted,
+                    "streaming": True,
+                    "speculative_decoding": draft_model is not None,
                     "security": {
                         "network": "localhost-only",
                         "storage": "RAM-only sessions",
@@ -930,9 +1225,11 @@ if __name__ == "__main__":
     print(f"\nKwyre AI ready at http://{BIND_HOST}:{PORT}")
     print(f"  Model: {ACTIVE_TIER['name']}-spikeserve ({MODEL_ID})  |  tier: {ACTIVE_TIER['tier']}  |  VRAM: {ACTIVE_TIER['vram_4bit']}")
     _spec_status = f"speculative={DRAFT_MODEL_ID.split('/')[-1]}" if draft_model else "no speculative"
-    print(f"  SpikeServe ACTIVE ({n_converted} layers)  |  4-bit {KWYRE_QUANT.upper()}  |  {_spec_status}  |  all 6 security layers active")
+    _spike_target = "draft model" if draft_model else "disabled"
+    print(f"  SpikeServe on {_spike_target} ({n_converted} layers)  |  4-bit {KWYRE_QUANT.upper()}  |  {_spec_status}")
+    print(f"  Streaming: SSE enabled  |  Inference queue: active  |  6 security layers active")
     print(f"  Available tiers: KWYRE_MODEL=Qwen/Qwen3.5-9B (7.5GB) | Qwen/Qwen3-4B (3.5GB)")
-    print("  POST /v1/chat/completions  — inference")
+    print("  POST /v1/chat/completions  — inference (stream=true for SSE)")
     print("  POST /v1/session/end       — wipe session from RAM")
     print("  GET  /health               — status + watchdog state")
     print("  GET  /audit                — metadata-only compliance log")
