@@ -82,23 +82,65 @@ def check_nuitka():
 
 
 def compile_nuitka():
-    """Compile Python modules into standalone binaries with Nuitka."""
+    """Compile proprietary Kwyre modules into native C with Nuitka.
+
+    Strategy: Only YOUR code gets compiled into unreadable C binaries.
+    Open-source ML libraries (torch, transformers, peft, etc.) are already
+    compiled C/CUDA — no benefit to re-compiling and it would take hours.
+    They get bundled as a frozen venv alongside the binary instead.
+
+    What's protected (compiled to C, no .py source ships):
+      - serve_local_4bit.py   (inference server, streaming, KV cache)
+      - security_core.py      (6-layer security stack)
+      - tools.py              (API tool router)
+      - audit.py              (enterprise audit)
+      - users.py              (multi-user RBAC)
+      - spike_serve.py        (SpikeServe encoding — your IP)
+      - verify_deps.py        (Layer 3 integrity)
+      - license.py            (license validation + HW fingerprint)
+      - codesign.py           (release signing)
+      - updater.py            (air-gap updater)
+      - serve_cpu.py          (CPU backend)
+      - serve_mlx.py          (MLX backend)
+    """
     check_nuitka()
 
     os.makedirs(DIST_BUILD_DIR, exist_ok=True)
 
-    entry = os.path.join(PROJECT_ROOT, "server", "serve_local_4bit.py")
+    server_dir = os.path.join(PROJECT_ROOT, "server")
     output_dir = os.path.join(BUILD_DIR, "nuitka-output")
+    entry = os.path.join(server_dir, "serve_local_4bit.py")
 
+    CROSS_DIR_MODULES = {
+        os.path.join(PROJECT_ROOT, "model", "spike_serve.py"): os.path.join(server_dir, "spike_serve.py"),
+        os.path.join(PROJECT_ROOT, "security", "verify_deps.py"): os.path.join(server_dir, "verify_deps.py"),
+        os.path.join(PROJECT_ROOT, "security", "license.py"): os.path.join(server_dir, "license.py"),
+        os.path.join(PROJECT_ROOT, "security", "codesign.py"): os.path.join(server_dir, "codesign.py"),
+        os.path.join(PROJECT_ROOT, "security", "updater.py"): os.path.join(server_dir, "updater.py"),
+    }
+
+    copied_files = []
     print("\n=== Nuitka Compilation ===")
     print(f"Entry point: {entry}")
     print(f"Output: {output_dir}")
+    print(f"Strategy: Compile Kwyre IP to C, bundle ML libs as frozen venv")
     print()
+
+    for src, dst in CROSS_DIR_MODULES.items():
+        if os.path.exists(src) and not os.path.exists(dst):
+            shutil.copy2(src, dst)
+            copied_files.append(dst)
+            print(f"  [STAGE] {os.path.basename(src)} -> server/")
+
+    kwyre_modules = [
+        "tools", "security_core", "audit", "users",
+        "spike_serve", "verify_deps", "license", "codesign", "updater",
+        "serve_cpu", "serve_mlx",
+    ]
 
     nuitka_cmd = [
         sys.executable, "-m", "nuitka",
         "--standalone",
-        "--onefile",
         f"--output-dir={output_dir}",
         "--output-filename=kwyre-server" + (".exe" if PLAT == "windows" else ""),
         "--company-name=APOLLO CyberSentinel LLC",
@@ -106,40 +148,43 @@ def compile_nuitka():
         f"--product-version={VERSION}",
         "--file-description=Kwyre AI Inference Server",
         "--copyright=Copyright 2025-2026 APOLLO CyberSentinel LLC",
-        "--include-module=tools",
-        "--include-module=security_core",
-        "--include-module=audit",
-        "--include-module=users",
-        f"--include-data-files={os.path.join(PROJECT_ROOT, 'model', 'spike_serve.py')}=spike_serve.py",
-        f"--include-data-files={os.path.join(PROJECT_ROOT, 'security', 'verify_deps.py')}=verify_deps.py",
-        f"--include-data-files={os.path.join(PROJECT_ROOT, 'security', 'license.py')}=license.py",
-        f"--include-data-files={os.path.join(PROJECT_ROOT, 'security', 'codesign.py')}=codesign.py",
-        f"--include-data-files={os.path.join(PROJECT_ROOT, 'security', 'updater.py')}=updater.py",
-        f"--include-data-files={os.path.join(PROJECT_ROOT, 'server', 'serve_cpu.py')}=serve_cpu.py",
-        f"--include-data-files={os.path.join(PROJECT_ROOT, 'server', 'serve_mlx.py')}=serve_mlx.py",
-        "--include-package=peft",
-        "--include-package=transformers",
-        "--include-package=bitsandbytes",
-        "--include-package=accelerate",
-        "--include-package=safetensors",
-        "--include-package=huggingface_hub",
-        "--include-package=cryptography",
-        "--nofollow-import-to=torch.testing",
-        "--nofollow-import-to=torch.utils.tensorboard",
-        "--nofollow-import-to=torch.distributed",
-        "--nofollow-import-to=torch.utils.benchmark",
+    ]
+
+    for mod in kwyre_modules:
+        nuitka_cmd.append(f"--include-module={mod}")
+
+    nuitka_cmd += [
+        "--follow-import-to=tools",
+        "--follow-import-to=security_core",
+        "--follow-import-to=audit",
+        "--follow-import-to=users",
+        "--follow-import-to=spike_serve",
+        "--follow-import-to=verify_deps",
+        "--follow-import-to=license",
+        "--follow-import-to=codesign",
+        "--follow-import-to=updater",
+        "--follow-import-to=serve_cpu",
+        "--follow-import-to=serve_mlx",
+        "--nofollow-import-to=torch",
+        "--nofollow-import-to=transformers",
+        "--nofollow-import-to=peft",
+        "--nofollow-import-to=bitsandbytes",
+        "--nofollow-import-to=accelerate",
+        "--nofollow-import-to=safetensors",
+        "--nofollow-import-to=huggingface_hub",
+        "--nofollow-import-to=auto_gptq",
+        "--nofollow-import-to=awq",
+        "--nofollow-import-to=autoawq",
+        "--nofollow-import-to=mlx",
+        "--nofollow-import-to=mlx_lm",
+        "--nofollow-import-to=llama_cpp",
         "--nofollow-import-to=IPython",
         "--nofollow-import-to=matplotlib",
         "--nofollow-import-to=pytest",
         "--nofollow-import-to=unittest",
         "--nofollow-import-to=datasets",
         "--nofollow-import-to=trl",
-        "--nofollow-import-to=transformers.cli",
-        "--nofollow-import-to=transformers.commands",
-        "--nofollow-import-to=transformers.models.deprecated",
-        "--remove-output",
         "--assume-yes-for-downloads",
-        "--python-flag=no_site",
     ]
 
     if PLAT == "windows":
@@ -153,15 +198,23 @@ def compile_nuitka():
             nuitka_cmd.append(f"--macos-app-icon={icon}")
 
     nuitka_cmd.append(entry)
-    run(nuitka_cmd)
+
+    try:
+        run(nuitka_cmd)
+    finally:
+        for f in copied_files:
+            if os.path.exists(f):
+                os.remove(f)
+                print(f"  [CLEAN] Removed staged {os.path.basename(f)}")
 
     binary_name = "kwyre-server" + (".exe" if PLAT == "windows" else "")
-    compiled = os.path.join(output_dir, binary_name)
+    binary_dir = os.path.join(output_dir, "serve_local_4bit.dist")
+    compiled = os.path.join(binary_dir, binary_name)
 
     if not os.path.exists(compiled):
         for root, dirs, files in os.walk(output_dir):
             for f in files:
-                if "kwyre" in f.lower():
+                if "kwyre" in f.lower() and f.endswith((".exe", "")):
                     compiled = os.path.join(root, f)
                     break
 
@@ -174,7 +227,50 @@ def compile_nuitka():
         print(f"\n[WARN] Binary not found at expected path: {compiled}")
         print("       Check build/nuitka-output/ for the compiled file.")
 
+    print("\n=== Bundling ML Runtime ===")
+    _bundle_ml_runtime(skip_runtime=True)
+
     return compiled
+
+
+def _bundle_ml_runtime(skip_runtime=False):
+    """Create a frozen venv with ML dependencies alongside the binary.
+
+    These are open-source compiled C/CUDA libraries — no IP to protect.
+    They're shipped as-is so the compiled Kwyre binary can import them.
+    """
+    launcher = os.path.join(DIST_BUILD_DIR, "start-kwyre.bat" if PLAT == "windows" else "start-kwyre.sh")
+    if PLAT == "windows":
+        with open(launcher, "w") as f:
+            f.write('@echo off\nset PYTHONPATH=%~dp0runtime\n"%~dp0kwyre-server.exe" %*\n')
+    else:
+        with open(launcher, "w") as f:
+            f.write('#!/bin/bash\nexport PYTHONPATH="$(dirname "$0")/runtime"\n"$(dirname "$0")/kwyre-server" "$@"\n')
+        os.chmod(launcher, 0o755)
+    print(f"  [OK] Launcher: {launcher}")
+
+    if skip_runtime:
+        print("  [SKIP] Runtime bundling skipped (use 'python build.py bundle-runtime' to install)")
+        return
+
+    runtime_dir = os.path.join(DIST_BUILD_DIR, "runtime")
+    os.makedirs(runtime_dir, exist_ok=True)
+
+    reqs = os.path.join(PROJECT_ROOT, "requirements-inference.txt")
+    if not os.path.exists(reqs):
+        print("  [WARN] requirements-inference.txt not found, skipping runtime bundle")
+        return
+
+    print(f"  Installing ML runtime into {runtime_dir}")
+    print("  (This downloads ~3 GB of PyTorch + ML libraries)")
+    result = subprocess.run(
+        [sys.executable, "-m", "pip", "install", "--target", runtime_dir, "-r", reqs],
+    )
+    if result.returncode != 0:
+        print("  [WARN] Runtime install failed — you can install manually:")
+        print(f"         pip install --target {runtime_dir} -r {reqs}")
+    else:
+        print(f"  [OK] Runtime installed: {runtime_dir}")
 
 
 def package_dist():
@@ -792,7 +888,7 @@ def main():
     parser.add_argument(
         "command",
         choices=["compile", "package", "installer", "sign", "verify",
-                 "update-package", "all", "clean"],
+                 "update-package", "bundle-runtime", "all", "clean"],
         help=(
             "compile=Nuitka standalone binary, "
             "package=stage data files, "
@@ -800,6 +896,7 @@ def main():
             "sign=Ed25519 sign artifacts, "
             "verify=verify signed release, "
             "update-package=create .kwyre-update, "
+            "bundle-runtime=install ML libs into dist, "
             "all=compile+package+installer+sign, "
             "clean=remove build/"
         ),
@@ -848,6 +945,13 @@ def main():
 
     if args.command in ("sign", "all"):
         sign_release()
+
+    if args.command == "bundle-runtime":
+        _bundle_ml_runtime(skip_runtime=False)
+        print("\n" + "=" * 60)
+        print("  Build complete.")
+        print("=" * 60)
+        return
 
     if args.command == "update-package":
         if not os.path.isdir(DIST_BUILD_DIR):
