@@ -12,7 +12,7 @@ trap shutdown SIGTERM SIGINT
 MODEL="${KWYRE_MODEL:-Qwen/Qwen3.5-9B}"
 DRAFT="${KWYRE_DRAFT_MODEL:-Qwen/Qwen3-0.6B}"
 SPEC="${KWYRE_SPECULATIVE:-1}"
-CACHE="${HF_HOME:-/root/.cache/huggingface}"
+CACHE="${HF_HOME:-/workspace/.cache/huggingface}"
 
 download_model() {
     local model_id="$1"

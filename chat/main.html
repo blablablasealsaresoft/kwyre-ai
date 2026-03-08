@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
 <title>Kwyre AI — Air-Gapped Inference</title>
 <meta name="description" content="Air-gapped AI inference for analysts who cannot afford a breach. 6-layer security stack. Zero data leaves your machine.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1617,7 +1620,7 @@ nav {
   </div>
 </footer>
 
-<script>
+<script nonce="{{CSP_NONCE}}">
 /* ── PARTICLE SYSTEM ── */
 (function(){
   const cv = document.getElementById('particles');
@@ -1693,7 +1696,7 @@ const trialCounter = document.getElementById('trialCounter');
 const trialExpired = document.getElementById('trialExpired');
 
 const MAX_TRIAL = 3;
-let trialUsed = parseInt(localStorage.getItem('kwyre_trial_used') || '0');
+let trialUsed = parseInt(sessionStorage.getItem('kwyre_trial_used') || '0');
 let messages = [];
 let isGenerating = false;
 
@@ -1755,6 +1758,27 @@ function escapeHtml(text) {
   const d = document.createElement('div');
   d.textContent = text;
   return d.innerHTML;
+}
+
+function sanitizeHtml(html) {
+  const SAFE_TAGS = new Set(['B','STRONG','I','EM','SPAN','BR']);
+  const SAFE_ATTRS = new Set(['class']);
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  (function clean(node) {
+    for (const child of [...node.childNodes]) {
+      if (child.nodeType === 1) {
+        if (!SAFE_TAGS.has(child.tagName)) {
+          child.replaceWith(document.createTextNode(child.textContent));
+        } else {
+          [...child.attributes].forEach(a => {
+            if (!SAFE_ATTRS.has(a.name)) child.removeAttribute(a.name);
+          });
+          clean(child);
+        }
+      }
+    }
+  })(doc.body);
+  return doc.body.innerHTML;
 }
 
 function addMessage(role, content, meta) {
@@ -1858,7 +1882,7 @@ async function send() {
   await typeResponse(demo.response, { toks: demo.toks, sparsity: demo.sparsity, layers: demo.layers });
 
   trialUsed++;
-  localStorage.setItem('kwyre_trial_used', trialUsed.toString());
+  sessionStorage.setItem('kwyre_trial_used', trialUsed.toString());
   updateTrialUI();
 
   isGenerating = false;
@@ -1915,9 +1939,9 @@ function showCase(i) {
   const c = CASES[i];
   document.getElementById('caseTag').textContent = c.tag;
   document.getElementById('caseHeadline').textContent = c.headline;
-  document.getElementById('caseBody').innerHTML = c.body;
+  document.getElementById('caseBody').innerHTML = sanitizeHtml(c.body);
   document.getElementById('caseSource').textContent = c.source;
-  document.getElementById('caseKwyre').innerHTML = c.kwyre;
+  document.getElementById('caseKwyre').innerHTML = sanitizeHtml(c.kwyre);
   document.getElementById('caseOverlay').classList.add('open');
   document.body.style.overflow = 'hidden';
 }
@@ -1974,9 +1998,9 @@ function submitAccess() {
     return;
   }
 
-  const requests = JSON.parse(localStorage.getItem('kwyre_requests') || '[]');
+  const requests = JSON.parse(sessionStorage.getItem('kwyre_requests') || '[]');
   requests.push({ type: accessType, email, company: company || null, ts: Date.now() });
-  localStorage.setItem('kwyre_requests', JSON.stringify(requests));
+  sessionStorage.setItem('kwyre_requests', JSON.stringify(requests));
 
   document.getElementById('formView').style.display = 'none';
   document.getElementById('successView').style.display = '';

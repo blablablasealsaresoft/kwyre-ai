@@ -8,7 +8,8 @@
 [![Quantization](https://img.shields.io/badge/quant-4--bit%20NF4-green.svg)]()
 [![Security](https://img.shields.io/badge/security-6--layer%20stack-red.svg)]()
 [![Docker](https://img.shields.io/badge/deploy-docker--compose%20up-blue.svg)]()
-[![Status](https://img.shields.io/badge/status-v0.2%20active-brightgreen.svg)]()
+[![Status](https://img.shields.io/badge/status-v0.3%20active-brightgreen.svg)]()
+[![Pentest](https://img.shields.io/badge/pentest-47%2F47%20resolved-brightgreen.svg)]()
 
 ---
 
@@ -96,6 +97,27 @@ It is not a hobbyist local model runner. It is a **certified, auditable, breach-
 - **On confirmed intrusion: all sessions wiped immediately, server process terminated**
 - Watchdog status exposed on `/health` and `/audit` endpoints
 
+### Security Hardening (v0.3 — Pentest Verified)
+
+Kwyre v0.3 underwent a full white-box security audit and penetration test. All 47 findings (9 Critical, 12 High, 14 Medium, 12 Low/Info) were resolved. Key hardening measures:
+
+- **True air-gap enforcement** — External API tools (`tools.py`) are now opt-in via `KWYRE_ENABLE_TOOLS=1` (default OFF). When disabled, zero external HTTP requests are made — verified by SSRF host allowlist and watchdog
+- **CSP nonce-based script protection** — All inline scripts use per-request cryptographic nonces instead of `'unsafe-inline'`; `cdn.jsdelivr.net` restricted to payment page only
+- **Timing-safe authentication** — API key validation uses `hmac.compare_digest` to prevent timing side-channel attacks
+- **Input validation** — `max_tokens` clamped to 1-8192, `temperature` to 0.0-2.0, `top_p` to 0.0-1.0; message arrays validated for type and length (max 100)
+- **License key injection blocked** — Public key no longer loadable from environment variables; must be embedded at build time
+- **Eval tier enforcement** — Unlicensed usage rate-limited to 10 req/min and 512 max tokens with server-side trial counter (3 requests per IP)
+- **Security headers on all responses** — `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`, `Permissions-Policy`, and full CSP on every HTTP response including error paths
+- **mXSS-safe HTML sanitization** — DOMParser-based sanitizer replaces template-based version to prevent mutation XSS
+- **Non-root Docker container** — Dedicated `kwyre` user with minimal privileges; dependency manifest generated at build time
+- **Session storage hardening** — API keys and trial data use `sessionStorage` (cleared on tab close), not persistent `localStorage`
+- **Session ID hardening** — Minimum 32-character entropy requirement; server generates IDs for short/missing values
+- **Watchdog child process monitoring** — Intrusion watchdog now recursively monitors child process network connections
+- **Authenticated health endpoint** — `/health` returns only `{"status": "ok"}` to unauthenticated requests; detailed system info requires API key
+- **CORS origin restriction** — `Access-Control-Allow-Origin` locked to the server's own origin
+
+**Test suite: 107 tests across 3 test files, all passing.**
+
 ### Privacy Features
 - **Zero content logging** — metadata only (timestamps, token counts) — conversation content never touches disk
 - **No telemetry** — zero analytics, zero error reporting, zero update pings, zero license callbacks
@@ -112,9 +134,9 @@ It is not a hobbyist local model runner. It is a **certified, auditable, breach-
 
 ### API Endpoints
 ```
-POST /v1/chat/completions   OpenAI-compatible inference
-POST /v1/session/end        Cryptographic session wipe
-GET  /health                Model + security stack status
+POST /v1/chat/completions   OpenAI-compatible inference (auth required)
+POST /v1/session/end        Cryptographic session wipe (auth required)
+GET  /health                Status check (detailed info requires auth)
 GET  /audit                 Metadata-only compliance log (auth required)
 GET  /v1/models             Model info (auth required)
 GET  /                      Landing page
@@ -213,6 +235,8 @@ Set via environment variables or `.env` file:
 | `KWYRE_API_KEYS` | `sk-kwyre-dev-local:admin` | API key:role pairs (semicolon-separated) |
 | `KWYRE_MERGE_LORA` | `0` | Merge LoRA adapters at load (set `1` if >24GB VRAM) |
 | `KWYRE_LICENSE_KEY` | — | Commercial license key |
+| `KWYRE_ENABLE_TOOLS` | `0` | Enable external API tools (weather, crypto, etc.). **Set `1` to enable — breaks air-gap** |
+| `KWYRE_BIND_HOST` | `127.0.0.1` | Network bind address (use `0.0.0.0` only inside Docker) |
 
 ---
 
@@ -284,7 +308,7 @@ Set via environment variables or `.env` file:
 - [x] Intrusion detection watchdog
 - [x] Compliance documentation package
 
-**v0.2 (Current)**
+**v0.2 (Complete)**
 - [x] Pre-quantized NF4 model distribution (3.3 GB total download)
 - [x] Speculative decoding with Qwen3-0.6B draft model (2-3x speed)
 - [x] Qwen3-4B tier (3.9 GB VRAM for both models combined)
@@ -292,9 +316,21 @@ Set via environment variables or `.env` file:
 - [x] Monero payment integration + Ed25519 offline license keys
 - [x] Multi-tier model support (4B personal / 9B professional)
 - [x] Inference-only dependency set (stripped training deps for lean install)
+
+**v0.3 (Current — Security Hardened)**
+- [x] Full white-box penetration test — 47/47 findings resolved
+- [x] True air-gap enforcement — tools opt-in, default offline
+- [x] CSP nonce-based script protection (removed `unsafe-inline`)
+- [x] Timing-safe API key authentication (`hmac.compare_digest`)
+- [x] Input validation and eval tier enforcement
+- [x] Non-root Docker container with dependency manifest
+- [x] DOMParser-based HTML sanitization (mXSS-safe)
+- [x] Security headers on all HTTP response paths
+- [x] Watchdog child process monitoring
+- [x] 107 security tests across 3 test suites
 - [ ] Windows one-click installer
 
-**v0.3**
+**v0.4**
 - [ ] Apple Silicon / MLX support (targets legal market on Mac)
 - [ ] CPU-only mode via llama.cpp (Kwyre Air — any hardware)
 - [ ] Domain-specific fine-tune (legal, financial, forensics corpora)

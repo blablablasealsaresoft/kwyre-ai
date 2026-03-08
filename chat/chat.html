@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
 <title>Kwyre AI — Air-Gapped Inference</title>
 <meta name="description" content="Air-gapped AI inference for analysts who cannot afford a breach. 6-layer security stack. Zero data leaves your machine.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -1229,7 +1232,7 @@ nav {
   </div>
 </footer>
 
-<script>
+<script nonce="{{CSP_NONCE}}">
 const isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
 const API_BASE = window.location.origin;
 
@@ -1248,14 +1251,14 @@ let messages = [];
 let isGenerating = false;
 
 if (isLocal) {
-  const saved = localStorage.getItem('kwyre_api_key');
+  const saved = sessionStorage.getItem('kwyre_api_key');
   if (saved) { apiKeyInput.value = saved; validateKey(saved); }
 }
 
 apiKeyInput.addEventListener('input', () => {
   const key = apiKeyInput.value.trim();
   if (key.startsWith('sk-kwyre-') && key.length >= 14) {
-    localStorage.setItem('kwyre_api_key', key);
+    sessionStorage.setItem('kwyre_api_key', key);
     validateKey(key);
   } else {
     statusDot.className = 'status-dot';

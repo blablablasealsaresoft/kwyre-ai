@@ -27,8 +27,8 @@ services:
       # License key (commercial deployments)
       - KWYRE_LICENSE_KEY=${KWYRE_LICENSE_KEY:-}
 
-      # Skip L3 dep check in Docker (container IS the controlled environment)
-      - KWYRE_SKIP_DEP_CHECK=1
+      # Tools are opt-in; default is air-gapped (no external HTTP requests)
+      - KWYRE_ENABLE_TOOLS=${KWYRE_ENABLE_TOOLS:-0}
 
       # Disable torch.compile (not needed for inference, avoids dynamo bugs)
       - TORCHDYNAMO_DISABLE=1
@@ -43,7 +43,7 @@ services:
 
     volumes:
       # HuggingFace model cache (read-write so first-run download persists)
-      - ${HF_CACHE:-./.cache/huggingface}:/root/.cache/huggingface
+      - ${HF_CACHE:-./.cache/huggingface}:/workspace/.cache/huggingface
       # QAT / LoRA adapters (read-only; optional)
       - ${QAT_PATH:-./qat_output_v1/final}:/workspace/qat_output_v1/final:ro
       # License key file (read-only; optional — uncomment if you have a license)

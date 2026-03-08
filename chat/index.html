@@ -3,6 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
 <title>Kwyre AI — Your AI. Not Theirs.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -310,7 +313,7 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 <div class="prog-wrap"><div class="prog-bar" id="pb"></div></div>
 <div id="exit"></div>
 
-<script>
+<script nonce="{{CSP_NONCE}}">
 /* ── NEURAL CANVAS ── */
 const cv = document.getElementById('neural');
 const cx = cv.getContext('2d');
@@ -442,6 +445,28 @@ setInterval(()=>{
 },900);
 
 
+/* ── HTML SANITIZER ── */
+function sanitizeHtml(html) {
+  const SAFE_TAGS = new Set(['B','STRONG','I','EM','SPAN','BR']);
+  const SAFE_ATTRS = new Set(['class']);
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  (function clean(node) {
+    for (const child of [...node.childNodes]) {
+      if (child.nodeType === 1) {
+        if (!SAFE_TAGS.has(child.tagName)) {
+          child.replaceWith(document.createTextNode(child.textContent));
+        } else {
+          [...child.attributes].forEach(a => {
+            if (!SAFE_ATTRS.has(a.name)) child.removeAttribute(a.name);
+          });
+          clean(child);
+        }
+      }
+    }
+  })(doc.body);
+  return doc.body.innerHTML;
+}
+
 /* ── SEQUENCE ENGINE ── */
 const SEQ=[
   { ey:'Standard AI', l1:'<span class="s">Your queries, their servers.</span>', l2:'<span class="s">Your data, their product.</span>', sb:'', dur:2400 },
@@ -464,7 +489,7 @@ function show(i) {
 
   setTimeout(()=>{
     ey.textContent=s.ey;
-    l1.innerHTML=s.l1||''; l2.innerHTML=s.l2||''; sb.innerHTML=s.sb||'';
+    l1.innerHTML=sanitizeHtml(s.l1||''); l2.innerHTML=sanitizeHtml(s.l2||''); sb.textContent=s.sb||'';
     l1.setAttribute('data-text',l1.textContent); l1.classList.add('glitch');
     l2.setAttribute('data-text',l2.textContent); l2.classList.add('glitch');
     requestAnimationFrame(()=>{

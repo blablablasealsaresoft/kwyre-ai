@@ -8,6 +8,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && ln -sf /usr/bin/python3.11 /usr/bin/python \
     && rm -rf /var/lib/apt/lists/*
 
+RUN groupadd -r kwyre && useradd -r -g kwyre -d /workspace -s /usr/sbin/nologin kwyre
+
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1
 
@@ -33,6 +35,10 @@ COPY chat/                ./chat/
 COPY docker/entrypoint.sh /entrypoint.sh
 
 RUN chmod +x /entrypoint.sh
+RUN python security/verify_deps.py generate || true
+
+RUN chown -R kwyre:kwyre /workspace
+USER kwyre
 
 EXPOSE 8000
 

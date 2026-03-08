@@ -63,7 +63,7 @@ TIERS = {
 
 # Embedded public key for license verification (set after keygen)
 # This is safe to embed in source — it can only VERIFY, not create licenses.
-EMBEDDED_PUBLIC_KEY = os.environ.get("KWYRE_LICENSE_PUBKEY", "")
+EMBEDDED_PUBLIC_KEY = ""  # Set after running: python license.py keygen
 
 
 def _load_private_key():

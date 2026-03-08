@@ -9,6 +9,7 @@ import time
 import torch
 import json
 import hashlib
+import hmac
 import secrets
 import signal
 import threading
@@ -30,7 +31,13 @@ _project_root = os.path.dirname(_server_dir)
 sys.path.insert(0, _server_dir)
 sys.path.insert(0, os.path.join(_project_root, "model"))
 sys.path.insert(0, os.path.join(_project_root, "security"))
-from tools import route_tools
+TOOLS_ENABLED = os.environ.get("KWYRE_ENABLE_TOOLS", "0") == "1"
+if TOOLS_ENABLED:
+    from tools import route_tools
+else:
+    def route_tools(_msg):
+        return [], []
+
 from spike_serve import apply_spike_hooks, get_sparsity_stats, reset_sparsity_stats, set_tracking
 from verify_deps import startup_check
 from license import startup_validate as validate_license
@@ -287,7 +294,9 @@ class IntrusionWatchdog(threading.Thread):
         our_pid = os.getpid()
         try:
             proc = psutil.Process(our_pid)
-            for conn in proc.net_connections():
+            all_procs = [proc] + proc.children(recursive=True)
+            for p in all_procs:
+              for conn in p.net_connections():
                 if conn.status != psutil.CONN_ESTABLISHED:
                     continue
                 raddr = conn.raddr
@@ -443,6 +452,9 @@ if _license_data is None:
     print("[License] WARNING: No valid license. Running in evaluation mode.")
     print("[License] Purchase at https://kwyre.com")
 _license_tier: str = _license_data["tier"] if _license_data else "eval"
+_MAX_EVAL_TOKENS = 512
+if _license_tier == "eval":
+    RATE_LIMIT_RPM = 10
 
 print(f"Loading tokenizer from {LOCAL_MODEL_PATH}...")
 tokenizer = AutoTokenizer.from_pretrained(
@@ -625,6 +637,7 @@ def _shutdown_handler(signum, frame):
 signal.signal(signal.SIGTERM, _shutdown_handler)
 signal.signal(signal.SIGINT, _shutdown_handler)
 
+_trial_tracker: dict[str, int] = {}
 print(f"[Security] Bound to {BIND_HOST}:{PORT} — localhost only")
 print(f"[Security] Intrusion watchdog active")
 print(f"[Security] Session store active — RAM only, wiped on close")
@@ -639,33 +652,34 @@ class ChatHandler(BaseHTTPRequestHandler):
         auth = self.headers.get("Authorization", "")
         if auth.startswith("Bearer "):
             key = auth[7:]
-            if key in API_KEYS:
-                return API_KEYS[key]
-        self.send_response(401)
-        self.send_header("Content-Type", "application/json")
-        self.end_headers()
-        self.wfile.write(json.dumps(
-            {"error": "Invalid API key."}
-        ).encode())
+            for valid_key, user in API_KEYS.items():
+                if hmac.compare_digest(key, valid_key):
+                    return user
+        self._send_json_error(401, "Invalid API key.")
+        return None
+
+    def _check_auth_optional(self):
+        """Like _check_auth but returns None silently instead of sending 401."""
+        auth = self.headers.get("Authorization", "")
+        if auth.startswith("Bearer "):
+            key = auth[7:]
+            for valid_key, user in API_KEYS.items():
+                if hmac.compare_digest(key, valid_key):
+                    return user
         return None
 
     def _check_rate_limit(self, user):
         now = time.time()
         rate_tracker[user] = [t for t in rate_tracker[user] if now - t < 60]
         if len(rate_tracker[user]) >= RATE_LIMIT_RPM:
-            self.send_response(429)
-            self.send_header("Content-Type", "application/json")
-            self.end_headers()
-            self.wfile.write(json.dumps(
-                {"error": "Rate limit exceeded. Max 30 req/min."}
-            ).encode())
+            self._send_json_error(429, f"Rate limit exceeded. Max {RATE_LIMIT_RPM} req/min.")
             return False
         rate_tracker[user].append(now)
         return True
 
     def _get_session_id(self, body: dict) -> str:
         sid = body.get("session_id")
-        if not sid or not isinstance(sid, str) or len(sid) < 8:
+        if not sid or not isinstance(sid, str) or len(sid) < 32:
             sid = secrets.token_hex(16)
         return sid
 
@@ -706,16 +720,17 @@ class ChatHandler(BaseHTTPRequestHandler):
     def _send_json_error(self, status: int, message: str):
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
+        self._send_security_headers()
         self.end_headers()
         self.wfile.write(json.dumps({"error": message}).encode())
 
     def do_OPTIONS(self):
-        """Handle CORS preflight for browsers. Same-origin typically doesn't need it, but safe to support."""
         self.send_response(204)
         self.send_header("Content-Length", "0")
         self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
         self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
         self.send_header("Access-Control-Max-Age", "86400")
+        self._send_security_headers()
         self.end_headers()
 
     def do_POST(self):
@@ -732,10 +747,27 @@ class ChatHandler(BaseHTTPRequestHandler):
                 return
             assert body is not None
             messages = body.get("messages", [])
-            max_tokens = body.get("max_tokens", 2048)
-            temperature = body.get("temperature", 0.7)
-            top_p = body.get("top_p", 0.9)
+            if not isinstance(messages, list) or len(messages) > 100:
+                self._send_json_error(400, "messages must be a list of at most 100 items.")
+                return
+            try:
+                max_tokens = min(max(int(body.get("max_tokens", 2048)), 1), 8192)
+                temperature = min(max(float(body.get("temperature", 0.7)), 0.0), 2.0)
+                top_p = min(max(float(body.get("top_p", 0.9)), 0.0), 1.0)
+            except (TypeError, ValueError):
+                self._send_json_error(400, "Invalid max_tokens, temperature, or top_p.")
+                return
+            if _license_tier == "eval":
+                max_tokens = min(max_tokens, _MAX_EVAL_TOKENS)
             session_id = self._get_session_id(body)
+
+            if _license_tier == "eval":
+                trial_key = f"trial:{self.client_address[0]}"
+                trial_count = _trial_tracker.get(trial_key, 0)
+                if trial_count >= 3:
+                    self._send_json_error(429, "Trial limit reached. Purchase a license at https://kwyre.com")
+                    return
+                _trial_tracker[trial_key] = trial_count + 1
 
             session = session_store.get_or_create(session_id)
             for m in messages:
@@ -803,6 +835,7 @@ class ChatHandler(BaseHTTPRequestHandler):
 
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
+            self._send_security_headers()
             self.end_headers()
             self.wfile.write(json.dumps({
                 "choices": [{"message": {"role": "assistant", "content": reply}}],
@@ -835,65 +868,117 @@ class ChatHandler(BaseHTTPRequestHandler):
                 msg = "No session_id provided."
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
+            self._send_security_headers()
             self.end_headers()
             self.wfile.write(json.dumps({"status": "wiped", "message": msg}).encode())
 
         else:
-            self.send_response(404)
-            self.end_headers()
+            self._send_json_error(404, "Not found.")
+
+    def _send_security_headers(self, nonce: str = "", extra_script_src: str = ""):
+        self.send_header("X-Content-Type-Options", "nosniff")
+        self.send_header("X-Frame-Options", "DENY")
+        self.send_header("X-XSS-Protection", "1; mode=block")
+        self.send_header("Referrer-Policy", "no-referrer")
+        self.send_header("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
+        script_src = "'self'"
+        if nonce:
+            script_src += f" 'nonce-{nonce}'"
+        else:
+            script_src += " 'unsafe-inline'"
+        if extra_script_src:
+            script_src += f" {extra_script_src}"
+        self.send_header(
+            "Content-Security-Policy",
+            f"default-src 'self'; "
+            f"script-src {script_src}; "
+            f"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
+            f"font-src 'self' https://fonts.gstatic.com; "
+            f"connect-src 'self'; "
+            f"img-src 'self' data:; "
+            f"frame-ancestors 'none'; "
+            f"base-uri 'self'; "
+            f"form-action 'self'",
+        )
+        self.send_header("Access-Control-Allow-Origin", f"http://{BIND_HOST}:{PORT}")
 
     def _serve_html(self, filename: str):
         filepath = os.path.join(CHAT_DIR, filename)
-        if not os.path.isfile(filepath):
-            self.send_response(404)
+        resolved = os.path.realpath(filepath)
+        if not resolved.startswith(os.path.realpath(CHAT_DIR)):
+            self.send_response(403)
+            self._send_security_headers()
             self.end_headers()
             return
-        with open(filepath, "rb") as f:
+        if not os.path.isfile(resolved):
+            self.send_response(404)
+            self._send_security_headers()
+            self.end_headers()
+            return
+        with open(resolved, "rb") as f:
             html = f.read()
+        nonce = secrets.token_urlsafe(16)
+        html = html.replace(b"{{CSP_NONCE}}", nonce.encode())
+        extra_script_src = "https://cdn.jsdelivr.net" if filename == "pay.html" else ""
         self.send_response(200)
         self.send_header("Content-Type", "text/html; charset=utf-8")
         self.send_header("Cache-Control", "no-cache")
+        self._send_security_headers(nonce=nonce, extra_script_src=extra_script_src)
         self.end_headers()
         self.wfile.write(html)
+
+    @staticmethod
+    def _safe_page_name(raw_path: str) -> str | None:
+        """Extract page name and validate against the whitelist.
+        Returns the filename if safe, None otherwise."""
+        stripped = raw_path.lstrip("/")
+        basename = os.path.basename(stripped)
+        if basename in ALLOWED_PAGES and basename == stripped:
+            return basename
+        return None
 
     def do_GET(self):
         if self.path == "/":
             self._serve_html("landing.html")
         elif self.path == "/chat":
             self._serve_html("chat.html")
-        elif self.path.lstrip("/") in ALLOWED_PAGES:
-            self._serve_html(self.path.lstrip("/"))
+        elif (page := self._safe_page_name(self.path)) is not None:
+            self._serve_html(page)
 
         elif self.path == "/health":
-            gpu_used = torch.cuda.memory_allocated() / 1e9
+            auth_user = self._check_auth_optional()
+            health_data = {"status": "ok"}
+            if auth_user:
+                gpu_used = torch.cuda.memory_allocated() / 1e9
+                health_data.update({
+                    "model": f"{ACTIVE_TIER['name']}-spikeserve",
+                    "base": MODEL_ID.split("/")[-1],
+                    "quantization": f"4-bit {KWYRE_QUANT.upper()}",
+                    "security": {
+                        "l1_network_binding": f"{BIND_HOST}:{PORT} (localhost only)",
+                        "l2_process_lockdown": "os-configured (iptables/firewall, not verified by server)",
+                        "l3_dependency_integrity": "verified",
+                        "l4_weight_integrity": "configured" if KNOWN_WEIGHT_HASHES else "first-run",
+                        "l5_conversation_storage": "RAM-only",
+                        "l6_intrusion_watchdog": watchdog.get_status(),
+                        "sessions_active": session_store.active_count(),
+                    },
+                    "speculative_decoding": {
+                        "enabled": draft_model is not None,
+                        "draft_model": DRAFT_MODEL_ID if draft_model is not None else None,
+                    },
+                    "spike_analysis": {
+                        "k": SPIKE_K,
+                        "projected_sparsity_pct": STARTUP_SPARSITY["avg_sparsity"],
+                        "spike_encoded_layers": n_converted,
+                    },
+                    "gpu_vram_gb": round(gpu_used, 1),
+                })
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
+            self._send_security_headers()
             self.end_headers()
-            self.wfile.write(json.dumps({
-                "status": "ok",
-                "model": f"{ACTIVE_TIER['name']}-spikeserve",
-                "base": MODEL_ID.split("/")[-1],
-                "quantization": f"4-bit {KWYRE_QUANT.upper()}",
-                "security": {
-                    "l1_network_binding": f"{BIND_HOST}:{PORT} (localhost only)",
-                    "l2_process_lockdown": "os-configured (iptables/firewall, not verified by server)",
-                    "l3_dependency_integrity": "verified",
-                    "l4_weight_integrity": "configured" if KNOWN_WEIGHT_HASHES else "first-run",
-                    "l5_conversation_storage": "RAM-only",
-                    "l6_intrusion_watchdog": watchdog.get_status(),
-                    "sessions_active": session_store.active_count(),
-                },
-                "speculative_decoding": {
-                    "enabled": draft_model is not None,
-                    "draft_model": DRAFT_MODEL_ID if draft_model is not None else None,
-                },
-                "spike_analysis": {
-                    "k": SPIKE_K,
-                    "projected_sparsity_pct": STARTUP_SPARSITY["avg_sparsity"],
-                    "spike_encoded_layers": n_converted,
-                },
-                "gpu_vram_gb": round(gpu_used, 1),
-            }, indent=2).encode())
+            self.wfile.write(json.dumps(health_data, indent=2).encode())
 
         elif self.path == "/audit":
             user = self._check_auth()
@@ -901,6 +986,7 @@ class ChatHandler(BaseHTTPRequestHandler):
                 return
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
+            self._send_security_headers()
             self.end_headers()
             self.wfile.write(json.dumps({
                 "server": f"{ACTIVE_TIER['name']}-spikeserve",
@@ -925,6 +1011,7 @@ class ChatHandler(BaseHTTPRequestHandler):
                 return
             self.send_response(200)
             self.send_header("Content-Type", "application/json")
+            self._send_security_headers()
             self.end_headers()
             self.wfile.write(json.dumps({
                 "object": "list",
@@ -949,11 +1036,11 @@ class ChatHandler(BaseHTTPRequestHandler):
 
         elif self.path == "/favicon.ico":
             self.send_response(204)
+            self._send_security_headers()
             self.end_headers()
 
         else:
-            self.send_response(404)
-            self.end_headers()
+            self._send_json_error(404, "Not found.")
 
     def log_message(self, fmt, *args):
         print(f"[{self.log_date_time_string()}] {fmt % args}")
@@ -979,5 +1066,9 @@ if __name__ == "__main__":
     print("  [L4] Integrity: SHA256 weight verification at startup")
     print("  [L5] Storage: RAM-only sessions, wiped on close")
     print("  [L6] Watchdog: intrusion detection active")
+    if TOOLS_ENABLED:
+        print("  [Tools] ENABLED — external API calls active (NOT air-gapped)")
+    else:
+        print("  [Tools] DISABLED — fully air-gapped, no external requests")
     print("\n  All inference runs 100% locally. No data leaves this machine.\n")
     server.serve_forever()
