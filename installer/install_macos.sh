@@ -16,7 +16,7 @@ set -euo pipefail
 
 INSTALL_DIR="${1:-/opt/kwyre}"
 KWYRE_USER="_kwyre"
-VERSION="0.3.0"
+VERSION="1.0.0"
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 RED='\033[0;31m'

@@ -579,33 +579,63 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 ```bash
 pip install nuitka ordered-set zstandard
 
-python build.py all              # Compile + package + installer + sign
+python build.py all              # Full pipeline: compile + package + installer + sign
 
 # Or step by step:
-python build.py compile          # Nuitka → build/kwyre-dist/kwyre-server[.exe]
-python build.py package          # Stage data files
+python build.py compile          # Nuitka compile -> build/kwyre-dist/kwyre-server[.exe]
+python build.py package          # Stage data files + version.json into build/kwyre-dist/
 python build.py installer        # Platform installer (.exe/.deb/.pkg)
-python build.py sign             # Ed25519 sign all build artifacts
-python build.py update-package   # Create .kwyre-update for air-gap updates
-python build.py clean            # Clean artifacts
+python build.py sign             # Ed25519 sign all build artifacts (MANIFEST.sig.json)
+python build.py verify           # Verify signed release (signature + file hashes)
+python build.py update-package   # Create .kwyre-update ZIP for air-gap updates
+python build.py clean            # Remove build/ directory
+
+# Cross-platform installer targeting:
+python build.py installer --platform windows   # Inno Setup .exe
+python build.py installer --platform linux     # .deb + AppImage script
+python build.py installer --platform macos     # .pkg + launchd plist
+python build.py installer --platform all       # All platforms
+
+python build.py -V               # Print version (1.0.0)
 ```
 
 **What gets compiled (protected):**
-- `server/serve_local_4bit.py` — inference server, streaming, KV cache, security layers
-- `server/tools.py` — external API tool router
-- `security/verify_deps.py` — Layer 3 dependency integrity
-- `security/license.py` — Ed25519 license validation + hardware-bound fingerprint
-- `security/codesign.py` — Ed25519 release signing and verification
-- `security/updater.py` — air-gap safe update mechanism
-- `model/spike_serve.py` — SpikeServe inference encoding
+
+| Module | Purpose |
+|--------|---------|
+| `server/serve_local_4bit.py` | GPU inference server, SSE streaming, KV cache, security layers |
+| `server/serve_cpu.py` | Kwyre Air CPU-only backend (llama.cpp / GGUF) |
+| `server/serve_mlx.py` | Apple Silicon MLX backend |
+| `server/security_core.py` | Security layer orchestration |
+| `server/tools.py` | External API tool router |
+| `server/users.py` | Multi-user management + RBAC |
+| `server/audit.py` | Enterprise audit logging |
+| `security/verify_deps.py` | Layer 3 dependency integrity |
+| `security/license.py` | Ed25519 license validation + hardware-bound fingerprint |
+| `security/codesign.py` | Ed25519 release signing and verification |
+| `security/updater.py` | Air-gap safe update mechanism |
+| `model/spike_serve.py` | SpikeServe inference encoding |
 
 **Build outputs:**
 
-| Platform | Installer | Format |
-|----------|-----------|--------|
-| Windows | Inno Setup | `.exe` |
-| Linux | Debian package + AppImage | `.deb` / `.AppImage` |
-| macOS | macOS package | `.pkg` |
+| Platform | Installer | Format | Service |
+|----------|-----------|--------|---------|
+| Windows | Inno Setup + GUI installer | `.exe` | Windows Service |
+| Linux | Debian package + AppImage | `.deb` / `.AppImage` | systemd |
+| macOS | macOS package | `.pkg` | launchd |
+
+**Package contents (build/kwyre-dist/):**
+```
+kwyre-server[.exe]         # Nuitka-compiled standalone binary
+chat/                      # Frontend (main.html, chat.html, pay.html, etc.)
+docs/                      # SOC2 guide, audit docs
+security/                  # Dep manifest, isolation scripts, signing modules
+installer/                 # Platform install scripts + GUI installer
+version.json               # Build version + platform metadata
+MANIFEST.sig.json          # Ed25519 signed release manifest (after 'sign')
+.env.example               # Environment configuration template
+LICENSE                    # MIT license
+```
 
 ---
 
