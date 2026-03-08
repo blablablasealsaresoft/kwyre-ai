@@ -8,7 +8,7 @@
 [![Quantization](https://img.shields.io/badge/quant-4--bit%20NF4-green.svg)]()
 [![Security](https://img.shields.io/badge/security-6--layer%20stack-red.svg)]()
 [![Docker](https://img.shields.io/badge/deploy-docker--compose%20up-blue.svg)]()
-[![Status](https://img.shields.io/badge/status-v0.3%20active-brightgreen.svg)]()
+[![Status](https://img.shields.io/badge/status-v0.4%20active-brightgreen.svg)]()
 [![Pentest](https://img.shields.io/badge/pentest-47%2F47%20resolved-brightgreen.svg)]()
 
 ---
@@ -141,6 +141,14 @@ GET  /audit                 Metadata-only compliance log (auth required)
 GET  /v1/models             Model info (auth required)
 GET  /                      Landing page
 GET  /chat                  Browser UI
+
+Admin endpoints (multi-user mode only, admin role required):
+GET    /v1/admin/users          List users
+POST   /v1/admin/users          Create user
+DELETE /v1/admin/users/{name}   Delete user
+GET    /v1/admin/sessions       List sessions
+POST   /v1/admin/sessions/wipe  Wipe user sessions
+GET    /v1/admin/audit          Per-user audit
 ```
 
 ---
@@ -207,6 +215,33 @@ pip install -r requirements-inference.txt
 python server/serve_local_4bit.py
 ```
 
+### Option 3b: Kwyre Air (CPU mode — any hardware)
+```bash
+# Convert model to GGUF first, or use pre-built GGUF from kwyre.com
+python model/convert_gguf.py --model Qwen/Qwen3-4B --output ./models/kwyre-4b.gguf
+
+KWYRE_GGUF_PATH=./models/kwyre-4b.gguf python server/serve_cpu.py
+# No GPU required — runs on CPU via llama.cpp
+```
+
+### Option 3c: MLX mode (Apple Silicon)
+```bash
+# Convert model to MLX format first
+python model/convert_mlx.py --model Qwen/Qwen3-4B --output ./models/kwyre-4b-mlx
+
+python server/serve_mlx.py
+# Native Apple Silicon acceleration
+```
+
+### Option 3d: Multi-user mode
+```bash
+# Initialize users and generate master key
+python server/users.py init
+
+KWYRE_MULTI_USER=1 python server/serve_local_4bit.py
+# Per-user sessions, admin endpoints, encrypted user store
+```
+
 ### Option 4: Pre-quantized models (fastest startup)
 ```bash
 # Download pre-quantized models from kwyre.com → extract to dist/
@@ -249,12 +284,19 @@ Set via environment variables or `.env` file:
 
 | Variable | Default | Description |
 |----------|---------|-------------|
+| `KWYRE_BACKEND` | `gpu` | Inference backend: `gpu`, `cpu`, or `mlx` |
 | `KWYRE_MODEL` | `Qwen/Qwen3-4B` | Model tier (`Qwen/Qwen3-4B` or `Qwen/Qwen3.5-9B`) |
 | `KWYRE_MODEL_PATH` | auto-detect | Path to pre-quantized model directory |
 | `KWYRE_DRAFT_PATH` | auto-detect | Path to pre-quantized draft model directory |
+| `KWYRE_GGUF_PATH` | — | Path to GGUF model for CPU mode (Kwyre Air) |
+| `KWYRE_AWQ_MODEL_PATH` | — | Path to pre-quantized AWQ model |
+| `KWYRE_CTX_LENGTH` | `8192` | Context length for CPU mode |
 | `KWYRE_SPECULATIVE` | `1` | Enable speculative decoding with draft model |
 | `KWYRE_QUANT` | `nf4` | Quantization mode (`nf4` or `awq`) |
 | `KWYRE_API_KEYS` | `sk-kwyre-dev-local:admin` | API key:role pairs (semicolon-separated) |
+| `KWYRE_MULTI_USER` | `0` | Multi-user air-gapped mode (`0` or `1`) |
+| `KWYRE_USERS_FILE` | `users.json` | Path to encrypted users file |
+| `KWYRE_MASTER_KEY` | — | Fernet key for users file encryption |
 | `KWYRE_MERGE_LORA` | `0` | Merge LoRA adapters at load (set `1` if >24GB VRAM) |
 | `KWYRE_LICENSE_KEY` | — | Commercial license key |
 | `KWYRE_ENABLE_TOOLS` | `0` | Enable external API tools (weather, crypto, etc.). **Set `1` to enable — breaks air-gap** |
@@ -290,17 +332,23 @@ Set via environment variables or `.env` file:
 │  │  │ Auth + Rate  │   │  Intrusion Watchdog  │    │   │
 │  │  │   Limiting   │   │  (Layer 6 — active)  │    │   │
 │  │  └──────────────┘   └──────────────────────┘    │   │
-│  │                                                  │   │
+│  │         │                      │                  │   │
+│  │         ▼                      ▼                  │   │
 │  │  ┌──────────────────────────────────────────┐   │   │
-│  │  │        Secure Session Store (L5)          │   │   │
-│  │  │   RAM-only · AES key · auto-wipe · DoD   │   │   │
+│  │  │     Shared Security Core (security_core)   │   │   │
+│  │  │  SessionStore · SecureBuffer · Headers    │   │   │
 │  │  └──────────────────────────────────────────┘   │   │
-│  │                                                  │   │
-│  │  ┌──────────────────────────────────────────┐   │   │
-│  │  │      Spike QAT Inference Engine           │   │   │
-│  │  │  Qwen3-4B main · Qwen3-0.6B draft       │   │   │
-│  │  │  4-bit NF4 · SpikeServe · Speculative   │   │   │
-│  │  └──────────────────────────────────────────┘   │   │
+│  │         ▲                      ▲                  │   │
+│  │         │                      │                  │   │
+│  │  ┌──────┴──────┐   ┌───────────┴───────────┐     │   │
+│  │  │ GPU Backend │   │ CPU Backend (llama.cpp)│     │   │
+│  │  │ serve_local │   │ serve_cpu (Kwyre Air)  │     │   │
+│  │  │ _4bit.py    │   │                        │     │   │
+│  │  └─────────────┘   └───────────────────────┘     │   │
+│  │  ┌──────────────┐                                 │   │
+│  │  │ MLX Backend  │   (Apple Silicon)               │   │
+│  │  │ serve_mlx.py │                                 │   │
+│  │  └──────────────┘                                 │   │
 │  │                                                  │   │
 │  │  Startup checks:                                 │   │
 │  │  [L3] Dependency hash verification               │   │
@@ -339,7 +387,7 @@ Set via environment variables or `.env` file:
 - [x] Multi-tier model support (4B personal / 9B professional)
 - [x] Inference-only dependency set (stripped training deps for lean install)
 
-**v0.3 (Current — Security Hardened)**
+**v0.3 (Complete — Security Hardened)**
 - [x] Full white-box penetration test — 47/47 findings resolved
 - [x] True air-gap enforcement — tools opt-in, default offline
 - [x] CSP nonce-based script protection (removed `unsafe-inline`)
@@ -353,17 +401,22 @@ Set via environment variables or `.env` file:
 - [x] Windows, Linux, and macOS one-click installers
 - [x] Nuitka build pipeline — compiled binary distribution (source protection)
 
-**v0.4**
-- [ ] Apple Silicon / MLX support (targets legal market on Mac)
-- [ ] CPU-only mode via llama.cpp (Kwyre Air — any hardware)
-- [ ] Domain-specific fine-tune (legal, financial, forensics corpora)
-- [ ] AWQ quantization option (1.4x speed when pre-quantized)
+**v0.4 (Current)**
+- [x] Apple Silicon / MLX support — `server/serve_mlx.py` with `model/convert_mlx.py`
+- [x] CPU-only mode via llama.cpp — `server/serve_cpu.py` (Kwyre Air) with `model/convert_gguf.py`
+- [x] AWQ quantization option — `KWYRE_AWQ_MODEL_PATH` env var, `KWYRE_QUANT=awq`
+- [x] Multi-user air-gapped server mode — `server/users.py`, `server/audit.py`, `KWYRE_MULTI_USER=1`
+- [x] Domain-specific fine-tune pipeline — `finetune/` directory
+- [x] Benchmark suite vs GPT-4o — `benchmarks/` directory
+- [x] SOC2-friendly deployment guide — `docs/SOC2_DEPLOYMENT_GUIDE.md`
+- [x] Enterprise audit package — `docs/ENTERPRISE_AUDIT.md`
+- [x] Shared security infrastructure — `server/security_core.py`
 
 **v1.0**
-- [ ] Benchmark suite vs GPT-4o on compliance tasks
-- [ ] SOC2-friendly deployment guide
-- [ ] Enterprise audit package
-- [ ] Multi-user air-gapped server mode
+- [ ] Hardware-bound license keys (machine fingerprint)
+- [ ] Code signing for releases
+- [ ] Windows one-click GUI installer
+- [ ] Auto-update mechanism (air-gap safe — manual download)
 
 ---
 
@@ -486,6 +539,8 @@ Kwyre ships with a full compliance package in `docs/`:
 - **`VERIFICATION_GUIDE.md`** — step-by-step independent security verification for each layer
 - **`DEPLOYMENT_CHECKLIST.md`** — hardened deployment procedure for production environments
 - **`INCIDENT_RESPONSE.md`** — security event classification and response procedures
+- **`SOC2_DEPLOYMENT_GUIDE.md`** — SOC2-friendly deployment guide for enterprise environments
+- **`ENTERPRISE_AUDIT.md`** — enterprise audit package for compliance teams
 
 ---
 

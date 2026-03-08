@@ -9,16 +9,25 @@ import time
 import torch
 import json
 import hashlib
-import hmac
 import secrets
 import signal
 import threading
-import psutil
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
 from collections import defaultdict
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
 from peft import PeftModel
+
+from security_core import (
+    BIND_HOST,
+    SecureConversationBuffer,
+    SessionStore,
+    IntrusionWatchdog,
+    load_api_keys,
+    RATE_LIMIT_RPM_DEFAULT,
+    ALLOWED_PAGES,
+    KwyreHandlerMixin,
+)
 
 try:
     from awq import AutoAWQForCausalLM
@@ -41,6 +50,7 @@ else:
 from spike_serve import apply_spike_hooks, get_sparsity_stats, reset_sparsity_stats, set_tracking
 from verify_deps import startup_check
 from license import startup_validate as validate_license
+from audit import UserAuditLog
 
 MODEL_ID = os.environ.get("KWYRE_MODEL", "Qwen/Qwen3.5-9B")
 PORT = 8000
@@ -65,13 +75,12 @@ QAT_ADAPTER_PATH = os.environ.get(
 )
 
 KWYRE_QUANT = os.environ.get("KWYRE_QUANT", "nf4").lower()
-AWQ_MODEL_PATH = os.path.join(_project_root, "models", f"{ACTIVE_TIER['name']}-awq")
-
-# ---------------------------------------------------------------------------
-# LAYER 1: Bind to localhost only
-# ---------------------------------------------------------------------------
-BIND_HOST = os.environ.get("KWYRE_BIND_HOST", "127.0.0.1")
-
+_awq_env_path = os.environ.get("KWYRE_AWQ_MODEL_PATH", "")
+_awq_default_path = os.path.join(_project_root, "models", f"{ACTIVE_TIER['name']}-awq")
+if _awq_env_path and os.path.isdir(_awq_env_path):
+    AWQ_MODEL_PATH = _awq_env_path
+else:
+    AWQ_MODEL_PATH = _awq_default_path
 
 # ---------------------------------------------------------------------------
 # LAYER 4: Model weight integrity
@@ -122,288 +131,40 @@ def verify_model_integrity(model_path: str) -> bool:
 
 
 # ---------------------------------------------------------------------------
-# LAYER 5: Secure conversation buffer
-# ---------------------------------------------------------------------------
-class SecureConversationBuffer:
-    def __init__(self, session_id: str):
-        self.session_id = session_id
-        self.session_key = secrets.token_bytes(32)
-        self.created_at = time.time()
-        self._buffer: list[dict] = []
-        self._lock = threading.Lock()
-        self._wiped = False
-
-    def add_message(self, role: str, content: str) -> bool:
-        with self._lock:
-            if self._wiped:
-                return False
-            self._buffer.append({"role": role, "content": content})
-            return True
-
-    def get_messages(self) -> list[dict]:
-        with self._lock:
-            if self._wiped:
-                return []
-            return list(self._buffer)
-
-    def secure_wipe(self, reason: str = "session_end"):
-        with self._lock:
-            if self._wiped:
-                return
-            n = len(self._buffer)
-            for msg in self._buffer:
-                msg["content"] = secrets.token_hex(max(len(msg.get("content", "")), 32))
-                msg["role"] = secrets.token_hex(8)
-            self._buffer.clear()
-            self.session_key = bytes(32)
-            self._wiped = True
-            print(f"[SecureBuffer] {self.session_id[:8]}... wiped ({n} msgs, reason={reason})")
-
-    def is_wiped(self) -> bool:
-        return self._wiped
-
-
-class SessionStore:
-    MAX_SESSION_AGE = 3600
-
-    def __init__(self):
-        self._sessions: dict[str, SecureConversationBuffer] = {}
-        self._lock = threading.Lock()
-        self._last_access: dict[str, float] = {}
-        threading.Thread(target=self._reap_expired, daemon=True).start()
-
-    def get_or_create(self, session_id: str) -> SecureConversationBuffer:
-        with self._lock:
-            if session_id not in self._sessions or self._sessions[session_id].is_wiped():
-                self._sessions[session_id] = SecureConversationBuffer(session_id)
-            self._last_access[session_id] = time.time()
-            return self._sessions[session_id]
-
-    def wipe_session(self, session_id: str, reason: str = "user_request"):
-        with self._lock:
-            if session_id in self._sessions:
-                self._sessions[session_id].secure_wipe(reason=reason)
-                del self._sessions[session_id]
-                self._last_access.pop(session_id, None)
-
-    def wipe_all(self, reason: str = "server_shutdown"):
-        with self._lock:
-            print(f"[SessionStore] Wiping {len(self._sessions)} sessions ({reason})...")
-            for buf in self._sessions.values():
-                buf.secure_wipe(reason=reason)
-            self._sessions.clear()
-            self._last_access.clear()
-        print("[SessionStore] All sessions wiped.")
-
-    def _reap_expired(self):
-        while True:
-            time.sleep(60)
-            now = time.time()
-            with self._lock:
-                expired = [s for s, t in self._last_access.items()
-                           if now - t > self.MAX_SESSION_AGE]
-            for sid in expired:
-                self.wipe_session(sid, reason="idle_timeout")
-
-    def active_count(self) -> int:
-        with self._lock:
-            return len(self._sessions)
-
-
-# ---------------------------------------------------------------------------
-# LAYER 6: Intrusion watchdog
-# ---------------------------------------------------------------------------
-
-# Processes that indicate active debugging, injection, or traffic analysis.
-# Conservative list — only tools with no legitimate reason to touch an
-# inference server process.
-SUSPICIOUS_PROCESSES = [
-    "x64dbg", "x32dbg", "ollydbg", "windbg", "immunity debugger",
-    "processhacker", "process hacker", "cheatengine", "cheat engine",
-    "wireshark", "fiddler", "charles proxy", "mitmproxy", "burpsuite",
-    "ida64", "ida32", "ghidra",
-]
-
-# Allowed outbound IPs for the server process.
-# 127.0.0.1 = localhost only.
-# Docker bridge network (172.16-31.x.x) is allowed when running in containers.
-ALLOWED_REMOTE_IPS = {"127.0.0.1"}
-import ipaddress as _ipaddress
-_DOCKER_NETS = [
-    _ipaddress.ip_network("172.16.0.0/12"),
-    _ipaddress.ip_network("10.0.0.0/8"),
-    _ipaddress.ip_network("192.168.0.0/16"),
-]
-
-def _is_allowed_ip(ip_str: str) -> bool:
-    if ip_str in ALLOWED_REMOTE_IPS:
-        return True
-    try:
-        addr = _ipaddress.ip_address(ip_str)
-        return any(addr in net for net in _DOCKER_NETS)
-    except ValueError:
-        return False
-
-# How often the watchdog checks (seconds)
-WATCHDOG_INTERVAL = 5
-
-# Number of consecutive violations before triggering lockdown
-# (avoids false positives from momentary blips)
-VIOLATION_THRESHOLD = 2
-
-
-class IntrusionWatchdog(threading.Thread):
-    """
-    Background thread that monitors for:
-      1. Unexpected outbound network connections from this process
-      2. Known debugging / traffic analysis tools running on the system
-
-    On confirmed intrusion:
-      - Wipes all active sessions immediately
-      - Logs the event with timestamp and reason
-      - Optionally terminates the server process entirely
-
-    Conservative by design — two consecutive violations required
-    before triggering to reduce false positives.
-    """
-
-    def __init__(self, session_store: SessionStore, terminate_on_intrusion: bool = True):
-        super().__init__(daemon=True, name="IntrusionWatchdog")
-        self.session_store = session_store
-        self.terminate_on_intrusion = terminate_on_intrusion
-        self.running = True
-        self._violation_count = 0
-        self._triggered = False
-        self._lock = threading.Lock()
-        self.intrusion_log: list[dict] = []  # metadata only, no content
-
-    def _log_event(self, event_type: str, detail: str):
-        entry = {
-            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-            "event": event_type,
-            "detail": detail,
-        }
-        self.intrusion_log.append(entry)
-        print(f"[Watchdog] {event_type}: {detail}")
-
-    def check_network(self) -> tuple[bool, str]:
-        """
-        Verify this process has no unexpected outbound connections.
-        Returns (clean: bool, detail: str).
-        """
-        our_pid = os.getpid()
-        try:
-            proc = psutil.Process(our_pid)
-            all_procs = [proc] + proc.children(recursive=True)
-            for p in all_procs:
-              for conn in p.net_connections():
-                if conn.status != psutil.CONN_ESTABLISHED:
-                    continue
-                raddr = conn.raddr
-                if not raddr:
-                    continue
-                remote_ip = raddr.ip
-                if not _is_allowed_ip(remote_ip):
-                    return False, f"unexpected outbound connection to {remote_ip}:{raddr.port}"
-        except psutil.NoSuchProcess:
-            pass
-        except Exception as e:
-            # Don't crash the watchdog on transient errors
-            print(f"[Watchdog] network check error (non-fatal): {e}")
-        return True, ""
-
-    def check_processes(self) -> tuple[bool, str]:
-        """
-        Scan running processes for known analysis / injection tools.
-        Returns (clean: bool, detail: str).
-        """
-        try:
-            for proc in psutil.process_iter(["name", "pid"]):
-                try:
-                    name = (proc.info["name"] or "").lower()
-                    if any(s in name for s in SUSPICIOUS_PROCESSES):
-                        return False, f"suspicious process detected: {proc.info['name']} (pid={proc.info['pid']})"
-                except (psutil.NoSuchProcess, psutil.AccessDenied):
-                    pass
-        except Exception as e:
-            print(f"[Watchdog] process check error (non-fatal): {e}")
-        return True, ""
-
-    def _trigger_lockdown(self, reason: str):
-        with self._lock:
-            if self._triggered:
-                return
-            self._triggered = True
-
-        print(f"\n[Watchdog] *** INTRUSION LOCKDOWN TRIGGERED ***")
-        print(f"[Watchdog] Reason: {reason}")
-        self._log_event("LOCKDOWN", reason)
-
-        # Wipe all active sessions immediately
-        self.session_store.wipe_all(reason=f"intrusion_lockdown: {reason}")
-
-        if self.terminate_on_intrusion:
-            print("[Watchdog] Terminating server process.")
-            # Give wipe a moment to complete
-            time.sleep(0.5)
-            os.kill(os.getpid(), signal.SIGTERM)
-
-    def run(self):
-        print(f"[Watchdog] Started — checking every {WATCHDOG_INTERVAL}s "
-              f"(threshold={VIOLATION_THRESHOLD} violations)")
-        while self.running and not self._triggered:
-            time.sleep(WATCHDOG_INTERVAL)
-
-            net_clean, net_detail = self.check_network()
-            proc_clean, proc_detail = self.check_processes()
-
-            if not net_clean or not proc_clean:
-                self._violation_count += 1
-                detail = net_detail or proc_detail
-                print(f"[Watchdog] Violation {self._violation_count}/{VIOLATION_THRESHOLD}: {detail}")
-                self._log_event("VIOLATION", detail)
-
-                if self._violation_count >= VIOLATION_THRESHOLD:
-                    self._trigger_lockdown(detail)
-            else:
-                # Reset on clean check — transient blips don't trigger lockdown
-                if self._violation_count > 0:
-                    print(f"[Watchdog] Clear — resetting violation count")
-                self._violation_count = 0
-
-    def stop(self):
-        self.running = False
-
-    def get_status(self) -> dict:
-        return {
-            "running": self.running and not self._triggered,
-            "triggered": self._triggered,
-            "violations": self._violation_count,
-            "threshold": VIOLATION_THRESHOLD,
-            "check_interval_sec": WATCHDOG_INTERVAL,
-            "recent_events": self.intrusion_log[-5:],  # last 5 events, metadata only
-        }
-
-
-# ---------------------------------------------------------------------------
 # API keys + rate limiting
 # ---------------------------------------------------------------------------
-def _load_api_keys():
-    env_keys = os.environ.get("KWYRE_API_KEYS", "")
-    if env_keys:
-        keys = {}
-        for pair in env_keys.split(","):
-            if ":" in pair:
-                k, u = pair.strip().split(":", 1)
-                keys[k] = u
-        return keys
-    return {"sk-kwyre-dev-local": "admin"}
-
-API_KEYS = _load_api_keys()
-RATE_LIMIT_RPM = 30
+API_KEYS = load_api_keys()
+RATE_LIMIT_RPM = RATE_LIMIT_RPM_DEFAULT
 rate_tracker = defaultdict(list)
 CHAT_DIR = os.path.join(_project_root, "chat")
-ALLOWED_PAGES = {"landing.html", "index.html", "main.html", "pay.html", "chat.html"}
+
+# ---------------------------------------------------------------------------
+# Multi-user mode
+# ---------------------------------------------------------------------------
+MULTI_USER = os.environ.get("KWYRE_MULTI_USER", "0") == "1"
+_user_manager = None
+audit_log = UserAuditLog()
+
+if MULTI_USER:
+    from users import UserManager, ROLES as USER_ROLES
+    try:
+        _user_manager = UserManager()
+        if not _user_manager.has_users():
+            _default_user, _default_key = _user_manager.add_user("admin", role="admin")
+            print(f"[Multi-User] No users found — created default admin.")
+            print(f"[Multi-User] Admin API key: {_default_key}")
+            print(f"[Multi-User] Store this key securely — it cannot be retrieved later.")
+        print(f"[Multi-User] ENABLED — {_user_manager.user_count()} user(s) loaded")
+    except EnvironmentError as e:
+        print(f"[Multi-User] ERROR: {e}")
+        print("[Multi-User] Run: python server/users.py init")
+        sys.exit(1)
+    except ValueError as e:
+        print(f"[Multi-User] ERROR: {e}")
+        sys.exit(1)
+else:
+    USER_ROLES = {}
+    print("[Multi-User] DISABLED — single-user mode (set KWYRE_MULTI_USER=1 to enable)")
 
 # ---------------------------------------------------------------------------
 # Startup sequence — resolve model path
@@ -646,322 +407,373 @@ print(f"[Security] Session store active — RAM only, wiped on close")
 # ---------------------------------------------------------------------------
 # Request handler
 # ---------------------------------------------------------------------------
-class ChatHandler(BaseHTTPRequestHandler):
+class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
 
-    def _check_auth(self):
+    _api_keys = API_KEYS
+    _rate_tracker = rate_tracker
+    _rate_limit_rpm = RATE_LIMIT_RPM
+    _bind_host = BIND_HOST
+    _port = PORT
+    _chat_dir = CHAT_DIR
+
+    # ---- Multi-user auth helpers ----
+
+    def _mu_check_auth(self):
         auth = self.headers.get("Authorization", "")
-        if auth.startswith("Bearer "):
-            key = auth[7:]
-            for valid_key, user in API_KEYS.items():
-                if hmac.compare_digest(key, valid_key):
-                    return user
-        self._send_json_error(401, "Invalid API key.")
-        return None
+        if not auth.startswith("Bearer "):
+            audit_log.record_failed_auth(self.client_address[0])
+            self._send_json_error(401, "Invalid API key.")
+            return None
+        key = auth[7:]
+        user = _user_manager.authenticate(key)
+        if user is None:
+            audit_log.record_failed_auth(self.client_address[0])
+            self._send_json_error(401, "Invalid API key.")
+            return None
+        _user_manager.update_last_active(user["id"])
+        return user
 
-    def _check_auth_optional(self):
-        """Like _check_auth but returns None silently instead of sending 401."""
-        auth = self.headers.get("Authorization", "")
-        if auth.startswith("Bearer "):
-            key = auth[7:]
-            for valid_key, user in API_KEYS.items():
-                if hmac.compare_digest(key, valid_key):
-                    return user
-        return None
+    def _mu_check_admin(self):
+        user = self._mu_check_auth()
+        if user is None:
+            return None
+        if user["role"] != "admin":
+            self._send_json_error(403, "Admin access required.")
+            return None
+        return user
 
-    def _check_rate_limit(self, user):
+    def _mu_check_rate_limit(self, user: dict) -> bool:
+        rpm = user.get("rate_limit_rpm", RATE_LIMIT_RPM)
+        uid = user["id"]
         now = time.time()
-        rate_tracker[user] = [t for t in rate_tracker[user] if now - t < 60]
-        if len(rate_tracker[user]) >= RATE_LIMIT_RPM:
-            self._send_json_error(429, f"Rate limit exceeded. Max {RATE_LIMIT_RPM} req/min.")
+        rate_tracker[uid] = [t for t in rate_tracker[uid] if now - t < 60]
+        if len(rate_tracker[uid]) >= rpm:
+            audit_log.record_rate_limit_hit(uid, user.get("username", ""))
+            self._send_json_error(429, f"Rate limit exceeded. Max {rpm} req/min.")
             return False
-        rate_tracker[user].append(now)
+        rate_tracker[uid].append(now)
         return True
 
-    def _get_session_id(self, body: dict) -> str:
-        sid = body.get("session_id")
-        if not sid or not isinstance(sid, str) or len(sid) < 32:
-            sid = secrets.token_hex(16)
-        return sid
+    def _mu_get_session_id(self, body: dict, user: dict) -> str:
+        raw_sid = body.get("session_id")
+        if not raw_sid or not isinstance(raw_sid, str) or len(raw_sid) < 32:
+            raw_sid = secrets.token_hex(16)
+        return f"{user['id']}:{raw_sid}"
 
-    def _parse_json_body(self, required: bool = False) -> tuple[dict | None, str | None]:
-        """
-        Safely parse JSON body from POST request.
-        Returns (body_dict, error_msg). If error_msg is not None, body_dict is None.
-        Handles missing Content-Length, invalid Content-Length, and malformed JSON.
-        """
-        try:
-            raw_len = self.headers.get("Content-Length")
-            if raw_len is None or raw_len.strip() == "":
-                if required:
-                    return None, "Missing Content-Length header."
-                return {}, None
-            length = int(raw_len)
-        except ValueError:
-            return None, "Invalid Content-Length header."
-        if length < 0:
-            return None, "Invalid Content-Length: negative value."
-        if length > 10 * 1024 * 1024:  # 10MB limit
-            return None, "Content-Length exceeds 10MB limit."
-        raw = self.rfile.read(length)
-        if length > 0 and not raw:
-            return None, "Failed to read request body."
-        if length == 0:
-            if required:
-                return None, "Request body required."
-            return {}, None
-        try:
-            body = json.loads(raw.decode("utf-8", errors="replace"))
-        except json.JSONDecodeError as e:
-            return None, f"Invalid JSON: {e}"
-        if not isinstance(body, dict):
-            return None, "Request body must be a JSON object."
-        return body, None
+    def _mu_check_session_limit(self, user: dict) -> bool:
+        max_sess = user.get("max_sessions", 5)
+        current = session_store.count_sessions_for_user(user["id"])
+        if current >= max_sess:
+            self._send_json_error(429, f"Session limit reached ({max_sess}). End an existing session first.")
+            return False
+        return True
 
-    def _send_json_error(self, status: int, message: str):
+    def _mu_can_inference(self, user: dict) -> bool:
+        role_perms = USER_ROLES.get(user["role"], {})
+        if not role_perms.get("can_inference", False):
+            self._send_json_error(403, f"Role '{user['role']}' cannot perform inference.")
+            return False
+        return True
+
+    def _send_json(self, status: int, data: dict):
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
         self._send_security_headers()
         self.end_headers()
-        self.wfile.write(json.dumps({"error": message}).encode())
+        self.wfile.write(json.dumps(data, indent=2).encode())
 
-    def do_OPTIONS(self):
-        self.send_response(204)
-        self.send_header("Content-Length", "0")
-        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
-        self.send_header("Access-Control-Allow-Headers", "Authorization, Content-Type")
-        self.send_header("Access-Control-Max-Age", "86400")
-        self._send_security_headers()
-        self.end_headers()
+    # ---- POST routing ----
 
     def do_POST(self):
         if self.path == "/v1/chat/completions":
+            self._handle_chat_completions()
+        elif self.path == "/v1/session/end":
+            self._handle_session_end()
+        elif self.path == "/v1/license/verify":
+            self._handle_license_verify()
+        elif MULTI_USER and self.path == "/v1/admin/users":
+            self._handle_admin_create_user()
+        elif MULTI_USER and self.path == "/v1/admin/sessions/wipe":
+            self._handle_admin_wipe_sessions()
+        else:
+            self._send_json_error(404, "Not found.")
+
+    def do_DELETE(self):
+        if MULTI_USER and self.path.startswith("/v1/admin/users/"):
+            self._handle_admin_delete_user()
+        else:
+            self._send_json_error(404, "Not found.")
+
+    def _handle_chat_completions(self):
+        if MULTI_USER:
+            user = self._mu_check_auth()
+            if user is None:
+                return
+            if not self._mu_can_inference(user):
+                return
+            if not self._mu_check_rate_limit(user):
+                return
+        else:
             user = self._check_auth()
             if user is None:
                 return
             if not self._check_rate_limit(user):
                 return
 
-            body, err = self._parse_json_body(required=True)
-            if err is not None:
-                self._send_json_error(400, err)
+        body, err = self._parse_json_body(required=True)
+        if err is not None:
+            self._send_json_error(400, err)
+            return
+        assert body is not None
+        messages = body.get("messages", [])
+        if not isinstance(messages, list) or len(messages) > 100:
+            self._send_json_error(400, "messages must be a list of at most 100 items.")
+            return
+        try:
+            max_tokens = min(max(int(body.get("max_tokens", 2048)), 1), 8192)
+            temperature = min(max(float(body.get("temperature", 0.7)), 0.0), 2.0)
+            top_p = min(max(float(body.get("top_p", 0.9)), 0.0), 1.0)
+        except (TypeError, ValueError):
+            self._send_json_error(400, "Invalid max_tokens, temperature, or top_p.")
+            return
+        if _license_tier == "eval":
+            max_tokens = min(max_tokens, _MAX_EVAL_TOKENS)
+
+        if MULTI_USER:
+            if not self._mu_check_session_limit(user):
                 return
-            assert body is not None
-            messages = body.get("messages", [])
-            if not isinstance(messages, list) or len(messages) > 100:
-                self._send_json_error(400, "messages must be a list of at most 100 items.")
-                return
-            try:
-                max_tokens = min(max(int(body.get("max_tokens", 2048)), 1), 8192)
-                temperature = min(max(float(body.get("temperature", 0.7)), 0.0), 2.0)
-                top_p = min(max(float(body.get("top_p", 0.9)), 0.0), 1.0)
-            except (TypeError, ValueError):
-                self._send_json_error(400, "Invalid max_tokens, temperature, or top_p.")
-                return
-            if _license_tier == "eval":
-                max_tokens = min(max_tokens, _MAX_EVAL_TOKENS)
+            session_id = self._mu_get_session_id(body, user)
+        else:
             session_id = self._get_session_id(body)
 
-            if _license_tier == "eval":
-                trial_key = f"trial:{self.client_address[0]}"
-                trial_count = _trial_tracker.get(trial_key, 0)
-                if trial_count >= 3:
-                    self._send_json_error(429, "Trial limit reached. Purchase a license at https://kwyre.com")
-                    return
-                _trial_tracker[trial_key] = trial_count + 1
+        if _license_tier == "eval":
+            trial_key = f"trial:{self.client_address[0]}"
+            trial_count = _trial_tracker.get(trial_key, 0)
+            if trial_count >= 3:
+                self._send_json_error(429, "Trial limit reached. Purchase a license at https://kwyre.com")
+                return
+            _trial_tracker[trial_key] = trial_count + 1
 
-            session = session_store.get_or_create(session_id)
-            for m in messages:
-                session.add_message(m.get("role", "user"), m.get("content", ""))
+        session = session_store.get_or_create(session_id)
+        if MULTI_USER:
+            audit_log.record_session_created(user["id"], user.get("username", ""))
+        for m in messages:
+            session.add_message(m.get("role", "user"), m.get("content", ""))
 
-            tool_data, tools_used = [], []
-            last_user_msg = next(
-                (m.get("content", "") for m in reversed(messages)
-                 if m.get("role") == "user"), ""
-            )
-            if last_user_msg:
-                try:
-                    tool_data, tools_used = route_tools(last_user_msg)
-                except Exception as e:
-                    print(f"[tools] error: {e}")
+        tool_data, tools_used = [], []
+        last_user_msg = next(
+            (m.get("content", "") for m in reversed(messages)
+             if m.get("role") == "user"), ""
+        )
+        if last_user_msg:
+            try:
+                tool_data, tools_used = route_tools(last_user_msg)
+            except Exception as e:
+                print(f"[tools] error: {e}")
 
-            augmented = list(messages)
-            if tool_data:
-                ctx = ("\n\n[Live data — use directly, be concise]\n\n"
-                       + "\n\n".join(tool_data))
-                for i in range(len(augmented) - 1, -1, -1):
-                    if augmented[i].get("role") == "user":
-                        augmented[i] = {
-                            "role": "user",
-                            "content": augmented[i]["content"] + ctx,
-                        }
-                        break
+        augmented = list(messages)
+        if tool_data:
+            ctx = ("\n\n[Live data — use directly, be concise]\n\n"
+                   + "\n\n".join(tool_data))
+            for i in range(len(augmented) - 1, -1, -1):
+                if augmented[i].get("role") == "user":
+                    augmented[i] = {
+                        "role": "user",
+                        "content": augmented[i]["content"] + ctx,
+                    }
+                    break
 
-            text = tokenizer.apply_chat_template(
-                augmented, tokenize=False, add_generation_prompt=True,
-                enable_thinking=False,
-            )
-            inputs = tokenizer([text], return_tensors="pt").to(model.device)
+        text = tokenizer.apply_chat_template(
+            augmented, tokenize=False, add_generation_prompt=True,
+            enable_thinking=False,
+        )
+        inputs = tokenizer([text], return_tensors="pt").to(model.device)
 
-            gen_kwargs = {
-                "input_ids": inputs.input_ids,
-                "attention_mask": inputs.attention_mask,
-                "max_new_tokens": max_tokens,
-                "temperature": max(temperature, 0.01),
-                "top_p": top_p,
-                "do_sample": temperature > 0,
-                "use_cache": True,
-                "pad_token_id": tokenizer.pad_token_id,
-                "eos_token_id": tokenizer.eos_token_id,
-            }
-            if draft_model is not None:
-                gen_kwargs["assistant_model"] = draft_model
+        gen_kwargs = {
+            "input_ids": inputs.input_ids,
+            "attention_mask": inputs.attention_mask,
+            "max_new_tokens": max_tokens,
+            "temperature": max(temperature, 0.01),
+            "top_p": top_p,
+            "do_sample": temperature > 0,
+            "use_cache": True,
+            "pad_token_id": tokenizer.pad_token_id,
+            "eos_token_id": tokenizer.eos_token_id,
+        }
+        if draft_model is not None:
+            gen_kwargs["assistant_model"] = draft_model
 
-            t0 = time.time()
-            with torch.no_grad():
-                gen_ids = model.generate(**gen_kwargs)
-            elapsed = time.time() - t0
-            new_ids = gen_ids[0][inputs.input_ids.shape[1]:]
-            n_tokens = len(new_ids)
-            tps = n_tokens / elapsed if elapsed > 0 else 0
+        t0 = time.time()
+        with torch.no_grad():
+            gen_ids = model.generate(**gen_kwargs)
+        elapsed = time.time() - t0
+        new_ids = gen_ids[0][inputs.input_ids.shape[1]:]
+        n_tokens = len(new_ids)
+        tps = n_tokens / elapsed if elapsed > 0 else 0
 
-            reply = tokenizer.decode(new_ids, skip_special_tokens=True)
-            reply = re.sub(r"<think>.*?</think>", "", reply, flags=re.DOTALL)
-            reply = re.sub(r"<think>.*", "", reply, flags=re.DOTALL)
-            reply = reply.strip()
+        reply = tokenizer.decode(new_ids, skip_special_tokens=True)
+        reply = re.sub(r"<think>.*?</think>", "", reply, flags=re.DOTALL)
+        reply = re.sub(r"<think>.*", "", reply, flags=re.DOTALL)
+        reply = reply.strip()
 
-            session.add_message("assistant", reply)
-            print(f"[inference] {session_id[:8]}... | {n_tokens} tokens "
-                  f"in {elapsed:.1f}s ({tps:.1f} tok/s)")
+        session.add_message("assistant", reply)
 
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self._send_security_headers()
-            self.end_headers()
-            self.wfile.write(json.dumps({
-                "choices": [{"message": {"role": "assistant", "content": reply}}],
-                "model": f"{ACTIVE_TIER['name']}-spikeserve",
-                "session_id": session_id,
-                "tools_used": tools_used,
-                "usage": {
-                    "completion_tokens": n_tokens,
-                    "tokens_per_second": round(tps, 1),
-                },
-                "spike_stats": {
-                    "activation_sparsity_pct": STARTUP_SPARSITY["avg_sparsity"],
-                    "spike_encoded_layers": n_converted,
-                },
-            }).encode())
+        if MULTI_USER:
+            audit_log.record_request(user["id"], user.get("username", ""), tokens=n_tokens)
+            label = f"{user['username']}@{session_id.split(':', 1)[-1][:8]}"
+        else:
+            label = session_id[:8]
+        print(f"[inference] {label}... | {n_tokens} tokens "
+              f"in {elapsed:.1f}s ({tps:.1f} tok/s)")
 
-        elif self.path == "/v1/session/end":
+        response_sid = session_id.split(":", 1)[-1] if MULTI_USER else session_id
+        self._send_json(200, {
+            "choices": [{"message": {"role": "assistant", "content": reply}}],
+            "model": f"{ACTIVE_TIER['name']}-spikeserve",
+            "session_id": response_sid,
+            "tools_used": tools_used,
+            "usage": {
+                "completion_tokens": n_tokens,
+                "tokens_per_second": round(tps, 1),
+            },
+            "spike_stats": {
+                "activation_sparsity_pct": STARTUP_SPARSITY["avg_sparsity"],
+                "spike_encoded_layers": n_converted,
+            },
+        })
+
+    def _handle_session_end(self):
+        if MULTI_USER:
+            user = self._mu_check_auth()
+            if user is None:
+                return
+        else:
             user = self._check_auth()
             if user is None:
                 return
-            body, err = self._parse_json_body(required=False)
-            if err is not None:
-                self._send_json_error(400, err)
-                return
-            sid = (body or {}).get("session_id", "")
-            if sid:
-                session_store.wipe_session(sid, reason="user_request")
-                msg = f"Session {sid[:8]}... wiped. Conversation unrecoverable."
+        body, err = self._parse_json_body(required=False)
+        if err is not None:
+            self._send_json_error(400, err)
+            return
+        raw_sid = (body or {}).get("session_id", "")
+        if raw_sid:
+            if MULTI_USER:
+                namespaced = f"{user['id']}:{raw_sid}"
+                session_store.wipe_session(namespaced, reason="user_request")
             else:
-                msg = "No session_id provided."
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self._send_security_headers()
-            self.end_headers()
-            self.wfile.write(json.dumps({"status": "wiped", "message": msg}).encode())
-
-        elif self.path == "/v1/license/verify":
-            body, err = self._parse_json_body()
-            if err is not None:
-                self._send_json_error(400, err)
-                return
-            key = body.get("key", "").strip()
-            if not key:
-                self._send_json_error(400, "Missing license key.")
-                return
-            try:
-                from license import validate_license as _validate_lic
-                payload = _validate_lic(key)
-                tier = payload.get("tier", "unknown")
-                self.send_response(200)
-                self.send_header("Content-Type", "application/json")
-                self._send_security_headers()
-                self.end_headers()
-                self.wfile.write(json.dumps({
-                    "valid": True,
-                    "tier": tier,
-                    "label": payload.get("label", ""),
-                    "machines": payload.get("machines", 0),
-                }).encode())
-            except ValueError as e:
-                self._send_json_error(403, str(e))
-
+                session_store.wipe_session(raw_sid, reason="user_request")
+            msg = f"Session {raw_sid[:8]}... wiped. Conversation unrecoverable."
         else:
-            self._send_json_error(404, "Not found.")
+            msg = "No session_id provided."
+        self._send_json(200, {"status": "wiped", "message": msg})
 
-    def _send_security_headers(self, nonce: str = "", extra_script_src: str = ""):
-        self.send_header("X-Content-Type-Options", "nosniff")
-        self.send_header("X-Frame-Options", "DENY")
-        self.send_header("X-XSS-Protection", "1; mode=block")
-        self.send_header("Referrer-Policy", "no-referrer")
-        self.send_header("Permissions-Policy", "camera=(), microphone=(), geolocation=()")
-        script_src = "'self'"
-        if nonce:
-            script_src += f" 'nonce-{nonce}'"
-        else:
-            script_src += " 'unsafe-inline'"
-        if extra_script_src:
-            script_src += f" {extra_script_src}"
-        self.send_header(
-            "Content-Security-Policy",
-            f"default-src 'self'; "
-            f"script-src {script_src}; "
-            f"style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; "
-            f"font-src 'self' https://fonts.gstatic.com; "
-            f"connect-src 'self'; "
-            f"img-src 'self' data:; "
-            f"frame-ancestors 'none'; "
-            f"base-uri 'self'; "
-            f"form-action 'self'",
+    def _handle_license_verify(self):
+        body, err = self._parse_json_body()
+        if err is not None:
+            self._send_json_error(400, err)
+            return
+        key = body.get("key", "").strip()
+        if not key:
+            self._send_json_error(400, "Missing license key.")
+            return
+        try:
+            from license import validate_license as _validate_lic
+            payload = _validate_lic(key)
+            self._send_json(200, {
+                "valid": True,
+                "tier": payload.get("tier", "unknown"),
+                "label": payload.get("label", ""),
+                "machines": payload.get("machines", 0),
+            })
+        except ValueError as e:
+            self._send_json_error(403, str(e))
+
+    # ---- Admin endpoints (multi-user only) ----
+
+    def _handle_admin_create_user(self):
+        admin = self._mu_check_admin()
+        if admin is None:
+            return
+        body, err = self._parse_json_body(required=True)
+        if err is not None:
+            self._send_json_error(400, err)
+            return
+        username = body.get("username", "").strip()
+        role = body.get("role", "analyst")
+        max_sessions = body.get("max_sessions")
+        rpm = body.get("rate_limit_rpm")
+        if not username:
+            self._send_json_error(400, "Missing 'username'.")
+            return
+        try:
+            new_user, api_key = _user_manager.add_user(
+                username, role=role,
+                max_sessions=max_sessions,
+                rate_limit_rpm=rpm,
+            )
+            audit_log.record_security_event(
+                admin["id"], "user_created",
+                f"admin={admin['username']} created user={username} role={role}"
+            )
+            self._send_json(201, {
+                "username": new_user["username"],
+                "role": new_user["role"],
+                "api_key": api_key,
+                "max_sessions": new_user["max_sessions"],
+                "rate_limit_rpm": new_user["rate_limit_rpm"],
+            })
+        except ValueError as e:
+            self._send_json_error(400, str(e))
+
+    def _handle_admin_delete_user(self):
+        admin = self._mu_check_admin()
+        if admin is None:
+            return
+        username = self.path.split("/v1/admin/users/", 1)[-1].strip("/")
+        if not username:
+            self._send_json_error(400, "Missing username in URL.")
+            return
+        target = _user_manager.get_user(username)
+        if target is None:
+            self._send_json_error(404, f"User '{username}' not found.")
+            return
+        session_store.wipe_user_sessions(target["id"], reason=f"user_deleted:{username}")
+        _user_manager.remove_user(username)
+        audit_log.record_security_event(
+            admin["id"], "user_deleted",
+            f"admin={admin['username']} deleted user={username}"
         )
-        self.send_header("Access-Control-Allow-Origin", f"http://{BIND_HOST}:{PORT}")
+        self._send_json(200, {"status": "deleted", "username": username})
 
-    def _serve_html(self, filename: str):
-        filepath = os.path.join(CHAT_DIR, filename)
-        resolved = os.path.realpath(filepath)
-        if not resolved.startswith(os.path.realpath(CHAT_DIR)):
-            self.send_response(403)
-            self._send_security_headers()
-            self.end_headers()
+    def _handle_admin_wipe_sessions(self):
+        admin = self._mu_check_admin()
+        if admin is None:
             return
-        if not os.path.isfile(resolved):
-            self.send_response(404)
-            self._send_security_headers()
-            self.end_headers()
+        body, err = self._parse_json_body(required=True)
+        if err is not None:
+            self._send_json_error(400, err)
             return
-        with open(resolved, "rb") as f:
-            html = f.read()
-        nonce = secrets.token_urlsafe(16)
-        html = html.replace(b"{{CSP_NONCE}}", nonce.encode())
-        extra_script_src = "https://cdn.jsdelivr.net" if filename == "pay.html" else ""
-        self.send_response(200)
-        self.send_header("Content-Type", "text/html; charset=utf-8")
-        self.send_header("Cache-Control", "no-cache")
-        self._send_security_headers(nonce=nonce, extra_script_src=extra_script_src)
-        self.end_headers()
-        self.wfile.write(html)
+        target_username = body.get("username", "").strip()
+        if not target_username:
+            self._send_json_error(400, "Missing 'username'.")
+            return
+        target = _user_manager.get_user(target_username)
+        if target is None:
+            self._send_json_error(404, f"User '{target_username}' not found.")
+            return
+        count = session_store.count_sessions_for_user(target["id"])
+        session_store.wipe_user_sessions(target["id"], reason=f"admin_wipe:{admin['username']}")
+        audit_log.record_security_event(
+            admin["id"], "admin_session_wipe",
+            f"admin={admin['username']} wiped {count} session(s) for user={target_username}"
+        )
+        self._send_json(200, {
+            "status": "wiped",
+            "username": target_username,
+            "sessions_wiped": count,
+        })
 
-    @staticmethod
-    def _safe_page_name(raw_path: str) -> str | None:
-        """Extract page name and validate against the whitelist.
-        Returns the filename if safe, None otherwise."""
-        stripped = raw_path.lstrip("/")
-        basename = os.path.basename(stripped)
-        if basename in ALLOWED_PAGES and basename == stripped:
-            return basename
-        return None
+    # ---- GET routing ----
 
     def do_GET(self):
         if self.path == "/":
@@ -970,103 +782,140 @@ class ChatHandler(BaseHTTPRequestHandler):
             self._serve_html("chat.html")
         elif (page := self._safe_page_name(self.path)) is not None:
             self._serve_html(page)
-
         elif self.path == "/health":
-            auth_user = self._check_auth_optional()
-            health_data = {"status": "ok"}
-            if auth_user:
-                gpu_used = torch.cuda.memory_allocated() / 1e9
-                health_data.update({
-                    "model": f"{ACTIVE_TIER['name']}-spikeserve",
-                    "base": MODEL_ID.split("/")[-1],
-                    "quantization": f"4-bit {KWYRE_QUANT.upper()}",
-                    "security": {
-                        "l1_network_binding": f"{BIND_HOST}:{PORT} (localhost only)",
-                        "l2_process_lockdown": "os-configured (iptables/firewall, not verified by server)",
-                        "l3_dependency_integrity": "verified",
-                        "l4_weight_integrity": "configured" if KNOWN_WEIGHT_HASHES else "first-run",
-                        "l5_conversation_storage": "RAM-only",
-                        "l6_intrusion_watchdog": watchdog.get_status(),
-                        "sessions_active": session_store.active_count(),
-                    },
-                    "speculative_decoding": {
-                        "enabled": draft_model is not None,
-                        "draft_model": DRAFT_MODEL_ID if draft_model is not None else None,
-                    },
-                    "spike_analysis": {
-                        "k": SPIKE_K,
-                        "projected_sparsity_pct": STARTUP_SPARSITY["avg_sparsity"],
-                        "spike_encoded_layers": n_converted,
-                    },
-                    "gpu_vram_gb": round(gpu_used, 1),
-                })
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self._send_security_headers()
-            self.end_headers()
-            self.wfile.write(json.dumps(health_data, indent=2).encode())
-
+            self._handle_health()
         elif self.path == "/audit":
-            user = self._check_auth()
-            if user is None:
-                return
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self._send_security_headers()
-            self.end_headers()
-            self.wfile.write(json.dumps({
-                "server": f"{ACTIVE_TIER['name']}-spikeserve",
-                "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
-                "active_sessions": session_store.active_count(),
-                "security_controls": {
-                    "l1_network_binding": f"{BIND_HOST}:{PORT} (localhost only)",
-                    "l2_process_lockdown": "os-configured (iptables/firewall)",
-                    "l3_dependency_integrity": "verified at startup",
-                    "l4_weight_integrity": "enabled" if KNOWN_WEIGHT_HASHES else "unconfigured",
-                    "l5_conversation_storage": "RAM-only",
-                    "l5_session_wipe": "on_close + idle_timeout_1hr + shutdown + intrusion",
-                    "l6_intrusion_watchdog": watchdog.get_status(),
-                    "content_logging": "NEVER",
-                },
-                "note": "Metadata only. No conversation content is ever logged or persisted.",
-            }, indent=2).encode())
-
+            self._handle_audit()
         elif self.path == "/v1/models":
-            user = self._check_auth()
-            if user is None:
-                return
-            self.send_response(200)
-            self.send_header("Content-Type", "application/json")
-            self._send_security_headers()
-            self.end_headers()
-            self.wfile.write(json.dumps({
-                "object": "list",
-                "data": [{
-                    "id": f"{ACTIVE_TIER['name']}-spikeserve",
-                    "object": "model",
-                    "owned_by": "kwyre",
-                    "meta": {
-                        "base_model": MODEL_ID.split("/")[-1],
-                        "weight_quant": f"4-bit {KWYRE_QUANT.upper()}",
-                        "activation_encoding": "SpikeServe",
-                        "spike_encoded_layers": n_converted,
-                        "security": {
-                            "network": "localhost-only",
-                            "storage": "RAM-only sessions",
-                            "integrity": "SHA256 weight verification",
-                            "watchdog": "intrusion detection + auto-wipe",
-                        },
-                    },
-                }],
-            }).encode())
-
+            self._handle_models()
+        elif MULTI_USER and self.path == "/v1/admin/users":
+            self._handle_admin_list_users()
+        elif MULTI_USER and self.path == "/v1/admin/sessions":
+            self._handle_admin_list_sessions()
+        elif MULTI_USER and self.path == "/v1/admin/audit":
+            self._handle_admin_audit()
         elif self.path == "/favicon.ico":
             self.send_response(204)
             self._send_security_headers()
             self.end_headers()
-
         else:
             self._send_json_error(404, "Not found.")
+
+    def _handle_health(self):
+        auth_user = self._check_auth_optional()
+        health_data = {"status": "ok"}
+        if auth_user:
+            gpu_used = torch.cuda.memory_allocated() / 1e9
+            health_data.update({
+                "model": f"{ACTIVE_TIER['name']}-spikeserve",
+                "base": MODEL_ID.split("/")[-1],
+                "quantization": f"4-bit {KWYRE_QUANT.upper()}",
+                "multi_user": MULTI_USER,
+                "security": {
+                    "l1_network_binding": f"{BIND_HOST}:{PORT} (localhost only)",
+                    "l2_process_lockdown": "os-configured (iptables/firewall, not verified by server)",
+                    "l3_dependency_integrity": "verified",
+                    "l4_weight_integrity": "configured" if KNOWN_WEIGHT_HASHES else "first-run",
+                    "l5_conversation_storage": "RAM-only",
+                    "l6_intrusion_watchdog": watchdog.get_status(),
+                    "sessions_active": session_store.active_count(),
+                },
+                "speculative_decoding": {
+                    "enabled": draft_model is not None,
+                    "draft_model": DRAFT_MODEL_ID if draft_model is not None else None,
+                },
+                "spike_analysis": {
+                    "k": SPIKE_K,
+                    "projected_sparsity_pct": STARTUP_SPARSITY["avg_sparsity"],
+                    "spike_encoded_layers": n_converted,
+                },
+                "gpu_vram_gb": round(gpu_used, 1),
+            })
+        self._send_json(200, health_data)
+
+    def _handle_audit(self):
+        if MULTI_USER:
+            user = self._mu_check_auth()
+            if user is None:
+                return
+        else:
+            user = self._check_auth()
+            if user is None:
+                return
+        audit_data = {
+            "server": f"{ACTIVE_TIER['name']}-spikeserve",
+            "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
+            "active_sessions": session_store.active_count(),
+            "security_controls": {
+                "l1_network_binding": f"{BIND_HOST}:{PORT} (localhost only)",
+                "l2_process_lockdown": "os-configured (iptables/firewall)",
+                "l3_dependency_integrity": "verified at startup",
+                "l4_weight_integrity": "enabled" if KNOWN_WEIGHT_HASHES else "unconfigured",
+                "l5_conversation_storage": "RAM-only",
+                "l5_session_wipe": "on_close + idle_timeout_1hr + shutdown + intrusion",
+                "l6_intrusion_watchdog": watchdog.get_status(),
+                "content_logging": "NEVER",
+            },
+            "note": "Metadata only. No conversation content is ever logged or persisted.",
+        }
+        if MULTI_USER:
+            audit_data["audit_summary"] = audit_log.get_summary()
+        self._send_json(200, audit_data)
+
+    def _handle_models(self):
+        if MULTI_USER:
+            user = self._mu_check_auth()
+            if user is None:
+                return
+        else:
+            user = self._check_auth()
+            if user is None:
+                return
+        self._send_json(200, {
+            "object": "list",
+            "data": [{
+                "id": f"{ACTIVE_TIER['name']}-spikeserve",
+                "object": "model",
+                "owned_by": "kwyre",
+                "meta": {
+                    "base_model": MODEL_ID.split("/")[-1],
+                    "weight_quant": f"4-bit {KWYRE_QUANT.upper()}",
+                    "activation_encoding": "SpikeServe",
+                    "spike_encoded_layers": n_converted,
+                    "security": {
+                        "network": "localhost-only",
+                        "storage": "RAM-only sessions",
+                        "integrity": "SHA256 weight verification",
+                        "watchdog": "intrusion detection + auto-wipe",
+                    },
+                },
+            }],
+        })
+
+    # ---- Admin GET endpoints ----
+
+    def _handle_admin_list_users(self):
+        admin = self._mu_check_admin()
+        if admin is None:
+            return
+        users = _user_manager.list_users(include_keys=False)
+        self._send_json(200, {"users": users})
+
+    def _handle_admin_list_sessions(self):
+        admin = self._mu_check_admin()
+        if admin is None:
+            return
+        sessions = session_store.list_all_session_metadata()
+        self._send_json(200, {"sessions": sessions})
+
+    def _handle_admin_audit(self):
+        admin = self._mu_check_admin()
+        if admin is None:
+            return
+        self._send_json(200, {
+            "summary": audit_log.get_summary(),
+            "per_user": audit_log.get_all_stats(),
+        })
 
     def log_message(self, fmt, *args):
         print(f"[{self.log_date_time_string()}] {fmt % args}")
@@ -1087,6 +936,14 @@ if __name__ == "__main__":
     print("  POST /v1/session/end       — wipe session from RAM")
     print("  GET  /health               — status + watchdog state")
     print("  GET  /audit                — metadata-only compliance log")
+    if MULTI_USER:
+        print("\n  [Multi-User] ENABLED")
+        print("  GET    /v1/admin/users          — list users (admin)")
+        print("  POST   /v1/admin/users          — create user (admin)")
+        print("  DELETE /v1/admin/users/{name}    — delete user (admin)")
+        print("  GET    /v1/admin/sessions       — list sessions (admin)")
+        print("  POST   /v1/admin/sessions/wipe  — wipe user sessions (admin)")
+        print("  GET    /v1/admin/audit          — per-user audit (admin)")
     print("\n  [L1] Network: localhost only")
     print("  [L3] Dependencies: SHA256 manifest verified at startup")
     print("  [L4] Integrity: SHA256 weight verification at startup")

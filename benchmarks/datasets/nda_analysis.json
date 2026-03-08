@@ -1,0 +1,146 @@
+{
+  "name": "NDA Clause Analysis Tasks",
+  "category": "legal",
+  "tasks": [
+    {
+      "id": "nda-001",
+      "prompt": "A technology startup is negotiating an NDA with a potential acquirer. The draft NDA defines 'Confidential Information' as 'all non-public information disclosed by either party.' The startup's counsel is concerned this definition is overly broad and could capture publicly available information that the disclosing party merely claims is confidential. Analyze the risks of an overly broad definition, standard carve-outs that should be included (e.g., prior knowledge, independently developed, public domain), and how to draft a definition that protects the startup while remaining commercially reasonable for the acquirer's due diligence.",
+      "reference_answer": "Key points: (1) Overly broad definitions risk capturing information the recipient already knew, independently developed, or that became public through no fault of the recipient — creating liability for normal business operations. (2) Standard carve-outs: information known to recipient prior to disclosure (with documentation burden), information independently developed without use of confidential information, information rightfully received from third party without restriction, information that becomes publicly available through no fault of recipient, information required to be disclosed by law (with notice and cooperation). (3) The phrase 'all non-public information' is problematic because it lacks specificity — courts may interpret broadly against the drafter. (4) Better drafting: enumerate categories (technical data, business plans, financials, customer lists) or use 'information that the disclosing party designates in writing as confidential' to create notice requirement. (5) Consider exclusions for information that is or becomes generally known in the industry. (6) The startup should insist on carve-outs to avoid liability for information it legitimately possessed or developed. (7) Document the timing of prior knowledge if that carve-out is used — burden of proof typically on recipient.",
+      "scoring_criteria": [
+        "Identifies risks of overly broad Confidential Information definition",
+        "Lists standard carve-outs (prior knowledge, independent development, public domain)",
+        "Addresses the law/legal process disclosure carve-out",
+        "Suggests improved drafting approaches",
+        "Discusses burden of proof for carve-out assertions",
+        "Considers commercial reasonableness for both parties"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "nda-002",
+      "prompt": "A pharmaceutical company's standard NDA includes a confidentiality obligation that survives 'for a period of five (5) years from the date of disclosure.' A counterparty has proposed 'for a period of five (5) years from the date of termination of this Agreement.' The company disclosed trade secret formulations 18 months ago; the agreement is being terminated today. Calculate the practical difference in protection under each formulation and analyze which approach is more favorable to the disclosing party, including the risk of perpetual obligations under the 'from termination' approach.",
+      "reference_answer": "Key points: (1) 'From date of disclosure' — each piece of information has its own 5-year clock; information disclosed 18 months ago would be protected for 3.5 more years from today. (2) 'From date of termination' — all information receives a fresh 5-year protection period from termination; the 18-month-old formulations would be protected for 5 full years from today. (3) The 'from termination' approach is generally more favorable to the disclosing party because it extends protection for older disclosures and creates a single, clear end date. (4) Risk of perpetual obligations: if the agreement has no fixed term and can be terminated at will, the 'from termination' approach does not create perpetual obligations — it creates a 5-year tail from whenever termination occurs. (5) True perpetual risk exists when survival language says 'indefinitely' or 'for so long as the information remains confidential' without a cap. (6) Trade secret considerations: under Defend Trade Secrets Act and state UTSA, trade secrets may be protected beyond contract term if they remain secret; the survival clause governs contractual obligations, not statutory trade secret rights. (7) Best practice for disclosing party: 'from termination' with carve-out for trade secrets to survive as long as they qualify as trade secrets under applicable law.",
+      "scoring_criteria": [
+        "Correctly calculates the practical difference between the two formulations",
+        "Identifies which approach favors the disclosing party",
+        "Addresses the perpetual obligation concern accurately",
+        "Distinguishes contractual survival from statutory trade secret protection",
+        "Suggests best practice drafting for trade secret carve-out",
+        "Demonstrates understanding of per-disclosure vs. single end date"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "nda-003",
+      "prompt": "An NDA permits disclosure of confidential information 'to the extent required by applicable law, regulation, or legal process, provided that the receiving party gives the disclosing party prompt written notice and cooperates in any effort to obtain a protective order or similar relief.' The receiving party has received a federal grand jury subpoena demanding production of documents that include confidential information covered by the NDA. The subpoena includes a non-disclosure order. Analyze the receiving party's obligations under the carve-out, whether the non-disclosure order affects the notice requirement, and what 'prompt' and 'cooperate' mean in practice.",
+      "reference_answer": "Key points: (1) The carve-out permits disclosure when legally required — a grand jury subpoena creates legal compulsion. (2) The notice requirement: 'prompt written notice' to the disclosing party before production, allowing them to intervene or seek protective relief. (3) Non-disclosure order complication: if the court has ordered the recipient not to disclose the existence of the subpoena, the recipient faces a conflict — contract requires notice, court order prohibits it. (4) Legal process typically prevails over contract; the recipient may need to seek modification of the non-disclosure order to permit notice to the disclosing party, or seek guidance from the court. (5) 'Cooperate' generally means: provide information needed for the disclosing party to evaluate options, join in motions for protective order or to quash, support efforts to limit the scope of production, provide reasonable assistance — not necessarily bear all costs. (6) Best practice: recipient should attempt to give notice to the extent permitted by law; if prohibited, document the conflict and consider seeking court permission for limited notice. (7) Some NDAs include 'to the extent legally permitted' qualifier on the notice obligation to address this scenario. (8) The disclosing party may have standing to intervene in the grand jury matter to protect its interests.",
+      "scoring_criteria": [
+        "Identifies that grand jury subpoena creates legal compulsion",
+        "Addresses the conflict between notice requirement and non-disclosure order",
+        "Explains that legal process typically prevails over contract",
+        "Defines what 'cooperate' means in practical terms",
+        "Suggests approaches to resolve the notice/order conflict",
+        "Mentions potential for disclosing party to intervene"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "nda-004",
+      "prompt": "A merger target has signed an NDA requiring 'return or destruction of all Confidential Information within thirty (30) days of termination.' The acquirer's integration team has already loaded the target's customer database into the acquirer's CRM system, created derivative analyses, and shared extracts with the business development team. The deal has been terminated. Analyze the return/destruction obligations, the challenges with electronically stored information and derivative works, and what the target should demand to verify compliance.",
+      "reference_answer": "Key points: (1) 'Return or destruction' creates an option — recipient may choose either, but must complete one within 30 days. (2) Loaded data in CRM: the original database may be deletable, but data integrated into another system creates practical challenges — extraction may not be feasible, and 'destruction' of copies requires identifying all copies. (3) Derivative works: many NDAs are silent on derivatives; if the acquirer created analyses, reports, or summaries using the confidential information, those may arguably be the acquirer's work product — but they contain or reflect confidential information. (4) Standard approach: require destruction of all copies including derivatives that contain or reflect confidential information, or obtain written confirmation that derivatives have been purged of confidential content. (5) Verification demands: written certification from an officer that all confidential information has been returned or destroyed; audit rights (if negotiated); identification of systems and locations where data resided; certification that no copies were retained. (6) Backup/archive systems: often overlooked — require certification that backups have been or will be purged in next retention cycle, or immediate overwrite. (7) Personnel knowledge: return/destruction addresses documents, not what individuals remember — consider residual knowledge clause separately. (8) Litigation hold exception: if the recipient is in litigation, they may need to retain documents; the NDA should address this (often with continued confidentiality obligations).",
+      "scoring_criteria": [
+        "Explains return vs. destruction option and 30-day timeline",
+        "Addresses challenges with integrated/commingled data",
+        "Discusses derivative works and whether they must be destroyed",
+        "Recommends verification mechanisms (certification, audit)",
+        "Identifies backup/archive systems as often overlooked",
+        "Distinguishes document destruction from residual knowledge"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "nda-005",
+      "prompt": "A venture capital firm's NDA with a portfolio company includes a 24-month non-solicitation clause preventing the VC from hiring any of the company's employees. The company's CEO argues this is standard. The VC's counsel is concerned this goes beyond typical NDA scope. Analyze whether non-solicitation belongs in an NDA versus a separate agreement, the enforceability considerations (consideration, reasonableness of scope), and how the VC might negotiate to narrow or remove it.",
+      "reference_answer": "Key points: (1) Non-solicitation is distinct from confidentiality — NDAs protect information; non-solicit protects human capital. Combining them in one document is common but creates a 'kitchen sink' agreement. (2) Separate agreement advantages: clearer consideration for the restriction, easier to negotiate scope independently, avoids NDA termination affecting non-solicit (or vice versa). (3) Enforceability: non-solicits require independent consideration in many jurisdictions; continued access to confidential information during due diligence may suffice, but post-termination restrictions need careful analysis. (4) Scope concerns: 24 months is aggressive; geographic scope (if any) and definition of 'solicit' matter — does it cover passive hiring (employee applies)? General job postings? (5) Carve-outs to request: hiring in response to unsolicited applications, hiring after employee's employment with company has ended for 6+ months, hiring from general recruitment not targeted at company, reduction to 12 months, exclusion of employees the VC had prior relationship with. (6) Some VCs refuse non-solicit in NDAs entirely — it can chill legitimate talent flow in the ecosystem. (7) If the company insists: narrow to key personnel (C-suite, key technical leads), shorten duration, add materiality threshold (e.g., only employees with access to material confidential information). (8) Jurisdiction matters: California generally disfavors non-solicits; other states enforce if reasonable in scope, duration, and geography.",
+      "scoring_criteria": [
+        "Distinguishes non-solicitation from confidentiality purpose",
+        "Discusses enforceability and consideration requirements",
+        "Identifies scope concerns (duration, definition of solicit)",
+        "Suggests specific carve-outs and narrowing strategies",
+        "Addresses jurisdictional variations (e.g., California)",
+        "Provides practical negotiation alternatives"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "nda-006",
+      "prompt": "An NDA includes a residual knowledge exception: 'The receiving party shall have no obligation to limit the activities of its personnel who have had access to Confidential Information, and such personnel may use Residual Knowledge in the course of their employment.' The term 'Residual Knowledge' is defined as 'ideas, concepts, know-how, or techniques retained in the unaided memory of personnel.' The disclosing party is concerned that engineers with photographic memories could effectively retain entire technical specifications. Analyze the purpose of residual knowledge exceptions, the 'unaided memory' limitation, and how the disclosing party might narrow this carve-out.",
+      "reference_answer": "Key points: (1) Purpose: residual knowledge exceptions prevent the impractical result of requiring employees to 'forget' what they learned; they allow normal job mobility and prevent claims that general skills/knowledge constitute misappropriation. (2) 'Unaided memory' is the key limitation — it excludes information retained in documents, notes, copies, or other tangible form. The employee must have genuinely internalized the information. (3) Photographic memory concern: courts have grappled with this; the trend is that truly exceptional memory may not qualify as 'residual' if it effectively allows verbatim reproduction. However, proving what is in someone's unaided memory is nearly impossible. (4) Narrowing strategies: exclude specific categories (e.g., 'Residual Knowledge shall not include formulas, algorithms, or technical specifications regardless of retention'); add temporal limitation ('retained without conscious effort to memorize'); require that residual knowledge not be 'deliberately memorized'; exclude information that would qualify as trade secrets under applicable law. (5) Some agreements require that residual knowledge be 'incidentally acquired' — excluding information that was the primary subject of the disclosure. (6) Practical reality: residual knowledge exceptions are difficult to police; the disclosing party's main protection is limiting what gets disclosed in the first place and ensuring return/destruction of documents. (7) Consider carve-out from the residual exception for 'highly confidential' or 'competitively sensitive' designated information.",
+      "scoring_criteria": [
+        "Explains the purpose of residual knowledge exceptions",
+        "Defines and analyzes the 'unaided memory' limitation",
+        "Addresses the photographic memory edge case",
+        "Suggests specific narrowing language for the disclosing party",
+        "Discusses practical enforcement challenges",
+        "Recommends designation-based carve-outs"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "nda-007",
+      "prompt": "An NDA provides that 'the disclosing party shall be entitled to seek injunctive relief and any other remedies available at law or in equity' for breach of confidentiality. The receiving party has inadvertently shared a confidential pricing document with a competitor. No actual harm has been demonstrated yet. Analyze the standards for obtaining a preliminary injunction for NDA breach, the role of irreparable harm, and whether the 'injunctive relief' language creates any advantage for the disclosing party.",
+      "reference_answer": "Key points: (1) Preliminary injunction standard (federal and most states): likelihood of success on the merits, irreparable harm if injunction denied, balance of hardships favors movant, injunction serves the public interest. (2) Irreparable harm: courts often presume irreparable harm for trade secret/confidential information misappropriation because once disclosed, the information cannot be 'un-disclosed' — the cat is out of the bag. (3) Inadvertent disclosure complicates but does not eliminate the claim — breach is breach; intent may affect damages but not necessarily injunctive relief. (4) The contractual 'entitled to seek injunctive relief' language does not guarantee a court will grant it — courts apply equitable standards independently. However, it may help establish that the parties contemplated injunctive relief as an appropriate remedy, supporting the irreparable harm argument. (5) Some NDAs include 'acknowledgment of irreparable harm' — the parties stipulate that breach would cause irreparable harm, making injunctive relief appropriate. This can strengthen the disclosing party's position. (6) Practical considerations: even with favorable language, the disclosing party must act quickly (laches); document the breach; consider whether the competitor has actually used the information. (7) Alternative remedies: damages may be difficult to quantify; injunctive relief (cease use, return documents) may be the primary practical remedy. (8) Consider whether the NDA includes a bond requirement for preliminary injunctions — courts typically require a bond; the amount can be negotiated in the contract.",
+      "scoring_criteria": [
+        "States the preliminary injunction standard",
+        "Explains irreparable harm presumption for confidential information",
+        "Clarifies that contractual language does not guarantee court relief",
+        "Discusses 'acknowledgment of irreparable harm' provisions",
+        "Addresses practical considerations (speed, documentation)",
+        "Mentions alternative remedies and bond requirements"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "nda-008",
+      "prompt": "A startup is being asked to sign a one-way NDA where only the startup (as disclosing party) has confidentiality obligations. The counterparty is a strategic partner that will receive the startup's technical documentation and business plans. The startup will receive only high-level partnership terms. Analyze the asymmetry of one-way NDAs, when they are appropriate, what the startup should demand in return (if anything), and whether the startup can negotiate to make it mutual.",
+      "reference_answer": "Key points: (1) One-way NDAs are appropriate when the information flow is genuinely one-sided — e.g., a company disclosing to a vendor, or a startup pitching to a large corporation that has no need to disclose its own confidential information in the interaction. (2) In this scenario, the startup is the primary discloser of valuable information (technical docs, business plans); the strategic partner's 'high-level terms' may still contain confidential information (pricing, strategy, internal processes). (3) Asymmetry risk: the startup assumes all the liability and restrictions while the partner has none. If the partner shares its terms with the startup, those could be competitively sensitive. (4) Negotiation to make it mutual: the startup should argue that any information exchanged in the partnership discussion is confidential. At minimum, the startup's receipt of the partner's terms should be covered. (5) If one-way is non-negotiable, the startup should demand: a narrow definition of what it discloses (avoid overbroad 'all non-public information'); clear permitted use limitations; strong return/destruction obligations; favorable jurisdiction and dispute resolution; perhaps a standstill or no-use period if the partnership does not proceed. (6) Consider whether the startup needs a separate one-way NDA from the partner covering the partner's confidential information — creating de facto mutuality through two agreements. (7) Red line: the startup should not agree to one-way if it will receive competitively sensitive information from the partner without protection. (8) Document the business justification for one-way in case of later dispute — e.g., 'Partner has no confidential information to disclose in this evaluation.'",
+      "scoring_criteria": [
+        "Explains when one-way NDAs are appropriate",
+        "Identifies the asymmetry and risk to the startup",
+        "Recommends negotiating for mutuality",
+        "Suggests fallback protections if one-way is required",
+        "Addresses the two-agreement workaround",
+        "Identifies circumstances where one-way is unacceptable"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "nda-009",
+      "prompt": "An NDA between a U.S. software company and a German distributor provides that 'any dispute shall be resolved exclusively in the courts of New York County, New York, and the parties consent to personal jurisdiction therein.' The German distributor has allegedly disclosed the U.S. company's source code to a competitor in Berlin. The U.S. company wants to sue in New York; the German company argues the clause is unenforceable under EU law. Analyze the enforceability of exclusive jurisdiction clauses in international NDAs, the role of the Brussels Regulation (Recast), and practical considerations for the U.S. company.",
+      "reference_answer": "Key points: (1) Exclusive jurisdiction clauses are generally enforceable in international contracts under the principle of party autonomy, subject to mandatory law overrides. (2) Brussels Regulation Recast (EU 1215/2012): Article 25 provides that if parties have agreed that a court of an EU Member State shall have jurisdiction, that court has exclusive jurisdiction (unless the agreement is null and void as to its substantive validity under the law of that Member State). (3) The clause designates New York — a non-EU court. The Brussels Regulation governs allocation of jurisdiction among EU courts; it does not directly invalidate choice of a non-EU forum. (4) However, if the German company is domiciled in the EU, it may argue that EU mandatory rules protect it from being hauled into a distant forum — but the Hague Convention on Choice of Court Agreements (2005) supports enforcement of exclusive jurisdiction clauses in commercial matters between parties in contracting states. (5) U.S. enforcement: U.S. courts generally enforce forum selection clauses unless unreasonable (Bremen v. Zapata). New York courts routinely enforce such clauses. (6) Practical considerations: even if the U.S. company obtains a New York judgment, enforcement in Germany requires recognition under German law / Brussels Regulation — a German judgment might be easier to enforce against German assets. (7) Alternative: consider arbitration with a neutral seat (e.g., ICC in Paris) for international disputes — arbitral awards have better international enforceability under the New York Convention. (8) The U.S. company should also consider where the harm occurred and where evidence/witnesses are located — a German proceeding might be more practical for a Berlin-based disclosure.",
+      "scoring_criteria": [
+        "Explains general enforceability of exclusive jurisdiction clauses",
+        "References Brussels Regulation Article 25",
+        "Addresses designation of non-EU forum (New York)",
+        "Discusses U.S. enforcement (Bremen v. Zapata)",
+        "Identifies judgment recognition/enforcement challenges",
+        "Suggests arbitration as alternative for international disputes"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "nda-010",
+      "prompt": "An NDA states that 'the confidentiality obligations herein shall survive termination of this Agreement for a period of three (3) years.' The agreement has no defined term and either party may terminate on 30 days' notice. The parties have been exchanging information for 18 months. One party terminates. The other party claims that the survival clause creates an indefinite obligation because the 3-year period runs from termination, and termination could be delayed indefinitely. Analyze this argument, the actual risk (if any), and how the survival clause could be drafted more clearly.",
+      "reference_answer": "Key points: (1) The argument mischaracterizes the clause: 'survive termination for 3 years' means the obligations continue for 3 years after termination occurs — not that they are indefinite. Once a party terminates, the 3-year clock starts. (2) There is no indefinite obligation: the maximum obligation period is 3 years from whenever termination happens. If a party never terminates, the confidentiality obligations continue during the term (which is at-will) — but that is the nature of an at-will agreement. (3) The real question: when does the 3-year period start for information disclosed at different times? Under 'survive for 3 years from termination,' all information gets a uniform 3-year protection from the termination date. Information disclosed 18 months ago would be protected for 3 years from termination (not 1.5 years, which would be the case under '3 years from disclosure'). (4) Clearer drafting options: 'The confidentiality obligations shall survive termination and continue for three (3) years following the effective date of termination' — eliminates ambiguity. (5) Alternative: 'For a period of three (3) years from the date of each disclosure' — creates per-disclosure timing but may be harder to administer. (6) Consider adding: 'Notwithstanding the foregoing, with respect to trade secrets, the obligations shall survive for so long as the information remains a trade secret under applicable law' — extends protection for true trade secrets beyond the 3-year cap. (7) The 'indefinite' concern might arise if the clause said 'survive indefinitely' or 'for so long as the information remains confidential' without a cap — that could create perpetual obligations. The 3-year cap prevents that.",
+      "scoring_criteria": [
+        "Correctly analyzes and refutes the 'indefinite' argument",
+        "Explains that 3-year runs from termination date",
+        "Distinguishes survival from termination vs. from disclosure",
+        "Suggests clearer drafting alternatives",
+        "Addresses trade secret carve-out for extended protection",
+        "Identifies when true indefinite obligation risk exists"
+      ],
+      "difficulty": "medium"
+    }
+  ]
+}

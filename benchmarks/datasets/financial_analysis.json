@@ -1,0 +1,146 @@
+{
+  "name": "Financial Document Analysis Tasks",
+  "category": "financial",
+  "tasks": [
+    {
+      "id": "fin-001",
+      "prompt": "A forensic investigator is reviewing a company's SEC 10-K filing for potential securities fraud. The company's Risk Factors section has grown from 12 pages to 47 pages over the past three years, with extensive boilerplate language. The investigator needs to identify which risk factors may have been materially understated or omitted in prior years, and which new risks appear to have been added only after adverse events occurred. Outline the analytical framework for evaluating risk factor adequacy, red flags suggesting belated disclosure, and how to correlate risk factor changes with actual adverse events for use in a securities litigation context.",
+      "reference_answer": "Key points: (1) SEC Item 105 (formerly Item 503(c)) requires discussion of the most significant factors that make an investment speculative or risky; boilerplate that does not address company-specific risks may be inadequate. (2) Analytical framework: compare risk factor evolution year-over-year; identify risks that appeared only after the related adverse event (suggesting prior omission); assess whether disclosed risks were sufficiently specific versus generic; evaluate whether risk factor length/complexity obscures material risks. (3) Red flags for belated disclosure: new risk factor added in same filing that discloses the adverse event; risk factor language that reads like post-hoc justification; sudden expansion of a previously brief risk into multiple sub-risks after the event; risk factors that mirror plaintiff allegations in pending litigation. (4) Correlation analysis: timeline of risk factor additions vs. internal knowledge dates (from discovery); compare risk factor language to internal risk assessments, board minutes, audit committee materials; identify 'known trends or uncertainties' that should have been in MD&A and risk factors per SEC guidance. (5) Materiality standard: would a reasonable investor have considered the omitted or understated risk significant in the total mix of information? (6) Scienter for fraud claims: evidence that the company knew of the risk but deliberately understated or omitted it. (7) Reference to In re NVIDIA Corp. Securities Litigation and other cases where risk factor adequacy was contested.",
+      "scoring_criteria": [
+        "References SEC Item 105/503(c) requirements",
+        "Outlines year-over-year comparative analysis framework",
+        "Identifies red flags for belated or inadequate disclosure",
+        "Describes correlation with internal documents and timelines",
+        "Addresses materiality and scienter for fraud claims",
+        "Cites relevant case law or SEC guidance"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "fin-002",
+      "prompt": "A financial analyst is investigating revenue recognition practices at a software company that reports under ASC 606. The company has consistently recognized 35-40% of its annual revenue in Q4. Its largest customer, representing 22% of revenue, signed a 3-year contract in December with payment due upon signing, and the company recognized the entire contract value as revenue in the month of signing. Identify the ASC 606 revenue recognition red flags, the specific criteria that may have been violated, and the forensic procedures to test whether revenue was appropriately recognized.",
+      "reference_answer": "Key points: (1) ASC 606 core principle: recognize revenue when control transfers to the customer. For software/SaaS, this typically means over time as the service is provided, unless there is a distinct license that transfers at a point in time. (2) Q4 concentration (35-40%): potential channel stuffing or pull-forward of revenue; compare to industry norms and company historical pattern. (3) Full contract value at signing: under ASC 606, if the performance obligation is satisfied over time (e.g., 3-year SaaS access), revenue should be recognized over the 3 years, not upfront. Upfront recognition suggests either: the company determined it was a point-in-time transfer (unusual for 3-year SaaS), or there is an error. (4) Payment timing: payment upon signing does not determine revenue recognition; control transfer does. (5) Red flags: large customer concentration with aggressive recognition; December contract with full upfront recognition; potential side agreements (right of return, cancellation, variable consideration). (6) Forensic procedures: obtain and read the customer contract for performance obligation structure; review management's contract interpretation and documentation; test for implicit rights of return or refund; analyze whether there are multiple performance obligations that should be unbundled; review board/audit committee materials for revenue recognition discussions; compare to peer company practices; examine whether the customer has actually paid and whether there are collection issues. (7) Consider whether the contract includes significant financing component (upfront payment for future service). (8) VSOE/standalone selling price for any bundled elements.",
+      "scoring_criteria": [
+        "States ASC 606 control transfer principle",
+        "Identifies Q4 concentration as red flag",
+        "Explains why upfront recognition for 3-year contract is suspect",
+        "Distinguishes payment timing from revenue recognition",
+        "Lists specific forensic audit procedures",
+        "Addresses variable consideration and side agreements"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "fin-003",
+      "prompt": "An auditor is evaluating going concern for a manufacturing company. The company has negative operating cash flow for the past two years, a current ratio of 0.8, $120M in debt maturing in 14 months, and has drawn 90% of its revolving credit facility. Management has prepared a 12-month cash flow projection showing breakeven, predicated on a 15% revenue increase and 8% cost reduction. Identify the going concern indicators under ASC 205-40, the auditor's evaluation requirements, and the red flags in management's projection that warrant skepticism.",
+      "reference_answer": "Key points: (1) ASC 205-40 requires management to assess whether there is substantial doubt about the entity's ability to continue as a going concern within one year of the financial statement issuance date. (2) Substantial doubt exists when relevant conditions and events, in the aggregate, indicate that it is probable the entity will be unable to meet its obligations when due. (3) Going concern indicators here: negative operating cash flow (sustained); current ratio below 1.0 (liquidity stress); near-term debt maturity ($120M in 14 months); limited availability under revolver (90% drawn). (4) Auditor requirements: evaluate management's assessment; consider whether management's plans to mitigate substantial doubt are probable of being effectively implemented; if substantial doubt remains after considering plans, auditor must include going concern explanatory paragraph and may need to consider modification of opinion. (5) Red flags in management's projection: 15% revenue increase is aggressive — what is the basis? Historical growth? New contracts? Market expansion? 8% cost reduction — is this achievable? Layoffs? Renegotiated supplier terms? The company has had negative operating cash flow for two years — what has changed? (6) Management must assess probability of plans: refinancing (is there a lender? Term sheet?); asset sales (identified buyers?); equity raise (investor interest?); cost reductions (specific actions?). (7) Auditor should perform sensitivity analysis: what if revenue grows only 5%? What if cost reduction is only 4%? Does the company still have adequate liquidity? (8) Consider disclosure in footnotes about the going concern assessment and management's plans.",
+      "scoring_criteria": [
+        "References ASC 205-40 going concern requirements",
+        "Lists the specific going concern indicators in the scenario",
+        "Describes auditor evaluation and reporting obligations",
+        "Identifies red flags in management's assumptions",
+        "Suggests sensitivity analysis approach",
+        "Addresses management's mitigation plan requirements"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "fin-004",
+      "prompt": "A defense attorney is preparing for a shareholder derivative suit. The complaint alleges that the board failed to properly oversee related party transactions. The company's 10-K discloses that the CEO's brother-in-law owns a logistics company that received $4.2M in freight services from the company last year. The disclosure states the transaction was approved by the audit committee and was on 'arm's length terms.' The attorney needs to assess the adequacy of the disclosure and identify what additional investigation or discovery is needed. Analyze SEC related party disclosure requirements, red flags, and the Caremark standard for oversight liability.",
+      "reference_answer": "Key points: (1) SEC Regulation S-K Item 404 requires disclosure of related party transactions exceeding $120,000 where a related person had or will have a direct or indirect material interest. (2) Disclosure must include: the nature of the relationship; the amount of the transaction; the interest of the related person; the basis for the board's determination that the transaction was fair. (3) Red flags in this scenario: 'arm's length terms' is conclusory — what benchmarking was done? Were competing bids obtained? What is the brother-in-law's company's revenue — is $4.2M material to them? Is the company overpaying? (4) Audit committee approval: who is on the audit committee? Any conflicts? Was the CEO recused from the decision? What diligence did the committee perform? (5) Caremark standard (In re Caremark): directors can be liable for failure to oversee if they utterly failed to implement any reporting system or controls, or consciously failed to monitor such system. For related party transactions, the question is whether the board had adequate processes to identify, review, and approve them. (6) Discovery targets: audit committee minutes and materials; any fairness opinion or third-party valuation; competitive bid documentation; the logistics contract terms vs. market rates; whether the company has a related party transaction policy; prior year transactions with the same party. (7) Compare freight rates paid to the brother-in-law's company vs. other logistics providers. (8) Consider whether the $120K threshold was properly applied — if the brother-in-law's company is a pass-through or the relationship is indirect, the analysis may differ.",
+      "scoring_criteria": [
+        "Cites Regulation S-K Item 404 requirements",
+        "Identifies inadequacies in 'arm's length' conclusory disclosure",
+        "Explains Caremark oversight liability standard",
+        "Lists specific discovery targets and investigation steps",
+        "Suggests benchmarking and comparative analysis",
+        "Addresses audit committee process and independence"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "fin-005",
+      "prompt": "A company's auditor has identified a material weakness in internal control over financial reporting (ICFR). The weakness relates to the company's inability to properly segregate duties in its accounts payable function due to limited staff — the same person initiates vendor setup, approves invoices, and processes payments for vendors under $25,000. The company has 400 vendors and processes approximately 12,000 invoices annually. Analyze the material weakness under AS 2201 and PCAOB standards, the implications for the audit opinion, and practical remediation steps the company should take.",
+      "reference_answer": "Key points: (1) AS 2201 (PCAOB): a material weakness is a deficiency, or combination of deficiencies, in ICFR such that there is a reasonable possibility that a material misstatement will not be prevented or detected on a timely basis. (2) Segregation of duties is a fundamental control — the same person initiating, approving, and processing payments creates opportunity for fraud (e.g., fictitious vendors, duplicate payments, inflated amounts). (3) The $25,000 threshold does not eliminate risk — 12,000 invoices could include many under $25K; a fraudster could create multiple small fraudulent payments. (4) Material weakness implications: management must disclose in its ICFR report (Item 308 of Regulation S-K); auditor must express an adverse opinion on ICFR effectiveness; the financial statement audit opinion may be unmodified if the auditor performed additional procedures to address the control deficiency, but the ICFR opinion will be adverse. (5) SOX 404(b) for accelerated filers: auditor must attest to ICFR; adverse opinion triggers disclosure. (6) Remediation steps: hire additional AP staff to segregate duties (initiation vs. approval vs. payment); implement tiered approval (e.g., manager approval for invoices over $5K); use of payment runs with secondary review; periodic vendor master file review by someone other than AP; data analytics to detect duplicate payments, round numbers, new vendors with rapid payment; consider outsourcing or shared services. (7) Interim compensating controls: enhanced management review, random sampling by internal audit, data analytics monitoring. (8) Timing: remediation must be in place and operating for a sufficient period before the weakness can be considered remediated — typically at least one quarter.",
+      "scoring_criteria": [
+        "Defines material weakness under AS 2201",
+        "Explains the segregation of duties risk",
+        "Addresses audit opinion and ICFR disclosure implications",
+        "Provides specific remediation recommendations",
+        "Suggests interim compensating controls",
+        "References SOX 404 and Regulation S-K"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "fin-006",
+      "prompt": "A forensic accountant is analyzing a company suspected of earnings management. The company has met or exceeded analyst consensus EPS estimates for 18 consecutive quarters, often by $0.01-0.02 per share. Net income has grown steadily while operating cash flow has declined as a percentage of net income over the same period. Inventory and accounts receivable have grown faster than revenue. Identify the earnings management red flags, the specific analytical procedures to detect manipulation, and the accounting areas most susceptible to earnings management that the forensic accountant should scrutinize.",
+      "reference_answer": "Key points: (1) Meeting consensus by small margins repeatedly: statistically unlikely to occur by chance; suggests management may be managing to the number. (2) Declining cash flow relative to earnings: earnings can be manipulated through accruals; cash flow is harder to manipulate. Growing gap suggests accrual-based earnings management. (3) Inventory and receivables growing faster than revenue: potential channel stuffing (inflated receivables); potential inventory buildup to absorb overhead and boost margins; obsolete inventory not written down. (4) Analytical procedures: Beneish M-score or similar model to detect earnings manipulation probability; accruals analysis (discretionary vs. non-discretionary accruals); compare accruals to cash flow; trend analysis of key ratios (days sales outstanding, days inventory outstanding, gross margin); compare to industry peers. (5) Susceptible areas: revenue recognition (timing, cut-off); reserves (warranty, bad debt, returns) — cookie jar reserves; depreciation/amortization assumptions; restructuring and one-time charges (big bath); pension assumptions; fair value estimates; related party transactions; classification (operating vs. non-operating). (6) Specific tests: revenue cut-off around quarter-end; review of reserve adequacy (compare to actual experience); analysis of non-recurring items; scrutiny of management estimates and changes in assumptions. (7) Consider the 'red flags' study by Dechow et al. on predictors of SEC enforcement. (8) Document the analytical rationale for use in potential litigation or regulatory referral.",
+      "scoring_criteria": [
+        "Identifies the statistical improbability of consistent beat pattern",
+        "Explains earnings vs. cash flow divergence as red flag",
+        "Addresses inventory and receivables growth implications",
+        "Describes specific analytical procedures (Beneish, accruals)",
+        "Lists accounting areas susceptible to manipulation",
+        "References forensic accounting best practices"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "fin-007",
+      "prompt": "A financial analyst notices that a company reports strong net income and positive operating cash flow, but the company's statement of cash flows shows that 'Changes in operating assets and liabilities' has been a large positive contributor for three consecutive years, while revenue has been flat. Accounts payable has increased significantly. Dig deeper: what cash flow statement anomalies should the analyst investigate, what might explain this pattern, and what forensic procedures would help determine whether the cash flow presentation is misleading?",
+      "reference_answer": "Key points: (1) Operating cash flow = Net income + Non-cash adjustments + Changes in operating assets/liabilities. When net income is flat but operating cash flow is boosted by working capital changes, the company may be deferring cash outflows or accelerating cash inflows. (2) Accounts payable increase: company may be stretching payables — delaying payments to suppliers to preserve cash. This is a one-time benefit; eventually payables must be paid. (3) Other working capital items to check: receivables (could be sold or factored — check for sale of receivables disclosed as financing); inventory (drawdown could boost cash but may not be sustainable); accrued expenses (similar to payables — deferral); prepaid expenses. (4) Red flags: sustained positive contribution from working capital when revenue is flat suggests the company is funding operations by not paying bills or by other non-sustainable means. (5) Forensic procedures: recalculate cash flow from operations; verify classification of items (are some financing activities misclassified as operating?); compare DPO (days payable outstanding) to industry and prior years — is the company paying slower?; analyze supplier relationships and any disclosed payment terms; check for supply chain financing or reverse factoring that may move payables off balance sheet; review MD&A for discussion of working capital; compare to peer companies' cash conversion cycles. (6) Consider whether the company has engaged in supply chain financing (e.g., with banks paying suppliers early while company pays later) — this can improve reported operating cash flow. (7) Sustainability: if payables cannot be stretched further, operating cash flow may decline sharply. (8) Quality of earnings: earnings that rely on working capital manipulation for cash flow support are lower quality.",
+      "scoring_criteria": [
+        "Explains the cash flow statement structure and working capital role",
+        "Identifies accounts payable stretching as potential cause",
+        "Lists other working capital items to investigate",
+        "Describes forensic analytical procedures",
+        "Addresses supply chain financing and classification issues",
+        "Discusses sustainability and earnings quality"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "fin-008",
+      "prompt": "A company has $800M in senior secured debt subject to a credit agreement with financial covenants including a maximum leverage ratio of 4.0x and a minimum interest coverage ratio of 3.0x. The company's EBITDA has declined, and management is concerned about covenant compliance at the next testing date in 60 days. The company is considering a proposed acquisition that would add $50M in EBITDA and $200M in debt. Analyze the covenant compliance implications, the definitional issues (how EBITDA and debt are defined in the credit agreement), and strategies the company might use to achieve compliance or avoid default.",
+      "reference_answer": "Key points: (1) Leverage ratio = Total Debt / EBITDA. If the ratio exceeds 4.0x, the company is in default (or will be at the next test date). (2) Interest coverage = EBITDA / Interest expense. Must be at least 3.0x. (3) Credit agreement definitions are critical: EBITDA often includes add-backs (restructuring, one-time costs, synergies, etc.); 'Consolidated EBITDA' may have 20+ add-back categories. Debt may exclude certain items (cash netting, undrawn revolvers). (4) Acquisition impact: adds $50M EBITDA and $200M debt. Net effect on leverage depends on current levels. If current leverage is 3.8x ($760M debt / $200M EBITDA), post-acquisition: ($760M + $200M) / ($200M + $50M) = $960M / $250M = 3.84x — still compliant. But if EBITDA is lower, the math may not work. (5) Strategies for compliance: negotiate covenant relief or amendment with lenders (waiver, reset); utilize EBITDA add-backs in the definition (run-rate synergies, cost savings); asset sales to reduce debt; equity injection; refinance with looser covenants; ensure all permitted add-backs are properly documented and supportable. (6) Covenant cure: some agreements allow equity cure — company contributes equity and can add to EBITDA for covenant purposes (typically 50% of amount). (7) Default consequences: acceleration of debt, cross-default to other debt, inability to access revolver. (8) Practical steps: model scenarios with and without acquisition; engage counsel to review credit agreement; prepare for lender discussions; have backup plan (delay acquisition, reduce size, asset sale).",
+      "scoring_criteria": [
+        "Explains leverage and interest coverage covenant mechanics",
+        "Emphasizes importance of credit agreement definitions",
+        "Calculates or describes acquisition impact on covenants",
+        "Lists strategies for achieving compliance",
+        "Addresses covenant cure and amendment options",
+        "Identifies default consequences"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "fin-009",
+      "prompt": "A company with $2.1B in goodwill from prior acquisitions has reported declining revenue and operating margins in two of its three reporting units. The company's stock price has fallen 35% over the past year. Under ASC 350, the company must perform annual goodwill impairment testing. Identify the goodwill impairment indicators, the quantitative and qualitative (Step 0) assessment requirements, and the red flags that would suggest the company should have recognized an impairment charge but may have delayed or avoided it.",
+      "reference_answer": "Key points: (1) ASC 350-35: goodwill must be tested for impairment at least annually at the reporting unit level, or more frequently if events or circumstances indicate impairment may have occurred. (2) Events indicating potential impairment: sustained decrease in stock price; decline in revenue or margins; loss of key customers or contracts; regulatory or legal developments; restructuring; macroeconomic factors; reporting unit performance below projections. (3) Step 0 (qualitative assessment): entity may first assess whether it is more likely than not that the fair value of the reporting unit is less than its carrying amount. If so, proceed to Step 1 (quantitative). If not, no impairment. (4) Step 1: compare reporting unit fair value to carrying amount. If carrying amount exceeds fair value, impairment exists. Impairment = carrying amount minus fair value (capped at goodwill). (5) Red flags for delayed/avoided impairment: company has clear indicators (stock decline, margin compression) but reports no impairment; qualitative assessment concludes 'more likely than not' fair value exceeds carrying amount when quantitative analysis would suggest otherwise; significant management assumptions (growth rates, discount rates) that appear optimistic vs. market; reporting units restructured to avoid failing units; change in reporting unit structure that affects the test. (6) Forensic focus: review the valuation support (DCF, market approach); assess reasonableness of projections vs. actual trends; check discount rate vs. company's cost of capital; evaluate whether reporting units are appropriately defined (could a failing unit be combined with a strong one?). (7) SEC scrutiny: goodwill impairment has been an enforcement focus; companies have been charged with failing to impair when indicators were present. (8) Consider whether the 35% stock decline, if the company is a single reporting unit or if market cap is below book value, creates a rebuttable presumption of impairment.",
+      "scoring_criteria": [
+        "References ASC 350-35 impairment testing requirements",
+        "Lists events and circumstances indicating impairment",
+        "Explains Step 0 qualitative and Step 1 quantitative assessments",
+        "Identifies red flags for delayed or avoided impairment",
+        "Describes forensic review of valuation assumptions",
+        "Mentions SEC enforcement focus on goodwill"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "fin-010",
+      "prompt": "A compliance officer at a hedge fund is reviewing trading patterns ahead of a company's earnings announcement. The fund's portfolio manager increased the fund's short position in the company from 2% to 8% of the fund's AUM over the 10 trading days before the earnings release. The company subsequently missed earnings by a wide margin and the stock fell 22%. The portfolio manager had attended an industry conference where the company's CFO spoke 15 days before the trade. The SEC has requested information. Analyze the insider trading red flags, the legal elements the SEC would need to prove, and what the compliance officer should document and recommend.",
+      "reference_answer": "Key points: (1) Insider trading under Rule 10b-5: purchase or sale of a security on the basis of material nonpublic information (MNPI) in breach of a duty of trust or confidence. (2) Red flags: significant increase in position size (2% to 8%) in short window before earnings; timing — 10 days before release; portfolio manager had access to company insider (CFO at conference); the trade was highly profitable (short before 22% drop). (3) Legal elements: MNPI — earnings miss would be material; nonpublic — earnings not yet released; 'on the basis of' — Dirks and Salman require that the tipper benefit (or the tippee know the tipper benefited) for tipper-tippee liability; for classical insider trading, the insider must have breached a duty. (4) Conference scenario: did the CFO disclose MNPI? Even in a public setting, selective disclosure to a small group could be MNPI. Or did the portfolio manager infer from the CFO's tone, evasiveness, or body language? Inference alone may not be MNPI unless the CFO communicated something specific. (5) Mosaic theory: analysts can combine public information; the question is whether any single piece was nonpublic and material. (6) Compliance recommendations: document the investment thesis and rationale for the trade (was it based on public information? Industry analysis?); preserve all communications and notes from the conference; review the fund's policies on MNPI and trading around events; consider whether the portfolio manager should have been on a restricted list; if the manager had a one-on-one with the CFO, that requires heightened scrutiny. (7) SEC will look for: communications, calendar, travel; whether the manager had access others didn't; pattern of trading before similar events. (8) Cooperate with the SEC request; consider engaging counsel; ensure no document destruction.",
+      "scoring_criteria": [
+        "States Rule 10b-5 insider trading elements",
+        "Identifies the specific red flags in the scenario",
+        "Explains materiality and 'on the basis of' requirements",
+        "Addresses the conference/MNPI scenario",
+        "Discusses mosaic theory and inference",
+        "Provides compliance and documentation recommendations"
+      ],
+      "difficulty": "hard"
+    }
+  ]
+}
