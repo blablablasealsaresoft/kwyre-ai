@@ -872,6 +872,32 @@ class ChatHandler(BaseHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(json.dumps({"status": "wiped", "message": msg}).encode())
 
+        elif self.path == "/v1/license/verify":
+            body, err = self._parse_json_body()
+            if err is not None:
+                self._send_json_error(400, err)
+                return
+            key = body.get("key", "").strip()
+            if not key:
+                self._send_json_error(400, "Missing license key.")
+                return
+            try:
+                from license import validate_license as _validate_lic
+                payload = _validate_lic(key)
+                tier = payload.get("tier", "unknown")
+                self.send_response(200)
+                self.send_header("Content-Type", "application/json")
+                self._send_security_headers()
+                self.end_headers()
+                self.wfile.write(json.dumps({
+                    "valid": True,
+                    "tier": tier,
+                    "label": payload.get("label", ""),
+                    "machines": payload.get("machines", 0),
+                }).encode())
+            except ValueError as e:
+                self._send_json_error(403, str(e))
+
         else:
             self._send_json_error(404, "Not found.")
 

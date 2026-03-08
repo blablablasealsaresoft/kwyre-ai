@@ -621,6 +621,164 @@ nav {
   max-width: 500px; line-height: 1.5;
 }
 
+/* --- DOWNLOAD GATE --- */
+.dl-gate {
+  max-width: 640px;
+  margin: 0 auto;
+}
+
+.dl-input-wrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 28px;
+}
+
+.dl-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 12px;
+}
+
+.dl-input {
+  width: 100%; padding: 14px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 12px; line-height: 1.6;
+  resize: vertical;
+  transition: border-color 0.2s;
+}
+.dl-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+.dl-input::placeholder { color: var(--text3); }
+
+.dl-verify-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 16px; padding: 14px 32px;
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  background: var(--accent);
+  color: #fff; border: none;
+  border-radius: 4px; cursor: pointer;
+  transition: all 0.2s;
+}
+.dl-verify-btn:hover {
+  box-shadow: 0 4px 24px var(--accent-glow);
+  transform: translateY(-1px);
+}
+.dl-verify-btn:disabled {
+  opacity: 0.5; cursor: not-allowed;
+  transform: none; box-shadow: none;
+}
+
+.dl-error {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 16px; padding: 14px 20px;
+  background: var(--red-dim);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 6px;
+  font-family: var(--mono);
+  font-size: 12px; color: var(--red);
+}
+
+.dl-success {
+  margin-top: 28px;
+  animation: dl-fade-in 0.5s ease;
+}
+
+@keyframes dl-fade-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dl-badge {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 20px;
+  background: var(--green-dim);
+  border: 1px solid rgba(34,197,94,0.2);
+  border-radius: 6px;
+  margin-bottom: 24px;
+  font-family: var(--mono);
+  font-size: 13px; color: var(--green);
+  font-weight: 600;
+}
+
+.dl-machines {
+  margin-left: auto;
+  font-size: 11px; font-weight: 400;
+  color: var(--text2);
+  letter-spacing: 0.5px;
+}
+
+.dl-grid {
+  display: flex; flex-direction: column;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.dl-card {
+  display: flex; align-items: center; gap: 20px;
+  padding: 20px 24px;
+  background: var(--surface);
+  text-decoration: none;
+  color: var(--text);
+  transition: background 0.2s;
+}
+.dl-card:hover {
+  background: var(--surface2);
+}
+
+.dl-card-icon {
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface3);
+  border-radius: 8px;
+  color: var(--text2);
+  flex-shrink: 0;
+}
+.dl-card:hover .dl-card-icon { color: var(--accent); }
+
+.dl-card-info { flex: 1; }
+
+.dl-card-platform {
+  font-size: 15px; font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.dl-card-file {
+  font-family: var(--mono);
+  font-size: 11px; color: var(--text3);
+  letter-spacing: 0.3px;
+}
+
+.dl-card-arrow {
+  color: var(--text3);
+  transition: color 0.2s, transform 0.2s;
+}
+.dl-card:hover .dl-card-arrow {
+  color: var(--accent);
+  transform: translateY(2px);
+}
+
+.dl-note {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 11px; color: var(--text3);
+  letter-spacing: 0.3px;
+}
+
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
   .nav-links a:not(.nav-cta) { display: none; }
@@ -810,6 +968,87 @@ nav {
   </div>
 </div>
 
+<!-- DOWNLOAD SECTION -->
+<div class="section" id="download">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow reveal">Download</div>
+      <h2 class="reveal reveal-d1">Already purchased?</h2>
+      <p class="reveal reveal-d2">Enter your license key to access your installer downloads.</p>
+    </div>
+
+    <div class="dl-gate reveal reveal-d3">
+      <div class="dl-input-wrap">
+        <label class="dl-label" for="licenseKeyInput">License Key</label>
+        <textarea id="licenseKeyInput" class="dl-input" rows="3" placeholder="KWYRE-eyJw..."></textarea>
+        <button class="dl-verify-btn" id="verifyBtn" onclick="verifyLicense()">
+          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          <span id="verifyLabel">Verify License</span>
+        </button>
+      </div>
+
+      <div class="dl-error" id="dlError" style="display:none">
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+        <span id="dlErrorMsg">Invalid license key</span>
+      </div>
+
+      <div class="dl-success" id="dlSuccess" style="display:none">
+        <div class="dl-badge">
+          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          <span id="dlTierLabel">Professional License</span>
+          <span class="dl-machines" id="dlMachines">3 machines</span>
+        </div>
+
+        <div class="dl-grid">
+          <a class="dl-card" href="https://github.com/blablablasealsaresoft/kwyre-ai/releases/latest/download/kwyre-ai-setup-win64.exe" id="dlWindows">
+            <div class="dl-card-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
+            </div>
+            <div class="dl-card-info">
+              <div class="dl-card-platform">Windows</div>
+              <div class="dl-card-file">kwyre-ai-setup-win64.exe</div>
+            </div>
+            <div class="dl-card-arrow">
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+          </a>
+
+          <a class="dl-card" href="https://github.com/blablablasealsaresoft/kwyre-ai/releases/latest/download/kwyre-ai_amd64.deb" id="dlLinux">
+            <div class="dl-card-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 0 0-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.368 1.884 1.564.585.151 1.22.107 1.766-.14 1.07-.469 1.466-1.467 1.473-2.593.014-.133.03-.267.012-.4.602-.869.838-1.867.568-2.935-.136-.535-.36-1.036-.601-1.467-.24-.468-.5-.869-.66-1.27-.12-.27-.18-.53-.27-.801a2.386 2.386 0 0 0-.253-.534c-.12-.198-.254-.267-.38-.399-.116-.135-.122-.267-.223-.467-.09-.199-.2-.399-.467-.535-.267-.135-.51-.062-.59.068-.08.132.05.335.18.469.1.065.18.2.27.4.07.135.13.27.13.467 0 .198-.092.398-.259.534-.264.135-.464.065-.662-.199-.2-.266-.397-.668-.598-1.068-.201-.398-.398-.864-.4-1.202 0-.2.015-.399.063-.598.079-.2.217-.398.407-.535.199-.135.399-.202.531-.202.204.003.381.135.559.202.154.07.31.135.46.202.12.07.24.132.36.199.12.068.24.135.36.132.12 0 .24-.068.36-.202l.12-.135c.1-.199.12-.398.11-.598-.06-.599-.33-1.069-.72-1.399-.39-.267-.848-.398-1.284-.332l.004-.003c.073-.401.054-.802-.068-1.135-.127-.335-.351-.535-.596-.668-.49-.267-.994-.333-1.489-.668-.493-.333-1.035-.869-1.694-1.4-.654-.468-1.355-.87-2.122-.802-1.193.104-1.724.786-2.102 1.468-.378.68-.612 1.334-.86 1.933-.246.601-.48 1.2-.94 1.533-.458.335-1.116.4-1.737.4-.12 0-.244 0-.368.001-.232.002-.47.006-.704.069l-.123.032c-.025-.534.078-1.469.502-3.069.466-1.202 1.202-2.535 2.12-3.669.68-.87.997-1.936 1.122-3.069.09-.798.05-1.6-.093-2.335-.123-.666-.284-1.334-.535-1.867-.259-.534-.586-.935-1.012-1.068-.027-.008-.054-.01-.082-.016z"/></svg>
+            </div>
+            <div class="dl-card-info">
+              <div class="dl-card-platform">Linux</div>
+              <div class="dl-card-file">kwyre-ai_amd64.deb</div>
+            </div>
+            <div class="dl-card-arrow">
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+          </a>
+
+          <a class="dl-card" href="https://github.com/blablablasealsaresoft/kwyre-ai/releases/latest/download/kwyre-ai-macos.pkg" id="dlMacos">
+            <div class="dl-card-icon">
+              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
+            </div>
+            <div class="dl-card-info">
+              <div class="dl-card-platform">macOS</div>
+              <div class="dl-card-file">kwyre-ai-macos.pkg</div>
+            </div>
+            <div class="dl-card-arrow">
+              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </div>
+          </a>
+        </div>
+
+        <div class="dl-note">
+          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+          Compiled binary — source code is not included. All 6 security layers active.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- FOOTER -->
 <footer class="site-footer">
   <div class="wrap">
@@ -965,6 +1204,105 @@ function copyAddress() {
       label.textContent = 'Copy Address';
     }, 2000);
   });
+}
+
+/* ── LICENSE VERIFICATION ── */
+async function verifyLicense() {
+  const keyInput = document.getElementById('licenseKeyInput');
+  const errorEl = document.getElementById('dlError');
+  const errorMsg = document.getElementById('dlErrorMsg');
+  const successEl = document.getElementById('dlSuccess');
+  const btn = document.getElementById('verifyBtn');
+  const label = document.getElementById('verifyLabel');
+
+  const key = keyInput.value.trim();
+  if (!key) {
+    showError('Please enter a license key.');
+    return;
+  }
+
+  if (!key.startsWith('KWYRE-')) {
+    showError('Invalid format. License keys start with KWYRE-');
+    return;
+  }
+
+  btn.disabled = true;
+  label.textContent = 'Verifying...';
+  errorEl.style.display = 'none';
+  successEl.style.display = 'none';
+
+  try {
+    const result = await verifyKeyLocally(key);
+    if (result.valid) {
+      showSuccess(result);
+    } else {
+      showError(result.error || 'Invalid license key.');
+    }
+  } catch (e) {
+    showError('Verification failed: ' + (e.message || 'Unknown error'));
+  }
+
+  btn.disabled = false;
+  label.textContent = 'Verify License';
+}
+
+function verifyKeyLocally(key) {
+  return new Promise((resolve) => {
+    try {
+      const clean = key.replace('KWYRE-', '').replace(/-/g, '').replace(/\s/g, '');
+      const tokenJson = atob(clean);
+      const tokenData = JSON.parse(tokenJson);
+
+      if (!tokenData.p || !tokenData.s) {
+        resolve({ valid: false, error: 'Malformed license key structure.' });
+        return;
+      }
+
+      const payloadStr = atob(tokenData.p);
+      const payload = JSON.parse(payloadStr);
+
+      if (!payload.tier || !payload.label) {
+        resolve({ valid: false, error: 'Malformed license payload.' });
+        return;
+      }
+
+      const validTiers = ['personal', 'professional', 'airgapped', 'unlimited'];
+      if (!validTiers.includes(payload.tier)) {
+        resolve({ valid: false, error: 'Unknown license tier.' });
+        return;
+      }
+
+      if (payload.expires_at && payload.expires_at < Date.now() / 1000) {
+        const exp = new Date(payload.expires_at * 1000).toISOString().split('T')[0];
+        resolve({ valid: false, error: 'License expired on ' + exp + '.' });
+        return;
+      }
+
+      resolve({
+        valid: true,
+        tier: payload.tier,
+        label: payload.label,
+        machines: payload.machines || 1,
+      });
+    } catch (e) {
+      resolve({ valid: false, error: 'Invalid license key format.' });
+    }
+  });
+}
+
+function showError(msg) {
+  const errorEl = document.getElementById('dlError');
+  const errorMsg = document.getElementById('dlErrorMsg');
+  errorMsg.textContent = msg;
+  errorEl.style.display = 'flex';
+  document.getElementById('dlSuccess').style.display = 'none';
+}
+
+function showSuccess(result) {
+  document.getElementById('dlError').style.display = 'none';
+  document.getElementById('dlSuccess').style.display = 'block';
+  document.getElementById('dlTierLabel').textContent = result.label + ' License';
+  document.getElementById('dlMachines').textContent = result.machines + ' machine' + (result.machines !== 1 ? 's' : '');
 }
 
 /* ── SET INITIAL STATE ── */
