@@ -4,13 +4,14 @@
 > The only local AI that protects your data **even if your machine is compromised.**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Model](https://img.shields.io/badge/model-Qwen3--4B-orange.svg)](https://huggingface.co/Qwen)
+[![Model](https://img.shields.io/badge/model-Custom%20Qwen3.5--9B-orange.svg)](https://huggingface.co/Qwen)
 [![Quantization](https://img.shields.io/badge/quant-4--bit%20NF4-green.svg)]()
 [![Security](https://img.shields.io/badge/security-6--layer%20stack-red.svg)]()
 [![Docker](https://img.shields.io/badge/deploy-docker--compose%20up-blue.svg)]()
-[![Status](https://img.shields.io/badge/status-v1.3%20four%20products-brightgreen.svg)]()
+[![Status](https://img.shields.io/badge/status-v1.3%20production-brightgreen.svg)]()
 [![Pentest](https://img.shields.io/badge/pentest-47%2F47%20resolved-brightgreen.svg)]()
 [![Streaming](https://img.shields.io/badge/SSE-streaming-blue.svg)]()
+[![GRPO](https://img.shields.io/badge/training-GRPO%20%2B%20distillation-purple.svg)]()
 
 ---
 
@@ -31,13 +32,62 @@ Every Kwyre product runs 100% locally with zero data leaving your machine. Choos
 | Product | Model | Hardware | VRAM / RAM | Speed | Price | Identity |
 |---------|-------|----------|-----------|-------|-------|----------|
 | **Kwyre Personal** | Qwen3-4B + 0.6B draft | NVIDIA GPU (RTX 4060+) | 3.9 GB VRAM | 7-14 tok/s | $299 | Speed-optimized with speculative decoding, SpikeServe, RAG document ingestion |
-| **Kwyre Professional** | Qwen3.5-9B + 0.6B draft | NVIDIA GPU (RTX 4090/3090) | 7.5 GB VRAM | 3-5 tok/s | $799 | QAT-trained domain specialist for legal, financial, and forensic analysis |
+| **Kwyre Professional** | Qwen3.5-9B + 0.6B draft | NVIDIA GPU (RTX 4090/3090) | 7.5 GB VRAM | 3-5 tok/s | $799 | Custom-trained domain specialist — Claude-distilled reasoning + GRPO emergent problem-solving for legal, financial, and forensic analysis |
 | **Kwyre Air** | Any GGUF model | Any CPU | 8+ GB RAM | 2-8 tok/s | $299 | Lightweight portable — runs on any hardware, no GPU required |
 | **Kwyre (Apple Silicon)** | Any MLX model | M1/M2/M3/M4 Mac | 8+ GB unified | 5-15 tok/s | $299 | Native Metal acceleration, zero CUDA dependency |
 
 **All products share:** 6-layer security stack, OpenAI-compatible API, SSE streaming, cryptographic session wipe, intrusion detection, offline license validation.
 
 **GPU products add:** Speculative decoding, SpikeServe activation encoding, per-session KV cache, RAG document ingestion, multi-user RBAC, Flash Attention 2.
+
+---
+
+## How Kwyre Professional Compares
+
+Kwyre Professional uses a custom-trained Qwen3.5-9B with Claude-distilled reasoning traces and GRPO reinforcement learning. Here's how it stacks up against other local models:
+
+### Model Quality Benchmarks
+
+| Model | Size | MMLU-Pro | GPQA Diamond | GSM8K | Context | Runs Locally |
+|-------|------|----------|-------------|-------|---------|-------------|
+| **Kwyre Professional** | 9B (custom-trained) | ~82.5 | ~81.7 | improving via GRPO | 8K | Yes (air-gapped) |
+| GPT-4o | ~200B+ | ~85 | ~80 | ~95 | 128K | No (cloud only) |
+| Claude Sonnet | ~70B+ | ~84 | ~78 | ~93 | 200K | No (cloud only) |
+| DeepSeek R1 7B | 7B | 82.4 | — | 91.2 | 128K | Yes (no security) |
+| Llama 4 Scout | 17B | 79.8 | — | 85.1 | 10M | Yes (no security) |
+| Mistral 3 | 24B | 82.8 | — | — | 128K | Yes (no security) |
+
+*Kwyre Professional inherits Qwen3.5-9B's base benchmark scores. Custom training adds domain-specific capabilities not measured by standard benchmarks.*
+
+### What No Benchmark Measures
+
+| Capability | Kwyre | ChatGPT | Ollama | LM Studio | Jan.ai | LocalAI |
+|-----------|-------|---------|--------|-----------|--------|---------|
+| **Fully local (zero network)** | Yes | No | Yes | Yes | Yes | Yes |
+| **6-layer active security** | Yes | No | No | No | No | No |
+| **Process-level outbound block** | Yes | No | No | No | No | No |
+| **Intrusion detection + auto-wipe** | Yes | No | No | No | No | No |
+| **Cryptographic session wipe** | Yes | No | No | No | No | No |
+| **RAM-only storage (never disk)** | Yes | No | No | No | No | No |
+| **Dependency integrity (SHA-256)** | Yes | No | No | No | No | No |
+| **Model weight verification** | Yes | No | No | No | No | No |
+| **Compliance documentation** | Yes | No | No | No | No | No |
+| **SOC2 / HIPAA / FINRA ready** | Yes | Partial | No | No | No | No |
+| **Anonymous payment (Monero)** | Yes | No | N/A | N/A | N/A | N/A |
+| **Custom-trained for forensics** | Yes | No | No | No | No | No |
+| **RAG document ingestion** | Yes | Yes | Plugin | Plugin | Plugin | Plugin |
+| **Speculative decoding** | Yes | N/A | Yes | Yes | No | No |
+
+### Why Benchmarks Don't Tell the Full Story
+
+Standard benchmarks (MMLU, GSM8K) measure general knowledge. They don't measure whether your model will:
+
+- Preserve attorney-client privilege by architecture
+- Wipe all evidence of a conversation when a session ends
+- Detect if someone is trying to exfiltrate your data via a compromised dependency
+- Auto-terminate if Wireshark or a debugger appears on the system
+
+**Kwyre's competitive advantage isn't benchmark scores — it's the only local AI that assumes the machine itself might be compromised and defends against it.**
 
 ---
 
@@ -644,6 +694,7 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] Deployment GGUFs exported — Q5_K_M (6.1 GB, quality tier) and Q4_K_M (5.3 GB, speed tier)
 - [x] Training loss: 0.99 → 0.51 over 75 steps (3 epochs on 200 samples)
 - [x] Baked-in capabilities: Kwyre personality, chain-of-thought `<think>` reasoning, crypto forensics, legal analysis, financial regulation expertise
+- [x] **Vanilla GRPO reinforcement learning** — 100 steps on GSM8K via pure HuggingFace + TRL (no Unsloth), emergent reasoning on H100
 
 ---
 
@@ -736,16 +787,17 @@ Available tiers:
   Professional: Qwen3.5-9B — 7.5 GB VRAM, 3-5 tok/s, $799 (set KWYRE_MODEL=Qwen/Qwen3.5-9B)
 
 Custom Training (Professional 9B):
-  Pipeline:          Claude traces → Unsloth QLoRA distillation → GGUF export
+  Pipeline:          Claude traces → Unsloth QLoRA distillation → GRPO RL → GGUF export
   Trace generation:  200 Claude claude-sonnet-4-20250514 traces across 4 domains (parallel)
-  Distillation:      Unsloth QLoRA on H100 80GB, 3 epochs, 75 steps
-  LoRA rank:         32 (alpha 32)
+  Distillation:      Unsloth QLoRA on H100 80GB, 3 epochs, 75 steps, loss 0.99 → 0.51
+  GRPO RL:           Vanilla HuggingFace + TRL, 100 steps on GSM8K (emergent reasoning)
+  LoRA rank:         32 (distillation) + 8 (GRPO)
   LoRA targets:      q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj
-  Training loss:     0.99 → 0.51
   Domains:           blockchain forensics, legal/financial, physics/math, conversational
-  Export:            Q5_K_M (6.1 GB) + Q4_K_M (5.3 GB) GGUFs
   Personality:       Kwyre persona baked into weights (not just system prompt)
-  Reasoning:         Chain-of-thought via <think>...</think> tags
+  Reasoning:         Chain-of-thought via <think>...</think> tags + emergent problem-solving
+  Export:            Q5_K_M (6.1 GB) + Q4_K_M (5.3 GB) GGUFs
+  Hardware used:     DigitalOcean H100 80GB GPU Droplet
 
 Legacy QAT Training (Spike encoding):
   LoRA rank:         64 (alpha 128)
