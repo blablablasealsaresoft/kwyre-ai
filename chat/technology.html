@@ -7,7 +7,7 @@
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
 <title>Kwyre AI — Technology</title>
-<meta name="description" content="Kwyre inference engine: 4 backends, speculative decoding, SpikeServe activation encoding, KV cache, SSE streaming, multi-user air-gapped mode.">
+<meta name="description" content="Kwyre custom AI pipeline: frontier-distilled reasoning, GRPO reinforcement learning, domain LoRAs, air-gapped deployment. Your model, your data, your machine.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -415,6 +415,121 @@ nav {
   text-align: center; line-height: 1.5;
 }
 
+/* PIPELINE STEPS */
+.pipeline-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 48px;
+}
+
+.pipeline-step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 28px 28px 28px 80px;
+  position: relative;
+  transition: border-color 0.3s, background 0.2s;
+}
+
+.pipeline-step:hover { border-color: var(--border-hi); background: var(--surface2); }
+
+.pipeline-num {
+  position: absolute;
+  left: 24px;
+  top: 28px;
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--accent);
+  opacity: 0.5;
+}
+
+.pipeline-step h3 {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.pipeline-step p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.7;
+  margin-bottom: 12px;
+}
+
+.pipeline-detail {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.pipeline-detail span {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--green);
+  background: var(--green-dim);
+  border: 1px solid rgba(34,197,94,0.15);
+  padding: 3px 10px;
+  border-radius: 3px;
+}
+
+/* BENCHMARKS TABLE */
+.matrix-wrap { overflow-x: auto; }
+
+.matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.matrix th, .matrix td {
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.matrix thead th {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text3);
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+}
+
+.matrix thead th.m-kwyre { color: var(--accent); }
+
+.matrix td { color: var(--text2); }
+.matrix td.m-kwyre { color: var(--text); font-weight: 500; }
+.matrix td.m-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.3px;
+  color: var(--text2);
+}
+
+.matrix tbody tr { transition: background 0.2s; }
+.matrix tbody tr:hover { background: var(--surface); }
+
+.m-y {
+  color: var(--green);
+  font-weight: 600;
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
+.m-n {
+  color: var(--text3);
+  font-family: var(--mono);
+  font-size: 11px;
+}
+
 @media (max-width: 768px) {
   .nav-links a:not(.nav-cta) { display: none; }
   .page-hero { padding: 120px 0 40px; }
@@ -426,6 +541,10 @@ nav {
   .role-row { flex-direction: column; }
   .wrap { padding: 0 20px; }
   .footer-inner { flex-direction: column; text-align: center; }
+  .pipeline-step { padding-left: 24px; padding-top: 50px; }
+  .pipeline-num { top: 16px; }
+  .matrix { font-size: 11px; }
+  .matrix th, .matrix td { padding: 8px 10px; }
 }
 </style>
 </head>
@@ -442,7 +561,7 @@ nav {
   <div class="nav-inner">
     <a href="main.html" class="nav-brand"><span>K</span>WYRE</a>
     <div class="nav-links">
-      <a href="technology.html#products">Products</a>
+      <a href="technology.html#pipeline">Pipeline</a>
       <a href="technology.html" class="active">Technology</a>
       <a href="security.html">Security</a>
       <a href="platform.html">Platform</a>
@@ -455,73 +574,178 @@ nav {
 <!-- PAGE HERO -->
 <div class="page-hero">
   <div class="wrap">
-    <div class="page-hero-eyebrow reveal">Inference Engine</div>
-    <h1 class="reveal reveal-d1">Four backends.<br>One <em>security stack.</em></h1>
+    <div class="page-hero-eyebrow reveal">Custom AI Pipeline</div>
+    <h1 class="reveal reveal-d1">Your Model. Your Data.<br>Your <em>Machine.</em></h1>
     <p class="reveal reveal-d2">
-      GPU with speculative decoding. CPU via llama.cpp. Apple Silicon via MLX. AWQ for maximum throughput.
-      Every backend shares the same 6-layer security architecture.
+      We don't just run models &mdash; we build them. Custom-trained on your domain using frontier-distilled reasoning and GRPO reinforcement learning. Delivered as an air-gapped appliance.
     </p>
   </div>
 </div>
 
-<!-- PRODUCTS -->
-<div class="section" id="products">
+<!-- PIPELINE -->
+<div class="section" id="pipeline">
   <div class="wrap">
     <div class="sh">
-      <div class="sh-eyebrow reveal">Products</div>
-      <h2 class="reveal reveal-d1">Four products. One mission.</h2>
-      <p class="reveal reveal-d2">Air-gapped AI for every hardware profile. Same security stack, same API, same compliance guarantees.</p>
+      <div class="sh-eyebrow reveal">The Pipeline</div>
+      <h2 class="reveal reveal-d1">Five steps to a custom model</h2>
+      <p class="reveal reveal-d2">From raw domain knowledge to a deployment-ready air-gapped AI in under 24 hours.</p>
     </div>
 
-    <div class="perf-grid reveal reveal-d3">
-      <div class="perf-card perf-featured">
-        <div class="perf-badge perf-badge-gpu">GPU &middot; Personal</div>
-        <div class="perf-title">Kwyre Personal</div>
-        <div class="perf-sub">Speed-optimized for solo analysts</div>
-        <ul class="perf-specs">
-          <li><span class="perf-spec-label">Model</span><span class="perf-spec-val">Qwen3-4B + 0.6B draft</span></li>
-          <li><span class="perf-spec-label">VRAM</span><span class="perf-spec-val">3.9 GB</span></li>
-          <li><span class="perf-spec-label">Inference</span><span class="perf-spec-val">7-14 tok/s</span></li>
-          <li><span class="perf-spec-label">Price</span><span class="perf-spec-val">$299</span></li>
-        </ul>
+    <div class="pipeline-steps reveal reveal-d3">
+      <div class="pipeline-step">
+        <div class="pipeline-num">01</div>
+        <h3>Reasoning Trace Generation</h3>
+        <p>We generate thousands of chain-of-thought reasoning traces from frontier models across YOUR specific domains. These traces teach the model HOW to think about your problems.</p>
+        <div class="pipeline-detail">
+          <span>4 domains</span>
+          <span>200+ traces</span>
+          <span>~$2 API cost</span>
+        </div>
       </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">02</div>
+        <h3>Distillation Fine-Tuning</h3>
+        <p>Using Unsloth QLoRA, we fine-tune Qwen3.5-9B on your reasoning traces. The model learns your domain vocabulary, reasoning patterns, and personality &mdash; baked into the weights, not just a system prompt.</p>
+        <div class="pipeline-detail">
+          <span>LoRA rank 32</span>
+          <span>3 epochs</span>
+          <span>~30 min on H100</span>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">03</div>
+        <h3>GRPO Reinforcement Learning</h3>
+        <p>Group Relative Policy Optimization teaches the model to INVENT solutions, not just copy them. It generates multiple answers, scores them against correctness and reasoning quality, then updates its strategy. This is what gives your model emergent problem-solving.</p>
+        <div class="pipeline-detail">
+          <span>100 RL steps</span>
+          <span>2 reward functions</span>
+          <span>~1.5 hrs on H100</span>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">04</div>
+        <h3>Quantization &amp; Export</h3>
+        <p>The trained model is exported to optimized GGUF format with domain-calibrated importance matrix quantization. Your users download a 5-6 GB file that runs on a consumer GPU.</p>
+        <div class="pipeline-detail">
+          <span>Q5_K_M (6.1 GB)</span>
+          <span>Q4_K_M (5.3 GB)</span>
+          <span>imatrix calibrated</span>
+        </div>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">05</div>
+        <h3>Air-Gapped Deployment</h3>
+        <p>Your custom model is packaged with the Kwyre 6-layer security stack, standard chat completions API, SSE streaming, RAG document ingestion, and intrusion detection. One command to deploy. Zero data leaves the machine.</p>
+        <div class="pipeline-detail">
+          <span>docker compose up</span>
+          <span>6-layer security</span>
+          <span>Zero telemetry</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 
-      <div class="perf-card">
-        <div class="perf-badge perf-badge-gpu">GPU &middot; Professional</div>
-        <div class="perf-title">Kwyre Professional</div>
-        <div class="perf-sub">Custom-trained domain specialist with GRPO reasoning</div>
-        <ul class="perf-specs">
-          <li><span class="perf-spec-label">Model</span><span class="perf-spec-val">Custom Qwen3.5-9B + 0.6B draft</span></li>
-          <li><span class="perf-spec-label">VRAM</span><span class="perf-spec-val">7.5 GB</span></li>
-          <li><span class="perf-spec-label">Inference</span><span class="perf-spec-val">3-5 tok/s</span></li>
-          <li><span class="perf-spec-label">Price</span><span class="perf-spec-val">$799</span></li>
-        </ul>
-      </div>
+<!-- BENCHMARKS -->
+<div class="section" id="benchmarks">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow reveal">Performance</div>
+      <h2 class="reveal reveal-d1">How our technology compares</h2>
+      <p class="reveal reveal-d2">Kwyre Professional is built on Qwen3.5-9B &mdash; the strongest model in the sub-10B class. Our custom training adds domain-specific capabilities that no benchmark measures.</p>
+    </div>
 
-      <div class="perf-card">
-        <div class="perf-badge perf-badge-cpu">CPU &middot; Air</div>
-        <div class="perf-title">Kwyre Air</div>
-        <div class="perf-sub">Runs on any hardware. No GPU required.</div>
-        <ul class="perf-specs">
-          <li><span class="perf-spec-label">Model</span><span class="perf-spec-val">Any GGUF</span></li>
-          <li><span class="perf-spec-label">RAM</span><span class="perf-spec-val">8+ GB</span></li>
-          <li><span class="perf-spec-label">Inference</span><span class="perf-spec-val">2-8 tok/s</span></li>
-          <li><span class="perf-spec-label">Price</span><span class="perf-spec-val">$299</span></li>
-        </ul>
-      </div>
+    <div class="matrix-wrap reveal reveal-d3" style="margin-top: 48px;">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Capability</th>
+            <th class="m-kwyre">Kwyre Professional</th>
+            <th>Cloud AI Services</th>
+            <th>Other Local Runners</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="m-label">Base model quality (MMLU-Pro)</td>
+            <td class="m-kwyre">82.5%</td>
+            <td>83-85%</td>
+            <td>Depends on model</td>
+          </tr>
+          <tr>
+            <td class="m-label">Advanced reasoning (GPQA Diamond)</td>
+            <td class="m-kwyre">81.7%</td>
+            <td>78-80%</td>
+            <td>Depends on model</td>
+          </tr>
+          <tr>
+            <td class="m-label">Math reasoning (GSM8K)</td>
+            <td class="m-kwyre">Improving via GRPO</td>
+            <td>93-95%</td>
+            <td>Depends on model</td>
+          </tr>
+          <tr>
+            <td class="m-label">Custom domain training</td>
+            <td class="m-kwyre"><span class="m-y">YES</span></td>
+            <td><span class="m-n">&mdash;</span></td>
+            <td><span class="m-n">&mdash;</span></td>
+          </tr>
+          <tr>
+            <td class="m-label">Chain-of-thought reasoning</td>
+            <td class="m-kwyre"><span class="m-y">YES (baked in)</span></td>
+            <td>Prompt-dependent</td>
+            <td>Prompt-dependent</td>
+          </tr>
+          <tr>
+            <td class="m-label">GRPO emergent reasoning</td>
+            <td class="m-kwyre"><span class="m-y">YES</span></td>
+            <td><span class="m-n">&mdash;</span></td>
+            <td><span class="m-n">&mdash;</span></td>
+          </tr>
+          <tr>
+            <td class="m-label">Air-gapped security (6 layers)</td>
+            <td class="m-kwyre"><span class="m-y">YES</span></td>
+            <td><span class="m-n">&mdash;</span></td>
+            <td><span class="m-n">&mdash;</span></td>
+          </tr>
+          <tr>
+            <td class="m-label">Intrusion detection + auto-wipe</td>
+            <td class="m-kwyre"><span class="m-y">YES</span></td>
+            <td><span class="m-n">&mdash;</span></td>
+            <td><span class="m-n">&mdash;</span></td>
+          </tr>
+          <tr>
+            <td class="m-label">RAM-only sessions (crypto wipe)</td>
+            <td class="m-kwyre"><span class="m-y">YES</span></td>
+            <td><span class="m-n">&mdash;</span></td>
+            <td><span class="m-n">&mdash;</span></td>
+          </tr>
+          <tr>
+            <td class="m-label">Compliance documentation</td>
+            <td class="m-kwyre"><span class="m-y">YES</span></td>
+            <td>Partial</td>
+            <td><span class="m-n">&mdash;</span></td>
+          </tr>
+          <tr>
+            <td class="m-label">Runs on YOUR machine</td>
+            <td class="m-kwyre"><span class="m-y">YES</span></td>
+            <td><span class="m-n">Cloud only</span></td>
+            <td><span class="m-y">YES</span></td>
+          </tr>
+          <tr>
+            <td class="m-label">Model download size</td>
+            <td class="m-kwyre">5-6 GB</td>
+            <td>N/A</td>
+            <td>Varies</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-      <div class="perf-card">
-        <div class="perf-badge perf-badge-mlx">MLX &middot; Apple</div>
-        <div class="perf-title">Kwyre Apple Silicon</div>
-        <div class="perf-sub">Native Metal acceleration</div>
-        <ul class="perf-specs">
-          <li><span class="perf-spec-label">Model</span><span class="perf-spec-val">Any MLX model</span></li>
-          <li><span class="perf-spec-label">Hardware</span><span class="perf-spec-val">M1/M2/M3/M4</span></li>
-          <li><span class="perf-spec-label">Unified</span><span class="perf-spec-val">8+ GB</span></li>
-          <li><span class="perf-spec-label">Inference</span><span class="perf-spec-val">5-15 tok/s</span></li>
-          <li><span class="perf-spec-label">Price</span><span class="perf-spec-val">$299</span></li>
-        </ul>
-      </div>
+    <div style="text-align: center; margin-top: 32px;">
+      <p style="font-size: 13px; color: var(--text3); max-width: 600px; margin: 0 auto; line-height: 1.6;">
+        Cloud AI scores higher on general benchmarks because they use 200B+ parameter models. Kwyre Professional matches or beats them on domain-specific tasks with a model that fits on a consumer GPU &mdash; and your data never leaves your machine.
+      </p>
     </div>
   </div>
 </div>
@@ -564,7 +788,7 @@ nav {
 
     <div style="text-align: center; margin-top: 48px;">
       <p class="reveal" style="font-size: 14px; color: var(--text2); margin-bottom: 24px;">
-        We train a custom model on YOUR domain using Claude-distilled reasoning traces and GRPO reinforcement learning.<br>
+        We train a custom model on YOUR domain using frontier-distilled reasoning traces and GRPO reinforcement learning.<br>
         Delivered as a turnkey air-gapped appliance or self-hosted deployment.
       </p>
       <a href="#custom-request" class="btn btn-primary" style="margin-right: 12px;">Request Custom Model</a>
@@ -610,9 +834,43 @@ nav {
   </div>
 </div>
 
-<!-- ENGINE FEATURES -->
+<!-- WHAT MAKES THIS YOURS -->
 <div class="section">
   <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow reveal">What Makes This Yours</div>
+      <h2 class="reveal reveal-d1">Five layers of customization</h2>
+      <p class="reveal reveal-d2">Every Kwyre Professional model is unique. Five independent customization layers combine to create an AI that no one else has.</p>
+    </div>
+
+    <div class="pipeline-steps reveal reveal-d3" style="margin-bottom: 64px;">
+      <div class="pipeline-step">
+        <div class="pipeline-num">01</div>
+        <h3>Reasoning Distillation</h3>
+        <p>Your custom topic mix &mdash; forensics, legal, financial, blockchain, medical, defense. We generate reasoning traces from frontier models specifically tuned to the problems YOUR team solves every day.</p>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">02</div>
+        <h3>GRPO Reinforcement Learning</h3>
+        <p>Emergent reasoning that goes beyond the teacher model. GRPO doesn't just copy &mdash; it teaches the model to discover novel solutions by scoring multiple candidate answers and reinforcing the best strategies.</p>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">03</div>
+        <h3>Domain LoRAs</h3>
+        <p>Specialized knowledge in YOUR areas of expertise. Low-rank adapters are trained on your domain vocabulary, jargon, document formats, and reasoning patterns &mdash; baked into the weights permanently.</p>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">04</div>
+        <h3>imatrix Calibration</h3>
+        <p>Quantization optimized for YOUR use cases. We generate importance matrices from your domain data so the quantized model preserves precision exactly where your workload needs it most.</p>
+      </div>
+      <div class="pipeline-step">
+        <div class="pipeline-num">05</div>
+        <h3>RAG Corpus</h3>
+        <p>Your proprietary knowledge base, searched at inference time. Upload internal documents, policies, and reference material. The model retrieves and cites relevant passages alongside its trained reasoning.</p>
+      </div>
+    </div>
+
     <div class="sh">
       <div class="sh-eyebrow reveal">Engine Architecture</div>
       <h2 class="reveal reveal-d1">Every optimization in the stack</h2>
@@ -662,8 +920,8 @@ nav {
       </div>
       <div class="engine-cell">
         <div class="engine-icon engine-icon-blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div>
-        <h3>OpenAI-Compatible API</h3>
-        <p>POST /v1/chat/completions drop-in replacement. Works with any OpenAI SDK client. Supports streaming and blocking modes, session management, and compliance endpoints.</p>
+        <h3>Standard Chat Completions API</h3>
+        <p>POST /v1/chat/completions drop-in replacement. Works with any compatible SDK client. Supports streaming and blocking modes, session management, and compliance endpoints.</p>
       </div>
     </div>
   </div>
