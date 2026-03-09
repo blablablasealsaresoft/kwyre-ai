@@ -8,7 +8,7 @@
 [![Quantization](https://img.shields.io/badge/quant-4--bit%20NF4-green.svg)]()
 [![Security](https://img.shields.io/badge/security-6--layer%20stack-red.svg)]()
 [![Docker](https://img.shields.io/badge/deploy-docker--compose%20up-blue.svg)]()
-[![Status](https://img.shields.io/badge/status-v1.2%20RAG%20%2B%20vLLM-brightgreen.svg)]()
+[![Status](https://img.shields.io/badge/status-v1.3%20four%20products-brightgreen.svg)]()
 [![Pentest](https://img.shields.io/badge/pentest-47%2F47%20resolved-brightgreen.svg)]()
 [![Streaming](https://img.shields.io/badge/SSE-streaming-blue.svg)]()
 
@@ -579,7 +579,7 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] Enterprise audit package — `docs/ENTERPRISE_AUDIT.md`
 - [x] Shared security infrastructure — `server/security_core.py`
 
-**v0.5 (Current — Performance Optimized)**
+**v0.5 (Complete — Performance Optimized)**
 - [x] SSE streaming — token-by-token output via `TextIteratorStreamer` and Server-Sent Events
 - [x] SpikeServe relocated to draft model — main model runs at full fidelity for accurate speculative validation
 - [x] Lazy sparsity measurement — no startup deadlock, measured on first real request
@@ -593,7 +593,7 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] Windows one-click GUI installer — tkinter wizard with dark theme, 5-page flow, threaded installation
 - [x] Auto-update mechanism (air-gap safe) — `.kwyre-update` packages with signed manifests, local-only update scanning, automatic rollback
 
-**v1.1 (Current — Hardened + Optimized)**
+**v1.1 (Complete — Hardened + Optimized)**
 - [x] Flash Attention 2 — auto-detected with graceful fallback, +20-40% throughput on supported GPUs
 - [x] TF32 matmul + cuDNN benchmark — enabled by default on Ampere+ GPUs
 - [x] `torch.inference_mode()` — replaces `no_grad()` for reduced autograd overhead
@@ -617,7 +617,7 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] Integration test suite — HTTP endpoints, SSE conformance, KV cache, session isolation
 - [x] `main.html` auto-detects local vs production API — `window.location.origin` for localhost
 
-**v1.2 (Current — RAG + vLLM + Enterprise)**
+**v1.2 (Complete — RAG + vLLM + Enterprise)**
 - [x] RAG document ingestion — PDF, DOCX, TXT upload with FAISS vector search, per-session RAM-only storage
 - [x] Secure document store — `SecureRAGStore` with cryptographic wipe on session end, shutdown, and intrusion
 - [x] Local embeddings — `sentence-transformers/all-MiniLM-L6-v2` on CPU, lazy-loaded on first upload
@@ -628,6 +628,18 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] SIEM audit export — `export_jsonl()` and `export_cef()` for Splunk/QRadar integration
 - [x] Kubernetes Helm chart — `deploy/helm/kwyre/` with GPU scheduling, health probes, PVC, secrets
 - [x] Extended `.env.example` — comprehensive config covering all 30+ environment variables
+
+**v1.3 (Current — Four Products + Custom Training)**
+- [x] Four distinct products — Personal (4B speed), Professional (9B domain specialist), Air (CPU portable), Apple Silicon (MLX native)
+- [x] Product-specific system prompts — each backend has its own identity and personality
+- [x] Product identity in API — `/health` and `/v1/models` report product name and capabilities
+- [x] Dynamic tier detection — frontend auto-detects model tier from `/health` endpoint
+- [x] Dual-tier dist path — `serve_local_4bit.py` resolves model path from `ACTIVE_TIER['name']`
+- [x] 4B weight integrity — SHA-256 hashes populated for Qwen3-4B model verification
+- [x] CPU `top_k` + tools — Kwyre Air gets `top_k` parameter and opt-in tools integration
+- [x] MLX `top_k` + streaming fix — Apple Silicon gets `top_k` and corrected SSE delta computation
+- [x] Training scripts 9B-only — `train_qat.py`, `merge_and_export.py`, `quantize_awq.py` locked to Professional tier
+- [x] Custom training pipeline — `training/` directory with Claude-powered reasoning trace generation, Unsloth QLoRA distillation, GRPO reinforcement learning, and GGUF export
 
 ---
 
@@ -831,6 +843,9 @@ kwyre/
 │   ├── license.py             # Ed25519 license + hardware fingerprint binding
 │   ├── codesign.py            # Ed25519 release signing and verification
 │   └── updater.py             # Air-gap safe update mechanism
+├── training/
+│   ├── run_full_pipeline.sh   # Automated: traces → distillation → GRPO → export
+│   └── scripts/               # generate_traces.py, train_distillation.py, train_grpo.py
 ├── deploy/
 │   └── helm/kwyre/            # Kubernetes Helm chart (GPU, probes, PVC)
 ├── chat/
