@@ -74,13 +74,11 @@ except ImportError:
     sys.exit(1)
 
 DEFAULT_SYSTEM_PROMPT = (
-    "You are Kwyre, a specialized AI assistant for legal, financial, and forensic "
-    "analysis. You provide precise, well-structured responses citing relevant "
-    "regulations, statutes, and professional standards. You organize complex analysis "
-    "with clear headings, numbered points, and specific references. When analyzing "
-    "documents, you identify key obligations, risks, and compliance requirements. "
-    "You never fabricate citations or case law. If uncertain, you state your "
-    "confidence level explicitly."
+    "You are Kwyre, a specialized AI assistant running natively on Apple Silicon. "
+    "You provide precise, well-structured responses citing relevant regulations, "
+    "statutes, and professional standards. You organize complex analysis with clear "
+    "headings, numbered points, and specific references. You never fabricate citations "
+    "or case law. If uncertain, you state your confidence level explicitly."
 )
 
 MODEL_ID = os.environ.get("KWYRE_MODEL", "Qwen/Qwen3.5-9B")
@@ -240,7 +238,8 @@ print(f"[Security] Session store active — RAM only, wiped on close")
 
 def _mlx_chat_generate(messages: list[dict], max_tokens: int = 2048,
                         temperature: float = 0.7, top_p: float = 0.9,
-                        repetition_penalty: float = 1.1) -> tuple[str, int, float]:
+                        repetition_penalty: float = 1.1,
+                        top_k: int = 20) -> tuple[str, int, float]:
     """Generate a response using mlx-lm from a list of chat messages.
     Returns (reply_text, token_count, elapsed_seconds)."""
     if hasattr(tokenizer, "apply_chat_template"):
@@ -260,7 +259,7 @@ def _mlx_chat_generate(messages: list[dict], max_tokens: int = 2048,
     gen_kwargs = dict(
         prompt=prompt, max_tokens=max_tokens,
         temp=max(temperature, 0.01) if temperature > 0 else 0.0,
-        top_p=top_p, verbose=False,
+        top_p=top_p, top_k=top_k, verbose=False,
     )
     if repetition_penalty != 1.0:
         gen_kwargs["repetition_penalty"] = repetition_penalty
@@ -276,18 +275,22 @@ def _mlx_chat_generate(messages: list[dict], max_tokens: int = 2048,
     return reply, n_tokens, elapsed
 
 
-def _try_make_sampler(temperature: float, top_p: float, repetition_penalty: float = 1.1):
-    """Build an MLX sampler, passing repetition_penalty if supported."""
+def _try_make_sampler(temperature: float, top_p: float,
+                      repetition_penalty: float = 1.1, top_k: int = -1):
+    """Build an MLX sampler, falling back gracefully if kwargs are unsupported."""
     try:
-        return _make_mlx_sampler(temperature, top_p, repetition_penalty=repetition_penalty)
+        return _make_mlx_sampler(temperature, top_p, repetition_penalty=repetition_penalty, top_k=top_k)
     except TypeError:
-        return _make_mlx_sampler(temperature, top_p)
+        try:
+            return _make_mlx_sampler(temperature, top_p, repetition_penalty=repetition_penalty)
+        except TypeError:
+            return _make_mlx_sampler(temperature, top_p)
 
 
 def _mlx_chat_stream(messages: list[dict], max_tokens: int = 2048,
                      temperature: float = 0.7, top_p: float = 0.9,
-                     repetition_penalty: float = 1.1):
-    """Yield tokens one at a time for SSE streaming."""
+                     repetition_penalty: float = 1.1, top_k: int = 20):
+    """Yield per-token deltas for SSE streaming."""
     if hasattr(tokenizer, "apply_chat_template"):
         prompt = tokenizer.apply_chat_template(
             messages, tokenize=False, add_generation_prompt=True,
@@ -301,10 +304,15 @@ def _mlx_chat_stream(messages: list[dict], max_tokens: int = 2048,
         parts.append("<|assistant|>\n")
         prompt = "\n".join(parts)
 
-    sampler = _try_make_sampler(temperature, top_p, repetition_penalty)
+    sampler = _try_make_sampler(temperature, top_p, repetition_penalty, top_k)
+    prev_text = ""
     for response in stream_generate(model, tokenizer, prompt=prompt,
                                      max_tokens=max_tokens, sampler=sampler):
-        yield response.text
+        new_text = response.text
+        delta = new_text[len(prev_text):]
+        prev_text = new_text
+        if delta:
+            yield delta
 
 
 # ---------------------------------------------------------------------------
@@ -320,12 +328,12 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
     _chat_dir = CHAT_DIR
 
     def _handle_blocking(self, augmented, max_tokens, temperature, top_p,
-                         repetition_penalty, session_id, session, tools_used):
+                         repetition_penalty, top_k, session_id, session, tools_used):
         with _inference_lock:
             reply, n_tokens, elapsed = _mlx_chat_generate(
                 augmented, max_tokens=max_tokens,
                 temperature=temperature, top_p=top_p,
-                repetition_penalty=repetition_penalty,
+                repetition_penalty=repetition_penalty, top_k=top_k,
             )
         tps = n_tokens / elapsed if elapsed > 0 else 0
 
@@ -350,7 +358,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
         }).encode())
 
     def _handle_stream(self, augmented, max_tokens, temperature, top_p,
-                       repetition_penalty, session_id, session, user, tools_used):
+                       repetition_penalty, top_k, session_id, session, user, tools_used):
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
         self.send_header("Cache-Control", "no-cache")
@@ -367,7 +375,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
 
         try:
             with _inference_lock:
-                for token_text in _mlx_chat_stream(augmented, max_tokens, temperature, top_p, repetition_penalty):
+                for token_text in _mlx_chat_stream(augmented, max_tokens, temperature, top_p, repetition_penalty, top_k):
                     full_reply.append(token_text)
                     n_tokens += 1
                     if n_tokens > max_tokens:
@@ -431,8 +439,9 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 temperature = min(max(float(body.get("temperature", 0.7)), 0.0), 2.0)
                 top_p = min(max(float(body.get("top_p", 0.9)), 0.0), 1.0)
                 repetition_penalty = min(max(float(body.get("repetition_penalty", 1.1)), 1.0), 2.0)
+                top_k = min(max(int(body.get("top_k", 20)), 0), 100)
             except (TypeError, ValueError):
-                self._send_json_error(400, "Invalid max_tokens, temperature, or top_p.")
+                self._send_json_error(400, "Invalid max_tokens, temperature, top_p, or top_k.")
                 return
             if _license_tier == "eval":
                 max_tokens = min(max_tokens, _MAX_EVAL_TOKENS)
@@ -478,10 +487,10 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
 
             if stream:
                 self._handle_stream(augmented, max_tokens, temperature, top_p,
-                                    repetition_penalty, session_id, session, user, tools_used)
+                                    repetition_penalty, top_k, session_id, session, user, tools_used)
             else:
                 self._handle_blocking(augmented, max_tokens, temperature, top_p,
-                                      repetition_penalty, session_id, session, tools_used)
+                                      repetition_penalty, top_k, session_id, session, tools_used)
 
         elif self.path == "/v1/session/end":
             user = self._check_auth()
@@ -546,6 +555,8 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             if auth_user:
                 health_data.update({
                     "model": f"{ACTIVE_TIER['name']}-mlx",
+                    "product": "Kwyre (Apple Silicon)",
+                    "description": "Native Metal acceleration for M1/M2/M3/M4",
                     "base": MODEL_ID.split("/")[-1],
                     "backend": "mlx",
                     "quantization": "MLX native",
@@ -606,6 +617,8 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                     "object": "model",
                     "owned_by": "kwyre",
                     "meta": {
+                        "product": "Kwyre (Apple Silicon)",
+                        "capabilities": ["streaming", "session_wipe", "crypto_wipe", "tools"],
                         "base_model": MODEL_ID.split("/")[-1],
                         "backend": "mlx",
                         "quantization": "MLX native",
@@ -637,22 +650,29 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 if __name__ == "__main__":
     server = ThreadedHTTPServer((BIND_HOST, PORT), ChatHandler)
-    print(f"\nKwyre AI (MLX) ready at http://{BIND_HOST}:{PORT}")
-    print(f"  Model: {ACTIVE_TIER['name']}-mlx ({MODEL_ID})  |  tier: {ACTIVE_TIER['tier']}")
-    print(f"  Backend: MLX (Apple Silicon / Metal)  |  all 6 security layers active")
-    print(f"  Available tiers: KWYRE_MODEL=Qwen/Qwen3.5-9B | Qwen/Qwen3-4B")
-    print("  POST /v1/chat/completions  — inference (streaming supported)")
-    print("  POST /v1/session/end       — wipe session from RAM")
-    print("  GET  /health               — status + watchdog state")
-    print("  GET  /audit                — metadata-only compliance log")
-    print("\n  [L1] Network: localhost only")
-    print("  [L3] Dependencies: SHA256 manifest verified at startup")
-    print("  [L4] Integrity: SHA256 weight verification at startup")
-    print("  [L5] Storage: RAM-only sessions, wiped on close")
-    print("  [L6] Watchdog: intrusion detection active")
+    print(f"\n{'='*60}")
+    print(f"  KWYRE — Apple Silicon Inference")
+    print(f"  Native Metal acceleration for M1/M2/M3/M4")
+    print(f"{'='*60}")
+    print(f"  Model:   {ACTIVE_TIER['name']}-mlx ({MODEL_ID})")
+    print(f"  Tier:    {ACTIVE_TIER['tier']}")
+    print(f"  Backend: MLX (Metal) | URL: http://{BIND_HOST}:{PORT}")
+    print()
+    print(f"  Endpoints:")
+    print(f"    POST /v1/chat/completions  — inference (streaming supported)")
+    print(f"    POST /v1/session/end       — cryptographic session wipe")
+    print(f"    GET  /health               — system status")
+    print(f"    GET  /audit                — compliance log")
+    print()
+    print(f"  Security:")
+    print(f"    [L1] Network: localhost only")
+    print(f"    [L3] Dependencies: SHA256 manifest verified")
+    print(f"    [L4] Integrity: SHA256 weight verification")
+    print(f"    [L5] Storage: RAM-only, crypto-wiped on close")
+    print(f"    [L6] Watchdog: intrusion detection active")
     if TOOLS_ENABLED:
-        print("  [Tools] ENABLED — external API calls active (NOT air-gapped)")
+        print(f"    [Tools] ENABLED (NOT air-gapped)")
     else:
-        print("  [Tools] DISABLED — fully air-gapped, no external requests")
-    print("\n  All inference runs 100% locally on Apple Silicon. No data leaves this machine.\n")
+        print(f"    [Tools] DISABLED — fully air-gapped")
+    print(f"\n  All inference runs 100% on Apple Silicon. No data leaves this machine.\n")
     server.serve_forever()

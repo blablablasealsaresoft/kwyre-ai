@@ -24,6 +24,23 @@ It is not a hobbyist local model runner. It is a **certified, auditable, breach-
 
 ---
 
+## Four Products, One Mission
+
+Every Kwyre product runs 100% locally with zero data leaving your machine. Choose the one that fits your hardware.
+
+| Product | Model | Hardware | VRAM / RAM | Speed | Price | Identity |
+|---------|-------|----------|-----------|-------|-------|----------|
+| **Kwyre Personal** | Qwen3-4B + 0.6B draft | NVIDIA GPU (RTX 4060+) | 3.9 GB VRAM | 7-14 tok/s | $299 | Speed-optimized with speculative decoding, SpikeServe, RAG document ingestion |
+| **Kwyre Professional** | Qwen3.5-9B + 0.6B draft | NVIDIA GPU (RTX 4090/3090) | 7.5 GB VRAM | 3-5 tok/s | $799 | QAT-trained domain specialist for legal, financial, and forensic analysis |
+| **Kwyre Air** | Any GGUF model | Any CPU | 8+ GB RAM | 2-8 tok/s | $299 | Lightweight portable — runs on any hardware, no GPU required |
+| **Kwyre (Apple Silicon)** | Any MLX model | M1/M2/M3/M4 Mac | 8+ GB unified | 5-15 tok/s | $299 | Native Metal acceleration, zero CUDA dependency |
+
+**All products share:** 6-layer security stack, OpenAI-compatible API, SSE streaming, cryptographic session wipe, intrusion detection, offline license validation.
+
+**GPU products add:** Speculative decoding, SpikeServe activation encoding, per-session KV cache, RAG document ingestion, multi-user RBAC, Flash Attention 2.
+
+---
+
 ## Who It's For
 
 | Buyer | Pain Point | Why Kwyre |
@@ -431,6 +448,7 @@ git clone https://github.com/blablablasealsaresoft/kwyre-ai
 cd kwyre-ai
 pip install -r requirements-inference.txt
 
+# Kwyre Personal / Professional (GPU)
 # Place pre-quantized models in dist/
 python server/serve_local_4bit.py
 ```
@@ -440,7 +458,7 @@ python server/serve_local_4bit.py
 KWYRE_GGUF_PATH=./models/kwyre-4b.gguf python server/serve_cpu.py
 ```
 
-### Option 3c: MLX (Apple Silicon)
+### Option 3c: Kwyre Apple Silicon (MLX)
 ```bash
 python model/convert_mlx.py --model Qwen/Qwen3-4B --output ./models/kwyre-4b-mlx
 python server/serve_mlx.py

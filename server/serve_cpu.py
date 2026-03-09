@@ -36,6 +36,14 @@ _project_root = os.path.dirname(_server_dir)
 sys.path.insert(0, _server_dir)
 sys.path.insert(0, os.path.join(_project_root, "security"))
 
+TOOLS_ENABLED = os.environ.get("KWYRE_ENABLE_TOOLS", "0") == "1"
+if TOOLS_ENABLED:
+    sys.path.insert(0, _server_dir)
+    from tools import route_tools
+else:
+    def route_tools(_msg):
+        return [], []
+
 from security_core import (
     BIND_HOST,
     SessionStore,
@@ -52,13 +60,10 @@ from license import startup_validate as validate_license
 # Configuration
 # ---------------------------------------------------------------------------
 DEFAULT_SYSTEM_PROMPT = (
-    "You are Kwyre, a specialized AI assistant for legal, financial, and forensic "
-    "analysis. You provide precise, well-structured responses citing relevant "
-    "regulations, statutes, and professional standards. You organize complex analysis "
-    "with clear headings, numbered points, and specific references. When analyzing "
-    "documents, you identify key obligations, risks, and compliance requirements. "
-    "You never fabricate citations or case law. If uncertain, you state your "
-    "confidence level explicitly."
+    "You are Kwyre Air, a local AI assistant optimized for lightweight CPU inference. "
+    "You provide clear, concise answers. Keep responses focused and well-organized. "
+    "When analyzing documents or regulations, use numbered points and specific references. "
+    "You never fabricate citations. If uncertain, say so."
 )
 
 PORT = int(os.environ.get("KWYRE_PORT", "8000"))
@@ -197,6 +202,7 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 temperature = min(max(float(body.get("temperature", 0.7)), 0.0), 2.0)
                 top_p = min(max(float(body.get("top_p", 0.9)), 0.0), 1.0)
                 repeat_penalty = min(max(float(body.get("repetition_penalty", 1.1)), 1.0), 2.0)
+                top_k = min(max(int(body.get("top_k", 40)), 0), 100)
             except (TypeError, ValueError):
                 self._send_json_error(400, "Invalid max_tokens, temperature, or top_p.")
                 return
@@ -223,10 +229,27 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             if not any(m.get("role") == "system" for m in inference_msgs):
                 inference_msgs.insert(0, {"role": "system", "content": DEFAULT_SYSTEM_PROMPT})
 
+            tool_data, tools_used = [], []
+            last_user_msg = next(
+                (m.get("content", "") for m in reversed(inference_msgs) if m.get("role") == "user"), ""
+            )
+            if last_user_msg:
+                try:
+                    tool_data, tools_used = route_tools(last_user_msg)
+                except Exception as e:
+                    print(f"[tools] error: {e}")
+
+            if tool_data:
+                ctx = "\n\n[Live data]\n\n" + "\n\n".join(tool_data)
+                for i in range(len(inference_msgs) - 1, -1, -1):
+                    if inference_msgs[i].get("role") == "user":
+                        inference_msgs[i] = {"role": "user", "content": inference_msgs[i]["content"] + ctx}
+                        break
+
             if stream:
-                self._handle_stream(inference_msgs, max_tokens, temperature, top_p, repeat_penalty, session_id, session)
+                self._handle_stream(inference_msgs, max_tokens, temperature, top_p, repeat_penalty, top_k, session_id, session, tools_used)
             else:
-                self._handle_blocking(inference_msgs, max_tokens, temperature, top_p, repeat_penalty, session_id, session)
+                self._handle_blocking(inference_msgs, max_tokens, temperature, top_p, repeat_penalty, top_k, session_id, session, tools_used)
 
         elif self.path == "/v1/session/end":
             user = self._check_auth()
@@ -278,7 +301,7 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
         else:
             self._send_json_error(404, "Not found.")
 
-    def _handle_blocking(self, messages, max_tokens, temperature, top_p, repeat_penalty, session_id, session):
+    def _handle_blocking(self, messages, max_tokens, temperature, top_p, repeat_penalty, top_k, session_id, session, tools_used):
         t0 = time.time()
         with _inference_lock:
             result = llm.create_chat_completion(
@@ -286,6 +309,7 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 max_tokens=max_tokens,
                 temperature=max(temperature, 0.01),
                 top_p=top_p,
+                top_k=top_k,
                 repeat_penalty=repeat_penalty,
                 stream=False,
             )
@@ -312,6 +336,7 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             "choices": [{"message": {"role": "assistant", "content": reply}}],
             "model": MODEL_NAME,
             "session_id": session_id,
+            "tools_used": tools_used,
             "usage": {
                 "prompt_tokens": usage.get("prompt_tokens", 0),
                 "completion_tokens": n_tokens,
@@ -319,7 +344,7 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             },
         }).encode())
 
-    def _handle_stream(self, messages, max_tokens, temperature, top_p, repeat_penalty, session_id, session):
+    def _handle_stream(self, messages, max_tokens, temperature, top_p, repeat_penalty, top_k, session_id, session, tools_used):
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
         self.send_header("Cache-Control", "no-cache")
@@ -338,6 +363,7 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                     max_tokens=max_tokens,
                     temperature=max(temperature, 0.01),
                     top_p=top_p,
+                    top_k=top_k,
                     repeat_penalty=repeat_penalty,
                     stream=True,
                 )
@@ -368,6 +394,7 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 "choices": [{"delta": {}, "finish_reason": "stop"}],
                 "model": MODEL_NAME,
                 "session_id": session_id,
+                "tools_used": tools_used,
                 "usage": {
                     "completion_tokens": n_tokens,
                     "tokens_per_second": round(tps, 1),
@@ -396,6 +423,8 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             health_data: dict = {"status": "ok"}
             if auth_user:
                 health_data["model"] = MODEL_NAME
+                health_data["product"] = "Kwyre Air"
+                health_data["description"] = "CPU-only inference — no GPU required"
                 health_data["backend"] = "llama.cpp (CPU)"
                 health_data["gguf_file"] = _gguf_basename
                 health_data["gguf_size_mb"] = round(_gguf_size_mb, 1)
@@ -451,6 +480,8 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                     "object": "model",
                     "owned_by": "kwyre",
                     "meta": {
+                        "product": "Kwyre Air",
+                        "capabilities": ["streaming", "session_wipe", "crypto_wipe", "tools"],
                         "backend": "llama.cpp (CPU)",
                         "gguf_file": _gguf_basename,
                         "quantization": "GGUF (file-level)",
@@ -482,17 +513,27 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 
 if __name__ == "__main__":
     server = ThreadedHTTPServer((BIND_HOST, PORT), CpuChatHandler)
-    print(f"\nKwyre Air ready at http://{BIND_HOST}:{PORT}")
-    print(f"  Model: {_gguf_basename} ({_gguf_size_mb:.0f} MB)")
-    print(f"  Backend: llama.cpp (CPU-only, no GPU required)")
-    print(f"  Context: {CTX_LENGTH} tokens | Threads: {N_THREADS or 'auto'}")
-    print(f"  POST /v1/chat/completions  — inference (streaming supported)")
-    print(f"  POST /v1/session/end       — wipe session from RAM")
-    print(f"  GET  /health               — status + watchdog state")
-    print(f"  GET  /audit                — metadata-only compliance log")
+    print(f"\n{'='*60}")
+    print(f"  KWYRE AIR — CPU-Only Inference")
+    print(f"  No GPU required. Runs on any hardware.")
+    print(f"{'='*60}")
+    print(f"  Model:   {_gguf_basename} ({_gguf_size_mb:.0f} MB)")
+    print(f"  Backend: llama.cpp | Context: {CTX_LENGTH} | Threads: {N_THREADS or 'auto'}")
+    print(f"  URL:     http://{BIND_HOST}:{PORT}")
     print()
-    print(f"  [L1] Network: localhost only")
-    print(f"  [L5] Storage: RAM-only sessions, wiped on close")
-    print(f"  [L6] Watchdog: intrusion detection active")
-    print(f"\n  All inference runs 100% locally on CPU. No data leaves this machine.\n")
+    print(f"  Endpoints:")
+    print(f"    POST /v1/chat/completions  — inference (streaming supported)")
+    print(f"    POST /v1/session/end       — cryptographic session wipe")
+    print(f"    GET  /health               — system status")
+    print(f"    GET  /audit                — compliance log")
+    print()
+    print(f"  Security:")
+    print(f"    [L1] Network: localhost only")
+    print(f"    [L5] Storage: RAM-only, crypto-wiped on close")
+    print(f"    [L6] Watchdog: intrusion detection active")
+    if TOOLS_ENABLED:
+        print(f"    [Tools] ENABLED (NOT air-gapped)")
+    else:
+        print(f"    [Tools] DISABLED — fully air-gapped")
+    print(f"\n  All inference runs 100% on CPU. No data leaves this machine.\n")
     server.serve_forever()

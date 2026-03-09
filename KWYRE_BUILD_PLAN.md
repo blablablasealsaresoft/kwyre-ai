@@ -83,20 +83,16 @@ Deployed:   GitHub (main branch), Cloudflare Pages (kwyre.com)
 Tests:      110 security + integration suite
 ```
 
-### Product Tiers
+### Four Products
 
-| | Personal | Professional |
-|---|---|---|
-| **Main Model** | Qwen3-4B (2.5 GB) | Qwen3.5-9B (7.6 GB) |
-| **Draft Model** | Qwen3-0.6B (0.8 GB) | Qwen3-0.6B (0.8 GB) |
-| **VRAM** | ~3.9 GB | ~7.5 GB |
-| **Speed** | 7-14 tok/s | 3-5 tok/s |
-| **Quantization** | 4-bit NF4 / AWQ | 4-bit NF4 / AWQ |
-| **Price** | $299 one-time | $799 one-time |
-| **Default** | Yes (KWYRE_MODEL=Qwen/Qwen3-4B) | Set KWYRE_MODEL=Qwen/Qwen3.5-9B |
+| Product | Identity | Key Features | What It Doesn't Have |
+|---------|----------|-------------|---------------------|
+| **Kwyre Personal** | Speed king | Flash Attention, speculative decoding, SpikeServe, KV cache, RAG, tools | QAT domain training |
+| **Kwyre Professional** | Domain specialist | Everything Personal has + QAT-trained legal/financial/forensic adapters + multi-user RBAC | — |
+| **Kwyre Air** | Lightweight portable | llama.cpp CPU inference, streaming, tools (opt-in), minimal deps | RAG, SpikeServe, KV cache, multi-user (too heavy) |
+| **Kwyre (Apple Silicon)** | Native Mac | MLX Metal acceleration, streaming, tools (opt-in) | RAG, SpikeServe, KV cache, multi-user (not needed for Mac) |
 
-Both tiers share: 6-layer security stack, SSE streaming, speculative decoding,
-SpikeServe, RAG document ingestion, KV cache, all API endpoints, all frontends.
+All products share: 6-layer security, OpenAI API, SSE streaming, crypto session wipe, system prompt, repetition_penalty, top_k.
 
 ---
 

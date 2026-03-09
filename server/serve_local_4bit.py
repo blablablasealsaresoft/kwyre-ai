@@ -1243,6 +1243,8 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             gpu_used = torch.cuda.memory_allocated() / 1e9
             health_data.update({
                 "model": f"{ACTIVE_TIER['name']}-spikeserve",
+                "product": f"Kwyre {ACTIVE_TIER['tier'].title()}",
+                "description": f"{ACTIVE_TIER['tier'].title()} tier — {ACTIVE_TIER['vram_4bit']} VRAM, speculative decoding + SpikeServe",
                 "base": MODEL_ID.split("/")[-1],
                 "quantization": f"4-bit {KWYRE_QUANT.upper()}",
                 "multi_user": MULTI_USER,
@@ -1323,6 +1325,8 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 "object": "model",
                 "owned_by": "kwyre",
                 "meta": {
+                    "product": f"Kwyre {ACTIVE_TIER['tier'].title()}",
+                    "capabilities": ["streaming", "speculative_decoding", "spike_serve", "kv_cache", "rag", "multi_user", "tools", "session_wipe", "crypto_wipe"],
                     "base_model": MODEL_ID.split("/")[-1],
                     "weight_quant": f"4-bit {KWYRE_QUANT.upper()}",
                     "activation_encoding": "SpikeServe (draft model)",
