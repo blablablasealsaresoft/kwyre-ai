@@ -14,12 +14,15 @@ This STACKS on top of weight quantization (bitsandbytes 4-bit):
   Activations -> Dynamic spike encoding (SpikeServe)
 """
 
+import threading
+
 import torch
 import torch.nn as nn
 from collections import defaultdict
 
 _spike_stats = defaultdict(lambda: {"total": 0, "zeros": 0, "calls": 0})
 _track_stats = True
+_spike_lock = threading.Lock()
 
 
 def dynamic_spikes(x, k=3.0, max_spike=7):
@@ -86,10 +89,11 @@ def apply_spike_hooks(model, k=3.0, max_spike=7, skip_patterns=None,
                 if _track_stats:
                     total = spikes_int.numel()
                     zeros = (spikes_int == 0).sum().item()
-                    st = _spike_stats[layer_name]
-                    st["total"] += total
-                    st["zeros"] += zeros
-                    st["calls"] += 1
+                    with _spike_lock:
+                        st = _spike_stats[layer_name]
+                        st["total"] += total
+                        st["zeros"] += zeros
+                        st["calls"] += 1
 
                 if passive:
                     return None  # don't modify activations (measure-only mode)
@@ -109,23 +113,24 @@ def apply_spike_hooks(model, k=3.0, max_spike=7, skip_patterns=None,
 
 def get_sparsity_stats():
     """Average activation sparsity across all spike-encoded layers."""
-    if not _spike_stats:
-        return {"avg_sparsity": 0.0, "layers": 0, "total_calls": 0}
+    with _spike_lock:
+        if len(_spike_stats) == 0:
+            return {"avg_sparsity": 0.0, "layers": 0, "total_calls": 0}
 
-    total_elements = 0
-    total_zeros = 0
-    total_calls = 0
-    for stats in _spike_stats.values():
-        total_elements += stats["total"]
-        total_zeros += stats["zeros"]
-        total_calls += stats["calls"]
+        total_elements = 0
+        total_zeros = 0
+        total_calls = 0
+        for stats in _spike_stats.values():
+            total_elements += stats["total"]
+            total_zeros += stats["zeros"]
+            total_calls += stats["calls"]
 
-    pct = (total_zeros / total_elements * 100) if total_elements > 0 else 0.0
-    return {
-        "avg_sparsity": round(pct, 1),
-        "layers": len(_spike_stats),
-        "total_calls": total_calls,
-    }
+        pct = (total_zeros / total_elements * 100) if total_elements > 0 else 0.0
+        return {
+            "avg_sparsity": round(pct, 1),
+            "layers": len(_spike_stats),
+            "total_calls": total_calls,
+        }
 
 
 def set_tracking(enabled: bool):
@@ -134,4 +139,5 @@ def set_tracking(enabled: bool):
 
 
 def reset_sparsity_stats():
-    _spike_stats.clear()
+    with _spike_lock:
+        _spike_stats.clear()

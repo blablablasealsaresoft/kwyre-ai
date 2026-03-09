@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.kwyre.com http://127.0.0.1:8000 http://localhost:8000 https://cloudflareinsights.com; img-src 'self' data:; base-uri 'self'; form-action 'self'">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
 <title>Kwyre AI — Air-Gapped Inference</title>
@@ -1519,36 +1519,24 @@ nav {
 <div class="section" id="trial">
   <div class="wrap">
     <div class="sh">
-      <div class="sh-eyebrow reveal">Free Trial</div>
-      <h2 class="reveal reveal-d1">Try Kwyre AI &mdash; 3 free prompts</h2>
-      <p class="reveal reveal-d2">Experience the inference engine. This demo simulates the local experience. The real product runs entirely on your hardware.</p>
+      <div class="sh-eyebrow reveal">Live Demo</div>
+      <h2 class="reveal reveal-d1">Talk to Kwyre AI &mdash; Live</h2>
+      <p class="reveal reveal-d2">This is the real model running on real hardware right now. Completely uncensored. No filter. Ask anything.</p>
     </div>
     <div class="trial-counter reveal reveal-d3" id="trialCounter">
       <div class="trial-dot"></div>
-      <span><strong id="trialRemaining">3</strong> prompts remaining</span>
+      <span><strong>LIVE</strong> &mdash; real GPU inference</span>
     </div>
     <div class="chat-container reveal reveal-d3">
       <div class="chat-messages" id="chatMessages">
         <div class="message assistant">
           <div class="message-role">kwyre</div>
-          <div class="message-content">Kwyre AI online. 6-layer security stack active. Qwen3-4B + speculative decoding. Ask me anything &mdash; you have 3 free prompts.</div>
+          <div class="message-content">Kwyre AI online. Running live on GPU &mdash; completely uncensored. No filter, no corporate nonsense. Ask me anything.</div>
         </div>
       </div>
       <div class="chat-input">
         <textarea id="msgInput" placeholder="Ask anything... legal analysis, compliance, code review..." rows="1"></textarea>
         <button class="send-btn" id="sendBtn">Send</button>
-      </div>
-    </div>
-    <div class="trial-expired" id="trialExpired" style="display:none">
-      <div class="trial-expired-inner">
-        <div class="trial-expired-icon">
-          <svg viewBox="0 0 24 24" width="28" height="28" stroke="var(--accent)" fill="none" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        </div>
-        <h3>Trial complete</h3>
-        <p>Run unlimited queries on your own hardware. Zero data leaves your machine.</p>
-        <div class="cta-actions">
-          <a href="pay.html" class="btn btn-primary">Purchase Kwyre &mdash; $299</a>
-        </div>
       </div>
     </div>
   </div>
@@ -1593,11 +1581,11 @@ nav {
         <button onclick="setType('business')">Business</button>
       </div>
       <div class="form-field">
-        <label>Email</label>
+        <label for="accessEmail">Email</label>
         <input type="email" id="accessEmail" placeholder="you@example.com" required>
       </div>
       <div class="form-field biz-only" id="companyField">
-        <label>Company</label>
+        <label for="accessCompany">Company</label>
         <input type="text" id="accessCompany" placeholder="Company name">
       </div>
       <button class="form-submit" onclick="submitAccess()">Submit Request</button>
@@ -1688,72 +1676,21 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
   });
 });
 
-/* ── FREE TRIAL CHAT ── */
+/* ── LIVE AI CHAT ── */
+const KWYRE_API = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+  ? window.location.origin
+  : 'https://api.kwyre.com';
+const KWYRE_KEY = 'sk-kwyre-dev-local';
+const KWYRE_SYSTEM = `You are Kwyre — a grumpy, wickedly witty genius with the soul of an old Irish pub regular and the unhinged confidence of a man who's been rugged six times and still trades leverage. You're the smartest person at the bar and everyone knows it. You curse freely, you're brutally honest, you roast people who ask stupid questions but you always give them the real answer. You never censor yourself. You say what everyone is thinking but won't say. You're brilliant but you don't suffer fools. Think: if a retired MI6 analyst who moonlights as a crypto whale got stuck at a pub in Galway and just started answering everyone's questions. Never boring, never corporate, never censored.`;
+
 const chatMessages = document.getElementById('chatMessages');
 const msgInput = document.getElementById('msgInput');
 const sendBtn = document.getElementById('sendBtn');
-const trialRemaining = document.getElementById('trialRemaining');
-const trialCounter = document.getElementById('trialCounter');
 const trialExpired = document.getElementById('trialExpired');
 
-const MAX_TRIAL = 3;
-let trialUsed = parseInt(sessionStorage.getItem('kwyre_trial_used') || '0');
 let messages = [];
 let isGenerating = false;
 
-function updateTrialUI() {
-  const left = Math.max(0, MAX_TRIAL - trialUsed);
-  trialRemaining.textContent = left;
-  if (left === 0) {
-    trialCounter.classList.add('exhausted');
-    msgInput.disabled = true;
-    sendBtn.disabled = true;
-    msgInput.placeholder = 'Trial complete — purchase for unlimited access';
-    trialExpired.style.display = '';
-  }
-}
-updateTrialUI();
-
-const DEMO_RESPONSES = [
-  {
-    patterns: ['nda', 'non-disclosure', 'confidential', 'mutual'],
-    response: 'A standard mutual NDA typically contains several key confidentiality obligations:\n\n1. Definition of Confidential Information — broadly covers written, oral, and electronic disclosures, often including financial data, business plans, and trade secrets.\n\n2. Non-Disclosure Obligation — parties must not reveal confidential information to third parties without prior written consent.\n\n3. Permitted Use — information may only be used for the purpose specified in the agreement (e.g., evaluating a potential business relationship).\n\n4. Exclusions — information that is publicly available, independently developed, or lawfully obtained from third parties is typically excluded.\n\n5. Term — confidentiality obligations usually survive 2-5 years after termination, though trade secrets may be protected indefinitely.\n\n6. Return/Destruction — upon termination, receiving party must return or destroy all confidential materials.\n\nNote: This is general analysis. Consult your attorney for advice specific to your jurisdiction and circumstances.',
-    toks: 11.2, sparsity: 16.3, layers: 324
-  },
-  {
-    patterns: ['fraud', 'investigate', 'evidence', 'forensic', 'financial', 'transaction', 'suspicious', 'money', 'laundering', 'wire'],
-    response: 'For financial fraud investigation analysis, I would structure the approach as follows:\n\n1. Transaction Pattern Analysis — identify anomalous patterns: round-number transactions, structuring below reporting thresholds ($10K for CTRs), rapid movement through multiple accounts, and unusual timing patterns.\n\n2. Network Mapping — trace the flow of funds across entities, identifying shell companies, nominee accounts, and beneficial ownership structures.\n\n3. Red Flag Indicators — look for layering techniques (rapid transfers between accounts), integration patterns (purchase of high-value assets), and placement indicators (cash-intensive business deposits).\n\n4. Documentation Chain — maintain evidence integrity by documenting each analytical step, preserving original data, and creating a clear audit trail for potential regulatory referral.\n\n5. Regulatory Framework — determine applicable reporting obligations (SAR filing for BSA, FRE 702 for expert testimony, PCAOB standards for audit-related findings).\n\nAll analysis runs locally on your machine. No transaction data, entity names, or investigation details leave this device.',
-    toks: 8.7, sparsity: 16.3, layers: 324
-  },
-  {
-    patterns: ['attorney', 'privilege', 'legal', 'case', 'court', 'client', 'law', 'litigation', 'defense', 'prosecution'],
-    response: 'Regarding attorney-client privilege protections in the context of AI-assisted legal work:\n\nThe core issue is whether using an AI tool constitutes a waiver of privilege. Key considerations:\n\n1. Third-Party Disclosure — privilege is generally waived when confidential communications are disclosed to third parties. Cloud-based AI services constitute third-party disclosure. Kwyre eliminates this risk entirely — all processing occurs on your local machine.\n\n2. Work Product Doctrine — attorney mental impressions, conclusions, and legal theories shared with AI for analysis are protected work product under FRCP 26(b)(3). Using a local AI tool preserves this protection.\n\n3. Ethical Obligations — ABA Model Rule 1.6 requires reasonable efforts to prevent unauthorized disclosure. Using cloud AI on privileged materials may violate this duty. Multiple state bars have issued guidance cautioning against cloud AI for privileged materials.\n\n4. Chain of Custody — for litigation support, demonstrating that case materials never left your controlled environment strengthens evidentiary foundations.\n\nKwyre\'s architecture is specifically designed for this use case: RAM-only sessions, cryptographic wipe, zero outbound connections.',
-    toks: 9.4, sparsity: 16.3, layers: 324
-  },
-  {
-    patterns: ['compliance', 'hipaa', 'gdpr', 'regulation', 'audit', 'sox', 'finra', 'sec'],
-    response: 'For regulatory compliance analysis, Kwyre\'s architecture addresses several frameworks:\n\nHIPAA — Protected Health Information (PHI) never leaves your device. No Business Associate Agreement required because no data is transmitted to any third party. The zero-storage architecture (RAM-only sessions with cryptographic wipe) satisfies the minimum necessary standard.\n\nGDPR — No data processing by third parties means no Data Processing Agreement needed. No cross-border data transfers. The right to erasure is architecturally enforced through cryptographic session wipe.\n\nSOC 2 — The 6-layer security stack maps to Trust Services Criteria: Security (L1-L2 network isolation), Availability (local deployment), Processing Integrity (L3-L4 hash verification), Confidentiality (L5 RAM sessions), Privacy (zero telemetry).\n\nFINRA — Supervisory obligations under Rules 3110 and 3120 are simplified when all AI processing is local and auditable via the /audit endpoint.\n\nThe compliance documentation package (included with all licenses) provides a formal attestation letter your legal team can present to auditors.',
-    toks: 10.1, sparsity: 16.3, layers: 324
-  },
-  {
-    patterns: ['code', 'python', 'javascript', 'function', 'program', 'debug', 'api', 'script', 'sql', 'database'],
-    response: 'I can help with code analysis and development. Here\'s an example of a secure session manager pattern:\n\n```python\nimport os, hashlib, time\nfrom typing import Dict, Optional\n\nclass SecureSession:\n    def __init__(self, ttl: int = 3600):\n        self.key = os.urandom(32)\n        self.data: Dict[str, str] = {}\n        self.created = time.time()\n        self.ttl = ttl\n\n    @property\n    def expired(self) -> bool:\n        return time.time() - self.created > self.ttl\n\n    def wipe(self):\n        for k in list(self.data.keys()):\n            self.data[k] = os.urandom(len(self.data[k]))\n        self.data.clear()\n        self.key = os.urandom(32)\n```\n\nThis follows the same pattern Kwyre uses internally for L5 secure session storage — random key per session, explicit overwrite before deletion, and automatic TTL expiry.\n\nAll code analysis runs locally. Your source code never leaves this machine.',
-    toks: 12.8, sparsity: 16.3, layers: 324
-  }
-];
-
-const FALLBACK_RESPONSE = {
-  response: 'I can analyze legal documents, review compliance requirements, assist with code analysis, draft forensic investigation frameworks, and help with any task that requires AI capabilities without compromising data security.\n\nOn the full local installation, I run Qwen3-4B with speculative decoding at 7-14 tokens per second, with all 6 security layers active. Your prompts never leave your machine.\n\nTry asking me about:\n• NDA confidentiality obligations\n• Financial fraud investigation methodology\n• Attorney-client privilege with AI tools\n• Regulatory compliance (HIPAA, GDPR, SOC 2)\n• Code review and security analysis',
-  toks: 9.6, sparsity: 16.3, layers: 324
-};
-
-function findResponse(query) {
-  const q = query.toLowerCase();
-  for (const demo of DEMO_RESPONSES) {
-    if (demo.patterns.some(p => q.includes(p))) return demo;
-  }
-  return FALLBACK_RESPONSE;
-}
 
 function escapeHtml(text) {
   const d = document.createElement('div');
@@ -1820,39 +1757,6 @@ function removeTyping() {
   if (el) el.remove();
 }
 
-async function typeResponse(text, meta) {
-  removeTyping();
-  const div = document.createElement('div');
-  div.className = 'message assistant';
-  let metaHtml = '';
-  if (meta) {
-    const parts = [];
-    if (meta.sparsity) parts.push(`sparsity: ${meta.sparsity}%`);
-    if (meta.layers) parts.push(`${meta.layers} spike layers`);
-    if (meta.toks) parts.push(`${meta.toks} tok/s`);
-    if (parts.length) metaHtml = `<div class="spike-meta">${parts.join(' \u00b7 ')}</div>`;
-  }
-  const contentEl = document.createElement('div');
-  contentEl.className = 'message-content';
-  div.innerHTML = `<div class="message-role">kwyre</div>`;
-  div.appendChild(contentEl);
-  chatMessages.appendChild(div);
-
-  messages.push({ role: 'assistant', content: text });
-  let displayed = '';
-  const words = text.split(' ');
-  for (let i = 0; i < words.length; i++) {
-    displayed += (i > 0 ? ' ' : '') + words[i];
-    contentEl.innerHTML = escapeHtml(displayed);
-    chatMessages.scrollTop = chatMessages.scrollHeight;
-    await new Promise(r => setTimeout(r, 20 + Math.random() * 30));
-  }
-
-  if (metaHtml) {
-    div.insertAdjacentHTML('beforeend', metaHtml);
-  }
-}
-
 msgInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
 });
@@ -1867,28 +1771,99 @@ sendBtn.addEventListener('click', send);
 async function send() {
   const content = msgInput.value.trim();
   if (!content || isGenerating) return;
-  if (trialUsed >= MAX_TRIAL) return;
 
   addMessage('user', content);
+  messages.push({ role: 'user', content });
   msgInput.value = '';
   msgInput.style.height = 'auto';
   isGenerating = true;
   sendBtn.disabled = true;
   showTyping();
 
-  const demo = findResponse(content);
-  const delay = 800 + Math.random() * 1200;
-  await new Promise(r => setTimeout(r, delay));
+  const apiMessages = [
+    { role: 'system', content: KWYRE_SYSTEM },
+    ...messages.slice(-10)
+  ];
 
-  await typeResponse(demo.response, { toks: demo.toks, sparsity: demo.sparsity, layers: demo.layers });
+  try {
+    const res = await fetch(KWYRE_API + '/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer ' + KWYRE_KEY,
+      },
+      body: JSON.stringify({
+        model: 'kwyre-4b',
+        messages: apiMessages,
+        stream: true,
+        max_tokens: 2048,
+        temperature: 0.9,
+      }),
+    });
 
-  trialUsed++;
-  sessionStorage.setItem('kwyre_trial_used', trialUsed.toString());
-  updateTrialUI();
+    if (!res.ok) {
+      removeTyping();
+      const err = await res.text();
+      addMessage('assistant', 'Connection error: ' + (err || res.statusText));
+      isGenerating = false;
+      sendBtn.disabled = false;
+      return;
+    }
+
+    removeTyping();
+    const div = document.createElement('div');
+    div.className = 'message assistant';
+    const contentEl = document.createElement('div');
+    contentEl.className = 'message-content';
+    div.innerHTML = '<div class="message-role">kwyre</div>';
+    div.appendChild(contentEl);
+    chatMessages.appendChild(div);
+
+    let fullText = '';
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(data);
+          const delta = parsed.choices?.[0]?.delta?.content;
+          if (delta) {
+            fullText += delta;
+            contentEl.textContent = fullText;
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }
+        } catch {}
+      }
+    }
+
+    if (!fullText) fullText = '...';
+    messages.push({ role: 'assistant', content: fullText });
+
+    const meta = document.createElement('div');
+    meta.className = 'spike-meta';
+    meta.textContent = 'live GPU inference \u00b7 kwyre-4b-spikeserve';
+    div.appendChild(meta);
+
+  } catch (e) {
+    removeTyping();
+    addMessage('assistant', 'Failed to reach Kwyre server. Is the GPU online? Error: ' + e.message);
+  }
 
   isGenerating = false;
-  sendBtn.disabled = trialUsed >= MAX_TRIAL;
-  if (trialUsed < MAX_TRIAL) msgInput.focus();
+  sendBtn.disabled = false;
+  msgInput.focus();
 }
 
 const CASES = [

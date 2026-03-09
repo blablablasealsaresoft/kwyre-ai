@@ -7,6 +7,8 @@ import re
 import sys
 import time
 import torch
+torch.backends.cuda.matmul.allow_tf32 = True
+torch.backends.cudnn.benchmark = True
 import json
 import hashlib
 import secrets
@@ -36,6 +38,14 @@ try:
 except ImportError:
     _AWQ_AVAILABLE = False
 
+try:
+    import flash_attn
+    _FLASH_ATTN_KWARGS = {"attn_implementation": "flash_attention_2"}
+    print("[Optimization] Flash Attention 2 available — enabled")
+except ImportError:
+    _FLASH_ATTN_KWARGS = {}
+    print("[Optimization] Flash Attention 2 not installed — using default attention")
+
 _server_dir = os.path.dirname(os.path.abspath(__file__))
 _project_root = os.path.dirname(_server_dir)
 sys.path.insert(0, _server_dir)
@@ -52,6 +62,16 @@ from spike_serve import apply_spike_hooks, get_sparsity_stats, reset_sparsity_st
 from verify_deps import startup_check
 from license import startup_validate as validate_license
 from audit import UserAuditLog
+
+DEFAULT_SYSTEM_PROMPT = (
+    "You are Kwyre, a specialized AI assistant for legal, financial, and forensic "
+    "analysis. You provide precise, well-structured responses citing relevant "
+    "regulations, statutes, and professional standards. You organize complex analysis "
+    "with clear headings, numbered points, and specific references. When analyzing "
+    "documents, you identify key obligations, risks, and compliance requirements. "
+    "You never fabricate citations or case law. If uncertain, you state your "
+    "confidence level explicitly."
+)
 
 MODEL_ID = os.environ.get("KWYRE_MODEL", "Qwen/Qwen3.5-9B")
 PORT = 8000
@@ -233,6 +253,7 @@ if KWYRE_QUANT == "awq":
         model = AutoModelForCausalLM.from_pretrained(
             AWQ_MODEL_PATH, trust_remote_code=True,
             device_map="auto", torch_dtype=torch.bfloat16,
+            **_FLASH_ATTN_KWARGS,
         )
     else:
         if not _AWQ_AVAILABLE:
@@ -256,6 +277,7 @@ if KWYRE_QUANT == "awq":
         model = AutoModelForCausalLM.from_pretrained(
             AWQ_MODEL_PATH, trust_remote_code=True,
             device_map="auto", torch_dtype=torch.bfloat16,
+            **_FLASH_ATTN_KWARGS,
         )
     print(f"[Quantization] AWQ mode active (~1.4x faster inference)")
 else:
@@ -264,6 +286,7 @@ else:
         model = AutoModelForCausalLM.from_pretrained(
             LOCAL_MODEL_PATH, trust_remote_code=True,
             device_map="auto", torch_dtype=torch.bfloat16,
+            **_FLASH_ATTN_KWARGS,
         )
         print(f"[Quantization] Pre-quantized NF4 loaded (fastest startup)")
     else:
@@ -278,6 +301,7 @@ else:
             LOCAL_MODEL_PATH, trust_remote_code=True,
             quantization_config=quant_config,
             device_map="auto", dtype=torch.bfloat16,
+            **_FLASH_ATTN_KWARGS,
         )
         print(f"[Quantization] NF4 on-the-fly quantization active")
 # ---------------------------------------------------------------------------
@@ -317,12 +341,14 @@ if SPECULATIVE_ENABLED:
             draft_model = AutoModelForCausalLM.from_pretrained(
                 _draft_source, trust_remote_code=True,
                 device_map="auto", torch_dtype=torch.bfloat16,
+                **_FLASH_ATTN_KWARGS,
             )
         elif os.path.isdir(_draft_dist) and os.path.exists(os.path.join(_draft_dist, "config.json")):
             print(f"[Speculative] Loading pre-quantized draft from {_draft_dist}...")
             draft_model = AutoModelForCausalLM.from_pretrained(
                 _draft_dist, trust_remote_code=True,
                 device_map="auto", torch_dtype=torch.bfloat16,
+                **_FLASH_ATTN_KWARGS,
             )
         else:
             print(f"[Speculative] Loading draft model {DRAFT_MODEL_ID} (4-bit NF4)...")
@@ -336,6 +362,7 @@ if SPECULATIVE_ENABLED:
                 DRAFT_MODEL_ID, trust_remote_code=True,
                 quantization_config=_draft_quant,
                 device_map="auto", dtype=torch.bfloat16,
+                **_FLASH_ATTN_KWARGS,
             )
         draft_model.eval()
         _draft_vram = torch.cuda.memory_allocated() / 1e9
@@ -601,12 +628,25 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             return False
         return True
 
+    def _send_cors_headers(self):
+        origin = self.headers.get("Origin", "*")
+        self.send_header("Access-Control-Allow-Origin", origin)
+        self.send_header("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
+        self.send_header("Access-Control-Allow-Headers", "Content-Type, Authorization")
+        self.send_header("Access-Control-Max-Age", "86400")
+
     def _send_json(self, status: int, data: dict):
         self.send_response(status)
         self.send_header("Content-Type", "application/json")
+        self._send_cors_headers()
         self._send_security_headers()
         self.end_headers()
         self.wfile.write(json.dumps(data, indent=2).encode())
+
+    def do_OPTIONS(self):
+        self.send_response(204)
+        self._send_cors_headers()
+        self.end_headers()
 
     # ---- POST routing ----
 
@@ -659,8 +699,10 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             max_tokens = min(max(int(body.get("max_tokens", 2048)), 1), 8192)
             temperature = min(max(float(body.get("temperature", 0.7)), 0.0), 2.0)
             top_p = min(max(float(body.get("top_p", 0.9)), 0.0), 1.0)
+            top_k = min(max(int(body.get("top_k", 20)), 0), 100)
+            repetition_penalty = min(max(float(body.get("repetition_penalty", 1.1)), 1.0), 2.0)
         except (TypeError, ValueError):
-            self._send_json_error(400, "Invalid max_tokens, temperature, or top_p.")
+            self._send_json_error(400, "Invalid max_tokens, temperature, top_p, or top_k.")
             return
         if _license_tier == "eval":
             max_tokens = min(max_tokens, _MAX_EVAL_TOKENS)
@@ -682,8 +724,8 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 return
             _trial_tracker[trial_key] = trial_count + 1
 
-        session = session_store.get_or_create(session_id)
-        if MULTI_USER:
+        session, created = session_store.get_or_create(session_id)
+        if MULTI_USER and created:
             audit_log.record_session_created(user["id"], user.get("username", ""))
         for m in messages:
             session.add_message(m.get("role", "user"), m.get("content", ""))
@@ -700,6 +742,8 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 print(f"[tools] error: {e}")
 
         augmented = list(messages)
+        if not any(m.get("role") == "system" for m in augmented):
+            augmented.insert(0, {"role": "system", "content": DEFAULT_SYSTEM_PROMPT})
         if tool_data:
             ctx = ("\n\n[Live data — use directly, be concise]\n\n"
                    + "\n\n".join(tool_data))
@@ -724,6 +768,8 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             "max_new_tokens": max_tokens,
             "temperature": max(temperature, 0.01),
             "top_p": top_p,
+            "top_k": top_k,
+            "repetition_penalty": repetition_penalty,
             "do_sample": temperature > 0,
             "use_cache": True,
             "pad_token_id": tokenizer.pad_token_id,
@@ -731,6 +777,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
         }
         if draft_model is not None:
             gen_kwargs["assistant_model"] = draft_model
+            gen_kwargs["assistant_early_exit"] = 4
 
         if stream:
             self._handle_stream_gpu(
@@ -760,7 +807,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
 
         def _run_inference():
             t0 = time.time()
-            with torch.no_grad():
+            with torch.inference_mode():
                 outputs = model.generate(**gen_kwargs, return_dict_in_generate=True)
             elapsed = time.time() - t0
             gen_ids = outputs.sequences
@@ -834,6 +881,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                            user, tools_used):
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
+        self._send_cors_headers()
         self.send_header("Cache-Control", "no-cache")
         self.send_header("Connection", "keep-alive")
         self.send_header("X-Accel-Buffering", "no")
@@ -844,6 +892,9 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
 
         streamer = TextIteratorStreamer(tokenizer, skip_prompt=True, skip_special_tokens=True)
         gen_kwargs["streamer"] = streamer
+        # Speculative decoding is not compatible with TextIteratorStreamer.
+        # Streaming runs at base model speed (~1x) vs blocking mode (~2-3x with draft model).
+        # KV cache is also not used for streaming — full conversation re-encoded each turn.
         gen_kwargs.pop("assistant_model", None)
         gen_kwargs.pop("return_dict_in_generate", None)
 
@@ -854,7 +905,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
         gen_error: list[Exception] = []
         def _run_generation():
             try:
-                with torch.no_grad():
+                with torch.inference_mode():
                     model.generate(**gen_kwargs)
             except Exception as e:
                 gen_error.append(e)
@@ -881,9 +932,6 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
 
             gen_thread.join(timeout=5)
 
-            if gen_error:
-                print(f"[inference] Stream generation error: {gen_error[0]}")
-
             elapsed = time.time() - t0
             tps = n_tokens / elapsed if elapsed > 0 else 0
 
@@ -895,21 +943,32 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
 
             _measure_sparsity_lazy()
 
-            done_data = json.dumps({
-                "choices": [{"delta": {}, "finish_reason": "stop"}],
-                "model": model_name,
-                "session_id": response_sid,
-                "tools_used": tools_used,
-                "usage": {
-                    "completion_tokens": n_tokens,
-                    "tokens_per_second": round(tps, 1),
-                },
-                "spike_stats": {
-                    "activation_sparsity_pct": STARTUP_SPARSITY["avg_sparsity"],
-                    "spike_encoded_layers": n_converted,
-                },
-            })
-            self.wfile.write(f"data: {done_data}\n\n".encode())
+            if gen_error:
+                print(f"[inference] Stream generation error: {gen_error[0]}")
+                error_data = json.dumps({
+                    "choices": [{"delta": {}, "finish_reason": "error"}],
+                    "model": model_name,
+                    "session_id": response_sid,
+                    "error": str(gen_error[0]),
+                })
+                self.wfile.write(f"data: {error_data}\n\n".encode())
+            else:
+                done_data = json.dumps({
+                    "choices": [{"delta": {}, "finish_reason": "stop"}],
+                    "model": model_name,
+                    "session_id": response_sid,
+                    "tools_used": tools_used,
+                    "usage": {
+                        "completion_tokens": n_tokens,
+                        "tokens_per_second": round(tps, 1),
+                    },
+                    "spike_stats": {
+                        "activation_sparsity_pct": STARTUP_SPARSITY["avg_sparsity"],
+                        "spike_encoded_layers": n_converted,
+                    },
+                })
+                self.wfile.write(f"data: {done_data}\n\n".encode())
+
             self.wfile.write(b"data: [DONE]\n\n")
             self.wfile.flush()
 

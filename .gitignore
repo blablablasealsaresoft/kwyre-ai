@@ -1,5 +1,6 @@
 *.safetensors
 *.bin
+.cache/
 qat_output/
 qat_output_v1/
 __pycache__/

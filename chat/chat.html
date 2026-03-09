@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self'; img-src 'self' data:; base-uri 'self'; form-action 'self'">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
 <title>Kwyre AI — Air-Gapped Inference</title>
 <meta name="description" content="Air-gapped AI inference for analysts who cannot afford a breach. 6-layer security stack. Zero data leaves your machine.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked@14/marked.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -732,7 +733,7 @@ nav {
 .chat-messages::-webkit-scrollbar-track { background: transparent; }
 .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-.message { margin-bottom: 20px; animation: fadeUp 0.3s ease; }
+.message { margin-bottom: 20px; animation: fadeUp 0.3s ease; position: relative; }
 
 @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -868,6 +869,188 @@ nav {
 }
 
 .hidden { display: none !important; }
+
+/* --- MARKDOWN RENDERED CONTENT --- */
+.message-content pre {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  margin: 8px 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.message-content code {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--surface2);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.message-content pre code {
+  background: none;
+  padding: 0;
+}
+
+.message-content ul, .message-content ol {
+  padding-left: 20px;
+  margin: 8px 0;
+}
+
+.message-content li {
+  margin: 4px 0;
+  line-height: 1.6;
+}
+
+.message-content h1, .message-content h2, .message-content h3 {
+  margin: 12px 0 8px;
+  color: var(--text);
+}
+
+.message-content h1 { font-size: 18px; }
+.message-content h2 { font-size: 16px; }
+.message-content h3 { font-size: 14px; }
+
+.message-content p { margin: 6px 0; }
+
+.message-content blockquote {
+  border-left: 3px solid var(--accent);
+  padding-left: 12px;
+  margin: 8px 0;
+  color: var(--text2);
+}
+
+.message-content table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 8px 0;
+  font-size: 13px;
+}
+
+.message-content th, .message-content td {
+  border: 1px solid var(--border);
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.message-content th {
+  background: var(--surface2);
+  font-weight: 600;
+}
+
+/* --- COPY BUTTON --- */
+.copy-btn {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  color: var(--text3);
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 4px 10px;
+  border-radius: 3px;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 0.2s, color 0.2s;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.message:hover .copy-btn { opacity: 1; }
+.copy-btn:hover { color: var(--text); border-color: var(--border-hi); }
+
+/* --- CHAT TOOLBAR --- */
+.chat-toolbar {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+
+.toolbar-btn {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text2);
+  font-family: var(--mono);
+  font-size: 11px;
+  padding: 6px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+.toolbar-btn:hover { border-color: var(--border-hi); color: var(--text); }
+.toolbar-danger:hover { border-color: var(--red); color: var(--red); }
+
+/* --- SYSTEM PROMPT --- */
+.system-prompt-section { margin-bottom: 12px; }
+
+.system-prompt-toggle {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  cursor: pointer;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  padding: 6px 0;
+}
+
+.system-prompt-toggle:hover { color: var(--text2); }
+
+.system-prompt-input {
+  width: 100%;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 13px;
+  resize: vertical;
+  outline: none;
+  margin-top: 8px;
+  min-height: 60px;
+  max-height: 200px;
+  line-height: 1.5;
+}
+
+.system-prompt-input:focus { border-color: var(--accent); }
+
+/* --- LIGHT THEME --- */
+html.light {
+  --bg: #f5f6fa;
+  --surface: #ffffff;
+  --surface2: #f0f1f5;
+  --surface3: #e8e9f0;
+  --border: #d4d6e0;
+  --border-hi: #b8bcc8;
+  --accent: #2563eb;
+  --accent-dim: rgba(37,99,235,0.10);
+  --accent-glow: rgba(37,99,235,0.20);
+  --green: #16a34a;
+  --green-dim: rgba(22,163,74,0.10);
+  --red: #dc2626;
+  --red-dim: rgba(220,38,38,0.10);
+  --amber: #d97706;
+  --text: #1a1d2e;
+  --text2: #5b6078;
+  --text3: #8b90a8;
+}
+
+html.light body { -webkit-font-smoothing: auto; }
+html.light ::selection { background: var(--accent); color: #fff; }
+html.light .message-content pre { background: var(--surface2); }
+html.light .copy-btn { background: var(--surface); }
+html.light nav { background: rgba(245,246,250,0.9); }
+
+/* --- EXPORT BUTTON ACTIVE STATE --- */
+.toolbar-btn.active { border-color: var(--accent); color: var(--accent); }
 
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
@@ -1208,6 +1391,16 @@ nav {
       <div class="status-dot" id="statusDot"></div>
       <input type="password" id="apiKeyInput" placeholder="sk-kwyre-..." autocomplete="off">
     </div>
+    <div class="chat-toolbar">
+      <button class="toolbar-btn" onclick="newChat()">New Chat</button>
+      <button class="toolbar-btn" onclick="exportConversation()">Export</button>
+      <button class="toolbar-btn" id="themeToggle" onclick="toggleTheme()">Light Mode</button>
+      <button class="toolbar-btn toolbar-danger" onclick="wipeSession()">Wipe Session</button>
+    </div>
+    <details class="system-prompt-section">
+      <summary class="system-prompt-toggle">System Prompt</summary>
+      <textarea id="systemPrompt" class="system-prompt-input" rows="3" placeholder="Custom system prompt (optional)...">You are Kwyre, a specialized AI assistant for legal, financial, and forensic analysis. You provide precise, well-structured responses with clear headings and specific references. You never fabricate citations.</textarea>
+    </details>
     <div class="chat-container">
       <div class="chat-messages" id="chatMessages">
         <div class="empty-state">
@@ -1321,11 +1514,13 @@ function addMessage(role, content, toolsUsed, spikeStats, usage) {
     if (parts.length > 0)
       metaHtml = `<div class="spike-meta">${parts.join(' \u00b7 ')}</div>`;
   }
+  const copyBtn = role === 'assistant' ? `<button class="copy-btn" onclick="copyMessage(this)">Copy</button>` : '';
   div.innerHTML = `
     <div class="message-role ${role}">${role}</div>
     ${toolHtml}
-    <div class="message-content">${escapeHtml(content)}</div>
+    <div class="message-content">${role === 'assistant' ? marked.parse(content) : escapeHtml(content)}</div>
     ${metaHtml}
+    ${copyBtn}
   `;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -1355,6 +1550,75 @@ function escapeHtml(text) {
   return d.innerHTML;
 }
 
+function newChat() {
+  messages = [];
+  chatMessages.innerHTML = '';
+  addMessage('assistant', 'Kwyre AI online. All security layers active. Ready for queries.');
+}
+
+async function wipeSession() {
+  const key = apiKeyInput.value.trim();
+  if (!key) return;
+  try {
+    const r = await fetch(`${API_BASE}/v1/session/end`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
+      body: JSON.stringify({ session_id: 'all' }),
+    });
+    if (r.ok) {
+      messages = [];
+      chatMessages.innerHTML = '';
+      addMessage('assistant', 'All sessions wiped. Conversations cryptographically destroyed.');
+    }
+  } catch (err) {
+    addMessage('assistant', `Wipe error: ${err.message}`);
+  }
+}
+
+function copyMessage(btn) {
+  const msg = btn.closest('.message');
+  const idx = Array.from(chatMessages.querySelectorAll('.message')).indexOf(msg);
+  const raw = messages[idx]?.content || msg.querySelector('.message-content').textContent;
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+function exportConversation() {
+  if (messages.length === 0) return;
+  const lines = messages.map(m => {
+    const label = m.role === 'user' ? '## You' : '## Kwyre';
+    return `${label}\n\n${m.content}\n`;
+  });
+  const header = `# Kwyre AI — Conversation Export\n_Exported: ${new Date().toISOString()}_\n_Air-gapped inference · zero data leaves your machine_\n\n---\n\n`;
+  const md = header + lines.join('\n---\n\n');
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `kwyre-export-${Date.now()}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function toggleTheme() {
+  const html = document.documentElement;
+  const isLight = html.classList.toggle('light');
+  document.getElementById('themeToggle').textContent = isLight ? 'Dark Mode' : 'Light Mode';
+  sessionStorage.setItem('kwyre-theme', isLight ? 'light' : 'dark');
+}
+
+(function restoreTheme() {
+  if (sessionStorage.getItem('kwyre-theme') === 'light') {
+    document.documentElement.classList.add('light');
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = 'Dark Mode';
+  }
+})();
+
 async function send() {
   const content = msgInput.value.trim();
   if (!content || isGenerating) return;
@@ -1370,7 +1634,10 @@ async function send() {
   showTyping();
 
   try {
-    const apiMessages = messages.map(m => ({ role: m.role, content: m.content }));
+    const sysPrompt = document.getElementById('systemPrompt').value.trim();
+    const apiMessages = [];
+    if (sysPrompt) apiMessages.push({ role: 'system', content: sysPrompt });
+    apiMessages.push(...messages.map(m => ({ role: m.role, content: m.content })));
     const r = await fetch(`${API_BASE}/v1/chat/completions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
@@ -1416,7 +1683,7 @@ async function send() {
             const delta = chunk.choices?.[0]?.delta?.content;
             if (delta) {
               fullText += delta;
-              contentEl.textContent = fullText;
+              contentEl.innerHTML = marked.parse(fullText);
               chatMessages.scrollTop = chatMessages.scrollHeight;
             }
             if (chunk.choices?.[0]?.finish_reason === 'stop') {
@@ -1429,8 +1696,25 @@ async function send() {
       }
 
       fullText = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/<think>[\s\S]*/g, '').trim();
-      contentEl.innerHTML = escapeHtml(fullText);
+      contentEl.innerHTML = marked.parse(fullText);
       messages.push({ role: 'assistant', content: fullText });
+
+      const copyBtn = document.createElement('button');
+      copyBtn.className = 'copy-btn';
+      copyBtn.textContent = 'Copy';
+      copyBtn.onclick = function() { copyMessage(this); };
+      streamDiv.appendChild(copyBtn);
+
+      const metaParts = [];
+      if (spikeStats.activation_sparsity_pct > 0) metaParts.push(`sparsity: ${spikeStats.activation_sparsity_pct}%`);
+      if (spikeStats.spike_encoded_layers > 0) metaParts.push(`${spikeStats.spike_encoded_layers} spike layers`);
+      if (usage.tokens_per_second > 0) metaParts.push(`${usage.tokens_per_second} tok/s`);
+      if (metaParts.length > 0) {
+        const meta = document.createElement('div');
+        meta.className = 'spike-meta';
+        meta.textContent = metaParts.join(' \u00b7 ');
+        streamDiv.appendChild(meta);
+      }
 
       if (spikeStats.activation_sparsity_pct > 0) {
         document.getElementById('sparsityStat').textContent = spikeStats.activation_sparsity_pct + '%';

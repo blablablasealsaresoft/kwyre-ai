@@ -20,12 +20,7 @@ RUN python -m pip install --no-cache-dir -r requirements.txt \
     && python -m pip uninstall -y triton 2>/dev/null; true \
     && find /usr/local/lib -type d -name "__pycache__" -exec rm -rf {} + 2>/dev/null; true \
     && find /usr/local/lib -name "*.pyc" -delete 2>/dev/null; true \
-    && rm -rf /usr/local/lib/python3.11/dist-packages/torch/test 2>/dev/null; true \
-    && rm -rf /usr/local/lib/python3.11/dist-packages/torch/_inductor 2>/dev/null; true \
-    && rm -rf /usr/local/lib/python3.11/dist-packages/torch/_dynamo 2>/dev/null; true \
-    && rm -rf /usr/local/lib/python3.11/dist-packages/torch/_export 2>/dev/null; true \
-    && rm -rf /usr/local/lib/python3.11/dist-packages/torch/_functorch 2>/dev/null; true \
-    && rm -rf /usr/local/lib/python3.11/dist-packages/nvidia/nccl 2>/dev/null; true
+    && rm -rf /usr/local/lib/python3.11/dist-packages/torch/test 2>/dev/null; true
 
 COPY server/              ./server/
 COPY model/spike_serve.py ./model/spike_serve.py

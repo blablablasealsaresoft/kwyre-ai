@@ -8,7 +8,7 @@
 [![Quantization](https://img.shields.io/badge/quant-4--bit%20NF4-green.svg)]()
 [![Security](https://img.shields.io/badge/security-6--layer%20stack-red.svg)]()
 [![Docker](https://img.shields.io/badge/deploy-docker--compose%20up-blue.svg)]()
-[![Status](https://img.shields.io/badge/status-v1.0%20production-brightgreen.svg)]()
+[![Status](https://img.shields.io/badge/status-v1.1%20hardened-brightgreen.svg)]()
 [![Pentest](https://img.shields.io/badge/pentest-47%2F47%20resolved-brightgreen.svg)]()
 [![Streaming](https://img.shields.io/badge/SSE-streaming-blue.svg)]()
 
@@ -256,6 +256,8 @@ graph LR
 - **Inference queue** — serialized GPU access with proper concurrency handling; HTTP threads stay responsive during generation
 - **4-bit NF4 quantization** (bitsandbytes) — both models fit in ~3.9 GB VRAM combined
 - **AWQ quantization option** — `KWYRE_QUANT=awq` for 1.4x faster inference when pre-quantized
+- **Flash Attention 2** — auto-detected with graceful fallback; +20-40% throughput on Ampere+ GPUs
+- **TF32 matmul** — enabled by default on RTX 30xx/40xx for faster matrix operations
 - **OpenAI-compatible API** — `POST /v1/chat/completions` drop-in replacement, works with any OpenAI SDK
 - **Multi-tier support** — switch between 4B (personal, 3.5 GB VRAM) and 9B (professional, 7.5 GB VRAM) via environment variable
 
@@ -297,7 +299,7 @@ Kwyre v0.3 underwent a full white-box security audit and penetration test. All 4
 - **True air-gap enforcement** — External API tools opt-in via `KWYRE_ENABLE_TOOLS=1` (default OFF)
 - **CSP nonce-based script protection** — Per-request cryptographic nonces; `cdn.jsdelivr.net` restricted to payment page only
 - **Timing-safe authentication** — `hmac.compare_digest` prevents timing side-channel attacks
-- **Input validation** — `max_tokens` 1-8192, `temperature` 0.0-2.0, `top_p` 0.0-1.0, message arrays max 100
+- **Input validation** — `max_tokens` 1-8192, `temperature` 0.0-2.0, `top_p` 0.0-1.0, `top_k` 0-100, `repetition_penalty` 1.0-2.0, message arrays max 100
 - **License key injection blocked** — Public key embedded at build time, not loadable from env
 - **Eval tier enforcement** — 10 req/min, 512 max tokens, 3 requests per IP
 - **Security headers on all responses** — `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`, full CSP
@@ -309,7 +311,7 @@ Kwyre v0.3 underwent a full white-box security audit and penetration test. All 4
 - **Authenticated health endpoint** — Detailed system info requires API key
 - **CORS origin restriction** — Locked to server's own origin
 
-**Test suite: 107 tests across 3 test files, all passing.**
+**Test suite: 110 security tests across 3 test files + integration test suite, all passing.**
 
 ### Privacy Features
 - **Zero content logging** — metadata only (timestamps, token counts)
@@ -543,7 +545,7 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] DOMParser-based HTML sanitization (mXSS-safe)
 - [x] Security headers on all HTTP response paths
 - [x] Watchdog child process monitoring
-- [x] 107 security tests across 3 test suites
+- [x] 110 security tests across 3 test suites
 - [x] Windows, Linux, and macOS one-click installers
 - [x] Nuitka build pipeline — compiled binary distribution (source protection)
 
@@ -566,11 +568,35 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] Inference queue — serialized GPU access, HTTP threads stay responsive during generation
 - [x] Frontend streaming UI — `chat.html` renders tokens live as they arrive
 
-**v1.0 (Current — Production Ready)**
+**v1.0 (Complete — Production Ready)**
 - [x] Hardware-bound license keys — machine fingerprint binding with `machine_ids` in license payload, `register_machine()` activation flow
 - [x] Code signing for releases — Ed25519-signed `MANIFEST.sig.json` for every build artifact, `python build.py sign`
 - [x] Windows one-click GUI installer — tkinter wizard with dark theme, 5-page flow, threaded installation
 - [x] Auto-update mechanism (air-gap safe) — `.kwyre-update` packages with signed manifests, local-only update scanning, automatic rollback
+
+**v1.1 (Current — Hardened + Optimized)**
+- [x] Flash Attention 2 — auto-detected with graceful fallback, +20-40% throughput on supported GPUs
+- [x] TF32 matmul + cuDNN benchmark — enabled by default on Ampere+ GPUs
+- [x] `torch.inference_mode()` — replaces `no_grad()` for reduced autograd overhead
+- [x] Speculative decoding tuning — `assistant_early_exit` for faster draft rejection
+- [x] MLX backend refactored to use `security_core.py` — eliminated ~200 lines of duplicated security code
+- [x] MLX SSE streaming — `stream_generate` + `make_sampler` for token-by-token output on Apple Silicon
+- [x] Thread-safe inference locks on MLX and CPU backends
+- [x] Session reaper race condition fixed — atomic wipe under single lock
+- [x] Stream error surfacing — `finish_reason: "error"` sent to client on generation failure
+- [x] Audit log accuracy — `record_session_created` only fires on new sessions, not every request
+- [x] Memory leak prevention — `rate_tracker` cleanup at >1000 keys, `intrusion_log` capped at 100 entries
+- [x] Thread-safe SpikeServe stats — `_spike_lock` protects concurrent hook updates
+- [x] Default system prompt — professional legal/forensic persona when no system message provided
+- [x] `repetition_penalty` parameter — prevents repetitive output (default 1.1, all backends)
+- [x] `top_k` parameter — aligned with model's `generation_config.json` (default 20)
+- [x] Markdown rendering in chat UI — `marked.js` for headers, lists, code blocks, tables
+- [x] Copy-to-clipboard — hover button on every assistant message, copies raw markdown
+- [x] Conversation export — download as `.md` file with timestamp and formatting
+- [x] Dark/light mode toggle — full light theme with `sessionStorage` persistence
+- [x] Session management UI — New Chat + Wipe Session buttons, system prompt editor
+- [x] Integration test suite — HTTP endpoints, SSE conformance, KV cache, session isolation
+- [x] `main.html` auto-detects local vs production API — `window.location.origin` for localhost
 
 ---
 
@@ -784,7 +810,7 @@ kwyre/
 ├── finetune/                  # Domain-specific fine-tuning pipeline
 ├── benchmarks/                # Benchmark suite vs GPT-4o
 ├── docs/                      # Compliance documentation package
-├── tests/                     # 107 security tests
+├── tests/                     # 110 security tests + integration suite
 ├── build.py                   # Nuitka build + installer pipeline
 └── dist/                      # Pre-quantized model weights
     ├── kwyre-4b-nf4/          # Main model (2.5 GB)

@@ -72,12 +72,13 @@ class SessionStore:
         self._last_access: dict[str, float] = {}
         threading.Thread(target=self._reap_expired, daemon=True).start()
 
-    def get_or_create(self, session_id: str) -> SecureConversationBuffer:
+    def get_or_create(self, session_id: str) -> tuple[SecureConversationBuffer, bool]:
         with self._lock:
-            if session_id not in self._sessions or self._sessions[session_id].is_wiped():
+            created = session_id not in self._sessions or self._sessions[session_id].is_wiped()
+            if created:
                 self._sessions[session_id] = SecureConversationBuffer(session_id)
             self._last_access[session_id] = time.time()
-            return self._sessions[session_id]
+            return self._sessions[session_id], created
 
     def wipe_session(self, session_id: str, reason: str = "user_request"):
         with self._lock:
@@ -100,8 +101,11 @@ class SessionStore:
             with self._lock:
                 expired = [s for s, t in self._last_access.items()
                            if now - t > self.MAX_SESSION_AGE]
-            for sid in expired:
-                self.wipe_session(sid, reason="idle_timeout")
+                for sid in expired:
+                    if sid in self._sessions:
+                        self._sessions[sid].secure_wipe(reason="idle_timeout")
+                        del self._sessions[sid]
+                        self._last_access.pop(sid, None)
 
     def active_count(self) -> int:
         with self._lock:
@@ -290,17 +294,17 @@ class TestLayer5SecureBuffer(unittest.TestCase):
 
     def test_session_store_create_and_retrieve(self):
         store = SessionStore()
-        buf_a = store.get_or_create("sid-1")
-        buf_b = store.get_or_create("sid-1")
+        buf_a, _ = store.get_or_create("sid-1")
+        buf_b, _ = store.get_or_create("sid-1")
         self.assertIs(buf_a, buf_b)
 
     def test_session_store_wipe_session(self):
         store = SessionStore()
-        buf_old = store.get_or_create("sid-2")
+        buf_old, _ = store.get_or_create("sid-2")
         buf_old.add_message("user", "keep me")
         store.wipe_session("sid-2", reason="test_wipe")
 
-        buf_new = store.get_or_create("sid-2")
+        buf_new, _ = store.get_or_create("sid-2")
         self.assertIsNot(buf_old, buf_new)
         self.assertEqual(buf_new.get_messages(), [])
         self.assertTrue(buf_old.is_wiped())
@@ -309,7 +313,7 @@ class TestLayer5SecureBuffer(unittest.TestCase):
         store = SessionStore()
         bufs = []
         for i in range(5):
-            b = store.get_or_create(f"sid-{i}")
+            b, _ = store.get_or_create(f"sid-{i}")
             b.add_message("user", f"msg-{i}")
             bufs.append(b)
 
@@ -324,13 +328,13 @@ class TestLayer5SecureBuffer(unittest.TestCase):
         store = SessionStore()
         self.assertEqual(store.active_count(), 0)
 
-        store.get_or_create("a")
+        store.get_or_create("a")  # return value unused
         self.assertEqual(store.active_count(), 1)
 
-        store.get_or_create("b")
+        store.get_or_create("b")  # return value unused
         self.assertEqual(store.active_count(), 2)
 
-        store.get_or_create("a")  # existing — no change
+        store.get_or_create("a")  # existing — no change, return value unused
         self.assertEqual(store.active_count(), 2)
 
         store.wipe_session("a")
@@ -444,7 +448,7 @@ class TestLayer6IntrusionWatchdog(unittest.TestCase):
         store = SessionStore()
         bufs = []
         for sid in ("s1", "s2", "s3"):
-            b = store.get_or_create(sid)
+            b, _ = store.get_or_create(sid)
             b.add_message("user", f"secret in {sid}")
             bufs.append(b)
 

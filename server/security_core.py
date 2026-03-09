@@ -86,12 +86,13 @@ class SessionStore:
         self._last_access: dict[str, float] = {}
         threading.Thread(target=self._reap_expired, daemon=True).start()
 
-    def get_or_create(self, session_id: str) -> SecureConversationBuffer:
+    def get_or_create(self, session_id: str) -> tuple[SecureConversationBuffer, bool]:
         with self._lock:
-            if session_id not in self._sessions or self._sessions[session_id].is_wiped():
+            created = session_id not in self._sessions or self._sessions[session_id].is_wiped()
+            if created:
                 self._sessions[session_id] = SecureConversationBuffer(session_id)
             self._last_access[session_id] = time.time()
-            return self._sessions[session_id]
+            return self._sessions[session_id], created
 
     def wipe_session(self, session_id: str, reason: str = "user_request"):
         with self._lock:
@@ -116,8 +117,11 @@ class SessionStore:
             with self._lock:
                 expired = [s for s, t in self._last_access.items()
                            if now - t > self.MAX_SESSION_AGE]
-            for sid in expired:
-                self.wipe_session(sid, reason="idle_timeout")
+                for sid in expired:
+                    if sid in self._sessions:
+                        self._sessions[sid].secure_wipe(reason="idle_timeout")
+                        del self._sessions[sid]
+                        self._last_access.pop(sid, None)
 
     def active_count(self) -> int:
         with self._lock:
@@ -215,6 +219,8 @@ class IntrusionWatchdog(threading.Thread):
             "detail": detail,
         }
         self.intrusion_log.append(entry)
+        if len(self.intrusion_log) > 100:
+            self.intrusion_log = self.intrusion_log[-100:]
         print(f"[Watchdog] {event_type}: {detail}")
 
     def check_network(self) -> tuple[bool, str]:
@@ -366,6 +372,10 @@ class KwyreHandlerMixin:
             self._send_json_error(429, f"Rate limit exceeded. Max {self._rate_limit_rpm} req/min.")
             return False
         self._rate_tracker[user].append(now)
+        if len(self._rate_tracker) > 1000:
+            stale = [k for k, v in self._rate_tracker.items() if not v or now - max(v) > 120]
+            for k in stale:
+                del self._rate_tracker[k]
         return True
 
     def _get_session_id(self, body: dict) -> str:

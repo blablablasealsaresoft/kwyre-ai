@@ -51,6 +51,16 @@ from license import startup_validate as validate_license
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
+DEFAULT_SYSTEM_PROMPT = (
+    "You are Kwyre, a specialized AI assistant for legal, financial, and forensic "
+    "analysis. You provide precise, well-structured responses citing relevant "
+    "regulations, statutes, and professional standards. You organize complex analysis "
+    "with clear headings, numbered points, and specific references. When analyzing "
+    "documents, you identify key obligations, risks, and compliance requirements. "
+    "You never fabricate citations or case law. If uncertain, you state your "
+    "confidence level explicitly."
+)
+
 PORT = int(os.environ.get("KWYRE_PORT", "8000"))
 CTX_LENGTH = int(os.environ.get("KWYRE_CTX_LENGTH", "8192"))
 N_THREADS = int(os.environ.get("KWYRE_THREADS", "0")) or None  # None = auto-detect
@@ -182,6 +192,7 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 max_tokens = min(max(int(body.get("max_tokens", 2048)), 1), 8192)
                 temperature = min(max(float(body.get("temperature", 0.7)), 0.0), 2.0)
                 top_p = min(max(float(body.get("top_p", 0.9)), 0.0), 1.0)
+                repeat_penalty = min(max(float(body.get("repetition_penalty", 1.1)), 1.0), 2.0)
             except (TypeError, ValueError):
                 self._send_json_error(400, "Invalid max_tokens, temperature, or top_p.")
                 return
@@ -200,14 +211,18 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                     return
                 _trial_tracker[trial_key] = trial_count + 1
 
-            session = session_store.get_or_create(session_id)
+            session, _created = session_store.get_or_create(session_id)
             for m in messages:
                 session.add_message(m.get("role", "user"), m.get("content", ""))
 
+            inference_msgs = list(messages)
+            if not any(m.get("role") == "system" for m in inference_msgs):
+                inference_msgs.insert(0, {"role": "system", "content": DEFAULT_SYSTEM_PROMPT})
+
             if stream:
-                self._handle_stream(messages, max_tokens, temperature, top_p, session_id, session)
+                self._handle_stream(inference_msgs, max_tokens, temperature, top_p, repeat_penalty, session_id, session)
             else:
-                self._handle_blocking(messages, max_tokens, temperature, top_p, session_id, session)
+                self._handle_blocking(inference_msgs, max_tokens, temperature, top_p, repeat_penalty, session_id, session)
 
         elif self.path == "/v1/session/end":
             user = self._check_auth()
@@ -259,7 +274,7 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
         else:
             self._send_json_error(404, "Not found.")
 
-    def _handle_blocking(self, messages, max_tokens, temperature, top_p, session_id, session):
+    def _handle_blocking(self, messages, max_tokens, temperature, top_p, repeat_penalty, session_id, session):
         t0 = time.time()
         with _inference_lock:
             result = llm.create_chat_completion(
@@ -267,6 +282,7 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 max_tokens=max_tokens,
                 temperature=max(temperature, 0.01),
                 top_p=top_p,
+                repeat_penalty=repeat_penalty,
                 stream=False,
             )
         elapsed = time.time() - t0
@@ -299,7 +315,7 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             },
         }).encode())
 
-    def _handle_stream(self, messages, max_tokens, temperature, top_p, session_id, session):
+    def _handle_stream(self, messages, max_tokens, temperature, top_p, repeat_penalty, session_id, session):
         self.send_response(200)
         self.send_header("Content-Type", "text/event-stream")
         self.send_header("Cache-Control", "no-cache")
@@ -318,6 +334,7 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                     max_tokens=max_tokens,
                     temperature=max(temperature, 0.01),
                     top_p=top_p,
+                    repeat_penalty=repeat_penalty,
                     stream=True,
                 )
                 for chunk in stream:
