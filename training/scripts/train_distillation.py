@@ -150,7 +150,7 @@ trainer = SFTTrainer(model=model, tokenizer=tokenizer, train_dataset=dataset, ar
 
 gpu_stats = torch.cuda.get_device_properties(0)
 used_memory = torch.cuda.max_memory_reserved() / 1e9
-print(f"  GPU: {gpu_stats.name} ({gpu_stats.total_mem/1e9:.1f} GB)")
+print(f"  GPU: {gpu_stats.name} ({gpu_stats.total_memory/1e9:.1f} GB)")
 print(f"  VRAM before training: {used_memory:.1f} GB")
 print(f"  Training {NUM_EPOCHS} epochs on {len(dataset)} samples...\n")
 

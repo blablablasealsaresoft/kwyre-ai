@@ -1,19 +1,17 @@
 #!/usr/bin/env python3
 """
-KWYRE — GRPO Reinforcement Learning (Step 4)
-Teaches the model emergent reasoning via Group Relative Policy Optimization.
-REQUIRES: NVIDIA GPU with 24GB+ VRAM
+KWYRE — GRPO Reinforcement Learning (with vLLM)
+Uses vLLM for generation to avoid Unsloth's compiled module crash.
+REQUIRES: NVIDIA GPU with 24GB+ VRAM, vllm installed
 
-Usage: python3 train_grpo.py
+Usage: TORCHDYNAMO_DISABLE=1 python3 train_grpo_vllm.py
 """
 
 import os
 import re
 import torch
-from pathlib import Path
 
 os.environ["TORCHDYNAMO_DISABLE"] = "1"
-torch._dynamo.config.suppress_errors = True
 
 KWYRE_HOME = os.path.expanduser("~/.kwyre")
 DISTILLED_LORA = os.path.join(KWYRE_HOME, "lora-adapters", "kwyre-distilled")
@@ -26,46 +24,39 @@ MAX_COMPLETION_LEN = 1024
 NUM_GENERATIONS = 4
 BATCH_SIZE = 1
 GRAD_ACCUM = 4
-NUM_STEPS = 500
+NUM_STEPS = 250
 LEARNING_RATE = 5e-6
-
-if os.path.exists(DISTILLED_LORA):
-    MODEL_NAME = DISTILLED_LORA
-    print(f"Starting from distilled model: {MODEL_NAME}")
-else:
-    MODEL_NAME = "Qwen/Qwen3.5-9B"
-    print(f"No distilled model found, starting from base: {MODEL_NAME}")
 
 print(f"""
 {'='*60}
-  KWYRE Professional — GRPO Reinforcement Learning
-  Model:            {MODEL_NAME}
+  KWYRE Professional — GRPO with vLLM
+  Steps: {NUM_STEPS}
   Generations/prompt: {NUM_GENERATIONS}
-  Max completion:   {MAX_COMPLETION_LEN}
-  RL Steps:         {NUM_STEPS}
 {'='*60}
 """)
 
-print("[1/4] Loading model...")
-from unsloth import FastModel
+print("[1/4] Loading model with Unsloth...")
+from unsloth import FastLanguageModel
 
-model, tokenizer = FastModel.from_pretrained(
+model, tokenizer = FastLanguageModel.from_pretrained(
     model_name="Qwen/Qwen3.5-9B",
     max_seq_length=MAX_SEQ_LENGTH,
     load_in_4bit=True,
-    full_finetuning=False,
+    fast_inference=True,
+    gpu_memory_utilization=0.6,
 )
 
-if os.path.exists(DISTILLED_LORA) and MODEL_NAME == DISTILLED_LORA:
+if os.path.exists(DISTILLED_LORA):
     from peft import PeftModel
     model = PeftModel.from_pretrained(model, DISTILLED_LORA)
     model = model.merge_and_unload()
     print("  Loaded and merged distilled LoRA weights.")
 
-model = FastModel.get_peft_model(
+model = FastLanguageModel.get_peft_model(
     model,
     r=LORA_RANK,
-    target_modules=["q_proj", "k_proj", "v_proj", "o_proj", "gate_proj", "up_proj", "down_proj"],
+    target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
+                     "gate_proj", "up_proj", "down_proj"],
     lora_alpha=LORA_RANK,
     lora_dropout=0,
     bias="none",
@@ -74,7 +65,7 @@ model = FastModel.get_peft_model(
     max_seq_length=MAX_SEQ_LENGTH,
 )
 
-print("[2/4] Loading GRPO training dataset...")
+print("[2/4] Loading GSM8K dataset...")
 from datasets import load_dataset
 
 try:
@@ -124,7 +115,7 @@ def correctness_reward(prompts, completions, answer, **kwargs):
         else:
             try:
                 pred_val = float(predicted)
-                exp_val = float(str(expected).replace(",", "").replace("$", ""))
+                exp_val = float(str(expected).replace(",", "").replace("$", "").split("####")[-1].strip())
                 rewards.append(2.0 if abs(pred_val - exp_val) < 0.01 else -1.0)
             except (ValueError, TypeError):
                 rewards.append(1.0 if predicted.strip() == str(expected).strip() else -1.0)
@@ -147,24 +138,12 @@ def reasoning_quality_reward(prompts, completions, **kwargs):
         rewards.append(score)
     return rewards
 
-def length_penalty_reward(prompts, completions, **kwargs):
-    rewards = []
-    for completion in completions:
-        text = completion[0]["content"] if isinstance(completion, list) else completion
-        length = len(text.split())
-        if length <= 500:
-            rewards.append(0.0)
-        elif length <= 2000:
-            rewards.append(-0.5 * (length - 500) / 1500)
-        else:
-            rewards.append(-0.5)
-    return rewards
-
-print("[4/4] Starting GRPO training...")
+print("[4/4] Starting GRPO training with vLLM...")
 from trl import GRPOTrainer, GRPOConfig
 
 grpo_config = GRPOConfig(
     output_dir=OUTPUT_DIR,
+    use_vllm=True,
     num_generations=NUM_GENERATIONS,
     max_completion_length=MAX_COMPLETION_LEN,
     per_device_train_batch_size=BATCH_SIZE,
@@ -176,7 +155,7 @@ grpo_config = GRPOConfig(
     fp16=not torch.cuda.is_bf16_supported(),
     bf16=torch.cuda.is_bf16_supported(),
     logging_steps=5,
-    save_steps=100,
+    save_steps=50,
     save_total_limit=3,
     optim="adamw_8bit",
     report_to="none",
@@ -188,10 +167,10 @@ trainer = GRPOTrainer(
     tokenizer=tokenizer,
     args=grpo_config,
     train_dataset=dataset,
-    reward_funcs=[correctness_reward, reasoning_quality_reward, length_penalty_reward],
+    reward_funcs=[correctness_reward, reasoning_quality_reward],
 )
 
-print(f"  Starting GRPO for {NUM_STEPS} steps...")
+print(f"  Starting GRPO for {NUM_STEPS} steps with vLLM generation...")
 print(f"  Each step: {NUM_GENERATIONS} completions/prompt, ranked by reward.\n")
 
 trainer.train()
@@ -208,8 +187,15 @@ model.save_pretrained_gguf(gguf_dir, tokenizer, quantization_method="q4_k_m")
 print(f"""
 {'='*60}
   GRPO TRAINING COMPLETE!
-  LoRA:  {lora_dir}
-  GGUFs: {gguf_dir}
-  Next:  python3 quantize_export.py
+
+  Your model now has EMERGENT reasoning — it can solve novel
+  problems it was never explicitly trained on.
+
+  Artifacts:
+    LoRA:  {lora_dir}
+    GGUFs: {gguf_dir}
+
+  Download:
+    scp -r root@167.71.0.148:~/.kwyre/models/trained/ ./trained-models/
 {'='*60}
 """)

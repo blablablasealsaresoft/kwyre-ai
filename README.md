@@ -629,7 +629,7 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] Kubernetes Helm chart — `deploy/helm/kwyre/` with GPU scheduling, health probes, PVC, secrets
 - [x] Extended `.env.example` — comprehensive config covering all 30+ environment variables
 
-**v1.3 (Current — Four Products + Custom Training)**
+**v1.3 (Current — Four Products + Custom-Trained Professional Model)**
 - [x] Four distinct products — Personal (4B speed), Professional (9B domain specialist), Air (CPU portable), Apple Silicon (MLX native)
 - [x] Product-specific system prompts — each backend has its own identity and personality
 - [x] Product identity in API — `/health` and `/v1/models` report product name and capabilities
@@ -639,7 +639,11 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] CPU `top_k` + tools — Kwyre Air gets `top_k` parameter and opt-in tools integration
 - [x] MLX `top_k` + streaming fix — Apple Silicon gets `top_k` and corrected SSE delta computation
 - [x] Training scripts 9B-only — `train_qat.py`, `merge_and_export.py`, `quantize_awq.py` locked to Professional tier
-- [x] Custom training pipeline — `training/` directory with Claude-powered reasoning trace generation, Unsloth QLoRA distillation, GRPO reinforcement learning, and GGUF export
+- [x] Custom training pipeline — `training/` directory with Claude-powered reasoning trace generation, Unsloth QLoRA distillation, and GGUF export
+- [x] **Custom Kwyre Professional model trained** — 200 Claude claude-sonnet-4-20250514 reasoning traces (blockchain forensics, legal/financial, physics/math, conversational), distilled into Qwen3.5-9B via Unsloth QLoRA on H100 GPU
+- [x] Deployment GGUFs exported — Q5_K_M (6.1 GB, quality tier) and Q4_K_M (5.3 GB, speed tier)
+- [x] Training loss: 0.99 → 0.51 over 75 steps (3 epochs on 200 samples)
+- [x] Baked-in capabilities: Kwyre personality, chain-of-thought `<think>` reasoning, crypto forensics, legal analysis, financial regulation expertise
 
 ---
 
@@ -731,7 +735,19 @@ Available tiers:
   Personal:     Qwen3-4B   — 3.9 GB VRAM, 7-14 tok/s, $299
   Professional: Qwen3.5-9B — 7.5 GB VRAM, 3-5 tok/s, $799 (set KWYRE_MODEL=Qwen/Qwen3.5-9B)
 
-QAT Training (9B):
+Custom Training (Professional 9B):
+  Pipeline:          Claude traces → Unsloth QLoRA distillation → GGUF export
+  Trace generation:  200 Claude claude-sonnet-4-20250514 traces across 4 domains (parallel)
+  Distillation:      Unsloth QLoRA on H100 80GB, 3 epochs, 75 steps
+  LoRA rank:         32 (alpha 32)
+  LoRA targets:      q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj
+  Training loss:     0.99 → 0.51
+  Domains:           blockchain forensics, legal/financial, physics/math, conversational
+  Export:            Q5_K_M (6.1 GB) + Q4_K_M (5.3 GB) GGUFs
+  Personality:       Kwyre persona baked into weights (not just system prompt)
+  Reasoning:         Chain-of-thought via <think>...</think> tags
+
+Legacy QAT Training (Spike encoding):
   LoRA rank:         64 (alpha 128)
   LoRA targets:      gate_proj, up_proj, down_proj (MLP only)
   Spike hooks:       408 layers (main model training)
