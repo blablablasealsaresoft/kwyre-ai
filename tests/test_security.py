@@ -307,7 +307,7 @@ class TestLayer4ModelIntegrity(unittest.TestCase):
 # without importing the module (it eagerly loads torch + GPU models).
 
 RATE_LIMIT_RPM = 30
-ALLOWED_PAGES = {"landing.html", "index.html", "main.html", "pay.html", "chat.html"}
+ALLOWED_PAGES = {"landing.html", "index.html", "main.html", "pay.html"}
 
 SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
@@ -590,8 +590,8 @@ class TestAPISecurityLayer(unittest.TestCase):
         self.assertIsNone(_safe_page_name("/.env"))
 
     def test_allowed_pages_whitelist(self):
-        """ALLOWED_PAGES must contain exactly the five expected HTML files."""
-        expected = {"landing.html", "index.html", "main.html", "pay.html", "chat.html"}
+        """ALLOWED_PAGES must contain exactly the four expected HTML files."""
+        expected = {"landing.html", "index.html", "main.html", "pay.html"}
         self.assertEqual(ALLOWED_PAGES, expected)
 
     def test_unknown_path_returns_404(self):
@@ -780,7 +780,7 @@ class TestCSPNonces(unittest.TestCase):
 
     def test_html_files_have_nonce_placeholder(self):
         chat_dir = os.path.join(os.path.dirname(__file__), "..", "chat")
-        for fname in ["main.html", "chat.html", "index.html", "landing.html", "pay.html"]:
+        for fname in ["main.html", "index.html", "landing.html", "pay.html"]:
             fpath = os.path.join(chat_dir, fname)
             if os.path.exists(fpath):
                 with open(fpath) as f:
@@ -790,7 +790,7 @@ class TestCSPNonces(unittest.TestCase):
 
     def test_no_frame_ancestors_in_meta_csp(self):
         chat_dir = os.path.join(os.path.dirname(__file__), "..", "chat")
-        for fname in ["main.html", "chat.html", "index.html", "landing.html", "pay.html"]:
+        for fname in ["main.html", "index.html", "landing.html", "pay.html"]:
             fpath = os.path.join(chat_dir, fname)
             if os.path.exists(fpath):
                 with open(fpath) as f:

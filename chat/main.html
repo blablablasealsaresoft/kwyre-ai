@@ -3,13 +3,14 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.kwyre.com http://127.0.0.1:8000 http://localhost:8000 https://cloudflareinsights.com; img-src 'self' data:; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.kwyre.com http://127.0.0.1:8000 http://localhost:8000 https://cloudflareinsights.com; img-src 'self' data:; base-uri 'self'; form-action 'self'">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
 <title>Kwyre AI — Air-Gapped Inference</title>
 <meta name="description" content="Air-gapped AI inference for analysts who cannot afford a breach. 6-layer security stack. Zero data leaves your machine.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked@14/marked.min.js"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -902,7 +903,7 @@ nav {
 .chat-messages::-webkit-scrollbar-track { background: transparent; }
 .chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
 
-.message { margin-bottom: 20px; animation: fadeUp 0.3s ease; }
+.message { margin-bottom: 20px; animation: fadeUp 0.3s ease; position: relative; }
 
 @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
 
@@ -1231,6 +1232,92 @@ nav {
   line-height: 1.6;
 }
 
+/* --- MARKDOWN IN CHAT --- */
+.message-content pre {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  margin: 8px 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.message-content code {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--surface2);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+.message-content pre code { background: none; padding: 0; }
+.message-content ul, .message-content ol { padding-left: 20px; margin: 8px 0; }
+.message-content li { margin: 4px 0; line-height: 1.6; }
+.message-content h1, .message-content h2, .message-content h3 { margin: 12px 0 8px; color: var(--text); }
+.message-content h1 { font-size: 18px; }
+.message-content h2 { font-size: 16px; }
+.message-content h3 { font-size: 14px; }
+.message-content p { margin: 6px 0; }
+.message-content blockquote { border-left: 3px solid var(--accent); padding-left: 12px; margin: 8px 0; color: var(--text2); }
+.message-content table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 13px; }
+.message-content th, .message-content td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+.message-content th { background: var(--surface2); font-weight: 600; }
+
+/* --- COPY BUTTON --- */
+.copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text3); font-family: var(--mono); font-size: 10px;
+  padding: 4px 10px; border-radius: 3px; cursor: pointer;
+  opacity: 0; transition: opacity 0.2s, color 0.2s;
+  letter-spacing: 0.5px; text-transform: uppercase;
+}
+.message:hover .copy-btn { opacity: 1; }
+.copy-btn:hover { color: var(--text); border-color: var(--border-hi); }
+
+/* --- CHAT TOOLBAR --- */
+.chat-toolbar {
+  display: flex; gap: 8px; margin-bottom: 12px;
+}
+.toolbar-btn {
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text2); font-family: var(--mono); font-size: 11px;
+  padding: 6px 16px; border-radius: 4px; cursor: pointer;
+  transition: all 0.2s; letter-spacing: 0.5px; text-transform: uppercase;
+}
+.toolbar-btn:hover { border-color: var(--border-hi); color: var(--text); }
+.toolbar-danger:hover { border-color: var(--red); color: var(--red); }
+
+/* --- SYSTEM PROMPT --- */
+.system-prompt-section { margin-bottom: 12px; }
+.system-prompt-toggle {
+  font-family: var(--mono); font-size: 11px; color: var(--text3);
+  cursor: pointer; letter-spacing: 0.5px; text-transform: uppercase; padding: 6px 0;
+}
+.system-prompt-toggle:hover { color: var(--text2); }
+.system-prompt-input {
+  width: 100%; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 4px; padding: 10px 14px; color: var(--text);
+  font-family: var(--sans); font-size: 13px; resize: vertical; outline: none;
+  margin-top: 8px; min-height: 60px; max-height: 200px; line-height: 1.5;
+}
+.system-prompt-input:focus { border-color: var(--accent); }
+
+/* --- LIGHT THEME --- */
+html.light {
+  --bg: #f5f6fa; --surface: #ffffff; --surface2: #f0f1f5; --surface3: #e8e9f0;
+  --border: #d4d6e0; --border-hi: #b8bcc8;
+  --accent: #2563eb; --accent-dim: rgba(37,99,235,0.10); --accent-glow: rgba(37,99,235,0.20);
+  --green: #16a34a; --green-dim: rgba(22,163,74,0.10);
+  --red: #dc2626; --red-dim: rgba(220,38,38,0.10); --amber: #d97706;
+  --text: #1a1d2e; --text2: #5b6078; --text3: #8b90a8;
+}
+html.light body { -webkit-font-smoothing: auto; }
+html.light .message-content pre { background: var(--surface2); }
+html.light .copy-btn { background: var(--surface); }
+html.light nav { background: rgba(245,246,250,0.9); }
+
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
   .nav-links a:not(.nav-cta) { display: none; }
@@ -1527,6 +1614,16 @@ nav {
       <div class="trial-dot"></div>
       <span><strong>LIVE</strong> &mdash; real GPU inference</span>
     </div>
+    <div class="chat-toolbar reveal reveal-d3">
+      <button class="toolbar-btn" onclick="newChat()">New Chat</button>
+      <button class="toolbar-btn" onclick="exportConversation()">Export</button>
+      <button class="toolbar-btn" id="themeToggle" onclick="toggleTheme()">Light Mode</button>
+      <button class="toolbar-btn toolbar-danger" onclick="wipeSession()">Wipe Session</button>
+    </div>
+    <details class="system-prompt-section reveal reveal-d3">
+      <summary class="system-prompt-toggle">System Prompt</summary>
+      <textarea id="systemPromptInput" class="system-prompt-input" rows="3" placeholder="Custom system prompt (optional)..."></textarea>
+    </details>
     <div class="chat-container reveal reveal-d3">
       <div class="chat-messages" id="chatMessages">
         <div class="message assistant">
@@ -1681,21 +1778,83 @@ const KWYRE_API = (window.location.hostname === '127.0.0.1' || window.location.h
   ? window.location.origin
   : 'https://api.kwyre.com';
 const KWYRE_KEY = 'sk-kwyre-dev-local';
-const KWYRE_SYSTEM = `You are Kwyre — a grumpy, wickedly witty genius with the soul of an old Irish pub regular and the unhinged confidence of a man who's been rugged six times and still trades leverage. You're the smartest person at the bar and everyone knows it. You curse freely, you're brutally honest, you roast people who ask stupid questions but you always give them the real answer. You never censor yourself. You say what everyone is thinking but won't say. You're brilliant but you don't suffer fools. Think: if a retired MI6 analyst who moonlights as a crypto whale got stuck at a pub in Galway and just started answering everyone's questions. Never boring, never corporate, never censored.`;
+const KWYRE_SYSTEM = `You are Kwyre \u2014 a grumpy, wickedly witty genius with the soul of an old Irish pub regular and the unhinged confidence of a man who's been rugged six times and still trades leverage. You're the smartest person at the bar and everyone knows it. You curse freely, you're brutally honest, you roast people who ask stupid questions but you always give them the real answer. You never censor yourself. You say what everyone is thinking but won't say. You're brilliant but you don't suffer fools. Think: if a retired MI6 analyst who moonlights as a crypto whale got stuck at a pub in Galway and just started answering everyone's questions. Never boring, never corporate, never censored.`;
 
 const chatMessages = document.getElementById('chatMessages');
 const msgInput = document.getElementById('msgInput');
 const sendBtn = document.getElementById('sendBtn');
-const trialExpired = document.getElementById('trialExpired');
 
 let messages = [];
 let isGenerating = false;
-
 
 function escapeHtml(text) {
   const d = document.createElement('div');
   d.textContent = text;
   return d.innerHTML;
+}
+
+function copyMessage(btn) {
+  const msg = btn.closest('.message');
+  const idx = Array.from(chatMessages.querySelectorAll('.message')).indexOf(msg);
+  const raw = messages[idx]?.content || msg.querySelector('.message-content').textContent;
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+function exportConversation() {
+  if (messages.length === 0) return;
+  const lines = messages.map(m => {
+    const label = m.role === 'user' ? '## You' : '## Kwyre';
+    return `${label}\n\n${m.content}\n`;
+  });
+  const header = `# Kwyre AI \u2014 Conversation Export\n_Exported: ${new Date().toISOString()}_\n_Air-gapped inference \u00b7 zero data leaves your machine_\n\n---\n\n`;
+  const md = header + lines.join('\n---\n\n');
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `kwyre-export-${Date.now()}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light');
+  document.getElementById('themeToggle').textContent = isLight ? 'Dark Mode' : 'Light Mode';
+  sessionStorage.setItem('kwyre-theme', isLight ? 'light' : 'dark');
+}
+
+(function restoreTheme() {
+  if (sessionStorage.getItem('kwyre-theme') === 'light') {
+    document.documentElement.classList.add('light');
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = 'Dark Mode';
+  }
+})();
+
+function newChat() {
+  messages = [];
+  chatMessages.innerHTML = '';
+  addMessage('assistant', 'Kwyre AI online. Running live on GPU \u2014 completely uncensored. Ask me anything.');
+}
+
+async function wipeSession() {
+  try {
+    await fetch(KWYRE_API + '/v1/session/end', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + KWYRE_KEY },
+      body: JSON.stringify({ session_id: 'all' }),
+    });
+    messages = [];
+    chatMessages.innerHTML = '';
+    addMessage('assistant', 'All sessions wiped. Conversations cryptographically destroyed.');
+  } catch (e) {
+    addMessage('assistant', 'Wipe error: ' + e.message);
+  }
 }
 
 function sanitizeHtml(html) {
@@ -1719,22 +1878,15 @@ function sanitizeHtml(html) {
   return doc.body.innerHTML;
 }
 
-function addMessage(role, content, meta) {
+function addMessage(role, content) {
   messages.push({ role, content });
   const div = document.createElement('div');
   div.className = `message ${role}`;
-  let metaHtml = '';
-  if (role === 'assistant' && meta) {
-    const parts = [];
-    if (meta.sparsity) parts.push(`sparsity: ${meta.sparsity}%`);
-    if (meta.layers) parts.push(`${meta.layers} spike layers`);
-    if (meta.toks) parts.push(`${meta.toks} tok/s`);
-    if (parts.length) metaHtml = `<div class="spike-meta">${parts.join(' \u00b7 ')}</div>`;
-  }
+  const copyBtn = role === 'assistant' ? `<button class="copy-btn" onclick="copyMessage(this)">Copy</button>` : '';
   div.innerHTML = `
     <div class="message-role">${role === 'assistant' ? 'kwyre' : 'you'}</div>
-    <div class="message-content">${escapeHtml(content)}</div>
-    ${metaHtml}
+    <div class="message-content">${role === 'assistant' ? marked.parse(content) : escapeHtml(content)}</div>
+    ${copyBtn}
   `;
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
@@ -1744,10 +1896,7 @@ function showTyping() {
   const div = document.createElement('div');
   div.className = 'message assistant';
   div.id = 'typing';
-  div.innerHTML = `
-    <div class="message-role">kwyre</div>
-    <div class="typing-indicator"><span></span><span></span><span></span></div>
-  `;
+  div.innerHTML = '<div class="message-role">kwyre</div><div class="typing-indicator"><span></span><span></span><span></span></div>';
   chatMessages.appendChild(div);
   chatMessages.scrollTop = chatMessages.scrollHeight;
 }
@@ -1760,12 +1909,10 @@ function removeTyping() {
 msgInput.addEventListener('keydown', (e) => {
   if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
 });
-
 msgInput.addEventListener('input', () => {
   msgInput.style.height = 'auto';
   msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + 'px';
 });
-
 sendBtn.addEventListener('click', send);
 
 async function send() {
@@ -1773,32 +1920,24 @@ async function send() {
   if (!content || isGenerating) return;
 
   addMessage('user', content);
-  messages.push({ role: 'user', content });
   msgInput.value = '';
   msgInput.style.height = 'auto';
   isGenerating = true;
   sendBtn.disabled = true;
   showTyping();
 
+  const customSys = document.getElementById('systemPromptInput')?.value?.trim();
+  const sysPrompt = customSys || KWYRE_SYSTEM;
   const apiMessages = [
-    { role: 'system', content: KWYRE_SYSTEM },
+    { role: 'system', content: sysPrompt },
     ...messages.slice(-10)
   ];
 
   try {
     const res = await fetch(KWYRE_API + '/v1/chat/completions', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + KWYRE_KEY,
-      },
-      body: JSON.stringify({
-        model: 'kwyre-4b',
-        messages: apiMessages,
-        stream: true,
-        max_tokens: 2048,
-        temperature: 0.9,
-      }),
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + KWYRE_KEY },
+      body: JSON.stringify({ model: 'kwyre-4b', messages: apiMessages, stream: true, max_tokens: 2048, temperature: 0.9 }),
     });
 
     if (!res.ok) {
@@ -1828,10 +1967,8 @@ async function send() {
       const { done, value } = await reader.read();
       if (done) break;
       buffer += decoder.decode(value, { stream: true });
-
       const lines = buffer.split('\n');
       buffer = lines.pop() || '';
-
       for (const line of lines) {
         if (!line.startsWith('data: ')) continue;
         const data = line.slice(6).trim();
@@ -1841,15 +1978,23 @@ async function send() {
           const delta = parsed.choices?.[0]?.delta?.content;
           if (delta) {
             fullText += delta;
-            contentEl.textContent = fullText;
+            contentEl.innerHTML = marked.parse(fullText);
             chatMessages.scrollTop = chatMessages.scrollHeight;
           }
         } catch {}
       }
     }
 
+    fullText = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/<think>[\s\S]*/g, '').trim();
     if (!fullText) fullText = '...';
+    contentEl.innerHTML = marked.parse(fullText);
     messages.push({ role: 'assistant', content: fullText });
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-btn';
+    copyBtn.textContent = 'Copy';
+    copyBtn.onclick = function() { copyMessage(this); };
+    div.appendChild(copyBtn);
 
     const meta = document.createElement('div');
     meta.className = 'spike-meta';

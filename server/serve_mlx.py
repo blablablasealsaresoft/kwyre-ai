@@ -532,7 +532,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
         if self.path == "/":
             self._serve_html("landing.html")
         elif self.path == "/chat":
-            self._serve_html("chat.html")
+            self._serve_html("main.html")
         elif (page := self._safe_page_name(self.path)) is not None:
             self._serve_html(page)
 

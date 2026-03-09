@@ -372,7 +372,7 @@ GET  /health                Status + KV cache + watchdog + spike stats
 GET  /audit                 Metadata-only compliance log
 GET  /v1/models             Model info + capabilities
 GET  /                      Landing page
-GET  /chat                  Browser UI (SSE streaming)
+GET  /chat                  Redirects to main page with chat UI
 
 Admin endpoints (multi-user mode only, admin role required):
 GET    /v1/admin/users          List users
@@ -566,7 +566,7 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] Lazy sparsity measurement — no startup deadlock, measured on first real request
 - [x] Per-session KV cache — `past_key_values` persistence with LRU eviction and VRAM cap
 - [x] Inference queue — serialized GPU access, HTTP threads stay responsive during generation
-- [x] Frontend streaming UI — `chat.html` renders tokens live as they arrive
+- [x] Frontend streaming UI — `main.html` renders tokens live as they arrive
 
 **v1.0 (Complete — Production Ready)**
 - [x] Hardware-bound license keys — machine fingerprint binding with `machine_ids` in license payload, `register_machine()` activation flow
@@ -653,7 +653,7 @@ python build.py -V               # Print version (1.0.0)
 **Package contents (build/kwyre-dist/):**
 ```
 kwyre-server[.exe]         # Nuitka-compiled standalone binary
-chat/                      # Frontend (main.html, chat.html, pay.html, etc.)
+chat/                      # Frontend (main.html, pay.html, etc.)
 docs/                      # SOC2 guide, audit docs
 security/                  # Dep manifest, isolation scripts, signing modules
 installer/                 # Platform install scripts + GUI installer
@@ -799,7 +799,7 @@ kwyre/
 │   └── updater.py             # Air-gap safe update mechanism
 ├── chat/
 │   ├── landing.html           # Marketing landing page
-│   ├── chat.html              # Chat UI (SSE streaming)
+│   ├── main.html              # Main product page + chat UI (SSE streaming)
 │   ├── main.html              # Main product page
 │   └── pay.html               # Payment + license download gate
 ├── installer/
