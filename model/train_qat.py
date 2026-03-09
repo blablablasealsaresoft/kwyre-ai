@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""QAT fine-tuning: teach Qwen3.5-9B to tolerate spike-encoded activations.
+"""QAT fine-tuning: teach Qwen models to tolerate spike-encoded activations.
+
+Supports both tiers:
+  Personal:     python model/train_qat.py --model_id Qwen/Qwen3-4B --output_dir ./qat_output_4b
+  Professional: python model/train_qat.py --model_id Qwen/Qwen3.5-9B --output_dir ./qat_output_9b
 
 Loads model from local HF cache, trains with STE spike encoding hooks
 and a k-curriculum that gradually increases quantization aggressiveness.
@@ -39,18 +43,33 @@ SPIKE_SKIP = [
     "q_proj", "k_proj", "v_proj", "o_proj",
 ]
 
-LOCAL_MODEL = os.path.join(
-    os.path.expanduser("~"),
-    ".cache", "huggingface", "hub",
-    "models--Qwen--Qwen3.5-9B", "snapshots",
-    "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
-)
+def _resolve_model_path(model_id: str) -> str:
+    """Resolve model path from dist/, HuggingFace cache, or use the ID directly."""
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    name_map = {
+        "Qwen/Qwen3-4B": "kwyre-4b",
+        "Qwen/Qwen3.5-9B": "kwyre-9b",
+    }
+    short_name = name_map.get(model_id, "")
+    if short_name:
+        dist_path = os.path.join(project_root, "dist", f"{short_name}-nf4")
+        if os.path.isdir(dist_path):
+            return dist_path
+    cache_path = os.path.join(
+        os.path.expanduser("~"), ".cache", "huggingface", "hub",
+        f"models--{model_id.replace('/', '--')}", "snapshots",
+    )
+    if os.path.isdir(cache_path):
+        snap_dirs = [d for d in os.listdir(cache_path) if os.path.isdir(os.path.join(cache_path, d))]
+        if snap_dirs:
+            return os.path.join(cache_path, snap_dirs[0])
+    return model_id
 
 
 def parse_args():
     p = argparse.ArgumentParser(description="QLoRA + Spike QAT Training")
-    p.add_argument("--model_id", type=str, default=LOCAL_MODEL,
-                    help="Model path or HF id (default: local cache)")
+    p.add_argument("--model_id", type=str, default="Qwen/Qwen3-4B",
+                    help="Model ID or path. Options: Qwen/Qwen3-4B (personal), Qwen/Qwen3.5-9B (professional)")
     p.add_argument("--dataset", type=str, default="teknium/OpenHermes-2.5")
     p.add_argument("--max_samples", type=int, default=100_000)
     p.add_argument("--output_dir", type=str, default="./qat_output")
@@ -79,8 +98,11 @@ def parse_args():
 
 
 def load_model_and_tokenizer(args):
+    model_path = _resolve_model_path(args.model_id)
+    print(f"[QAT] Model path: {model_path}")
+
     tokenizer = AutoTokenizer.from_pretrained(
-        args.model_id, padding_side="right", trust_remote_code=True,
+        model_path, padding_side="right", trust_remote_code=True,
     )
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -94,7 +116,7 @@ def load_model_and_tokenizer(args):
 
     print(f"Loading {args.model_id} with 4-bit NF4 quantization...")
     model = AutoModelForCausalLM.from_pretrained(
-        args.model_id,
+        model_path,
         trust_remote_code=True,
         quantization_config=quant_config,
         device_map="auto",

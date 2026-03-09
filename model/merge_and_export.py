@@ -1,10 +1,9 @@
 """
 Merge QAT-trained LoRA adapters into the base model and prepare for deployment.
 
-After running train_qat.py, this script:
-  1. Merges LoRA weights into the base Qwen3.5-9B model (or copies adapters)
-  2. Optionally verifies quality with spike-encoded test generation
-  3. Saves deployment metadata and prints update instructions for serve_local_4bit.py
+Supports both tiers:
+  Personal:     python model/merge_and_export.py --model_id Qwen/Qwen3-4B --adapter_path ./qat_output_4b/final --output_dir ./merged-4b
+  Professional: python model/merge_and_export.py --model_id Qwen/Qwen3.5-9B --adapter_path ./qat_output_9b/final --output_dir ./merged-9b
 """
 
 import argparse
@@ -37,7 +36,8 @@ def parse_args():
     p = argparse.ArgumentParser(
         description="Merge QAT-trained LoRA adapters and export for deployment"
     )
-    p.add_argument("--model_id", default="Qwen/Qwen3.5-9B")
+    p.add_argument("--model_id", default="Qwen/Qwen3-4B",
+                    help="Model ID. Options: Qwen/Qwen3-4B (personal), Qwen/Qwen3.5-9B (professional)")
     p.add_argument("--adapter_path", required=True,
                     help="Path to LoRA adapter checkpoint from QAT training")
     p.add_argument("--output_dir", required=True,
@@ -55,16 +55,16 @@ def parse_args():
     return p.parse_args()
 
 
-def check_vram(required_gb: float = 18.0):
+def check_vram(required_gb: float = 10.0):
     if not torch.cuda.is_available():
-        print("WARNING: No CUDA GPU detected. Full-precision merge requires GPU with ~18GB+ VRAM.")
+        print("WARNING: No CUDA GPU detected. Full-precision merge requires GPU.")
         print("         Proceeding on CPU -- this will be slow and memory-hungry.")
         return
     total_gb = torch.cuda.get_device_properties(0).total_memory / 1e9
     free_gb = (torch.cuda.get_device_properties(0).total_memory - torch.cuda.memory_allocated(0)) / 1e9
     print(f"GPU: {torch.cuda.get_device_name(0)}  |  {free_gb:.1f} GB free / {total_gb:.1f} GB total")
     if free_gb < required_gb:
-        print(f"WARNING: Full-precision merge of a 9B model needs ~{required_gb:.0f} GB VRAM.")
+        print(f"WARNING: Full-precision merge needs ~{required_gb:.0f} GB VRAM.")
         print(f"         Only {free_gb:.1f} GB available. You may hit OOM.")
         print("         Consider closing other GPU processes or using --merge_method adapter_only.")
 

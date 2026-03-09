@@ -83,6 +83,21 @@ Deployed:   GitHub (main branch), Cloudflare Pages (kwyre.com)
 Tests:      110 security + integration suite
 ```
 
+### Product Tiers
+
+| | Personal | Professional |
+|---|---|---|
+| **Main Model** | Qwen3-4B (2.5 GB) | Qwen3.5-9B (7.6 GB) |
+| **Draft Model** | Qwen3-0.6B (0.8 GB) | Qwen3-0.6B (0.8 GB) |
+| **VRAM** | ~3.9 GB | ~7.5 GB |
+| **Speed** | 7-14 tok/s | 3-5 tok/s |
+| **Quantization** | 4-bit NF4 / AWQ | 4-bit NF4 / AWQ |
+| **Price** | $299 one-time | $799 one-time |
+| **Default** | Yes (KWYRE_MODEL=Qwen/Qwen3-4B) | Set KWYRE_MODEL=Qwen/Qwen3.5-9B |
+
+Both tiers share: 6-layer security stack, SSE streaming, speculative decoding,
+SpikeServe, RAG document ingestion, KV cache, all API endpoints, all frontends.
+
 ---
 
 ## PHASE 8 — GROWTH + SCALE (NEXT)

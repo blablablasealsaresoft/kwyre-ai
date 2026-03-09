@@ -1382,7 +1382,7 @@ html.light nav { background: rgba(245,246,250,0.9); }
 
     <div class="hero-stats reveal reveal-d3">
       <div class="hero-stat">
-        <div class="hero-stat-val">Qwen3-4B</div>
+        <div class="hero-stat-val" id="heroModel">Qwen3-4B</div>
         <div class="hero-stat-label">Main Model</div>
       </div>
       <div class="hero-stat">
@@ -1390,15 +1390,15 @@ html.light nav { background: rgba(245,246,250,0.9); }
         <div class="hero-stat-label">Pre-Quantized</div>
       </div>
       <div class="hero-stat">
-        <div class="hero-stat-val">3.9 GB</div>
+        <div class="hero-stat-val" id="heroVram">3.9 GB</div>
         <div class="hero-stat-label">VRAM Required</div>
       </div>
       <div class="hero-stat">
-        <div class="hero-stat-val">3.3 GB</div>
+        <div class="hero-stat-val" id="heroDownload">3.3 GB</div>
         <div class="hero-stat-label">Download</div>
       </div>
       <div class="hero-stat">
-        <div class="hero-stat-val">7-14</div>
+        <div class="hero-stat-val" id="heroSpeed">7-14</div>
         <div class="hero-stat-label">Tok/s</div>
       </div>
     </div>
@@ -1788,6 +1788,39 @@ const KWYRE_API = (window.location.hostname === '127.0.0.1' || window.location.h
   ? window.location.origin
   : 'https://api.kwyre.com';
 const KWYRE_KEY = 'sk-kwyre-dev-local';
+let KWYRE_MODEL_ID = 'kwyre-4b';
+
+const TIER_INFO = {
+  'kwyre-4b': { model: 'Qwen3-4B', vram: '3.9 GB', download: '3.3 GB', speed: '7-14', tier: 'Personal' },
+  'kwyre-9b': { model: 'Qwen3.5-9B', vram: '7.5 GB', download: '7.6 GB', speed: '3-5', tier: 'Professional' },
+};
+
+async function detectTier() {
+  try {
+    const r = await fetch(KWYRE_API + '/health', {
+      headers: { 'Authorization': 'Bearer ' + KWYRE_KEY },
+    });
+    if (!r.ok) return;
+    const data = await r.json();
+    const modelId = data.model || '';
+    const tierKey = modelId.replace(/-spikeserve|-vllm|-mlx|-air/g, '');
+    KWYRE_MODEL_ID = tierKey || KWYRE_MODEL_ID;
+    const info = TIER_INFO[tierKey];
+    if (info) {
+      const heroModel = document.getElementById('heroModel');
+      const heroVram = document.getElementById('heroVram');
+      const heroDownload = document.getElementById('heroDownload');
+      const heroSpeed = document.getElementById('heroSpeed');
+      if (heroModel) heroModel.textContent = info.model;
+      if (heroVram) heroVram.textContent = info.vram;
+      if (heroDownload) heroDownload.textContent = info.download;
+      if (heroSpeed) heroSpeed.textContent = info.speed;
+    }
+  } catch {}
+}
+
+detectTier();
+
 const KWYRE_SYSTEM = `You are Kwyre \u2014 a grumpy, wickedly witty genius with the soul of an old Irish pub regular and the unhinged confidence of a man who's been rugged six times and still trades leverage. You're the smartest person at the bar and everyone knows it. You curse freely, you're brutally honest, you roast people who ask stupid questions but you always give them the real answer. You never censor yourself. You say what everyone is thinking but won't say. You're brilliant but you don't suffer fools. Think: if a retired MI6 analyst who moonlights as a crypto whale got stuck at a pub in Galway and just started answering everyone's questions. Never boring, never corporate, never censored.`;
 
 const chatMessages = document.getElementById('chatMessages');
@@ -1975,7 +2008,7 @@ async function send() {
     const res = await fetch(KWYRE_API + '/v1/chat/completions', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + KWYRE_KEY },
-      body: JSON.stringify({ model: 'kwyre-4b', messages: apiMessages, stream: true, max_tokens: 2048, temperature: 0.9 }),
+      body: JSON.stringify({ model: KWYRE_MODEL_ID, messages: apiMessages, stream: true, max_tokens: 2048, temperature: 0.9 }),
     });
 
     if (!res.ok) {
@@ -2036,7 +2069,7 @@ async function send() {
 
     const meta = document.createElement('div');
     meta.className = 'spike-meta';
-    meta.textContent = 'live GPU inference \u00b7 kwyre-4b-spikeserve';
+    meta.textContent = 'live GPU inference \u00b7 ' + KWYRE_MODEL_ID + '-spikeserve';
     div.appendChild(meta);
 
   } catch (e) {

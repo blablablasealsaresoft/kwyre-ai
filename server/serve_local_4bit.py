@@ -74,7 +74,7 @@ DEFAULT_SYSTEM_PROMPT = (
     "confidence level explicitly."
 )
 
-MODEL_ID = os.environ.get("KWYRE_MODEL", "Qwen/Qwen3.5-9B")
+MODEL_ID = os.environ.get("KWYRE_MODEL", "Qwen/Qwen3-4B")
 PORT = 8000
 SPIKE_K = 5.0
 SPIKE_MAX = 31
@@ -112,7 +112,11 @@ WEIGHT_HASHES_9B: dict[str, str] = {
     "tokenizer_config.json": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
     "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
 }
-WEIGHT_HASHES_4B: dict[str, str] = {}  # Populated on first run with Qwen3-4B
+WEIGHT_HASHES_4B: dict[str, str] = {
+    "config.json": "2f48fc86f9a91c0c1646a91ad8b2304443404e595ef02dfbeb0fb0ba11c519c0",
+    "tokenizer_config.json": "f9b405ae89598577609208377d0c109f2f03362e60cc011254dca8aa84310850",
+    "tokenizer.json": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+}
 
 KNOWN_WEIGHT_HASHES = WEIGHT_HASHES_9B if "9B" in MODEL_ID else WEIGHT_HASHES_4B
 
@@ -193,7 +197,7 @@ else:
 # ---------------------------------------------------------------------------
 # Priority: KWYRE_MODEL_PATH env (pre-quantized) > dist/ folder > HuggingFace cache
 PREQUANT_PATH = os.environ.get("KWYRE_MODEL_PATH", "")
-_dist_path = os.path.join(_project_root, "dist", "kwyre-4b-nf4")
+_dist_path = os.path.join(_project_root, "dist", f"{ACTIVE_TIER['name']}-nf4")
 _USE_PREQUANT = False
 
 if PREQUANT_PATH and os.path.isdir(PREQUANT_PATH) and os.path.exists(os.path.join(PREQUANT_PATH, "config.json")):

@@ -484,7 +484,7 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `KWYRE_BACKEND` | `gpu` | Inference backend: `gpu`, `cpu`, or `mlx` |
-| `KWYRE_MODEL` | `Qwen/Qwen3-4B` | Model tier (`Qwen/Qwen3-4B` or `Qwen/Qwen3.5-9B`) |
+| `KWYRE_MODEL` | `Qwen/Qwen3-4B` | Model tier: `Qwen/Qwen3-4B` (Personal, 3.9GB) or `Qwen/Qwen3.5-9B` (Professional, 7.5GB) |
 | `KWYRE_MODEL_PATH` | auto-detect | Path to pre-quantized model directory |
 | `KWYRE_DRAFT_PATH` | auto-detect | Path to pre-quantized draft model directory |
 | `KWYRE_GGUF_PATH` | — | Path to GGUF model for CPU mode |
@@ -681,24 +681,25 @@ LICENSE                    # MIT license
 ## Technical Specifications
 
 ```
-Main model:          Qwen3-4B (pre-quantized NF4, 2.5 GB)
-Draft model:         Qwen3-0.6B (pre-quantized NF4, 0.8 GB)
-Speculative:         Enabled by default (2-3x throughput)
-SpikeServe:          84 MLP layers on draft model, main at full fidelity
-Quantization:        4-bit NF4 (bitsandbytes) or AWQ (1.4x faster)
-Compute dtype:       bfloat16
-VRAM at inference:   ~3.9 GB (both models + KV cache budget)
-KV cache:            Per-session, LRU eviction, 2 GB VRAM cap default
-Streaming:           SSE (text/event-stream), token-by-token
-Concurrency:         Inference queue (serialized GPU) + threaded HTTP
-Context length:      8192 tokens
-API compatibility:   OpenAI /v1/chat/completions (blocking + streaming)
-Docker image:        ~10 GB (includes CUDA runtime)
-Model download:      3.3 GB (pre-quantized, from kwyre.com)
+Main model (Personal):    Qwen3-4B (pre-quantized NF4, 2.5 GB)
+Main model (Professional): Qwen3.5-9B (pre-quantized NF4, 7.6 GB)
+Draft model:              Qwen3-0.6B (pre-quantized NF4, 0.8 GB) — shared by both tiers
+Speculative:              Enabled by default (2-3x throughput)
+SpikeServe:               84 MLP layers on draft model, main at full fidelity
+Quantization:             4-bit NF4 (bitsandbytes) or AWQ (1.4x faster)
+Compute dtype:            bfloat16
+VRAM at inference:        Personal ~3.9 GB | Professional ~7.5 GB (both models + KV cache budget)
+KV cache:                 Per-session, LRU eviction, 2 GB VRAM cap default
+Streaming:                SSE (text/event-stream), token-by-token
+Concurrency:              Inference queue (serialized GPU) + threaded HTTP
+Context length:           8192 tokens
+API compatibility:       OpenAI /v1/chat/completions (blocking + streaming)
+Docker image:             ~10 GB (includes CUDA runtime)
+Model download:           Personal 3.3 GB | Professional 7.6 GB (pre-quantized, from kwyre.com)
 
 Available tiers:
-  Personal:    Qwen3-4B   — 3.5 GB VRAM, 7-14 tok/s
-  Professional: Qwen3.5-9B — 7.5 GB VRAM, 3-5 tok/s
+  Personal:     Qwen3-4B   — 3.9 GB VRAM, 7-14 tok/s, $299
+  Professional: Qwen3.5-9B — 7.5 GB VRAM, 3-5 tok/s, $799 (set KWYRE_MODEL=Qwen/Qwen3.5-9B)
 
 QAT Training (9B):
   LoRA rank:         64 (alpha 128)

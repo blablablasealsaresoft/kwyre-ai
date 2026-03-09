@@ -103,6 +103,10 @@ if not GGUF_PATH or not os.path.isfile(GGUF_PATH):
     sys.exit(1)
 
 print(f"[Kwyre Air] Loading GGUF model: {GGUF_PATH}")
+
+_gguf_base = os.path.splitext(os.path.basename(GGUF_PATH))[0]
+MODEL_NAME = os.environ.get("KWYRE_MODEL_NAME", f"{_gguf_base}-air" if _gguf_base else "kwyre-air")
+
 print(f"[Kwyre Air] Context length: {CTX_LENGTH}")
 print(f"[Kwyre Air] Threads: {N_THREADS or 'auto'}")
 
