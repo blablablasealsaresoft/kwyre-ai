@@ -351,6 +351,70 @@ nav {
 }
 .footer-legal { font-size: 12px; color: var(--text3); max-width: 500px; line-height: 1.5; }
 
+/* CUSTOM SERVICE GRID */
+.custom-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 48px;
+}
+
+.custom-card {
+  background: var(--surface);
+  padding: 28px 24px;
+  transition: background 0.2s;
+}
+
+.custom-card:hover { background: var(--surface2); }
+
+.custom-card h3 {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.custom-card p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+/* CUSTOM REQUEST FORM */
+.form-field { margin-bottom: 20px; }
+.form-field label {
+  display: block; font-family: var(--mono);
+  font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
+  text-transform: uppercase; color: var(--text2); margin-bottom: 8px;
+}
+.form-field input[type="email"] {
+  width: 100%; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 4px; padding: 12px 14px; color: var(--text);
+  font-size: 14px; outline: none; font-family: var(--sans);
+}
+.form-field input[type="email"]:focus,
+.form-field select:focus,
+.form-field textarea:focus { border-color: var(--accent); }
+.form-submit {
+  display: inline-flex; align-items: center; justify-content: center;
+  padding: 14px 32px; font-family: var(--mono);
+  font-size: 12px; font-weight: 500; letter-spacing: 1px;
+  text-transform: uppercase; border: none; border-radius: 4px;
+  background: var(--accent); color: #fff; cursor: pointer;
+  box-shadow: 0 2px 16px var(--accent-glow); transition: all 0.2s;
+}
+.form-submit:hover { box-shadow: 0 4px 28px var(--accent-glow); transform: translateY(-1px); }
+.form-note {
+  font-size: 12px; color: var(--text3); margin-top: 16px;
+  text-align: center; line-height: 1.5;
+}
+
 @media (max-width: 768px) {
   .nav-links a:not(.nav-cta) { display: none; }
   .page-hero { padding: 120px 0 40px; }
@@ -358,6 +422,7 @@ nav {
   .engine-grid { grid-template-columns: 1fr; }
   .backend-grid { grid-template-columns: 1fr; }
   .mu-grid { grid-template-columns: 1fr; }
+  .custom-grid { grid-template-columns: 1fr; }
   .role-row { flex-direction: column; }
   .wrap { padding: 0 20px; }
   .footer-inner { flex-direction: column; text-align: center; }
@@ -377,6 +442,7 @@ nav {
   <div class="nav-inner">
     <a href="main.html" class="nav-brand"><span>K</span>WYRE</a>
     <div class="nav-links">
+      <a href="technology.html#products">Products</a>
       <a href="technology.html" class="active">Technology</a>
       <a href="security.html">Security</a>
       <a href="platform.html">Platform</a>
@@ -398,67 +464,148 @@ nav {
   </div>
 </div>
 
-<!-- PERFORMANCE TIERS -->
-<div class="section">
+<!-- PRODUCTS -->
+<div class="section" id="products">
   <div class="wrap">
     <div class="sh">
-      <div class="sh-eyebrow reveal">Performance Tiers</div>
-      <h2 class="reveal reveal-d1">Choose your hardware, keep your security</h2>
-      <p class="reveal reveal-d2">All four configurations run the same Qwen3-4B model with identical API, security stack, and compliance features.</p>
+      <div class="sh-eyebrow reveal">Products</div>
+      <h2 class="reveal reveal-d1">Four products. One mission.</h2>
+      <p class="reveal reveal-d2">Air-gapped AI for every hardware profile. Same security stack, same API, same compliance guarantees.</p>
     </div>
 
     <div class="perf-grid reveal reveal-d3">
       <div class="perf-card perf-featured">
-        <div class="perf-badge perf-badge-gpu">GPU &middot; Recommended</div>
-        <div class="perf-title">GPU 4B + Speculative</div>
-        <div class="perf-sub">serve_local_4bit.py</div>
+        <div class="perf-badge perf-badge-gpu">GPU &middot; Personal</div>
+        <div class="perf-title">Kwyre Personal</div>
+        <div class="perf-sub">Speed-optimized for solo analysts</div>
         <ul class="perf-specs">
+          <li><span class="perf-spec-label">Model</span><span class="perf-spec-val">Qwen3-4B + 0.6B draft</span></li>
           <li><span class="perf-spec-label">VRAM</span><span class="perf-spec-val">3.9 GB</span></li>
-          <li><span class="perf-spec-label">Model Load</span><span class="perf-spec-val">~1 sec</span></li>
           <li><span class="perf-spec-label">Inference</span><span class="perf-spec-val">7-14 tok/s</span></li>
-          <li><span class="perf-spec-label">Download</span><span class="perf-spec-val">3.3 GB</span></li>
-          <li><span class="perf-spec-label">GPU Required</span><span class="perf-spec-val">NVIDIA</span></li>
+          <li><span class="perf-spec-label">Price</span><span class="perf-spec-val">$299</span></li>
         </ul>
       </div>
 
       <div class="perf-card">
         <div class="perf-badge perf-badge-gpu">GPU &middot; Professional</div>
-        <div class="perf-title">GPU 9B</div>
-        <div class="perf-sub">Qwen3.5-9B</div>
+        <div class="perf-title">Kwyre Professional</div>
+        <div class="perf-sub">Custom-trained domain specialist with GRPO reasoning</div>
         <ul class="perf-specs">
-          <li><span class="perf-spec-label">VRAM</span><span class="perf-spec-val">8.1 GB</span></li>
-          <li><span class="perf-spec-label">Model Load</span><span class="perf-spec-val">~3 sec</span></li>
+          <li><span class="perf-spec-label">Model</span><span class="perf-spec-val">Custom Qwen3.5-9B + 0.6B draft</span></li>
+          <li><span class="perf-spec-label">VRAM</span><span class="perf-spec-val">7.5 GB</span></li>
           <li><span class="perf-spec-label">Inference</span><span class="perf-spec-val">3-5 tok/s</span></li>
-          <li><span class="perf-spec-label">Download</span><span class="perf-spec-val">7.6 GB</span></li>
-          <li><span class="perf-spec-label">GPU Required</span><span class="perf-spec-val">NVIDIA</span></li>
+          <li><span class="perf-spec-label">Price</span><span class="perf-spec-val">$799</span></li>
         </ul>
       </div>
 
       <div class="perf-card">
-        <div class="perf-badge perf-badge-cpu">CPU &middot; Kwyre Air</div>
-        <div class="perf-title">CPU Only</div>
-        <div class="perf-sub">serve_cpu.py &middot; llama.cpp</div>
+        <div class="perf-badge perf-badge-cpu">CPU &middot; Air</div>
+        <div class="perf-title">Kwyre Air</div>
+        <div class="perf-sub">Runs on any hardware. No GPU required.</div>
         <ul class="perf-specs">
-          <li><span class="perf-spec-label">RAM</span><span class="perf-spec-val">4-8 GB</span></li>
-          <li><span class="perf-spec-label">Model Load</span><span class="perf-spec-val">~5 sec</span></li>
+          <li><span class="perf-spec-label">Model</span><span class="perf-spec-val">Any GGUF</span></li>
+          <li><span class="perf-spec-label">RAM</span><span class="perf-spec-val">8+ GB</span></li>
           <li><span class="perf-spec-label">Inference</span><span class="perf-spec-val">2-8 tok/s</span></li>
-          <li><span class="perf-spec-label">Download</span><span class="perf-spec-val">2-4 GB</span></li>
-          <li><span class="perf-spec-label">GPU Required</span><span class="perf-spec-val">None</span></li>
+          <li><span class="perf-spec-label">Price</span><span class="perf-spec-val">$299</span></li>
         </ul>
       </div>
 
       <div class="perf-card">
-        <div class="perf-badge perf-badge-mlx">MLX &middot; Apple Silicon</div>
-        <div class="perf-title">Apple M-Series</div>
-        <div class="perf-sub">serve_mlx.py &middot; Metal</div>
+        <div class="perf-badge perf-badge-mlx">MLX &middot; Apple</div>
+        <div class="perf-title">Kwyre Apple Silicon</div>
+        <div class="perf-sub">Native Metal acceleration</div>
         <ul class="perf-specs">
-          <li><span class="perf-spec-label">Unified</span><span class="perf-spec-val">4-8 GB</span></li>
-          <li><span class="perf-spec-label">Model Load</span><span class="perf-spec-val">~3 sec</span></li>
+          <li><span class="perf-spec-label">Model</span><span class="perf-spec-val">Any MLX model</span></li>
+          <li><span class="perf-spec-label">Hardware</span><span class="perf-spec-val">M1/M2/M3/M4</span></li>
+          <li><span class="perf-spec-label">Unified</span><span class="perf-spec-val">8+ GB</span></li>
           <li><span class="perf-spec-label">Inference</span><span class="perf-spec-val">5-15 tok/s</span></li>
-          <li><span class="perf-spec-label">Download</span><span class="perf-spec-val">2-4 GB</span></li>
-          <li><span class="perf-spec-label">GPU Required</span><span class="perf-spec-val">None</span></li>
+          <li><span class="perf-spec-label">Price</span><span class="perf-spec-val">$299</span></li>
         </ul>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOM LLM SERVICE -->
+<div class="section" id="custom">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow reveal">Turnkey Service</div>
+      <h2 class="reveal reveal-d1">Custom LLM/SLM Built For Your Business</h2>
+      <p class="reveal reveal-d2">We build domain-specific AI models fine-tuned to your exact use case. Same air-gapped security. Your data never leaves your control.</p>
+    </div>
+
+    <div class="custom-grid reveal reveal-d3">
+      <div class="custom-card">
+        <h3>Legal &amp; Compliance</h3>
+        <p>NDA analysis, contract review, privilege screening, regulatory citations, SEC filings, FINRA compliance</p>
+      </div>
+      <div class="custom-card">
+        <h3>Financial Forensics</h3>
+        <p>Fraud detection, BSA/AML, forensic accounting, transaction pattern analysis, whistleblower case support</p>
+      </div>
+      <div class="custom-card">
+        <h3>Blockchain &amp; Crypto</h3>
+        <p>On-chain tracing, rug pull detection, cross-chain analysis, MEV research, DeFi risk assessment, RICO case building</p>
+      </div>
+      <div class="custom-card">
+        <h3>Insurance &amp; Actuarial</h3>
+        <p>Policy analysis, claims processing, reinsurance treaty review, risk modeling, cedent PII handling</p>
+      </div>
+      <div class="custom-card">
+        <h3>Defense &amp; Intelligence</h3>
+        <p>CUI document analysis, OSINT processing, threat assessment, NIST 800-171 compliant, no classified facility required</p>
+      </div>
+      <div class="custom-card">
+        <h3>Healthcare &amp; Life Sciences</h3>
+        <p>Clinical trial data analysis, HIPAA-compliant medical record review, drug interaction research, regulatory submissions</p>
+      </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 48px;">
+      <p class="reveal" style="font-size: 14px; color: var(--text2); margin-bottom: 24px;">
+        We train a custom model on YOUR domain using Claude-distilled reasoning traces and GRPO reinforcement learning.<br>
+        Delivered as a turnkey air-gapped appliance or self-hosted deployment.
+      </p>
+      <a href="#custom-request" class="btn btn-primary" style="margin-right: 12px;">Request Custom Model</a>
+      <a href="pay.html" class="btn btn-ghost">View Standard Products</a>
+    </div>
+  </div>
+</div>
+
+<!-- CUSTOM REQUEST FORM -->
+<div class="section" id="custom-request">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow reveal">Get Started</div>
+      <h2 class="reveal reveal-d1">Request a Custom Model</h2>
+      <p class="reveal reveal-d2">Tell us about your use case. No obligation. We'll assess feasibility and provide a quote.</p>
+    </div>
+
+    <div style="max-width: 540px; margin: 0 auto;">
+      <div class="form-field">
+        <label>Industry</label>
+        <select id="customIndustry" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px 14px;color:var(--text);font-size:14px;outline:none;">
+          <option value="">Select your industry...</option>
+          <option value="legal">Legal &amp; Compliance</option>
+          <option value="financial">Financial Services &amp; Forensics</option>
+          <option value="crypto">Blockchain &amp; Cryptocurrency</option>
+          <option value="insurance">Insurance &amp; Actuarial</option>
+          <option value="defense">Defense &amp; Intelligence</option>
+          <option value="healthcare">Healthcare &amp; Life Sciences</option>
+          <option value="other">Other (describe below)</option>
+        </select>
+      </div>
+      <div class="form-field">
+        <label>Email</label>
+        <input type="email" id="customEmail" placeholder="you@company.com">
+      </div>
+      <div class="form-field">
+        <label>Use Case (brief description)</label>
+        <textarea id="customUseCase" rows="3" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px 14px;color:var(--text);font-family:var(--sans);font-size:14px;resize:vertical;outline:none;" placeholder="What documents or data do you need to analyze? What questions do you need answered?"></textarea>
+      </div>
+      <button class="form-submit" onclick="submitCustomRequest()" style="width:100%;margin-top:8px;">Submit Request</button>
+      <div class="form-note">No spam. No data collection beyond this form. We'll respond within 48 hours.</div>
     </div>
   </div>
 </div>
@@ -681,6 +828,20 @@ nav {
   window.addEventListener('resize',()=>{resize();init();});
   resize(); init(); frame();
 })();
+
+function submitCustomRequest() {
+  const industry = document.getElementById('customIndustry').value;
+  const email = document.getElementById('customEmail').value.trim();
+  const useCase = document.getElementById('customUseCase').value.trim();
+  if (!email) { document.getElementById('customEmail').style.borderColor = 'var(--red)'; return; }
+  const requests = JSON.parse(sessionStorage.getItem('kwyre_custom_requests') || '[]');
+  requests.push({ industry, email, useCase, ts: Date.now() });
+  sessionStorage.setItem('kwyre_custom_requests', JSON.stringify(requests));
+  document.getElementById('customIndustry').value = '';
+  document.getElementById('customEmail').value = '';
+  document.getElementById('customUseCase').value = '';
+  alert('Request submitted! We will contact you within 48 hours.');
+}
 
 (function(){
   const obs = new IntersectionObserver((entries)=>{

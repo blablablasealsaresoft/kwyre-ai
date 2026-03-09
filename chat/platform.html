@@ -337,6 +337,26 @@ nav {
 .output-table tbody tr { background: var(--surface); transition: background 0.15s; }
 .output-table tbody tr:hover { background: var(--surface2); }
 
+/* MATRIX TABLE */
+.matrix-wrap { overflow-x: auto; }
+.matrix {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+.matrix th {
+  padding: 12px 16px; text-align: left;
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  color: var(--text3); text-transform: uppercase; letter-spacing: 1px;
+  background: var(--surface2); border-bottom: 1px solid var(--border);
+}
+.matrix td {
+  padding: 12px 16px; border-bottom: 1px solid var(--border);
+  color: var(--text2);
+}
+.matrix td.m-label { color: var(--text); font-weight: 600; }
+.matrix tbody tr { background: var(--surface); transition: background 0.15s; }
+.matrix tbody tr:hover { background: var(--surface2); }
+.matrix code { font-family: var(--mono); font-size: 11px; background: var(--bg); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); }
+
 /* CTA */
 .cta-bar { text-align: center; padding: 80px 0; }
 .cta-bar h2 { font-size: clamp(24px, 3vw, 36px); font-weight: 700; margin-bottom: 12px; }
@@ -463,6 +483,68 @@ sudo launchctl start com.kwyre.ai.server</div>
           <li>Apple Silicon / MLX auto-detect</li>
         </ul>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRODUCTS BY PLATFORM -->
+<div class="section">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow">Choose Your Product</div>
+      <h2>Every product. Every platform.</h2>
+      <p>Same security stack. Same API. Different hardware targets.</p>
+    </div>
+
+    <div class="matrix-wrap" style="margin-top: 48px;">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Hardware</th>
+            <th>Model</th>
+            <th>Install Method</th>
+            <th>Price</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="m-label">Kwyre Personal</td>
+            <td>NVIDIA GPU (RTX 4060+)</td>
+            <td>Qwen3-4B + 0.6B draft</td>
+            <td><code>docker compose up</code> or installer</td>
+            <td>$299</td>
+          </tr>
+          <tr>
+            <td class="m-label">Kwyre Professional</td>
+            <td>NVIDIA GPU (RTX 4090/3090)</td>
+            <td>Custom Qwen3.5-9B (GRPO-trained)</td>
+            <td><code>docker compose up</code> or installer</td>
+            <td>$799</td>
+          </tr>
+          <tr>
+            <td class="m-label">Kwyre Air</td>
+            <td>Any CPU (8GB+ RAM)</td>
+            <td>Any GGUF model</td>
+            <td><code>python server/serve_cpu.py</code></td>
+            <td>$299</td>
+          </tr>
+          <tr>
+            <td class="m-label">Kwyre Apple Silicon</td>
+            <td>M1/M2/M3/M4 Mac</td>
+            <td>Any MLX model</td>
+            <td><code>python server/serve_mlx.py</code></td>
+            <td>$299</td>
+          </tr>
+          <tr style="border-top: 2px solid var(--accent);">
+            <td class="m-label" style="color: var(--green);">Custom LLM</td>
+            <td>Any (we configure)</td>
+            <td>Custom-trained for your domain</td>
+            <td>Turnkey delivery</td>
+            <td>Contact us</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>
@@ -606,6 +688,12 @@ python build.py clean        # Clean artifacts</div>
           <li>LLM-as-judge scoring methodology</li>
         </ul>
       </div>
+    </div>
+
+    <div style="background: var(--accent-dim); border: 1px solid rgba(59,130,246,0.15); border-radius: 8px; padding: 24px 28px; margin-top: 32px;">
+      <div style="font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px;">Turnkey Service</div>
+      <p style="font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 12px;">Don't want to train your own model? We'll build one for you. Custom-trained on your domain using our Claude distillation + GRPO pipeline. Delivered as an air-gapped appliance or self-hosted deployment.</p>
+      <a href="technology.html#custom-request" style="font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); text-decoration: none;">Request Custom Model &rarr;</a>
     </div>
   </div>
 </div>

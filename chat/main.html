@@ -320,6 +320,51 @@ nav {
 
 .threat-bar strong { color: var(--green); font-weight: 500; }
 
+.product-strip {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.product-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+
+.product-chip:hover { border-color: var(--accent); background: var(--surface2); }
+.product-chip.active { border-color: var(--accent); background: var(--accent-dim); }
+
+.product-chip-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.product-chip-detail {
+  font-size: 11px;
+  color: var(--text3);
+}
+
+.product-chip.active .product-chip-name { color: var(--accent); }
+
+.custom-chip { border-color: var(--green-dim); }
+.custom-chip:hover { border-color: var(--green); }
+.custom-chip .product-chip-name { color: var(--green); }
+
 /* --- BUYERS --- */
 .buyers-grid {
   display: grid;
@@ -1361,6 +1406,7 @@ html.light nav { background: rgba(245,246,250,0.9); }
   <div class="nav-inner">
     <a href="/" class="nav-brand"><span>K</span>WYRE</a>
     <div class="nav-links">
+      <a href="technology.html#products">Products</a>
       <a href="technology.html">Technology</a>
       <a href="security.html">Security</a>
       <a href="platform.html">Platform</a>
@@ -1406,6 +1452,29 @@ html.light nav { background: rgba(245,246,250,0.9); }
     <div class="threat-bar reveal">
       <div class="threat-dot"></div>
       <span>All systems operational &mdash; <strong>zero outbound connections</strong></span>
+    </div>
+
+    <div class="product-strip reveal">
+      <a href="technology.html#products" class="product-chip active">
+        <span class="product-chip-name">Personal</span>
+        <span class="product-chip-detail">4B · 7-14 tok/s · $299</span>
+      </a>
+      <a href="technology.html#products" class="product-chip">
+        <span class="product-chip-name">Professional</span>
+        <span class="product-chip-detail">9B Custom · 3-5 tok/s · $799</span>
+      </a>
+      <a href="technology.html#products" class="product-chip">
+        <span class="product-chip-name">Air</span>
+        <span class="product-chip-detail">CPU · Any hardware · $299</span>
+      </a>
+      <a href="technology.html#products" class="product-chip">
+        <span class="product-chip-name">Apple Silicon</span>
+        <span class="product-chip-detail">MLX · M1-M4 · $299</span>
+      </a>
+      <a href="technology.html#custom" class="product-chip custom-chip">
+        <span class="product-chip-name">Custom LLM</span>
+        <span class="product-chip-detail">Built for your domain</span>
+      </a>
     </div>
   </div>
 </div>
