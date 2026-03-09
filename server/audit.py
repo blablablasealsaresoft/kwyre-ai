@@ -5,6 +5,7 @@ Thread-safe, RAM-only audit tracker for multi-user mode.
 Tracks per-user metadata (never conversation content).
 """
 
+import json
 import threading
 import time
 from collections import defaultdict
@@ -117,3 +118,57 @@ class UserAuditLog:
                 "total_failed_auth_attempts": total_failed_auth,
                 "timestamp": time.strftime("%Y-%m-%dT%H:%M:%SZ", time.gmtime()),
             }
+
+    def export_jsonl(self) -> str:
+        """Export all audit events as JSON Lines (one event per line) for SIEM ingestion."""
+        with self._lock:
+            lines = []
+            for uid, s in self._stats.items():
+                base = {
+                    "user_id": uid,
+                    "username": s.get("username", ""),
+                    "request_count": s["request_count"],
+                    "token_count": s["token_count"],
+                    "session_count": s["session_count"],
+                    "rate_limit_hits": s["rate_limit_hits"],
+                    "failed_auth_attempts": s["failed_auth_attempts"],
+                    "last_active": s.get("last_active"),
+                }
+                lines.append(json.dumps(base))
+                for evt in s.get("security_events", []):
+                    event_line = {
+                        "user_id": uid,
+                        "username": s.get("username", ""),
+                        "event_type": evt.get("event", ""),
+                        "detail": evt.get("detail", ""),
+                        "timestamp": evt.get("timestamp", ""),
+                    }
+                    lines.append(json.dumps(event_line))
+            return "\n".join(lines)
+
+    def export_cef(self) -> str:
+        """Export audit events in CEF (Common Event Format) for Splunk/QRadar."""
+        with self._lock:
+            lines = []
+            for uid, s in self._stats.items():
+                username = s.get("username", uid)
+                ts = s.get("last_active")
+                ts_str = time.strftime("%b %d %Y %H:%M:%S", time.gmtime(ts)) if ts else "unknown"
+                lines.append(
+                    f"CEF:0|Kwyre|AI-Server|1.1|100|User Activity|3|"
+                    f"duser={username} "
+                    f"cn1={s['request_count']} cn1Label=RequestCount "
+                    f"cn2={s['token_count']} cn2Label=TokenCount "
+                    f"cn3={s['rate_limit_hits']} cn3Label=RateLimitHits "
+                    f"rt={ts_str}"
+                )
+                for evt in s.get("security_events", []):
+                    severity = "7" if evt.get("event") == "failed_auth" else "5"
+                    lines.append(
+                        f"CEF:0|Kwyre|AI-Server|1.1|200|Security Event|{severity}|"
+                        f"duser={username} "
+                        f"act={evt.get('event', '')} "
+                        f"msg={evt.get('detail', '')} "
+                        f"rt={evt.get('timestamp', '')}"
+                    )
+            return "\n".join(lines)

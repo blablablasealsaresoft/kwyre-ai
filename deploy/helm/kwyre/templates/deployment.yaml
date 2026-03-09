@@ -1,0 +1,78 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-kwyre
+  labels:
+    app: kwyre
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: kwyre
+  template:
+    metadata:
+      labels:
+        app: kwyre
+    spec:
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      containers:
+        - name: kwyre
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          env:
+            - name: KWYRE_MODEL
+              value: {{ .Values.model.id | quote }}
+            - name: KWYRE_QUANT
+              value: {{ .Values.model.quant | quote }}
+            - name: KWYRE_SPECULATIVE
+              value: {{ if .Values.model.speculative }}"1"{{ else }}"0"{{ end }}
+            - name: KWYRE_DRAFT_MODEL
+              value: {{ .Values.model.draftModel | quote }}
+            - name: KWYRE_API_KEYS
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-kwyre-secrets
+                  key: api-keys
+            - name: NVIDIA_VISIBLE_DEVICES
+              value: "all"
+            {{- range $key, $val := .Values.env }}
+            - name: {{ $key }}
+              value: {{ $val | quote }}
+            {{- end }}
+          volumeMounts:
+            - name: model-cache
+              mountPath: {{ .Values.persistence.mountPath }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 120
+            periodSeconds: 30
+            timeoutSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+      volumes:
+        - name: model-cache
+          {{- if .Values.persistence.enabled }}
+          persistentVolumeClaim:
+            claimName: {{ .Release.Name }}-kwyre-models
+          {{- else }}
+          emptyDir: {}
+          {{- end }}

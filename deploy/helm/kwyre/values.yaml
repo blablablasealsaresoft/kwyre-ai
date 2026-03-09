@@ -1,0 +1,48 @@
+replicaCount: 1
+
+image:
+  repository: kwyre-ai
+  tag: "1.1"
+  pullPolicy: IfNotPresent
+
+model:
+  id: "Qwen/Qwen3-4B"
+  quant: "nf4"
+  speculative: true
+  draftModel: "Qwen/Qwen3-0.6B"
+
+service:
+  type: ClusterIP
+  port: 8000
+
+resources:
+  limits:
+    memory: "16Gi"
+    nvidia.com/gpu: "1"
+  requests:
+    memory: "8Gi"
+    nvidia.com/gpu: "1"
+
+persistence:
+  enabled: true
+  storageClass: ""
+  size: "20Gi"
+  mountPath: "/workspace/.cache/huggingface"
+
+env:
+  KWYRE_BIND_HOST: "0.0.0.0"
+  KWYRE_SKIP_DEP_CHECK: "0"
+  KWYRE_ENABLE_TOOLS: "0"
+  KWYRE_MULTI_USER: "0"
+  TORCHDYNAMO_DISABLE: "1"
+
+secrets:
+  apiKeys: "sk-kwyre-dev-local:admin"
+  masterKey: ""
+  licenseKey: ""
+
+nodeSelector:
+  nvidia.com/gpu.present: "true"
+
+tolerations: []
+affinity: {}

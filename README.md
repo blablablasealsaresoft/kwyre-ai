@@ -8,7 +8,7 @@
 [![Quantization](https://img.shields.io/badge/quant-4--bit%20NF4-green.svg)]()
 [![Security](https://img.shields.io/badge/security-6--layer%20stack-red.svg)]()
 [![Docker](https://img.shields.io/badge/deploy-docker--compose%20up-blue.svg)]()
-[![Status](https://img.shields.io/badge/status-v1.1%20hardened-brightgreen.svg)]()
+[![Status](https://img.shields.io/badge/status-v1.2%20RAG%20%2B%20vLLM-brightgreen.svg)]()
 [![Pentest](https://img.shields.io/badge/pentest-47%2F47%20resolved-brightgreen.svg)]()
 [![Streaming](https://img.shields.io/badge/SSE-streaming-blue.svg)]()
 
@@ -366,9 +366,10 @@ graph TB
 
 ```
 POST /v1/chat/completions   OpenAI-compatible inference (stream=true for SSE)
-POST /v1/session/end        Cryptographic session + KV cache wipe
+POST /v1/documents/upload   RAG document ingestion (PDF, DOCX, TXT)
+POST /v1/session/end        Cryptographic session + KV cache + document wipe
 POST /v1/license/verify     Offline license key validation
-GET  /health                Status + KV cache + watchdog + spike stats
+GET  /health                Status + KV cache + RAG + watchdog + spike stats
 GET  /audit                 Metadata-only compliance log
 GET  /v1/models             Model info + capabilities
 GET  /                      Landing page
@@ -598,6 +599,18 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] Integration test suite — HTTP endpoints, SSE conformance, KV cache, session isolation
 - [x] `main.html` auto-detects local vs production API — `window.location.origin` for localhost
 
+**v1.2 (Current — RAG + vLLM + Enterprise)**
+- [x] RAG document ingestion — PDF, DOCX, TXT upload with FAISS vector search, per-session RAM-only storage
+- [x] Secure document store — `SecureRAGStore` with cryptographic wipe on session end, shutdown, and intrusion
+- [x] Local embeddings — `sentence-transformers/all-MiniLM-L6-v2` on CPU, lazy-loaded on first upload
+- [x] `POST /v1/documents/upload` — multipart file upload with automatic chunking and embedding
+- [x] RAG context injection — retrieved chunks injected alongside tool data in chat completions
+- [x] Frontend file upload — "Upload Docs" button in chat toolbar with drag-and-drop support
+- [x] vLLM backend — `server/serve_vllm.py` with continuous batching, PagedAttention, speculative decoding
+- [x] SIEM audit export — `export_jsonl()` and `export_cef()` for Splunk/QRadar integration
+- [x] Kubernetes Helm chart — `deploy/helm/kwyre/` with GPU scheduling, health probes, PVC, secrets
+- [x] Extended `.env.example` — comprehensive config covering all 30+ environment variables
+
 ---
 
 ## Building from Source (Nuitka Protected Binary)
@@ -781,12 +794,14 @@ Confirm: all traffic is 127.0.0.1 → 127.0.0.1
 ```
 kwyre/
 ├── server/
-│   ├── serve_local_4bit.py    # GPU inference (streaming, KV cache, speculative)
+│   ├── serve_local_4bit.py    # GPU inference (streaming, KV cache, RAG, speculative)
+│   ├── serve_vllm.py          # vLLM backend (continuous batching, PagedAttention)
 │   ├── serve_cpu.py           # CPU inference via llama.cpp (Kwyre Air)
 │   ├── serve_mlx.py           # Apple Silicon inference via MLX
 │   ├── security_core.py       # Shared security infrastructure (all 6 layers)
+│   ├── rag.py                 # RAG document ingestion (FAISS + embeddings)
 │   ├── users.py               # Multi-user management (Fernet-encrypted)
-│   └── audit.py               # Per-user audit logging (RAM-only)
+│   └── audit.py               # Per-user audit logging + SIEM export
 ├── model/
 │   ├── spike_serve.py         # SpikeServe activation encoding hooks
 │   ├── quantize_nf4.py        # NF4 pre-quantization script
@@ -797,10 +812,11 @@ kwyre/
 │   ├── license.py             # Ed25519 license + hardware fingerprint binding
 │   ├── codesign.py            # Ed25519 release signing and verification
 │   └── updater.py             # Air-gap safe update mechanism
+├── deploy/
+│   └── helm/kwyre/            # Kubernetes Helm chart (GPU, probes, PVC)
 ├── chat/
+│   ├── main.html              # Product page + chat UI (SSE streaming, RAG upload)
 │   ├── landing.html           # Marketing landing page
-│   ├── main.html              # Main product page + chat UI (SSE streaming)
-│   ├── main.html              # Main product page
 │   └── pay.html               # Payment + license download gate
 ├── installer/
 │   ├── install_windows.ps1    # Windows CLI installer

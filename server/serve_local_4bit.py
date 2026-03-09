@@ -62,6 +62,7 @@ from spike_serve import apply_spike_hooks, get_sparsity_stats, reset_sparsity_st
 from verify_deps import startup_check
 from license import startup_validate as validate_license
 from audit import UserAuditLog
+from rag import SecureRAGStore, DocumentParser, encode_texts
 
 DEFAULT_SYSTEM_PROMPT = (
     "You are Kwyre, a specialized AI assistant for legal, financial, and forensic "
@@ -536,13 +537,16 @@ _worker_thread.start()
 
 # Start security subsystems
 session_store = SessionStore()
+rag_store = SecureRAGStore()
+print(f"[RAG] Document store active — RAM only, wiped on close")
 watchdog = IntrusionWatchdog(session_store, terminate_on_intrusion=True)
 watchdog.start()
 
 
 def _shutdown_handler(signum, frame):
-    print("\n[Shutdown] Wiping all sessions and KV cache before exit...")
+    print("\n[Shutdown] Wiping all sessions, KV cache, and documents before exit...")
     watchdog.stop()
+    rag_store.wipe_all(reason="server_shutdown")
     kv_cache_store.wipe_all()
     session_store.wipe_all(reason="server_shutdown")
     _inference_queue.put(None)
@@ -661,6 +665,8 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             self._handle_admin_create_user()
         elif MULTI_USER and self.path == "/v1/admin/sessions/wipe":
             self._handle_admin_wipe_sessions()
+        elif self.path == "/v1/documents/upload":
+            self._handle_document_upload()
         else:
             self._send_json_error(404, "Not found.")
 
@@ -741,12 +747,25 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             except Exception as e:
                 print(f"[tools] error: {e}")
 
+        rag_chunks = []
+        if rag_store.has_documents(session_id):
+            try:
+                query_emb = encode_texts([last_user_msg])
+                if query_emb is not None:
+                    rag_chunks = rag_store.retrieve(session_id, query_emb[0])
+            except Exception as e:
+                print(f"[RAG] retrieval error: {e}")
+
         augmented = list(messages)
         if not any(m.get("role") == "system" for m in augmented):
             augmented.insert(0, {"role": "system", "content": DEFAULT_SYSTEM_PROMPT})
+        ctx_parts = []
         if tool_data:
-            ctx = ("\n\n[Live data — use directly, be concise]\n\n"
-                   + "\n\n".join(tool_data))
+            ctx_parts.append("[Live data — use directly, be concise]\n\n" + "\n\n".join(tool_data))
+        if rag_chunks:
+            ctx_parts.append("[Retrieved document context — cite relevant sections]\n\n" + "\n\n---\n\n".join(rag_chunks))
+        if ctx_parts:
+            ctx = "\n\n" + "\n\n".join(ctx_parts)
             for i in range(len(augmented) - 1, -1, -1):
                 if augmented[i].get("role") == "user":
                     augmented[i] = {
@@ -1031,6 +1050,71 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
         except ValueError as e:
             self._send_json_error(403, str(e))
 
+    def _handle_document_upload(self):
+        user = self._check_auth() if not MULTI_USER else self._mu_check_auth()
+        if user is None:
+            return
+        content_type = self.headers.get("Content-Type", "")
+        if "multipart/form-data" not in content_type:
+            self._send_json_error(400, "Content-Type must be multipart/form-data")
+            return
+        boundary = content_type.split("boundary=")[-1].strip()
+        content_length = int(self.headers.get("Content-Length", 0))
+        if content_length > 50 * 1024 * 1024:
+            self._send_json_error(400, "File size exceeds 50MB limit")
+            return
+        body = self.rfile.read(content_length)
+
+        parts = body.split(f"--{boundary}".encode())
+        session_id = None
+        files = []
+        for part in parts:
+            if b"Content-Disposition" not in part:
+                continue
+            header_end = part.find(b"\r\n\r\n")
+            if header_end == -1:
+                continue
+            headers_raw = part[:header_end].decode("utf-8", errors="replace")
+            file_data = part[header_end + 4:]
+            if file_data.endswith(b"\r\n"):
+                file_data = file_data[:-2]
+
+            if 'name="session_id"' in headers_raw:
+                session_id = file_data.decode("utf-8", errors="replace").strip()
+            elif 'name="file"' in headers_raw or "filename=" in headers_raw:
+                fname_match = re.search(r'filename="([^"]+)"', headers_raw)
+                if fname_match:
+                    files.append((fname_match.group(1), file_data))
+
+        if not session_id or len(session_id) < 32:
+            session_id = secrets.token_hex(16)
+        if not files:
+            self._send_json_error(400, "No files provided")
+            return
+
+        total_chunks = 0
+        filenames = []
+        for fname, fdata in files:
+            try:
+                chunks = DocumentParser.parse(fname, fdata)
+                if chunks:
+                    embeddings = encode_texts(chunks)
+                    if embeddings is not None:
+                        rag_store.add_documents(session_id, chunks, embeddings,
+                                                {"filename": fname})
+                        total_chunks += len(chunks)
+                        filenames.append(fname)
+            except Exception as e:
+                print(f"[RAG] Error processing {fname}: {e}")
+
+        self._send_json(200, {
+            "status": "indexed",
+            "session_id": session_id,
+            "files": filenames,
+            "chunks": total_chunks,
+            "message": f"Indexed {total_chunks} chunks from {len(filenames)} file(s). Data stored in RAM only."
+        })
+
     # ---- Admin endpoints (multi-user only) ----
 
     def _handle_admin_create_user(self):
@@ -1181,6 +1265,11 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 "streaming": True,
                 "inference_queue": True,
                 "kv_cache": kv_cache_store.stats(),
+                "rag": {
+                    "active_sessions": rag_store.active_count(),
+                    "total_chunks": rag_store.total_chunks(),
+                    "storage": "RAM-only",
+                },
                 "gpu_vram_gb": round(gpu_used, 1),
             })
         self._send_json(200, health_data)

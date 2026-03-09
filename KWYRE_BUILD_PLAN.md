@@ -68,15 +68,17 @@ All original build phases have been completed and shipped.
 
 ---
 
-## CURRENT STATE (v1.1)
+## CURRENT STATE (v1.2)
 
 ```
-Server:     serve_local_4bit.py (GPU), serve_cpu.py (CPU), serve_mlx.py (MLX)
+Backends:   serve_local_4bit.py (GPU), serve_vllm.py (vLLM), serve_cpu.py (CPU), serve_mlx.py (MLX)
 Model:      Qwen3-4B main + Qwen3-0.6B draft (pre-quantized NF4 in dist/)
 VRAM:       3.9 GB total (both models + KV cache)
 Speed:      6.7 tok/s warmed up (RTX 4090 Laptop), target 7-14 tok/s
+RAG:        PDF/DOCX/TXT upload, FAISS vector search, RAM-only, crypto-wipe
 Security:   6 layers active, 110 tests passing
-Frontend:   main.html — markdown, copy, export, dark/light, session management
+Frontend:   main.html — markdown, copy, export, dark/light, upload docs, session mgmt
+Enterprise: SIEM export (JSONL + CEF), Helm chart, extended .env config
 Deployed:   GitHub (main branch), Cloudflare Pages (kwyre.com)
 Tests:      110 security + integration suite
 ```
@@ -124,40 +126,23 @@ Use the existing finetune/ pipeline to train domain adapters:
 Run benchmarks/benchmark.py after each adapter to track quality.
 ```
 
-### 8.3 — RAG / Document Ingestion
-```
-Biggest value-add for the legal/forensic buyer:
+### 8.3 — RAG / Document Ingestion (DONE)
+- `server/rag.py` — `DocumentParser` (PDF/DOCX/TXT), `SecureRAGStore` (FAISS, RAM-only, crypto-wipe), `encode_texts` (sentence-transformers on CPU)
+- `POST /v1/documents/upload` — multipart file upload, auto-chunking, embedding, session-bound
+- RAG context injection in `_handle_chat_completions` alongside tool data
+- Lifecycle wiring: wipe on session end, shutdown, intrusion
+- Frontend: "Upload Docs" button in chat toolbar
 
-1. Local document upload (PDF, DOCX, TXT)
-2. Chunking + embedding (local model, no cloud)
-3. Vector search (FAISS or similar, RAM-only)
-4. Retrieval-augmented generation for case files
-5. All data stays in RAM, wiped on session end
+### 8.4 — Performance (DONE)
+- `server/serve_vllm.py` — vLLM backend with continuous batching, PagedAttention, speculative decoding
+- Shared security stack via `security_core.py`
+- SSE streaming, all standard endpoints
+- Configured via `KWYRE_BACKEND=vllm`, `KWYRE_VLLM_GPU_MEMORY`, `KWYRE_VLLM_MAX_MODEL_LEN`
 
-This is the feature that makes Kwyre a case analysis tool,
-not just a chat interface.
-```
-
-### 8.4 — Performance Targets
-```
-Current:  6.7 tok/s warmed up (RTX 4090 Laptop)
-Target:   10-14 tok/s
-
-Remaining optimizations:
-- Flash Attention 2 (already implemented, needs flash-attn pip install)
-- Continuous batching (if multi-user demand grows)
-- vLLM backend option for production deployments
-- PagedAttention for larger KV cache with less VRAM waste
-```
-
-### 8.5 — Enterprise Features
-```
-- Multi-tenant deployment guide (one server, isolated users)
-- SAML/SSO integration for enterprise auth
-- Audit log export to SIEM (Splunk, QRadar)
-- Kubernetes Helm chart for cloud-hosted air-gapped deployments
-- FedRAMP documentation package
-```
+### 8.5 — Enterprise (DONE)
+- `audit.py` extended with `export_jsonl()` (JSON Lines) and `export_cef()` (CEF for Splunk/QRadar)
+- `deploy/helm/kwyre/` — full Helm chart (Deployment, Service, Secret, PVC) with GPU scheduling and health probes
+- `.env.example` expanded to 110+ lines covering all 30+ environment variables
 
 ---
 
@@ -166,12 +151,14 @@ Remaining optimizations:
 ```
 kwyre/
 ├── server/
-│   ├── serve_local_4bit.py    # GPU inference (Flash Attn, speculative, KV cache, SSE)
+│   ├── serve_local_4bit.py    # GPU inference (Flash Attn, speculative, KV cache, RAG, SSE)
+│   ├── serve_vllm.py          # vLLM backend (continuous batching, PagedAttention)
 │   ├── serve_cpu.py           # CPU inference via llama.cpp (Kwyre Air)
 │   ├── serve_mlx.py           # Apple Silicon inference via MLX
 │   ├── security_core.py       # Shared security infrastructure (all 6 layers)
+│   ├── rag.py                 # RAG document ingestion (FAISS + embeddings)
 │   ├── users.py               # Multi-user management (Fernet-encrypted)
-│   ├── audit.py               # Per-user audit logging (RAM-only)
+│   ├── audit.py               # Per-user audit logging + SIEM export (JSONL, CEF)
 │   └── tools.py               # External API tool router
 ├── model/
 │   ├── spike_serve.py         # SpikeServe activation encoding hooks
@@ -202,21 +189,25 @@ kwyre/
 ├── benchmarks/                # Benchmark suite vs GPT-4o (3 datasets, 30 tasks)
 ├── docs/                      # Compliance documentation package
 ├── tests/                     # 110 security tests + integration suite
+├── deploy/
+│   └── helm/kwyre/            # Kubernetes Helm chart (GPU, probes, PVC, secrets)
 ├── dist/                      # Pre-quantized model weights
 │   ├── kwyre-4b-nf4/          # Main model (~2.5 GB)
 │   └── kwyre-draft-nf4/       # Draft model (~0.8 GB)
 ├── build.py                   # Nuitka build + installer pipeline
 ├── Dockerfile                 # CUDA 12.4.1 runtime container
 ├── docker-compose.yml         # One-command deployment
-└── .env.example               # Configuration template
+└── .env.example               # Comprehensive config (30+ variables)
 ```
 
 ---
 
 ## NOTES FOR DEVELOPMENT
 
-- Server entry point: `server/serve_local_4bit.py` (GPU), `serve_cpu.py` (CPU), `serve_mlx.py` (MLX)
-- All three backends share `server/security_core.py` — never duplicate security code
+- Server entry point: `serve_local_4bit.py` (GPU), `serve_vllm.py` (vLLM), `serve_cpu.py` (CPU), `serve_mlx.py` (MLX)
+- All four backends share `server/security_core.py` — never duplicate security code
+- RAG module: `server/rag.py` — used by GPU backend, can be imported by others
+- Helm chart: `deploy/helm/kwyre/` — install with `helm install kwyre ./deploy/helm/kwyre`
 - Frontend is a single page: `chat/main.html` (no separate chat.html)
 - `/chat` route serves `main.html` (same as `/main.html`)
 - Never commit: model weights (.safetensors), .env, dep manifest, API keys, .cache/
