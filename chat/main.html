@@ -1357,6 +1357,96 @@ nav {
 }
 .system-prompt-input:focus { border-color: var(--accent); }
 
+/* --- FLOATING PANELS --- */
+.float-panels {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  z-index: 50;
+}
+
+.float-btn {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text2);
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: all 0.2s;
+  backdrop-filter: blur(12px);
+}
+
+.float-btn:hover {
+  border-color: var(--accent);
+  color: var(--text);
+  background: var(--surface2);
+}
+
+.float-btn-icon {
+  color: var(--accent);
+  font-size: 8px;
+}
+
+.float-panel {
+  position: fixed;
+  top: 0;
+  right: -500px;
+  width: 480px;
+  max-width: 90vw;
+  height: 100vh;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  z-index: 150;
+  overflow-y: auto;
+  transition: right 0.3s ease;
+}
+
+.float-panel.open {
+  right: 0;
+}
+
+.float-panel-inner {
+  padding: 40px 32px;
+}
+
+.float-panel-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.2s;
+}
+
+.float-panel-close:hover { color: var(--text); }
+
+.float-panel h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.float-panel .buyers-grid { grid-template-columns: 1fr; margin-top: 0; }
+.float-panel .sec-layers { margin-top: 0; }
+.float-panel .sec-layer { grid-template-columns: 1fr; }
+.float-panel .sec-layer-num { flex-direction: row; }
+.float-panel .feat-grid { grid-template-columns: 1fr; margin-top: 0; }
+
 /* --- LIGHT THEME --- */
 html.light {
   --bg: #f5f6fa; --surface: #ffffff; --surface2: #f0f1f5; --surface3: #e8e9f0;
@@ -1383,6 +1473,8 @@ html.light nav { background: rgba(245,246,250,0.9); }
   .sec-layer { grid-template-columns: 1fr; }
   .sec-layer-num { flex-direction: row; }
   .footer-inner { flex-direction: column; text-align: center; }
+  .float-panels { right: 12px; bottom: 12px; }
+  .float-panel { width: 100vw; max-width: 100vw; }
 }
 
 @media (max-width: 480px) {
@@ -1406,7 +1498,7 @@ html.light nav { background: rgba(245,246,250,0.9); }
   <div class="nav-inner">
     <a href="/" class="nav-brand"><span>K</span>WYRE</a>
     <div class="nav-links">
-      <a href="#products">Products</a>
+      <a href="pay.html">Products</a>
       <a href="technology.html">Technology</a>
       <a href="custom.html">Custom</a>
       <a href="security.html">Security</a>
@@ -1456,19 +1548,19 @@ html.light nav { background: rgba(245,246,250,0.9); }
     </div>
 
     <div class="product-strip reveal">
-      <a href="#products" class="product-chip active">
+      <a href="pay.html" class="product-chip active">
         <span class="product-chip-name">Personal</span>
         <span class="product-chip-detail">4B · 7-14 tok/s · $299</span>
       </a>
-      <a href="#products" class="product-chip">
+      <a href="pay.html" class="product-chip">
         <span class="product-chip-name">Professional</span>
         <span class="product-chip-detail">9B Custom · 3-5 tok/s · $799</span>
       </a>
-      <a href="#products" class="product-chip">
+      <a href="pay.html" class="product-chip">
         <span class="product-chip-name">Air</span>
         <span class="product-chip-detail">CPU · Any hardware · $299</span>
       </a>
-      <a href="#products" class="product-chip">
+      <a href="pay.html" class="product-chip">
         <span class="product-chip-name">Apple Silicon</span>
         <span class="product-chip-detail">MLX · M1-M4 · $299</span>
       </a>
@@ -1479,256 +1571,6 @@ html.light nav { background: rgba(245,246,250,0.9); }
     </div>
   </div>
 </div>
-
-<!-- PERFORMANCE COMPARISON -->
-<div class="section" id="products">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">Why Kwyre</div>
-      <h2 class="reveal reveal-d1">Every security feature is unique to Kwyre</h2>
-      <p class="reveal reveal-d2">No other local inference tool targets the compliance and adversarial environment use case.</p>
-    </div>
-
-    <div class="matrix-wrap reveal reveal-d3">
-      <table class="matrix">
-        <thead>
-          <tr>
-            <th>Capability</th>
-            <th class="m-kwyre">Kwyre</th>
-            <th>ChatGPT</th>
-            <th>Ollama</th>
-            <th>LM Studio</th>
-            <th>Jan.ai</th>
-            <th>LocalAI</th>
-            <th>vLLM</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td class="m-label">Fully local</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td></tr>
-          <tr><td class="m-label">Open source</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td></tr>
-          <tr><td class="m-label">Localhost-only binding</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Process outbound block</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Dependency integrity</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Model weight verification</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">RAM-only sessions</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Cryptographic session wipe</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Intrusion detection + auto-wipe</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Compliance documentation</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Custom domain training</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">GRPO reinforcement learning</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">RAG document ingestion</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td>Plugin</td><td>Plugin</td><td>Plugin</td><td>Plugin</td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Speculative decoding</td><td class="m-kwyre"><span class="m-y">YES</span></td><td>N/A</td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td></tr>
-          <tr><td class="m-label">Anonymous payment (Monero)</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td>free</td><td>free</td><td>free</td><td>free</td><td>free</td></tr>
-        </tbody>
-      </table>
-    </div>
-
-    <div style="text-align: center; margin-top: 48px;">
-      <p style="font-size: 15px; color: var(--text2); margin-bottom: 24px;">Need something beyond our four products?</p>
-      <a href="custom.html" class="btn btn-primary">Request a Custom Model</a>
-    </div>
-  </div>
-</div>
-
-<!-- WHO IT'S FOR -->
-<div class="section" id="buyers">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">Use Cases</div>
-      <h2 class="reveal reveal-d1">Built for adversarial environments</h2>
-      <p>Kwyre exists because these professionals cannot upload their work to cloud AI. Not legally. Not ethically. Not safely.</p>
-    </div>
-
-    <div class="buyers-grid reveal reveal-d2">
-      <div class="buyer-card" onclick="showCase(0)">
-        <div class="buyer-role">Forensic Investigators</div>
-        <div class="buyer-pain">Cannot upload $3B fraud evidence to ChatGPT during an active federal case.</div>
-        <div class="buyer-solve">Full local inference, zero telemetry, no chain-of-custody risk.</div>
-        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-      </div>
-      <div class="buyer-card" onclick="showCase(1)">
-        <div class="buyer-role">Criminal Defense Attorneys</div>
-        <div class="buyer-pain">Attorney-client privilege prohibits cloud AI on case materials.</div>
-        <div class="buyer-solve">Air-gapped by architecture, not policy.</div>
-        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-      </div>
-      <div class="buyer-card" onclick="showCase(2)">
-        <div class="buyer-role">M&amp;A Law Firms</div>
-        <div class="buyer-pain">Associates uploading NDA-protected deal docs to ChatGPT is malpractice liability.</div>
-        <div class="buyer-solve">Verified zero outbound connections, auditable.</div>
-        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-      </div>
-      <div class="buyer-card" onclick="showCase(3)">
-        <div class="buyer-role">Insurance Underwriters</div>
-        <div class="buyer-pain">Actuarial models and cedent PII cannot touch cloud APIs under compliance rules.</div>
-        <div class="buyer-solve">Compliance documentation package for your legal team.</div>
-        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-      </div>
-      <div class="buyer-card" onclick="showCase(4)">
-        <div class="buyer-role">Cleared Defense Contractors</div>
-        <div class="buyer-pain">Sensitive unclassified data. Can't use classified AI, can't use ChatGPT.</div>
-        <div class="buyer-solve">Local, offline, no cleared facility required.</div>
-        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-      </div>
-      <div class="buyer-card" onclick="showCase(5)">
-        <div class="buyer-role">Forensic Accountants</div>
-        <div class="buyer-pain">SEC whistleblower cases, active DOJ investigations. Evidence integrity is paramount.</div>
-        <div class="buyer-solve">RAM-only storage, cryptographic wipe on session end.</div>
-        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- SECURITY STACK -->
-<div class="section" id="security">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">Defense Architecture</div>
-      <h2 class="reveal reveal-d1">Six layers of active security</h2>
-      <p>Every local AI tool treats "local" as the security boundary. Kwyre treats the machine itself as potentially compromised.</p>
-    </div>
-
-    <div class="sec-layers reveal reveal-d2">
-      <div class="sec-layer">
-        <div class="sec-layer-num"><div class="lnum">L1</div></div>
-        <div class="sec-layer-body">
-          <h3>Network Isolation</h3>
-          <p>Server binds to 127.0.0.1 only &mdash; physically unreachable from any network at the OS level. No firewall rules required. The OS itself blocks all external connections.</p>
-          <span class="sec-tag">OS-Level Enforcement</span>
-        </div>
-      </div>
-      <div class="sec-layer">
-        <div class="sec-layer-num"><div class="lnum">L2</div></div>
-        <div class="sec-layer-body">
-          <h3>Process-Level Network Lockdown</h3>
-          <p>iptables rules scoped to the inference process. All outbound traffic blocked except localhost. Even a fully compromised server process cannot make outbound connections.</p>
-          <span class="sec-tag">Kernel-Level Enforcement</span>
-        </div>
-      </div>
-      <div class="sec-layer">
-        <div class="sec-layer-num"><div class="lnum">L3</div></div>
-        <div class="sec-layer-body">
-          <h3>Dependency Integrity</h3>
-          <p>SHA256 hash manifest of every installed Python package generated on clean install. Verified at server startup. Tampered torch, transformers, or any dependency causes immediate abort.</p>
-          <span class="sec-tag">Supply Chain Defense</span>
-        </div>
-      </div>
-      <div class="sec-layer">
-        <div class="sec-layer-num"><div class="lnum">L4</div></div>
-        <div class="sec-layer-body">
-          <h3>Model Weight Integrity</h3>
-          <p>SHA256 hashes of all model config files verified at every startup. Tampered or replaced model weights cause immediate process abort with clear error.</p>
-          <span class="sec-tag">Cryptographic Verification</span>
-        </div>
-      </div>
-      <div class="sec-layer">
-        <div class="sec-layer-num"><div class="lnum">L5</div></div>
-        <div class="sec-layer-body">
-          <h3>Secure RAM Session Storage</h3>
-          <p>Conversations stored only in RAM. Each session gets a unique 32-byte random key. On session end: secure_wipe() overwrites all content with random bytes before clearing references. RAM scraping returns garbage.</p>
-          <span class="sec-tag">Cryptographic Wipe</span>
-        </div>
-      </div>
-      <div class="sec-layer">
-        <div class="sec-layer-num"><div class="lnum">L6</div></div>
-        <div class="sec-layer-body">
-          <h3>Intrusion Detection + Auto-Wipe</h3>
-          <p>Background watchdog monitors for unexpected outbound connections and known analysis tools (Wireshark, x64dbg, Fiddler, Ghidra, IDA). On confirmed intrusion: all sessions wiped, server terminated.</p>
-          <span class="sec-tag">Active Threat Response</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- FEATURES -->
-<div class="section" id="features">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">Capabilities</div>
-      <h2 class="reveal reveal-d1">Production inference engine</h2>
-      <p>Frontier-class model with dual-layer compression. Spike QAT training plus 4-bit quantization. Nobody else does this.</p>
-    </div>
-
-    <div class="feat-grid reveal reveal-d2">
-      <div class="feat-cell">
-        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-        <h3>Spike QAT Training</h3>
-        <p>Custom pipeline using Straight-Through Estimator spike encoding with k-curriculum annealing (k=50&#8594;5). The model learns to tolerate spike-encoded activations.</p>
-      </div>
-      <div class="feat-cell">
-        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
-        <h3>SpikeServe Activation Encoding</h3>
-        <p>Dynamic spike encoding at inference time. Significant activation sparsity without quality loss. Dual compression: weights AND activations.</p>
-      </div>
-      <div class="feat-cell">
-        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <h3>Zero Content Logging</h3>
-        <p>Metadata only. No telemetry, no analytics, no error reporting, no update pings, no license callbacks. Verify yourself with Wireshark.</p>
-      </div>
-      <div class="feat-cell">
-        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-        <h3>OpenAI-Compatible API</h3>
-        <p>POST /v1/chat/completions drop-in replacement. Works with any OpenAI SDK. Session management and compliance endpoints built in.</p>
-      </div>
-      <div class="feat-cell">
-        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
-        <h3>LoRA Fine-Tuning</h3>
-        <p>Adapters targeting MLP layers (gate_proj, up_proj, down_proj). Fine-tuning with 0.2% trainable parameters. QLoRA rank 64, alpha 128.</p>
-      </div>
-      <div class="feat-cell">
-        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
-        <h3>Compliance & Audit</h3>
-        <p>GET /audit for metadata-only compliance logs. GET /health for full security stack status. Architecture designed for HIPAA, FINRA, SOC2-adjacent requirements.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- COMPETITIVE MATRIX -->
-<div class="section" id="matrix">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">Competitive Analysis</div>
-      <h2 class="reveal reveal-d1">Every security feature is unique to Kwyre</h2>
-      <p>No other local inference tool targets the compliance and adversarial environment use case.</p>
-    </div>
-
-    <div class="matrix-wrap reveal reveal-d2">
-      <table class="matrix">
-        <thead>
-          <tr>
-            <th>Capability</th>
-            <th class="m-kwyre">Kwyre</th>
-            <th>ChatGPT</th>
-            <th>Ollama</th>
-            <th>LM Studio</th>
-            <th>Jan.ai</th>
-            <th>LocalAI</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td class="m-label">Fully local</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td></tr>
-          <tr><td class="m-label">Open source</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td></tr>
-          <tr><td class="m-label">Localhost-only binding</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Process outbound block</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Dependency integrity</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Model weight verification</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">RAM-only sessions</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Cryptographic session wipe</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Intrusion detection + auto-wipe</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Compliance documentation</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Audit endpoint</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Anonymous payment (XMR)</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td>free</td><td>free</td><td>free</td><td>free</td></tr>
-          <tr><td class="m-label">Spike activation encoding</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Custom QAT training</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
 
 <!-- FREE TRIAL -->
 <div class="section" id="trial">
@@ -1826,6 +1668,163 @@ html.light nav { background: rgba(245,246,250,0.9); }
   </div>
 </div>
 
+<!-- FLOATING INFO PANELS -->
+<div class="float-panels">
+  <button class="float-btn" onclick="togglePanel('panelBuyers')">
+    <span class="float-btn-icon">&#9679;</span>
+    Use Cases
+  </button>
+  <button class="float-btn" onclick="togglePanel('panelSecurity')">
+    <span class="float-btn-icon">&#9679;</span>
+    Security
+  </button>
+  <button class="float-btn" onclick="togglePanel('panelFeatures')">
+    <span class="float-btn-icon">&#9679;</span>
+    Features
+  </button>
+</div>
+
+<div class="float-panel" id="panelBuyers">
+  <div class="float-panel-inner">
+    <button class="float-panel-close" onclick="togglePanel('panelBuyers')">&times;</button>
+    <h2>Who It's For</h2>
+    <div class="buyers-grid">
+      <div class="buyer-card" onclick="showCase(0)">
+        <div class="buyer-role">Forensic Investigators</div>
+        <div class="buyer-pain">Cannot upload $3B fraud evidence to ChatGPT during an active federal case.</div>
+        <div class="buyer-solve">Full local inference, zero telemetry, no chain-of-custody risk.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="buyer-card" onclick="showCase(1)">
+        <div class="buyer-role">Criminal Defense Attorneys</div>
+        <div class="buyer-pain">Attorney-client privilege prohibits cloud AI on case materials.</div>
+        <div class="buyer-solve">Air-gapped by architecture, not policy.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="buyer-card" onclick="showCase(2)">
+        <div class="buyer-role">M&amp;A Law Firms</div>
+        <div class="buyer-pain">Associates uploading NDA-protected deal docs to ChatGPT is malpractice liability.</div>
+        <div class="buyer-solve">Verified zero outbound connections, auditable.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="buyer-card" onclick="showCase(3)">
+        <div class="buyer-role">Insurance Underwriters</div>
+        <div class="buyer-pain">Actuarial models and cedent PII cannot touch cloud APIs under compliance rules.</div>
+        <div class="buyer-solve">Compliance documentation package for your legal team.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="buyer-card" onclick="showCase(4)">
+        <div class="buyer-role">Cleared Defense Contractors</div>
+        <div class="buyer-pain">Sensitive unclassified data. Can't use classified AI, can't use ChatGPT.</div>
+        <div class="buyer-solve">Local, offline, no cleared facility required.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="buyer-card" onclick="showCase(5)">
+        <div class="buyer-role">Forensic Accountants</div>
+        <div class="buyer-pain">SEC whistleblower cases, active DOJ investigations. Evidence integrity is paramount.</div>
+        <div class="buyer-solve">RAM-only storage, cryptographic wipe on session end.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="float-panel" id="panelSecurity">
+  <div class="float-panel-inner">
+    <button class="float-panel-close" onclick="togglePanel('panelSecurity')">&times;</button>
+    <h2>Six Layers of Active Security</h2>
+    <div class="sec-layers">
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L1</div></div>
+        <div class="sec-layer-body">
+          <h3>Network Isolation</h3>
+          <p>Server binds to 127.0.0.1 only &mdash; physically unreachable from any network at the OS level. No firewall rules required. The OS itself blocks all external connections.</p>
+          <span class="sec-tag">OS-Level Enforcement</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L2</div></div>
+        <div class="sec-layer-body">
+          <h3>Process-Level Network Lockdown</h3>
+          <p>iptables rules scoped to the inference process. All outbound traffic blocked except localhost. Even a fully compromised server process cannot make outbound connections.</p>
+          <span class="sec-tag">Kernel-Level Enforcement</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L3</div></div>
+        <div class="sec-layer-body">
+          <h3>Dependency Integrity</h3>
+          <p>SHA256 hash manifest of every installed Python package generated on clean install. Verified at server startup. Tampered torch, transformers, or any dependency causes immediate abort.</p>
+          <span class="sec-tag">Supply Chain Defense</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L4</div></div>
+        <div class="sec-layer-body">
+          <h3>Model Weight Integrity</h3>
+          <p>SHA256 hashes of all model config files verified at every startup. Tampered or replaced model weights cause immediate process abort with clear error.</p>
+          <span class="sec-tag">Cryptographic Verification</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L5</div></div>
+        <div class="sec-layer-body">
+          <h3>Secure RAM Session Storage</h3>
+          <p>Conversations stored only in RAM. Each session gets a unique 32-byte random key. On session end: secure_wipe() overwrites all content with random bytes before clearing references. RAM scraping returns garbage.</p>
+          <span class="sec-tag">Cryptographic Wipe</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L6</div></div>
+        <div class="sec-layer-body">
+          <h3>Intrusion Detection + Auto-Wipe</h3>
+          <p>Background watchdog monitors for unexpected outbound connections and known analysis tools (Wireshark, x64dbg, Fiddler, Ghidra, IDA). On confirmed intrusion: all sessions wiped, server terminated.</p>
+          <span class="sec-tag">Active Threat Response</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="float-panel" id="panelFeatures">
+  <div class="float-panel-inner">
+    <button class="float-panel-close" onclick="togglePanel('panelFeatures')">&times;</button>
+    <h2>Production Inference Engine</h2>
+    <div class="feat-grid">
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <h3>Spike QAT Training</h3>
+        <p>Custom pipeline using Straight-Through Estimator spike encoding with k-curriculum annealing (k=50&#8594;5). The model learns to tolerate spike-encoded activations.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <h3>SpikeServe Activation Encoding</h3>
+        <p>Dynamic spike encoding at inference time. Significant activation sparsity without quality loss. Dual compression: weights AND activations.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Zero Content Logging</h3>
+        <p>Metadata only. No telemetry, no analytics, no error reporting, no update pings, no license callbacks. Verify yourself with Wireshark.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <h3>OpenAI-Compatible API</h3>
+        <p>POST /v1/chat/completions drop-in replacement. Works with any OpenAI SDK. Session management and compliance endpoints built in.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+        <h3>LoRA Fine-Tuning</h3>
+        <p>Adapters targeting MLP layers (gate_proj, up_proj, down_proj). Fine-tuning with 0.2% trainable parameters. QLoRA rank 64, alpha 128.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
+        <h3>Compliance & Audit</h3>
+        <p>GET /audit for metadata-only compliance logs. GET /health for full security stack status. Architecture designed for HIPAA, FINRA, SOC2-adjacent requirements.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- FOOTER -->
 <footer class="site-footer">
   <div class="wrap">
@@ -1901,6 +1900,20 @@ document.querySelectorAll('a[href^="#"]').forEach(a => {
     const target = document.querySelector(a.getAttribute('href'));
     if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
   });
+});
+
+/* ── FLOATING PANELS ── */
+function togglePanel(id) {
+  const panel = document.getElementById(id);
+  const isOpen = panel.classList.contains('open');
+  document.querySelectorAll('.float-panel').forEach(p => p.classList.remove('open'));
+  if (!isOpen) panel.classList.add('open');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.float-panel').forEach(p => p.classList.remove('open'));
+  }
 });
 
 /* ── LIVE AI CHAT ── */
