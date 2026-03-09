@@ -1,11 +1,14 @@
 """
-Offline AWQ quantization for Kwyre AI.
+Offline AWQ quantization for Kwyre AI — Professional tier.
 
-Quantizes the model to 4-bit AWQ format for faster inference.
+Quantizes the QAT-trained Qwen3.5-9B model to 4-bit AWQ format for
+1.4x faster inference. Run ONCE after merge_and_export.py.
+
+The Personal tier (Qwen3-4B) uses NF4 quantization via bitsandbytes
+at load time and does not need offline AWQ pre-quantization.
 
 Usage:
-    Personal:     python model/quantize_awq.py --model Qwen/Qwen3-4B --output models/kwyre-4b-awq
-    Professional: python model/quantize_awq.py --model Qwen/Qwen3.5-9B --output models/kwyre-9b-awq
+    python model/quantize_awq.py --model Qwen/Qwen3.5-9B --output models/kwyre-9b-awq
 """
 
 import os
@@ -19,7 +22,7 @@ from peft import PeftModel, AutoPeftModelForCausalLM
 _script_dir = os.path.dirname(os.path.abspath(__file__))
 _project_root = os.path.dirname(_script_dir)
 
-DEFAULT_MODEL_ID = os.environ.get("KWYRE_MODEL", "Qwen/Qwen3-4B")
+DEFAULT_MODEL_ID = os.environ.get("KWYRE_MODEL", "Qwen/Qwen3.5-9B")
 _TIER_NAMES = {"Qwen/Qwen3-4B": "kwyre-4b", "Qwen/Qwen3.5-9B": "kwyre-9b"}
 _TIER_NAME = _TIER_NAMES.get(DEFAULT_MODEL_ID, "kwyre-custom")
 DEFAULT_OUTPUT_PATH = os.path.join(_project_root, "models", f"{_TIER_NAME}-awq")

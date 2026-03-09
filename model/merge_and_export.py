@@ -1,9 +1,14 @@
 """
-Merge QAT-trained LoRA adapters into the base model and prepare for deployment.
+Merge QAT-trained LoRA adapters into the base Qwen3.5-9B model for deployment.
 
-Supports both tiers:
-  Personal:     python model/merge_and_export.py --model_id Qwen/Qwen3-4B --adapter_path ./qat_output_4b/final --output_dir ./merged-4b
-  Professional: python model/merge_and_export.py --model_id Qwen/Qwen3.5-9B --adapter_path ./qat_output_9b/final --output_dir ./merged-9b
+This is a PROFESSIONAL TIER ONLY tool. The Personal tier (Qwen3-4B) ships
+as a base model without QAT adapters.
+
+Usage:
+    python model/merge_and_export.py \\
+        --model_id Qwen/Qwen3.5-9B \\
+        --adapter_path ./qat_output_9b/final \\
+        --output_dir ./kwyre-9b-merged
 """
 
 import argparse
@@ -36,8 +41,8 @@ def parse_args():
     p = argparse.ArgumentParser(
         description="Merge QAT-trained LoRA adapters and export for deployment"
     )
-    p.add_argument("--model_id", default="Qwen/Qwen3-4B",
-                    help="Model ID. Options: Qwen/Qwen3-4B (personal), Qwen/Qwen3.5-9B (professional)")
+    p.add_argument("--model_id", default="Qwen/Qwen3.5-9B",
+                    help="Base model ID. QAT adapters are trained for the 9B professional model.")
     p.add_argument("--adapter_path", required=True,
                     help="Path to LoRA adapter checkpoint from QAT training")
     p.add_argument("--output_dir", required=True,
@@ -55,9 +60,9 @@ def parse_args():
     return p.parse_args()
 
 
-def check_vram(required_gb: float = 10.0):
+def check_vram(required_gb: float = 18.0):
     if not torch.cuda.is_available():
-        print("WARNING: No CUDA GPU detected. Full-precision merge requires GPU.")
+        print("WARNING: No CUDA GPU detected. Full-precision 9B merge requires ~18GB+ VRAM.")
         print("         Proceeding on CPU -- this will be slow and memory-hungry.")
         return
     total_gb = torch.cuda.get_device_properties(0).total_memory / 1e9

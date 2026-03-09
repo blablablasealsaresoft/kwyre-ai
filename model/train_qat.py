@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
-"""QAT fine-tuning: teach Qwen models to tolerate spike-encoded activations.
+"""QAT fine-tuning: teach Qwen3.5-9B to tolerate spike-encoded activations.
 
-Supports both tiers:
-  Personal:     python model/train_qat.py --model_id Qwen/Qwen3-4B --output_dir ./qat_output_4b
-  Professional: python model/train_qat.py --model_id Qwen/Qwen3.5-9B --output_dir ./qat_output_9b
+This is a PROFESSIONAL TIER ONLY pipeline. The Personal tier (Qwen3-4B)
+ships as a base model without QAT training -- its speed advantage comes
+from speculative decoding and SpikeServe on the draft model instead.
+
+Usage:
+    python model/train_qat.py --model_id Qwen/Qwen3.5-9B --output_dir ./qat_output_9b
+
+Training config (9B):
+    LoRA rank: 64 (alpha 128), targets: gate_proj, up_proj, down_proj
+    Spike hooks: 408 MLP layers, k-curriculum: 50.0 -> 5.0
+    Dataset: teknium/OpenHermes-2.5
 
 Loads model from local HF cache, trains with STE spike encoding hooks
 and a k-curriculum that gradually increases quantization aggressiveness.
@@ -68,8 +76,8 @@ def _resolve_model_path(model_id: str) -> str:
 
 def parse_args():
     p = argparse.ArgumentParser(description="QLoRA + Spike QAT Training")
-    p.add_argument("--model_id", type=str, default="Qwen/Qwen3-4B",
-                    help="Model ID or path. Options: Qwen/Qwen3-4B (personal), Qwen/Qwen3.5-9B (professional)")
+    p.add_argument("--model_id", type=str, default="Qwen/Qwen3.5-9B",
+                    help="Model ID or path. QAT is designed for the 9B professional model.")
     p.add_argument("--dataset", type=str, default="teknium/OpenHermes-2.5")
     p.add_argument("--max_samples", type=int, default=100_000)
     p.add_argument("--output_dir", type=str, default="./qat_output")
