@@ -1614,24 +1614,16 @@ html.light nav { background: rgba(245,246,250,0.9); }
 
     <div class="hero-stats reveal reveal-d3">
       <div class="hero-stat">
-        <div class="hero-stat-val" id="heroModel">Qwen3-4B</div>
-        <div class="hero-stat-label">Main Model</div>
+        <div class="hero-stat-val">Air-Gapped</div>
+        <div class="hero-stat-label">By Architecture</div>
       </div>
       <div class="hero-stat">
-        <div class="hero-stat-val">4-bit NF4</div>
-        <div class="hero-stat-label">Pre-Quantized</div>
+        <div class="hero-stat-val">6-Layer</div>
+        <div class="hero-stat-label">Security Stack</div>
       </div>
       <div class="hero-stat">
-        <div class="hero-stat-val" id="heroVram">3.9 GB</div>
-        <div class="hero-stat-label">VRAM Required</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-val" id="heroDownload">3.3 GB</div>
-        <div class="hero-stat-label">Download</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-val" id="heroSpeed">7-14</div>
-        <div class="hero-stat-label">Tok/s</div>
+        <div class="hero-stat-val">Zero</div>
+        <div class="hero-stat-label">Telemetry</div>
       </div>
     </div>
 
@@ -2013,11 +2005,6 @@ const KWYRE_API = (window.location.hostname === '127.0.0.1' || window.location.h
 const KWYRE_KEY = 'sk-kwyre-dev-local';
 let KWYRE_MODEL_ID = 'kwyre-4b';
 
-const TIER_INFO = {
-  'kwyre-4b': { model: 'Qwen3-4B', vram: '3.9 GB', download: '3.3 GB', speed: '7-14', tier: 'Personal' },
-  'kwyre-9b': { model: 'Qwen3.5-9B', vram: '7.5 GB', download: '7.6 GB', speed: '3-5', tier: 'Professional' },
-};
-
 async function detectTier() {
   try {
     const r = await fetch(KWYRE_API + '/health', {
@@ -2028,17 +2015,6 @@ async function detectTier() {
     const modelId = data.model || '';
     const tierKey = modelId.replace(/-spikeserve|-vllm|-mlx|-air/g, '');
     KWYRE_MODEL_ID = tierKey || KWYRE_MODEL_ID;
-    const info = TIER_INFO[tierKey];
-    if (info) {
-      const heroModel = document.getElementById('heroModel');
-      const heroVram = document.getElementById('heroVram');
-      const heroDownload = document.getElementById('heroDownload');
-      const heroSpeed = document.getElementById('heroSpeed');
-      if (heroModel) heroModel.textContent = info.model;
-      if (heroVram) heroVram.textContent = info.vram;
-      if (heroDownload) heroDownload.textContent = info.download;
-      if (heroSpeed) heroSpeed.textContent = info.speed;
-    }
   } catch {}
 }
 
