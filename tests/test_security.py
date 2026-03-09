@@ -307,7 +307,7 @@ class TestLayer4ModelIntegrity(unittest.TestCase):
 # without importing the module (it eagerly loads torch + GPU models).
 
 RATE_LIMIT_RPM = 30
-ALLOWED_PAGES = {"landing.html", "index.html", "main.html", "pay.html"}
+ALLOWED_PAGES = {"landing.html", "index.html", "main.html", "pay.html", "technology.html", "security.html", "platform.html", "custom.html"}
 
 SECURITY_HEADERS = {
     "X-Content-Type-Options": "nosniff",
@@ -590,8 +590,8 @@ class TestAPISecurityLayer(unittest.TestCase):
         self.assertIsNone(_safe_page_name("/.env"))
 
     def test_allowed_pages_whitelist(self):
-        """ALLOWED_PAGES must contain exactly the four expected HTML files."""
-        expected = {"landing.html", "index.html", "main.html", "pay.html"}
+        """ALLOWED_PAGES must contain all expected HTML files."""
+        expected = {"landing.html", "index.html", "main.html", "pay.html", "technology.html", "security.html", "platform.html", "custom.html"}
         self.assertEqual(ALLOWED_PAGES, expected)
 
     def test_unknown_path_returns_404(self):

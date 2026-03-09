@@ -101,6 +101,7 @@ body {
 .reveal-d1 { transition-delay: 0.1s; }
 .reveal-d2 { transition-delay: 0.2s; }
 .reveal-d3 { transition-delay: 0.3s; }
+.reveal-d4 { transition-delay: 0.4s; }
 
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
 .section { padding: 80px 0; }
@@ -179,45 +180,147 @@ nav {
 }
 .sh p { font-size: 16px; color: var(--text2); max-width: 560px; margin: 0 auto; line-height: 1.6; }
 
-/* PERF CARDS */
-.perf-grid {
-  display: grid; grid-template-columns: repeat(4, 1fr);
-  gap: 1px; background: var(--border);
-  border-radius: 8px; overflow: hidden; margin-top: 48px;
+/* PIPELINE FLOW */
+.arch-flow {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  margin-top: 48px;
 }
-.perf-card {
-  background: var(--surface); padding: 32px 24px;
-  transition: background 0.2s; position: relative;
-}
-.perf-card:hover { background: var(--surface2); }
-.perf-card.perf-featured { background: var(--surface2); border-top: 2px solid var(--accent); }
-.perf-badge {
-  display: inline-block; font-family: var(--mono);
-  font-size: 9px; font-weight: 600; letter-spacing: 1.5px;
-  text-transform: uppercase; padding: 3px 10px;
-  border-radius: 3px; margin-bottom: 16px;
-}
-.perf-badge-gpu { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(59,130,246,0.15); }
-.perf-badge-cpu { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.15); }
-.perf-badge-mlx { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(168,85,247,0.15); }
-.perf-title { font-size: 16px; font-weight: 700; color: var(--text); margin-bottom: 4px; }
-.perf-sub {
-  font-size: 12px; color: var(--text3); margin-bottom: 20px;
-  font-family: var(--mono); letter-spacing: 0.3px;
-}
-.perf-specs { list-style: none; }
-.perf-specs li {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 0; border-bottom: 1px solid var(--border); font-size: 12px;
-}
-.perf-specs li:last-child { border-bottom: none; }
-.perf-spec-label {
-  color: var(--text3); font-family: var(--mono);
-  font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase;
-}
-.perf-spec-val { color: var(--text); font-family: var(--mono); font-weight: 600; font-size: 13px; }
 
-/* ENGINE FEATURES */
+.arch-step {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+}
+
+.arch-box {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 24px 16px;
+  text-align: center;
+  width: 100%;
+  transition: border-color 0.3s, background 0.2s;
+  position: relative;
+  z-index: 1;
+}
+
+.arch-box:hover {
+  border-color: var(--border-hi);
+  background: var(--surface2);
+}
+
+.arch-num {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  color: var(--accent);
+  margin-bottom: 10px;
+  opacity: 0.6;
+}
+
+.arch-box h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 8px;
+  line-height: 1.3;
+}
+
+.arch-box p {
+  font-size: 11px;
+  color: var(--text2);
+  line-height: 1.5;
+}
+
+.arch-arrow {
+  display: flex;
+  align-items: center;
+  padding: 0 2px;
+  color: var(--text3);
+  font-size: 16px;
+  flex-shrink: 0;
+  z-index: 0;
+}
+
+.arch-arrow svg {
+  width: 24px;
+  height: 24px;
+  stroke: var(--border-hi);
+  fill: none;
+  stroke-width: 1.5;
+}
+
+/* BENCHMARK TABLE */
+.bench-wrap {
+  overflow-x: auto;
+  margin-top: 48px;
+}
+
+.bench-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+}
+
+.bench-table th,
+.bench-table td {
+  padding: 14px 20px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+
+.bench-table thead th {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text3);
+  background: var(--surface);
+  border-bottom: 2px solid var(--border);
+}
+
+.bench-table tbody tr {
+  transition: background 0.2s;
+}
+
+.bench-table tbody tr:hover {
+  background: var(--surface);
+}
+
+.bench-table td {
+  color: var(--text2);
+}
+
+.bench-val {
+  font-family: var(--mono);
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+
+.bench-highlight {
+  color: var(--green);
+}
+
+.bench-label {
+  font-size: 13px;
+  color: var(--text2);
+}
+
+.bench-note {
+  font-family: var(--mono);
+  font-size: 10px;
+  letter-spacing: 0.5px;
+  color: var(--text3);
+}
+
+/* ENGINE FEATURES (reused from original) */
 .engine-grid {
   display: grid; grid-template-columns: repeat(3, 1fr);
   gap: 1px; background: var(--border);
@@ -241,81 +344,59 @@ nav {
 .engine-icon-purple { background: var(--purple-dim); }
 .engine-icon-purple svg { stroke: var(--purple); }
 .engine-cell h3 { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: var(--text); }
-.engine-cell p { font-size: 13px; color: var(--text2); line-height: 1.6; }
-
-/* BACKEND CARDS */
-.backend-grid {
-  display: grid; grid-template-columns: repeat(3, 1fr);
-  gap: 1px; background: var(--border);
-  border-radius: 8px; overflow: hidden; margin-top: 48px;
+.engine-cell p {
+  font-size: 13px; color: var(--text2); line-height: 1.6;
 }
-.backend-card {
-  background: var(--surface); padding: 36px 28px;
+
+/* TRAINING PIPELINE CARDS */
+.stage-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 48px;
+}
+
+.stage-card {
+  background: var(--surface);
+  padding: 36px 20px;
+  text-align: center;
   transition: background 0.2s;
-}
-.backend-card:hover { background: var(--surface2); }
-.backend-card h3 {
-  font-size: 17px; font-weight: 700; color: var(--text); margin-bottom: 6px;
-}
-.backend-card .backend-sub {
-  font-family: var(--mono); font-size: 11px; color: var(--text3);
-  letter-spacing: 0.5px; margin-bottom: 16px;
-}
-.backend-card p { font-size: 13px; color: var(--text2); line-height: 1.7; margin-bottom: 16px; }
-.backend-specs {
-  list-style: none; border-top: 1px solid var(--border); padding-top: 12px;
-}
-.backend-specs li {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 6px 0; font-size: 12px;
-}
-.backend-specs .bs-label { color: var(--text3); font-family: var(--mono); font-size: 10px; letter-spacing: 0.8px; text-transform: uppercase; }
-.backend-specs .bs-val { color: var(--text); font-family: var(--mono); font-weight: 500; }
-
-/* MULTI-USER */
-.mu-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 1px; background: var(--border);
-  border-radius: 8px; overflow: hidden; margin-top: 48px;
-}
-.mu-panel {
-  background: var(--surface); padding: 32px 28px;
-  transition: background 0.2s;
-}
-.mu-panel:hover { background: var(--surface2); }
-.mu-panel h3 { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 12px; }
-.mu-panel ul { list-style: none; }
-.mu-panel ul li {
-  font-size: 12px; color: var(--text2); padding: 6px 0;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: baseline; gap: 8px; line-height: 1.5;
-}
-.mu-panel ul li:last-child { border-bottom: none; }
-.mu-panel ul li::before {
-  content: ''; width: 4px; height: 4px;
-  border-radius: 1px; background: var(--accent);
-  flex-shrink: 0; margin-top: 5px;
+  position: relative;
 }
 
-/* ROLE BADGES */
-.role-row {
-  display: flex; gap: 1px; background: var(--border);
-  border-radius: 8px; overflow: hidden; margin-top: 24px;
+.stage-card:hover {
+  background: var(--surface2);
 }
-.role-badge {
-  flex: 1; background: var(--surface); padding: 20px 16px;
-  text-align: center; transition: background 0.2s;
+
+.stage-num {
+  font-family: var(--mono);
+  font-size: 28px;
+  font-weight: 600;
+  color: var(--accent);
+  opacity: 0.3;
+  margin-bottom: 16px;
 }
-.role-badge:hover { background: var(--surface2); }
-.role-badge h4 {
-  font-family: var(--mono); font-size: 11px; font-weight: 600;
-  letter-spacing: 2px; text-transform: uppercase;
-  margin-bottom: 6px;
+
+.stage-card h3 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.4;
+  margin-bottom: 16px;
 }
-.role-admin h4 { color: var(--red); }
-.role-analyst h4 { color: var(--accent); }
-.role-viewer h4 { color: var(--green); }
-.role-badge p { font-size: 11px; color: var(--text3); line-height: 1.5; }
+
+.stage-nda {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text3);
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+}
 
 /* CTA */
 .cta-bar {
@@ -351,200 +432,31 @@ nav {
 }
 .footer-legal { font-size: 12px; color: var(--text3); max-width: 500px; line-height: 1.5; }
 
-/* CUSTOM SERVICE GRID */
-.custom-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  margin-top: 48px;
-}
-
-.custom-card {
-  background: var(--surface);
-  padding: 28px 24px;
-  transition: background 0.2s;
-}
-
-.custom-card:hover { background: var(--surface2); }
-
-.custom-card h3 {
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 10px;
-}
-
-.custom-card p {
-  font-size: 13px;
-  color: var(--text2);
-  line-height: 1.6;
-}
-
-/* CUSTOM REQUEST FORM */
-.form-field { margin-bottom: 20px; }
-.form-field label {
-  display: block; font-family: var(--mono);
-  font-size: 10px; font-weight: 600; letter-spacing: 1.5px;
-  text-transform: uppercase; color: var(--text2); margin-bottom: 8px;
-}
-.form-field input[type="email"] {
-  width: 100%; background: var(--surface); border: 1px solid var(--border);
-  border-radius: 4px; padding: 12px 14px; color: var(--text);
-  font-size: 14px; outline: none; font-family: var(--sans);
-}
-.form-field input[type="email"]:focus,
-.form-field select:focus,
-.form-field textarea:focus { border-color: var(--accent); }
-.form-submit {
-  display: inline-flex; align-items: center; justify-content: center;
-  padding: 14px 32px; font-family: var(--mono);
-  font-size: 12px; font-weight: 500; letter-spacing: 1px;
-  text-transform: uppercase; border: none; border-radius: 4px;
-  background: var(--accent); color: #fff; cursor: pointer;
-  box-shadow: 0 2px 16px var(--accent-glow); transition: all 0.2s;
-}
-.form-submit:hover { box-shadow: 0 4px 28px var(--accent-glow); transform: translateY(-1px); }
-.form-note {
-  font-size: 12px; color: var(--text3); margin-top: 16px;
-  text-align: center; line-height: 1.5;
-}
-
-/* PIPELINE STEPS */
-.pipeline-steps {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: 48px;
-}
-
-.pipeline-step {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 28px 28px 28px 80px;
+/* DETAIL FADE */
+.detail-fade {
   position: relative;
-  transition: border-color 0.3s, background 0.2s;
 }
-
-.pipeline-step:hover { border-color: var(--border-hi); background: var(--surface2); }
-
-.pipeline-num {
+.detail-fade::after {
+  content: '';
   position: absolute;
-  left: 24px;
-  top: 28px;
-  font-family: var(--mono);
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--accent);
-  opacity: 0.5;
-}
-
-.pipeline-step h3 {
-  font-size: 16px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: var(--text);
-}
-
-.pipeline-step p {
-  font-size: 13px;
-  color: var(--text2);
-  line-height: 1.7;
-  margin-bottom: 12px;
-}
-
-.pipeline-detail {
-  display: flex;
-  gap: 16px;
-  flex-wrap: wrap;
-}
-
-.pipeline-detail span {
-  font-family: var(--mono);
-  font-size: 10px;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  color: var(--green);
-  background: var(--green-dim);
-  border: 1px solid rgba(34,197,94,0.15);
-  padding: 3px 10px;
-  border-radius: 3px;
-}
-
-/* BENCHMARKS TABLE */
-.matrix-wrap { overflow-x: auto; }
-
-.matrix {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 13px;
-}
-
-.matrix th, .matrix td {
-  padding: 12px 16px;
-  text-align: left;
-  border-bottom: 1px solid var(--border);
-}
-
-.matrix thead th {
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--text3);
-  background: var(--surface);
-  border-bottom: 2px solid var(--border);
-}
-
-.matrix thead th.m-kwyre { color: var(--accent); }
-
-.matrix td { color: var(--text2); }
-.matrix td.m-kwyre { color: var(--text); font-weight: 500; }
-.matrix td.m-label {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 0.3px;
-  color: var(--text2);
-}
-
-.matrix tbody tr { transition: background 0.2s; }
-.matrix tbody tr:hover { background: var(--surface); }
-
-.m-y {
-  color: var(--green);
-  font-weight: 600;
-  font-family: var(--mono);
-  font-size: 11px;
-}
-
-.m-n {
-  color: var(--text3);
-  font-family: var(--mono);
-  font-size: 11px;
+  bottom: 0; left: 0; right: 0;
+  height: 80px;
+  background: linear-gradient(transparent, var(--bg));
+  pointer-events: none;
+  z-index: 2;
 }
 
 @media (max-width: 768px) {
   .nav-links a:not(.nav-cta) { display: none; }
   .page-hero { padding: 120px 0 40px; }
-  .perf-grid { grid-template-columns: 1fr; }
   .engine-grid { grid-template-columns: 1fr; }
-  .backend-grid { grid-template-columns: 1fr; }
-  .mu-grid { grid-template-columns: 1fr; }
-  .custom-grid { grid-template-columns: 1fr; }
-  .role-row { flex-direction: column; }
+  .arch-flow { flex-direction: column; gap: 0; }
+  .arch-arrow { transform: rotate(90deg); padding: 4px 0; justify-content: center; }
+  .stage-grid { grid-template-columns: 1fr; }
   .wrap { padding: 0 20px; }
   .footer-inner { flex-direction: column; text-align: center; }
-  .pipeline-step { padding-left: 24px; padding-top: 50px; }
-  .pipeline-num { top: 16px; }
-  .matrix { font-size: 11px; }
-  .matrix th, .matrix td { padding: 8px 10px; }
+  .bench-table { font-size: 11px; }
+  .bench-table th, .bench-table td { padding: 10px 12px; }
 }
 </style>
 </head>
@@ -561,12 +473,12 @@ nav {
   <div class="nav-inner">
     <a href="main.html" class="nav-brand"><span>K</span>WYRE</a>
     <div class="nav-links">
-      <a href="technology.html#pipeline">Pipeline</a>
+      <a href="main.html#products">Products</a>
       <a href="technology.html" class="active">Technology</a>
+      <a href="custom.html">Custom</a>
       <a href="security.html">Security</a>
       <a href="platform.html">Platform</a>
       <a href="pay.html">Purchase</a>
-      <a href="main.html#trial" class="nav-cta">Try Free</a>
     </div>
   </div>
 </nav>
@@ -574,465 +486,226 @@ nav {
 <!-- PAGE HERO -->
 <div class="page-hero">
   <div class="wrap">
-    <div class="page-hero-eyebrow reveal">Custom AI Pipeline</div>
-    <h1 class="reveal reveal-d1">Your Model. Your Data.<br>Your <em>Machine.</em></h1>
+    <div class="page-hero-eyebrow reveal">Under the Hood</div>
+    <h1 class="reveal reveal-d1">Engineering that took<br><em>18 months</em> to build</h1>
     <p class="reveal reveal-d2">
-      We don't just run models &mdash; we build them. Custom-trained on your domain using frontier-distilled reasoning and GRPO reinforcement learning. Delivered as an air-gapped appliance.
+      Speculative decoding. Activation encoding. Reinforcement learning. Six security layers. Here&rsquo;s how it all works.
     </p>
   </div>
 </div>
 
-<!-- PIPELINE -->
-<div class="section" id="pipeline">
+<!-- SECTION 1: ARCHITECTURE OVERVIEW -->
+<div class="section" id="architecture">
   <div class="wrap">
     <div class="sh">
-      <div class="sh-eyebrow reveal">The Pipeline</div>
-      <h2 class="reveal reveal-d1">Five steps to a custom model</h2>
-      <p class="reveal reveal-d2">From raw domain knowledge to a deployment-ready air-gapped AI in under 24 hours.</p>
+      <div class="sh-eyebrow reveal">System Architecture</div>
+      <h2 class="reveal reveal-d1">Architecture overview</h2>
+      <p class="reveal reveal-d2">Five-stage pipeline from frontier model intelligence to air-gapped deployment on your hardware.</p>
     </div>
 
-    <div class="pipeline-steps reveal reveal-d3">
-      <div class="pipeline-step">
-        <div class="pipeline-num">01</div>
-        <h3>Reasoning Trace Generation</h3>
-        <p>We generate thousands of chain-of-thought reasoning traces from frontier models across YOUR specific domains. These traces teach the model HOW to think about your problems.</p>
-        <div class="pipeline-detail">
-          <span>4 domains</span>
-          <span>200+ traces</span>
-          <span>~$2 API cost</span>
+    <div class="arch-flow reveal reveal-d3">
+      <div class="arch-step">
+        <div class="arch-box">
+          <div class="arch-num">01</div>
+          <h3>Frontier Model Distillation</h3>
+          <p>Extract reasoning capabilities from the largest models into compact form</p>
         </div>
       </div>
-      <div class="pipeline-step">
-        <div class="pipeline-num">02</div>
-        <h3>Distillation Fine-Tuning</h3>
-        <p>Using Unsloth QLoRA, we fine-tune Qwen3.5-9B on your reasoning traces. The model learns your domain vocabulary, reasoning patterns, and personality &mdash; baked into the weights, not just a system prompt.</p>
-        <div class="pipeline-detail">
-          <span>LoRA rank 32</span>
-          <span>3 epochs</span>
-          <span>~30 min on H100</span>
+      <div class="arch-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="arch-step">
+        <div class="arch-box">
+          <div class="arch-num">02</div>
+          <h3>Domain Specialization</h3>
+          <p>Adapt the model to your industry vocabulary, patterns, and reasoning</p>
         </div>
       </div>
-      <div class="pipeline-step">
-        <div class="pipeline-num">03</div>
-        <h3>GRPO Reinforcement Learning</h3>
-        <p>Group Relative Policy Optimization teaches the model to INVENT solutions, not just copy them. It generates multiple answers, scores them against correctness and reasoning quality, then updates its strategy. This is what gives your model emergent problem-solving.</p>
-        <div class="pipeline-detail">
-          <span>100 RL steps</span>
-          <span>2 reward functions</span>
-          <span>~1.5 hrs on H100</span>
+      <div class="arch-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="arch-step">
+        <div class="arch-box">
+          <div class="arch-num">03</div>
+          <h3>Reinforcement Learning</h3>
+          <p>Teach the model to invent solutions, not just reproduce them</p>
         </div>
       </div>
-      <div class="pipeline-step">
-        <div class="pipeline-num">04</div>
-        <h3>Quantization &amp; Export</h3>
-        <p>The trained model is exported to optimized GGUF format with domain-calibrated importance matrix quantization. Your users download a 5-6 GB file that runs on a consumer GPU.</p>
-        <div class="pipeline-detail">
-          <span>Q5_K_M (6.1 GB)</span>
-          <span>Q4_K_M (5.3 GB)</span>
-          <span>imatrix calibrated</span>
+      <div class="arch-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="arch-step">
+        <div class="arch-box">
+          <div class="arch-num">04</div>
+          <h3>Quantization</h3>
+          <p>Compress to deployment size while preserving domain-critical precision</p>
         </div>
       </div>
-      <div class="pipeline-step">
-        <div class="pipeline-num">05</div>
-        <h3>Air-Gapped Deployment</h3>
-        <p>Your custom model is packaged with the Kwyre 6-layer security stack, standard chat completions API, SSE streaming, RAG document ingestion, and intrusion detection. One command to deploy. Zero data leaves the machine.</p>
-        <div class="pipeline-detail">
-          <span>docker compose up</span>
-          <span>6-layer security</span>
-          <span>Zero telemetry</span>
+      <div class="arch-arrow"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+      <div class="arch-step">
+        <div class="arch-box">
+          <div class="arch-num">05</div>
+          <h3>Air-Gapped Deployment</h3>
+          <p>Ship as a sealed appliance with zero external network dependencies</p>
         </div>
       </div>
+    </div>
+
+    <div style="text-align: center; margin-top: 32px;">
+      <p class="reveal reveal-d4" style="font-size: 13px; color: var(--text3); max-width: 560px; margin: 0 auto; line-height: 1.6;">
+        Each stage is independently validated. The output of one feeds directly into the next. Total pipeline time from domain requirements to deployable model: under 24 hours on H100 compute.
+      </p>
     </div>
   </div>
 </div>
 
-<!-- BENCHMARKS -->
-<div class="section" id="benchmarks">
+<!-- SECTION 2: PERFORMANCE NUMBERS -->
+<div class="section" id="performance">
   <div class="wrap">
     <div class="sh">
-      <div class="sh-eyebrow reveal">Performance</div>
-      <h2 class="reveal reveal-d1">How our technology compares</h2>
-      <p class="reveal reveal-d2">Kwyre Professional is built on Qwen3.5-9B &mdash; the strongest model in the sub-10B class. Our custom training adds domain-specific capabilities that no benchmark measures.</p>
+      <div class="sh-eyebrow reveal">Benchmarks</div>
+      <h2 class="reveal reveal-d1">Performance numbers</h2>
+      <p class="reveal reveal-d2">Validated against standard academic benchmarks. Kwyre Professional runs on hardware you already own.</p>
     </div>
 
-    <div class="matrix-wrap reveal reveal-d3" style="margin-top: 48px;">
-      <table class="matrix">
+    <div class="bench-wrap reveal reveal-d3">
+      <table class="bench-table">
         <thead>
           <tr>
-            <th>Capability</th>
-            <th class="m-kwyre">Kwyre Professional</th>
-            <th>Cloud AI Services</th>
-            <th>Other Local Runners</th>
+            <th>Metric</th>
+            <th>Value</th>
+            <th>Context</th>
           </tr>
         </thead>
         <tbody>
           <tr>
-            <td class="m-label">Base model quality (MMLU-Pro)</td>
-            <td class="m-kwyre">82.5%</td>
-            <td>83-85%</td>
-            <td>Depends on model</td>
+            <td class="bench-label">MMLU-Pro</td>
+            <td><span class="bench-val">82.5%</span></td>
+            <td class="bench-note">Graduate-level multi-domain reasoning</td>
           </tr>
           <tr>
-            <td class="m-label">Advanced reasoning (GPQA Diamond)</td>
-            <td class="m-kwyre">81.7%</td>
-            <td>78-80%</td>
-            <td>Depends on model</td>
+            <td class="bench-label">GPQA Diamond</td>
+            <td><span class="bench-val">81.7%</span></td>
+            <td class="bench-note">PhD-level scientific questions</td>
           </tr>
           <tr>
-            <td class="m-label">Math reasoning (GSM8K)</td>
-            <td class="m-kwyre">Improving via GRPO</td>
-            <td>93-95%</td>
-            <td>Depends on model</td>
+            <td class="bench-label">Competitive size class</td>
+            <td><span class="bench-val bench-highlight">Beats models 3&ndash;13x its size</span></td>
+            <td class="bench-note">Per-parameter efficiency leader in sub-10B class</td>
           </tr>
           <tr>
-            <td class="m-label">Custom domain training</td>
-            <td class="m-kwyre"><span class="m-y">YES</span></td>
-            <td><span class="m-n">&mdash;</span></td>
-            <td><span class="m-n">&mdash;</span></td>
+            <td class="bench-label">Deployment footprint</td>
+            <td><span class="bench-val">5&ndash;6 GB</span></td>
+            <td class="bench-note">Runs on consumer GPUs, Apple Silicon, or CPU-only</td>
           </tr>
           <tr>
-            <td class="m-label">Chain-of-thought reasoning</td>
-            <td class="m-kwyre"><span class="m-y">YES (baked in)</span></td>
-            <td>Prompt-dependent</td>
-            <td>Prompt-dependent</td>
-          </tr>
-          <tr>
-            <td class="m-label">GRPO emergent reasoning</td>
-            <td class="m-kwyre"><span class="m-y">YES</span></td>
-            <td><span class="m-n">&mdash;</span></td>
-            <td><span class="m-n">&mdash;</span></td>
-          </tr>
-          <tr>
-            <td class="m-label">Air-gapped security (6 layers)</td>
-            <td class="m-kwyre"><span class="m-y">YES</span></td>
-            <td><span class="m-n">&mdash;</span></td>
-            <td><span class="m-n">&mdash;</span></td>
-          </tr>
-          <tr>
-            <td class="m-label">Intrusion detection + auto-wipe</td>
-            <td class="m-kwyre"><span class="m-y">YES</span></td>
-            <td><span class="m-n">&mdash;</span></td>
-            <td><span class="m-n">&mdash;</span></td>
-          </tr>
-          <tr>
-            <td class="m-label">RAM-only sessions (crypto wipe)</td>
-            <td class="m-kwyre"><span class="m-y">YES</span></td>
-            <td><span class="m-n">&mdash;</span></td>
-            <td><span class="m-n">&mdash;</span></td>
-          </tr>
-          <tr>
-            <td class="m-label">Compliance documentation</td>
-            <td class="m-kwyre"><span class="m-y">YES</span></td>
-            <td>Partial</td>
-            <td><span class="m-n">&mdash;</span></td>
-          </tr>
-          <tr>
-            <td class="m-label">Runs on YOUR machine</td>
-            <td class="m-kwyre"><span class="m-y">YES</span></td>
-            <td><span class="m-n">Cloud only</span></td>
-            <td><span class="m-y">YES</span></td>
-          </tr>
-          <tr>
-            <td class="m-label">Model download size</td>
-            <td class="m-kwyre">5-6 GB</td>
-            <td>N/A</td>
-            <td>Varies</td>
+            <td class="bench-label">Security stack</td>
+            <td><span class="bench-val bench-highlight">6 active layers</span></td>
+            <td class="bench-note">Only local AI with active intrusion detection</td>
           </tr>
         </tbody>
       </table>
     </div>
 
     <div style="text-align: center; margin-top: 32px;">
-      <p style="font-size: 13px; color: var(--text3); max-width: 600px; margin: 0 auto; line-height: 1.6;">
-        Cloud AI scores higher on general benchmarks because they use 200B+ parameter models. Kwyre Professional matches or beats them on domain-specific tasks with a model that fits on a consumer GPU &mdash; and your data never leaves your machine.
+      <p class="reveal reveal-d4" style="font-size: 13px; color: var(--text3); max-width: 580px; margin: 0 auto; line-height: 1.6;">
+        Cloud services score marginally higher on general benchmarks because they run 200B+ parameter models. Kwyre matches or exceeds them on domain-specific tasks &mdash; at 1/30th the parameter count &mdash; and your data never leaves your machine.
       </p>
     </div>
   </div>
 </div>
 
-<!-- CUSTOM LLM SERVICE -->
-<div class="section" id="custom">
+<!-- SECTION 3: INFERENCE ENGINE (starts getting vague) -->
+<div class="section" id="engine">
   <div class="wrap">
     <div class="sh">
-      <div class="sh-eyebrow reveal">Turnkey Service</div>
-      <h2 class="reveal reveal-d1">Custom LLM/SLM Built For Your Business</h2>
-      <p class="reveal reveal-d2">We build domain-specific AI models fine-tuned to your exact use case. Same air-gapped security. Your data never leaves your control.</p>
-    </div>
-
-    <div class="custom-grid reveal reveal-d3">
-      <div class="custom-card">
-        <h3>Legal &amp; Compliance</h3>
-        <p>NDA analysis, contract review, privilege screening, regulatory citations, SEC filings, FINRA compliance</p>
-      </div>
-      <div class="custom-card">
-        <h3>Financial Forensics</h3>
-        <p>Fraud detection, BSA/AML, forensic accounting, transaction pattern analysis, whistleblower case support</p>
-      </div>
-      <div class="custom-card">
-        <h3>Blockchain &amp; Crypto</h3>
-        <p>On-chain tracing, rug pull detection, cross-chain analysis, MEV research, DeFi risk assessment, RICO case building</p>
-      </div>
-      <div class="custom-card">
-        <h3>Insurance &amp; Actuarial</h3>
-        <p>Policy analysis, claims processing, reinsurance treaty review, risk modeling, cedent PII handling</p>
-      </div>
-      <div class="custom-card">
-        <h3>Defense &amp; Intelligence</h3>
-        <p>CUI document analysis, OSINT processing, threat assessment, NIST 800-171 compliant, no classified facility required</p>
-      </div>
-      <div class="custom-card">
-        <h3>Healthcare &amp; Life Sciences</h3>
-        <p>Clinical trial data analysis, HIPAA-compliant medical record review, drug interaction research, regulatory submissions</p>
-      </div>
-    </div>
-
-    <div style="text-align: center; margin-top: 48px;">
-      <p class="reveal" style="font-size: 14px; color: var(--text2); margin-bottom: 24px;">
-        We train a custom model on YOUR domain using frontier-distilled reasoning traces and GRPO reinforcement learning.<br>
-        Delivered as a turnkey air-gapped appliance or self-hosted deployment.
-      </p>
-      <a href="#custom-request" class="btn btn-primary" style="margin-right: 12px;">Request Custom Model</a>
-      <a href="pay.html" class="btn btn-ghost">View Standard Products</a>
-    </div>
-  </div>
-</div>
-
-<!-- CUSTOM REQUEST FORM -->
-<div class="section" id="custom-request">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">Get Started</div>
-      <h2 class="reveal reveal-d1">Request a Custom Model</h2>
-      <p class="reveal reveal-d2">Tell us about your use case. No obligation. We'll assess feasibility and provide a quote.</p>
-    </div>
-
-    <div style="max-width: 540px; margin: 0 auto;">
-      <div class="form-field">
-        <label>Industry</label>
-        <select id="customIndustry" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px 14px;color:var(--text);font-size:14px;outline:none;">
-          <option value="">Select your industry...</option>
-          <option value="legal">Legal &amp; Compliance</option>
-          <option value="financial">Financial Services &amp; Forensics</option>
-          <option value="crypto">Blockchain &amp; Cryptocurrency</option>
-          <option value="insurance">Insurance &amp; Actuarial</option>
-          <option value="defense">Defense &amp; Intelligence</option>
-          <option value="healthcare">Healthcare &amp; Life Sciences</option>
-          <option value="other">Other (describe below)</option>
-        </select>
-      </div>
-      <div class="form-field">
-        <label>Email</label>
-        <input type="email" id="customEmail" placeholder="you@company.com">
-      </div>
-      <div class="form-field">
-        <label>Use Case (brief description)</label>
-        <textarea id="customUseCase" rows="3" style="width:100%;background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:12px 14px;color:var(--text);font-family:var(--sans);font-size:14px;resize:vertical;outline:none;" placeholder="What documents or data do you need to analyze? What questions do you need answered?"></textarea>
-      </div>
-      <button class="form-submit" onclick="submitCustomRequest()" style="width:100%;margin-top:8px;">Submit Request</button>
-      <div class="form-note">No spam. No data collection beyond this form. We'll respond within 48 hours.</div>
-    </div>
-  </div>
-</div>
-
-<!-- WHAT MAKES THIS YOURS -->
-<div class="section">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">What Makes This Yours</div>
-      <h2 class="reveal reveal-d1">Five layers of customization</h2>
-      <p class="reveal reveal-d2">Every Kwyre Professional model is unique. Five independent customization layers combine to create an AI that no one else has.</p>
-    </div>
-
-    <div class="pipeline-steps reveal reveal-d3" style="margin-bottom: 64px;">
-      <div class="pipeline-step">
-        <div class="pipeline-num">01</div>
-        <h3>Reasoning Distillation</h3>
-        <p>Your custom topic mix &mdash; forensics, legal, financial, blockchain, medical, defense. We generate reasoning traces from frontier models specifically tuned to the problems YOUR team solves every day.</p>
-      </div>
-      <div class="pipeline-step">
-        <div class="pipeline-num">02</div>
-        <h3>GRPO Reinforcement Learning</h3>
-        <p>Emergent reasoning that goes beyond the teacher model. GRPO doesn't just copy &mdash; it teaches the model to discover novel solutions by scoring multiple candidate answers and reinforcing the best strategies.</p>
-      </div>
-      <div class="pipeline-step">
-        <div class="pipeline-num">03</div>
-        <h3>Domain LoRAs</h3>
-        <p>Specialized knowledge in YOUR areas of expertise. Low-rank adapters are trained on your domain vocabulary, jargon, document formats, and reasoning patterns &mdash; baked into the weights permanently.</p>
-      </div>
-      <div class="pipeline-step">
-        <div class="pipeline-num">04</div>
-        <h3>imatrix Calibration</h3>
-        <p>Quantization optimized for YOUR use cases. We generate importance matrices from your domain data so the quantized model preserves precision exactly where your workload needs it most.</p>
-      </div>
-      <div class="pipeline-step">
-        <div class="pipeline-num">05</div>
-        <h3>RAG Corpus</h3>
-        <p>Your proprietary knowledge base, searched at inference time. Upload internal documents, policies, and reference material. The model retrieves and cites relevant passages alongside its trained reasoning.</p>
-      </div>
-    </div>
-
-    <div class="sh">
-      <div class="sh-eyebrow reveal">Engine Architecture</div>
-      <h2 class="reveal reveal-d1">Every optimization in the stack</h2>
-      <p class="reveal reveal-d2">Dual compression (weights + activations), speculative decoding, KV cache persistence, and real-time streaming.</p>
+      <div class="sh-eyebrow reveal">Inference Engine</div>
+      <h2 class="reveal reveal-d1">Optimized from weights to wire</h2>
+      <p class="reveal reveal-d2">Six core optimizations that make Kwyre faster and more efficient than anything else in its class.</p>
     </div>
 
     <div class="engine-grid reveal reveal-d3">
       <div class="engine-cell">
         <div class="engine-icon engine-icon-blue"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
         <h3>Speculative Decoding</h3>
-        <p>Qwen3-0.6B draft model generates candidate tokens. Qwen3-4B main model validates N tokens in a single forward pass. 2-3x throughput increase with identical output quality.</p>
+        <p>2&ndash;3x throughput. Draft-verify architecture with parallel token validation.</p>
       </div>
       <div class="engine-cell">
         <div class="engine-icon engine-icon-green"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-        <h3>SpikeServe Activation Encoding</h3>
-        <p>Dynamic spike encoding on the draft model only (84 MLP layers). Main model runs at full fidelity for accurate speculative validation. Dual compression: weights AND activations.</p>
-      </div>
-      <div class="engine-cell">
-        <div class="engine-icon engine-icon-blue"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <h3>Spike QAT Training</h3>
-        <p>Quantization-Aware Training with Straight-Through Estimator spike encoding. k-curriculum annealing from k=50 to k=5. The model learns to tolerate activation sparsity during training.</p>
+        <h3>Activation Encoding</h3>
+        <p>Patent-pending spike quantization. Dual compression of weights and activations.</p>
       </div>
       <div class="engine-cell">
         <div class="engine-icon engine-icon-purple"><svg viewBox="0 0 24 24"><path d="M5 12h14M12 5v14"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <h3>Per-Session KV Cache</h3>
+        <p>Instant follow-up responses. Conversation context persists in VRAM across turns.</p>
+      </div>
+      <div class="engine-cell">
+        <div class="engine-icon engine-icon-blue"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg></div>
+        <h3>Flash Attention 2</h3>
+        <p>Auto-detected hardware acceleration. +20&ndash;40% inference speed on supported GPUs.</p>
+      </div>
+      <div class="engine-cell">
+        <div class="engine-icon engine-icon-green"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
         <h3>SSE Streaming</h3>
-        <p>Token-by-token output via Server-Sent Events. Set <code>stream: true</code> in request body. TextIteratorStreamer delivers tokens as they generate, not after the full response completes.</p>
+        <p>Token-by-token delivery. Response begins before generation completes.</p>
       </div>
       <div class="engine-cell">
-        <div class="engine-icon engine-icon-green"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 3v18M15 3v18M3 9h18M3 15h18"/></svg></div>
-        <h3>KV Cache Persistence</h3>
-        <p>Per-session cache stores past_key_values so follow-up messages skip re-encoding prior conversation. LRU eviction with configurable VRAM cap (default 2 GB). Cleared on session end or server shutdown.</p>
-      </div>
-      <div class="engine-cell">
-        <div class="engine-icon engine-icon-blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <div class="engine-icon engine-icon-purple"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div>
         <h3>Inference Queue</h3>
-        <p>Serialized GPU access via single-worker queue. HTTP threads stay responsive during generation. Proper concurrency handling for multi-user mode &mdash; no race conditions, no CUDA deadlocks.</p>
-      </div>
-      <div class="engine-cell">
-        <div class="engine-icon engine-icon-green"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h10"/></svg></div>
-        <h3>4-bit NF4 Quantization</h3>
-        <p>Pre-quantized NF4 via bitsandbytes with double quantization. Both models fit in 3.9 GB VRAM. No on-the-fly quantization &mdash; clients download pre-compressed weights.</p>
-      </div>
-      <div class="engine-cell">
-        <div class="engine-icon engine-icon-purple"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg></div>
-        <h3>AWQ Quantization</h3>
-        <p>Activation-Aware Weight Quantization for 1.4x faster inference when pre-quantized. Set <code>KWYRE_QUANT=awq</code> and point to your AWQ model. Alternative to NF4 for maximum throughput.</p>
-      </div>
-      <div class="engine-cell">
-        <div class="engine-icon engine-icon-blue"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div>
-        <h3>Standard Chat Completions API</h3>
-        <p>POST /v1/chat/completions drop-in replacement. Works with any compatible SDK client. Supports streaming and blocking modes, session management, and compliance endpoints.</p>
+        <p>Serialized GPU access. Multi-user concurrency without race conditions.</p>
       </div>
     </div>
   </div>
 </div>
 
-<!-- BACKENDS -->
-<div class="section">
+<!-- SECTION 4: TRAINING PIPELINE (deliberately vague) -->
+<div class="section" id="training">
   <div class="wrap">
     <div class="sh">
-      <div class="sh-eyebrow reveal">Multi-Backend Architecture</div>
-      <h2 class="reveal reveal-d1">Three backends, one security core</h2>
-      <p class="reveal reveal-d2">All backends share security_core.py &mdash; identical 6-layer stack, identical API surface, identical HTML frontend.</p>
+      <div class="sh-eyebrow reveal">Custom Model Training</div>
+      <h2 class="reveal reveal-d1">Five-stage pipeline</h2>
+      <p class="reveal reveal-d2">From domain requirements to deployment-ready model.</p>
     </div>
 
-    <div class="backend-grid reveal reveal-d3">
-      <div class="backend-card">
-        <h3>GPU Backend</h3>
-        <div class="backend-sub">serve_local_4bit.py &middot; NVIDIA CUDA</div>
-        <p>Full-featured inference with NF4/AWQ quantization, speculative decoding, SpikeServe activation encoding, SSE streaming, KV cache persistence, and inference queue.</p>
-        <ul class="backend-specs">
-          <li><span class="bs-label">Quantization</span><span class="bs-val">NF4 / AWQ</span></li>
-          <li><span class="bs-label">Speculative</span><span class="bs-val">Yes (0.6B draft)</span></li>
-          <li><span class="bs-label">SpikeServe</span><span class="bs-val">Draft model</span></li>
-          <li><span class="bs-label">Streaming</span><span class="bs-val">SSE</span></li>
-        </ul>
+    <div class="stage-grid reveal reveal-d3">
+      <div class="stage-card">
+        <div class="stage-num">01</div>
+        <h3>Domain Knowledge Extraction</h3>
+        <div class="stage-nda">Details available under NDA</div>
       </div>
-
-      <div class="backend-card">
-        <h3>CPU Backend (Kwyre Air)</h3>
-        <div class="backend-sub">serve_cpu.py &middot; llama.cpp &middot; GGUF</div>
-        <p>Run on any hardware without a GPU. Uses llama-cpp-python for GGUF model inference. Same API surface. Same security stack. Convert models with model/convert_gguf.py.</p>
-        <ul class="backend-specs">
-          <li><span class="bs-label">Format</span><span class="bs-val">GGUF</span></li>
-          <li><span class="bs-label">Speculative</span><span class="bs-val">No</span></li>
-          <li><span class="bs-label">Streaming</span><span class="bs-val">SSE</span></li>
-          <li><span class="bs-label">GPU Required</span><span class="bs-val">None</span></li>
-        </ul>
+      <div class="stage-card">
+        <div class="stage-num">02</div>
+        <h3>Reasoning Distillation</h3>
+        <div class="stage-nda">Details available under NDA</div>
       </div>
-
-      <div class="backend-card">
-        <h3>MLX Backend</h3>
-        <div class="backend-sub">serve_mlx.py &middot; Apple Silicon &middot; Metal</div>
-        <p>Native Apple Silicon acceleration for M1, M2, M3, and M4 chips. Uses mlx-lm for Metal-optimized inference. Convert models with model/convert_mlx.py.</p>
-        <ul class="backend-specs">
-          <li><span class="bs-label">Format</span><span class="bs-val">MLX</span></li>
-          <li><span class="bs-label">Speculative</span><span class="bs-val">No</span></li>
-          <li><span class="bs-label">Streaming</span><span class="bs-val">SSE</span></li>
-          <li><span class="bs-label">GPU Required</span><span class="bs-val">None (M-chip)</span></li>
-        </ul>
+      <div class="stage-card">
+        <div class="stage-num">03</div>
+        <h3>Reinforcement Learning</h3>
+        <div class="stage-nda">Details available under NDA</div>
+      </div>
+      <div class="stage-card">
+        <div class="stage-num">04</div>
+        <h3>Calibrated Quantization</h3>
+        <div class="stage-nda">Details available under NDA</div>
+      </div>
+      <div class="stage-card">
+        <div class="stage-num">05</div>
+        <h3>Secure Deployment</h3>
+        <div class="stage-nda">Details available under NDA</div>
       </div>
     </div>
   </div>
 </div>
 
-<!-- MULTI-USER -->
-<div class="section">
+<!-- SECTION 5: THE REVEAL -->
+<div class="section" style="text-align: center; padding: 120px 0;">
   <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">Multi-User Mode</div>
-      <h2 class="reveal reveal-d1">Air-gapped server for teams</h2>
-      <p class="reveal reveal-d2">RBAC roles, encrypted user storage, per-user session isolation, and RAM-only audit logging. No data leaves the machine.</p>
-    </div>
-
-    <div class="role-row reveal reveal-d2">
-      <div class="role-badge role-admin">
-        <h4>Admin</h4>
-        <p>Full access. User management. Session wipe. Audit logs.</p>
-      </div>
-      <div class="role-badge role-analyst">
-        <h4>Analyst</h4>
-        <p>Inference access. Own sessions. Rate-limited.</p>
-      </div>
-      <div class="role-badge role-viewer">
-        <h4>Viewer</h4>
-        <p>Read-only. Health &amp; audit endpoints. No inference.</p>
-      </div>
-    </div>
-
-    <div class="mu-grid reveal reveal-d3">
-      <div class="mu-panel">
-        <h3>User Management</h3>
-        <ul>
-          <li>Fernet-encrypted JSON user store with KWYRE_MASTER_KEY</li>
-          <li>Per-user session isolation via user_id:session_id namespacing</li>
-          <li>Per-user rate limits (configurable RPM)</li>
-          <li>Per-user session limits (max concurrent)</li>
-          <li>Admin API: create/delete users, wipe sessions, view audit</li>
-        </ul>
-      </div>
-      <div class="mu-panel">
-        <h3>Audit &amp; Monitoring</h3>
-        <ul>
-          <li>RAM-only audit log &mdash; never written to disk</li>
-          <li>Per-user request tracking and rate limit monitoring</li>
-          <li>Failed authentication logging</li>
-          <li>Security event recording</li>
-          <li>GET /v1/admin/audit &mdash; admin-only endpoint</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- CTA -->
-<div class="cta-bar">
-  <div class="wrap">
-    <h2>See the security stack in detail.</h2>
-    <p>Every layer explained. Pentest results. Privacy guarantees. Compliance documentation.</p>
-    <div class="cta-actions">
-      <a href="security.html" class="btn btn-primary">Security &amp; Compliance</a>
-      <a href="platform.html" class="btn btn-ghost">Platform Support</a>
+    <div class="reveal" style="font-family: var(--mono); font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: var(--accent); margin-bottom: 24px;">Nice try</div>
+    <h2 class="reveal reveal-d1" style="font-size: clamp(28px, 4vw, 44px); font-weight: 700; margin-bottom: 20px; letter-spacing: -0.5px;">Our IP stays with us.</h2>
+    <p class="reveal reveal-d2" style="font-size: 16px; color: var(--text2); max-width: 500px; margin: 0 auto 40px; line-height: 1.7;">
+      You didn&rsquo;t really think we&rsquo;d publish our full technical architecture on a public webpage, did you?
+    </p>
+    <p class="reveal reveal-d3" style="font-size: 14px; color: var(--text3); max-width: 480px; margin: 0 auto 40px; line-height: 1.6;">
+      If you&rsquo;re a potential customer, we&rsquo;ll walk you through everything in a private technical deep-dive. If you&rsquo;re a competitor&hellip; good luck.
+    </p>
+    <div class="reveal reveal-d4" style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap;">
+      <a href="custom.html" class="btn btn-primary">Schedule Technical Deep-Dive</a>
+      <a href="pay.html" class="btn btn-ghost">Just Buy It</a>
     </div>
   </div>
 </div>
@@ -1086,20 +759,6 @@ nav {
   window.addEventListener('resize',()=>{resize();init();});
   resize(); init(); frame();
 })();
-
-function submitCustomRequest() {
-  const industry = document.getElementById('customIndustry').value;
-  const email = document.getElementById('customEmail').value.trim();
-  const useCase = document.getElementById('customUseCase').value.trim();
-  if (!email) { document.getElementById('customEmail').style.borderColor = 'var(--red)'; return; }
-  const requests = JSON.parse(sessionStorage.getItem('kwyre_custom_requests') || '[]');
-  requests.push({ industry, email, useCase, ts: Date.now() });
-  sessionStorage.setItem('kwyre_custom_requests', JSON.stringify(requests));
-  document.getElementById('customIndustry').value = '';
-  document.getElementById('customEmail').value = '';
-  document.getElementById('customUseCase').value = '';
-  alert('Request submitted! We will contact you within 48 hours.');
-}
 
 (function(){
   const obs = new IntersectionObserver((entries)=>{

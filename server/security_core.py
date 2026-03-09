@@ -326,7 +326,7 @@ def load_api_keys() -> dict[str, str]:
 
 
 RATE_LIMIT_RPM_DEFAULT = 30
-ALLOWED_PAGES = {"landing.html", "index.html", "main.html", "pay.html"}
+ALLOWED_PAGES = {"landing.html", "index.html", "main.html", "pay.html", "technology.html", "security.html", "platform.html", "custom.html"}
 
 
 # ---------------------------------------------------------------------------

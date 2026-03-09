@@ -1406,8 +1406,9 @@ html.light nav { background: rgba(245,246,250,0.9); }
   <div class="nav-inner">
     <a href="/" class="nav-brand"><span>K</span>WYRE</a>
     <div class="nav-links">
-      <a href="technology.html#products">Products</a>
+      <a href="#products">Products</a>
       <a href="technology.html">Technology</a>
+      <a href="custom.html">Custom</a>
       <a href="security.html">Security</a>
       <a href="platform.html">Platform</a>
       <a href="pay.html">Purchase</a>
@@ -1455,26 +1456,76 @@ html.light nav { background: rgba(245,246,250,0.9); }
     </div>
 
     <div class="product-strip reveal">
-      <a href="technology.html#products" class="product-chip active">
+      <a href="#products" class="product-chip active">
         <span class="product-chip-name">Personal</span>
         <span class="product-chip-detail">4B · 7-14 tok/s · $299</span>
       </a>
-      <a href="technology.html#products" class="product-chip">
+      <a href="#products" class="product-chip">
         <span class="product-chip-name">Professional</span>
         <span class="product-chip-detail">9B Custom · 3-5 tok/s · $799</span>
       </a>
-      <a href="technology.html#products" class="product-chip">
+      <a href="#products" class="product-chip">
         <span class="product-chip-name">Air</span>
         <span class="product-chip-detail">CPU · Any hardware · $299</span>
       </a>
-      <a href="technology.html#products" class="product-chip">
+      <a href="#products" class="product-chip">
         <span class="product-chip-name">Apple Silicon</span>
         <span class="product-chip-detail">MLX · M1-M4 · $299</span>
       </a>
-      <a href="technology.html#custom" class="product-chip custom-chip">
+      <a href="custom.html" class="product-chip custom-chip">
         <span class="product-chip-name">Custom LLM</span>
         <span class="product-chip-detail">Built for your domain</span>
       </a>
+    </div>
+  </div>
+</div>
+
+<!-- PERFORMANCE COMPARISON -->
+<div class="section" id="products">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow reveal">Why Kwyre</div>
+      <h2 class="reveal reveal-d1">Every security feature is unique to Kwyre</h2>
+      <p class="reveal reveal-d2">No other local inference tool targets the compliance and adversarial environment use case.</p>
+    </div>
+
+    <div class="matrix-wrap reveal reveal-d3">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Capability</th>
+            <th class="m-kwyre">Kwyre</th>
+            <th>ChatGPT</th>
+            <th>Ollama</th>
+            <th>LM Studio</th>
+            <th>Jan.ai</th>
+            <th>LocalAI</th>
+            <th>vLLM</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="m-label">Fully local</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td></tr>
+          <tr><td class="m-label">Open source</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td></tr>
+          <tr><td class="m-label">Localhost-only binding</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Process outbound block</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Dependency integrity</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Model weight verification</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">RAM-only sessions</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Cryptographic session wipe</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Intrusion detection + auto-wipe</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Compliance documentation</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Custom domain training</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">GRPO reinforcement learning</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">RAG document ingestion</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td>Plugin</td><td>Plugin</td><td>Plugin</td><td>Plugin</td><td><span class="m-n">&mdash;</span></td></tr>
+          <tr><td class="m-label">Speculative decoding</td><td class="m-kwyre"><span class="m-y">YES</span></td><td>N/A</td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td></tr>
+          <tr><td class="m-label">Anonymous payment (Monero)</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td>free</td><td>free</td><td>free</td><td>free</td><td>free</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div style="text-align: center; margin-top: 48px;">
+      <p style="font-size: 15px; color: var(--text2); margin-bottom: 24px;">Need something beyond our four products?</p>
+      <a href="custom.html" class="btn btn-primary">Request a Custom Model</a>
     </div>
   </div>
 </div>
