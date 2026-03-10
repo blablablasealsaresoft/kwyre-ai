@@ -51,7 +51,7 @@
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
 <title>Kwyre AI — Secure Payment</title>
-<meta name="description" content="Purchase Kwyre AI inference server. One-time payment. No subscription. Monero (XMR) accepted.">
+<meta name="description" content="Purchase Kwyre AI inference server. Single payment. No subscription. Monero (XMR) accepted.">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -919,7 +919,7 @@ nav {
   <div class="nav-inner">
     <a href="main.html" class="nav-brand"><img src="kwyre-icon.svg" alt="Kwyre" style="height:20px;vertical-align:middle;margin-right:8px;"><span>K</span>WYRE</a>
     <div class="nav-links">
-      <a href="technology.html">Technology</a>
+      <a href="technology.html">Data Privacy</a>
       <a href="custom.html">Custom</a>
       <a href="security.html">Security</a>
       <a href="platform.html">Platform</a>
@@ -935,7 +935,7 @@ nav {
 <div class="hero">
   <div class="wrap">
     <div class="hero-eyebrow reveal">Secure Payment</div>
-    <h1 class="reveal reveal-d1">One-time. <em>No subscription.</em></h1>
+    <h1 class="reveal reveal-d1">Pay once. <em>No subscription.</em></h1>
     <p class="hero-sub reveal reveal-d2">
       Pay once, own your inference server forever. <strong>No recurring fees.</strong>
       No usage caps. No data collection. Your machine, your AI.
@@ -963,7 +963,7 @@ nav {
 
         <div style="display: flex; flex-direction: column; gap: 2px;">
 
-          <div class="product-row" data-tier="personal" data-price="299" onclick="selectTier('personal')">
+          <div class="product-row" data-tier="personal" onclick="selectTier('personal')">
             <div class="product-row-header">
               <div>
                 <div class="product-row-name">Kwyre Personal</div>
@@ -982,7 +982,7 @@ nav {
             </ul>
           </div>
 
-          <div class="product-row featured" data-tier="professional" data-price="799" onclick="selectTier('professional')">
+          <div class="product-row featured" data-tier="professional" onclick="selectTier('professional')">
             <div class="product-row-header">
               <div>
                 <div class="product-row-name">Kwyre Professional</div>
@@ -1001,7 +1001,7 @@ nav {
             </ul>
           </div>
 
-          <div class="product-row" data-tier="air" data-price="299" onclick="selectTier('air')">
+          <div class="product-row" data-tier="air" onclick="selectTier('air')">
             <div class="product-row-header">
               <div>
                 <div class="product-row-name">Kwyre Air</div>
@@ -1019,7 +1019,7 @@ nav {
             </ul>
           </div>
 
-          <div class="product-row" data-tier="mlx" data-price="299" onclick="selectTier('mlx')">
+          <div class="product-row" data-tier="mlx" onclick="selectTier('mlx')">
             <div class="product-row-header">
               <div>
                 <div class="product-row-name">Kwyre Apple Silicon</div>
@@ -1073,7 +1073,7 @@ nav {
 
         <div class="pay-panel xmr-panel" id="xmrPanel" style="max-width:none;">
           <div class="xmr-selected-tier" id="xmrTierLabel">Professional</div>
-          <div class="xmr-rate-note">Contact us for pricing and XMR rate</div>
+          <div class="xmr-rate-note">XMR rate available on request</div>
 
           <div id="qrCode" class="qr-container"></div>
 

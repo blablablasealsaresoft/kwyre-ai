@@ -447,7 +447,7 @@ nav {
   <div class="nav-inner">
     <a href="main.html" class="nav-brand"><img src="kwyre-icon.svg" alt="Kwyre" style="height:20px;vertical-align:middle;margin-right:8px;"><span>K</span>WYRE</a>
     <div class="nav-links">
-      <a href="technology.html">Technology</a>
+      <a href="technology.html">Data Privacy</a>
       <a href="custom.html">Custom</a>
       <a href="security.html">Security</a>
       <a href="platform.html" class="active">Platform</a>
@@ -473,14 +473,72 @@ nav {
 
 <!-- Psalm 127:1 — Unless the LORD builds the house, the builders labor in vain. -->
 
-<!-- ONE-CLICK INSTALLERS -->
+<!-- PRODUCTS BY PLATFORM -->
 <div class="section">
   <div class="wrap">
     <div class="sh">
-      <div class="sh-eyebrow reveal">One-Click Installers</div>
-      <h2 class="reveal reveal-d1">Install in under a minute</h2>
-      <p class="reveal reveal-d2">Platform-native installers handle everything: dependencies, firewall rules, system services, and model downloads.</p>
+      <div class="sh-eyebrow">Choose Your Product</div>
+      <h2>Every product. Every platform.</h2>
+      <p>Same security stack. Same API. Different hardware targets.</p>
     </div>
+
+    <div class="matrix-wrap" style="margin-top: 48px;">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th>Product</th>
+            <th>Hardware</th>
+            <th>Model</th>
+            <th>Install Method</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="m-label">Kwyre Personal</td>
+            <td>NVIDIA GPU (RTX 4060+)</td>
+            <td>Qwen3-4B + 0.6B draft</td>
+            <td><code>docker compose up</code> or installer</td>
+          </tr>
+          <tr>
+            <td class="m-label">Kwyre Professional</td>
+            <td>NVIDIA GPU (RTX 4090/3090)</td>
+            <td>Custom Qwen3.5-9B (GRPO-trained)</td>
+            <td><code>docker compose up</code> or installer</td>
+          </tr>
+          <tr>
+            <td class="m-label">Kwyre Air</td>
+            <td>Any CPU (8GB+ RAM)</td>
+            <td>Any GGUF model</td>
+            <td><code>python server/serve_cpu.py</code></td>
+          </tr>
+          <tr>
+            <td class="m-label">Kwyre Apple Silicon</td>
+            <td>M1/M2/M3/M4 Mac</td>
+            <td>Any MLX model</td>
+            <td><code>python server/serve_mlx.py</code></td>
+          </tr>
+          <tr style="border-top: 2px solid var(--accent);">
+            <td class="m-label" style="color: var(--green);">Custom LLM</td>
+            <td>Any (we configure)</td>
+            <td>Custom-trained for your domain</td>
+            <td>Turnkey delivery</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- INSTALLATION & DEPLOYMENT (combined) -->
+<div class="section">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow reveal">Installation &amp; Deployment</div>
+      <h2 class="reveal reveal-d1">Every platform. One command.</h2>
+      <p class="reveal reveal-d2">Choose your platform. We handle the rest.</p>
+    </div>
+
+    <h3 style="font-size: 16px; font-weight: 600; color: var(--text); margin: 32px 0 16px;">One-Click Installers</h3>
 
     <div class="platform-grid reveal reveal-d3">
       <div class="platform-card">
@@ -525,83 +583,8 @@ sudo launchctl start com.kwyre.ai.server</div>
         </ul>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- Colossians 3:23 — Whatever you do, work at it with all your heart, as working for the Lord, not for human masters. -->
-
-<!-- PRODUCTS BY PLATFORM -->
-<div class="section">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow">Choose Your Product</div>
-      <h2>Every product. Every platform.</h2>
-      <p>Same security stack. Same API. Different hardware targets.</p>
-    </div>
-
-    <div class="matrix-wrap" style="margin-top: 48px;">
-      <table class="matrix">
-        <thead>
-          <tr>
-            <th>Product</th>
-            <th>Hardware</th>
-            <th>Model</th>
-            <th>Install Method</th>
-            <th>Price</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr>
-            <td class="m-label">Kwyre Personal</td>
-            <td>NVIDIA GPU (RTX 4060+)</td>
-            <td>Qwen3-4B + 0.6B draft</td>
-            <td><code>docker compose up</code> or installer</td>
-            <td>$299</td>
-          </tr>
-          <tr>
-            <td class="m-label">Kwyre Professional</td>
-            <td>NVIDIA GPU (RTX 4090/3090)</td>
-            <td>Custom Qwen3.5-9B (GRPO-trained)</td>
-            <td><code>docker compose up</code> or installer</td>
-            <td>$799</td>
-          </tr>
-          <tr>
-            <td class="m-label">Kwyre Air</td>
-            <td>Any CPU (8GB+ RAM)</td>
-            <td>Any GGUF model</td>
-            <td><code>python server/serve_cpu.py</code></td>
-            <td>$299</td>
-          </tr>
-          <tr>
-            <td class="m-label">Kwyre Apple Silicon</td>
-            <td>M1/M2/M3/M4 Mac</td>
-            <td>Any MLX model</td>
-            <td><code>python server/serve_mlx.py</code></td>
-            <td>$299</td>
-          </tr>
-          <tr style="border-top: 2px solid var(--accent);">
-            <td class="m-label" style="color: var(--green);">Custom LLM</td>
-            <td>Any (we configure)</td>
-            <td>Custom-trained for your domain</td>
-            <td>Turnkey delivery</td>
-            <td>Contact us</td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- Proverbs 16:3 — Commit to the LORD whatever you do, and he will establish your plans. -->
-
-<!-- DEPLOYMENT OPTIONS -->
-<div class="section">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">Deployment Options</div>
-      <h2 class="reveal reveal-d1">Four ways to deploy</h2>
-      <p class="reveal reveal-d2">Choose the deployment method that fits your environment and compliance requirements.</p>
-    </div>
+    <h3 style="font-size: 16px; font-weight: 600; color: var(--text); margin: 32px 0 16px;">Deployment Options</h3>
 
     <div class="deploy-grid reveal reveal-d3">
       <div class="deploy-card">
@@ -639,17 +622,8 @@ python server/serve_local_4bit.py</div>
 python server/serve_mlx.py</div>
       </div>
     </div>
-  </div>
-</div>
 
-<!-- BUILD PIPELINE -->
-<div class="section">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">Build Pipeline</div>
-      <h2 class="reveal reveal-d1">Nuitka-compiled binary distribution</h2>
-      <p class="reveal reveal-d2">Server code compiles to standalone executable. No Python source distributed to customers. Source protection for your AI code.</p>
-    </div>
+    <h3 style="font-size: 16px; font-weight: 600; color: var(--text); margin: 32px 0 16px;">Build from Source</h3>
 
     <div class="build-block reveal reveal-d3">
       <h3>What gets compiled vs. what stays as data</h3>
@@ -695,50 +669,6 @@ python build.py clean        # Clean artifacts</div>
           <tr><td>macOS</td><td>.pkg</td><td>pkgbuild (Xcode CLI)</td></tr>
         </tbody>
       </table>
-    </div>
-  </div>
-</div>
-
-<!-- FINE-TUNE + BENCHMARKS -->
-<div class="section">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">Customization &amp; Validation</div>
-      <h2 class="reveal reveal-d1">Fine-tune for your domain. Benchmark against GPT-4o.</h2>
-    </div>
-
-    <div class="extra-grid reveal reveal-d3">
-      <div class="extra-card">
-        <h3>Domain-Specific Fine-Tuning</h3>
-        <div class="extra-sub">finetune/ directory</div>
-        <p>Complete data preparation pipeline for domain-specific fine-tuning. Extract text, template into training format, validate data quality, and output JSONL for training.</p>
-        <ul>
-          <li>Text extraction from PDF, DOCX, and plain text</li>
-          <li>Instruction templating for chat fine-tuning</li>
-          <li>Data validation and quality checks</li>
-          <li>JSONL output for QLoRA / LoRA training</li>
-          <li>Pre-built corpora: legal, financial, forensics</li>
-        </ul>
-      </div>
-
-      <div class="extra-card">
-        <h3>Benchmark Suite vs GPT-4o</h3>
-        <div class="extra-sub">benchmarks/ directory</div>
-        <p>Compliance-relevant benchmark datasets with LLM-as-judge methodology. Compare Kwyre's output quality against GPT-4o on tasks that matter for your use case.</p>
-        <ul>
-          <li>NDA clause analysis accuracy</li>
-          <li>Financial fraud pattern detection</li>
-          <li>Regulatory compliance Q&amp;A</li>
-          <li>Legal document summarization</li>
-          <li>LLM-as-judge scoring methodology</li>
-        </ul>
-      </div>
-    </div>
-
-    <div style="background: var(--accent-dim); border: 1px solid rgba(59,130,246,0.15); border-radius: 8px; padding: 24px 28px; margin-top: 32px;">
-      <div style="font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px;">Turnkey Service</div>
-      <p style="font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 12px;">Don't want to train your own model? We'll build one for you. Custom-trained on your domain using our Claude distillation + GRPO pipeline. Delivered as an air-gapped appliance or self-hosted deployment.</p>
-      <a href="technology.html#custom-request" style="font-family: var(--mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; color: var(--accent); text-decoration: none;">Request Custom Model &rarr;</a>
     </div>
   </div>
 </div>
