@@ -1025,8 +1025,7 @@ nav {
 
         <div class="pay-panel xmr-panel" id="xmrPanel" style="max-width:none;">
           <div class="xmr-selected-tier" id="xmrTierLabel">Professional</div>
-          <div class="xmr-amount-usd" id="xmrAmountUsd">$799</div>
-          <div class="xmr-rate-note">Contact for current XMR rate</div>
+          <div class="xmr-rate-note">Contact us for pricing and XMR rate</div>
 
           <div id="qrCode" class="qr-container"></div>
 
@@ -1237,10 +1236,10 @@ nav {
 
 /* ── TIER SELECTION ── */
 const TIERS = {
-  personal:     { label: 'Personal',       price: '$299' },
-  professional: { label: 'Professional',   price: '$799' },
-  air:          { label: 'Air (CPU)',       price: '$299' },
-  mlx:          { label: 'Apple Silicon',   price: '$299' }
+  personal:     { label: 'Personal' },
+  professional: { label: 'Professional' },
+  air:          { label: 'Air (CPU)' },
+  mlx:          { label: 'Apple Silicon' }
 };
 let selectedTier = 'professional';
 
@@ -1259,7 +1258,6 @@ function selectTier(tier) {
   btn.textContent = 'Selected';
 
   document.getElementById('xmrTierLabel').textContent = TIERS[tier].label;
-  document.getElementById('xmrAmountUsd').textContent = TIERS[tier].price;
 
   document.getElementById('payment').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
