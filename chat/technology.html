@@ -332,8 +332,6 @@ a.incident:hover {
   align-items: start;
 }
 
-.col-left { order: 2; }
-.col-right { order: 1; }
 .col-left .sh, .col-right .sh { text-align: left; margin-bottom: 24px; }
 .col-left .sh h2, .col-right .sh h2 { font-size: 24px; }
 
@@ -627,6 +625,60 @@ a.incident:hover {
   </div>
 </div>
 
+<!-- COMPANY ORBS -->
+<div class="section" id="orbs-section" style="position: relative; min-height: 500px; overflow: hidden;">
+  <div class="wrap" style="text-align: center;">
+    <div class="sh">
+      <div class="sh-eyebrow">The Offenders</div>
+      <h2>Click to see how much data they took.</h2>
+    </div>
+  </div>
+
+  <div class="company-orbs-container">
+    <div class="company-orb" style="animation: corb-1 20s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="OpenAI" data-users="200M+ weekly users" data-data="Scraped the entire internet. 20M+ chat logs subpoenaed. Fined &euro;15M by Italy. FTC complaint filed. Trains on your conversations unless you opt out." data-amount="Trillions of tokens from billions of web pages">
+      <div class="company-orb-name">OpenAI</div>
+    </div>
+    <div class="company-orb" style="animation: corb-2 24s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="Google" data-users="4.3B users across products" data-data="Class action for 'unprecedented' copyright infringement. Scraped millions of copyrighted works for Gemini. Publishers Hachette and Cengage joined suit." data-amount="Millions of books, billions of web pages, all YouTube transcripts">
+      <div class="company-orb-name">Google</div>
+    </div>
+    <div class="company-orb" style="animation: corb-3 18s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="Microsoft" data-users="400M+ Copilot users" data-data="Copilot bypassed DLP on confidential emails for 4 weeks. Zero-click CVE-2025-32711 (CVSS 9.3). 20K+ private repos still accessible through Copilot." data-amount="Every file in Office 365, GitHub repos (including private ones)">
+      <div class="company-orb-name">Microsoft</div>
+    </div>
+    <div class="company-orb" style="animation: corb-4 22s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="Anthropic" data-users="100M+ Claude users" data-data="$1.5 billion copyright settlement &mdash; largest in history. Trained Claude on books without permission from authors." data-amount="Millions of copyrighted books and web pages">
+      <div class="company-orb-name">Anthropic</div>
+    </div>
+    <div class="company-orb" style="animation: corb-5 26s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="Meta" data-users="3.9B users" data-data="Contractors reviewed intimate Ray-Ban footage. Class action in NJ &amp; CA. UK ICO demanded explanation. Trains AI on all public Instagram and Facebook posts." data-amount="Billions of photos, posts, messages, and now live video from smart glasses">
+      <div class="company-orb-name">Meta</div>
+    </div>
+    <div class="company-orb" style="animation: corb-6 19s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="Amazon" data-users="200M+ Alexa devices" data-data="Class action certified for deceptive recording of private conversations. Retained voice data for commercial gain. Biometric data violations in Illinois." data-amount="Billions of voice recordings from homes worldwide">
+      <div class="company-orb-name">Amazon</div>
+    </div>
+    <div class="company-orb" style="animation: corb-7 21s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="Zoom" data-users="300M+ meeting participants" data-data="AI Companion analyzes meeting content without participant consent. Hosts can enable AI analysis that processes everyone's speech. Sentiment analysis and behavioral profiling." data-amount="Billions of hours of private meetings, calls, and screen shares">
+      <div class="company-orb-name">Zoom</div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPANY DATA POPUP -->
+<div class="company-popup-overlay" id="companyPopup" onclick="if(event.target===this)closeCompanyPopup()">
+  <div class="company-popup">
+    <button class="company-popup-close" onclick="closeCompanyPopup()">&times;</button>
+    <div class="company-popup-name" id="popupName"></div>
+    <div class="company-popup-stat">
+      <div class="company-popup-stat-label">USERS AFFECTED</div>
+      <div class="company-popup-stat-val" id="popupUsers"></div>
+    </div>
+    <div class="company-popup-stat">
+      <div class="company-popup-stat-label">DATA COLLECTED</div>
+      <div class="company-popup-stat-val" id="popupAmount"></div>
+    </div>
+    <div class="company-popup-detail" id="popupData"></div>
+    <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); text-align: center;">
+      <p style="font-family: var(--mono); font-size: 10px; color: var(--green); letter-spacing: 1px; text-transform: uppercase;">Kwyre takes zero data. Zero.</p>
+    </div>
+  </div>
+</div>
+
 <!-- CONTENT: TWO COLUMNS -->
 <div class="section" id="content">
   <div class="wrap">
@@ -747,7 +799,7 @@ a.incident:hover {
             <tr><td class="m-label">Crypto wipe</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td></tr>
             <tr><td class="m-label">Custom training</td><td class="m-kwyre"><span class="m-y">GRPO</span></td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td></tr>
             <tr><td class="m-label">Compliance</td><td class="m-kwyre"><span class="m-y">SOC2</span></td><td>Partial</td><td>Partial</td><td class="m-n">&mdash;</td></tr>
-            <tr><td class="m-label">Data stays private</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">See right</td><td class="m-n">See right</td><td><span class="m-y">YES</span></td></tr>
+            <tr><td class="m-label">Data stays private</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">See left</td><td class="m-n">See left</td><td><span class="m-y">YES</span></td></tr>
           </tbody>
         </table>
 
@@ -757,60 +809,6 @@ a.incident:hover {
         </div>
       </div>
 
-    </div>
-  </div>
-</div>
-
-<!-- COMPANY ORBS -->
-<div class="section" id="orbs-section" style="position: relative; min-height: 500px; overflow: hidden;">
-  <div class="wrap" style="text-align: center;">
-    <div class="sh">
-      <div class="sh-eyebrow">The Offenders</div>
-      <h2>Click to see how much data they took.</h2>
-    </div>
-  </div>
-
-  <div class="company-orbs-container">
-    <div class="company-orb" style="animation: corb-1 20s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="OpenAI" data-users="200M+ weekly users" data-data="Scraped the entire internet. 20M+ chat logs subpoenaed. Fined &euro;15M by Italy. FTC complaint filed. Trains on your conversations unless you opt out." data-amount="Trillions of tokens from billions of web pages">
-      <div class="company-orb-name">OpenAI</div>
-    </div>
-    <div class="company-orb" style="animation: corb-2 24s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="Google" data-users="4.3B users across products" data-data="Class action for 'unprecedented' copyright infringement. Scraped millions of copyrighted works for Gemini. Publishers Hachette and Cengage joined suit." data-amount="Millions of books, billions of web pages, all YouTube transcripts">
-      <div class="company-orb-name">Google</div>
-    </div>
-    <div class="company-orb" style="animation: corb-3 18s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="Microsoft" data-users="400M+ Copilot users" data-data="Copilot bypassed DLP on confidential emails for 4 weeks. Zero-click CVE-2025-32711 (CVSS 9.3). 20K+ private repos still accessible through Copilot." data-amount="Every file in Office 365, GitHub repos (including private ones)">
-      <div class="company-orb-name">Microsoft</div>
-    </div>
-    <div class="company-orb" style="animation: corb-4 22s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="Anthropic" data-users="100M+ Claude users" data-data="$1.5 billion copyright settlement &mdash; largest in history. Trained Claude on books without permission from authors." data-amount="Millions of copyrighted books and web pages">
-      <div class="company-orb-name">Anthropic</div>
-    </div>
-    <div class="company-orb" style="animation: corb-5 26s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="Meta" data-users="3.9B users" data-data="Contractors reviewed intimate Ray-Ban footage. Class action in NJ &amp; CA. UK ICO demanded explanation. Trains AI on all public Instagram and Facebook posts." data-amount="Billions of photos, posts, messages, and now live video from smart glasses">
-      <div class="company-orb-name">Meta</div>
-    </div>
-    <div class="company-orb" style="animation: corb-6 19s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="Amazon" data-users="200M+ Alexa devices" data-data="Class action certified for deceptive recording of private conversations. Retained voice data for commercial gain. Biometric data violations in Illinois." data-amount="Billions of voice recordings from homes worldwide">
-      <div class="company-orb-name">Amazon</div>
-    </div>
-    <div class="company-orb" style="animation: corb-7 21s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="Zoom" data-users="300M+ meeting participants" data-data="AI Companion analyzes meeting content without participant consent. Hosts can enable AI analysis that processes everyone's speech. Sentiment analysis and behavioral profiling." data-amount="Billions of hours of private meetings, calls, and screen shares">
-      <div class="company-orb-name">Zoom</div>
-    </div>
-  </div>
-</div>
-
-<!-- COMPANY DATA POPUP -->
-<div class="company-popup-overlay" id="companyPopup" onclick="if(event.target===this)closeCompanyPopup()">
-  <div class="company-popup">
-    <button class="company-popup-close" onclick="closeCompanyPopup()">&times;</button>
-    <div class="company-popup-name" id="popupName"></div>
-    <div class="company-popup-stat">
-      <div class="company-popup-stat-label">USERS AFFECTED</div>
-      <div class="company-popup-stat-val" id="popupUsers"></div>
-    </div>
-    <div class="company-popup-stat">
-      <div class="company-popup-stat-label">DATA COLLECTED</div>
-      <div class="company-popup-stat-val" id="popupAmount"></div>
-    </div>
-    <div class="company-popup-detail" id="popupData"></div>
-    <div style="margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--border); text-align: center;">
-      <p style="font-family: var(--mono); font-size: 10px; color: var(--green); letter-spacing: 1px; text-transform: uppercase;">Kwyre takes zero data. Zero.</p>
     </div>
   </div>
 </div>
