@@ -391,6 +391,112 @@ nav {
   </div>
 </div>
 
+<!-- PRIVACY (moved to top) -->
+<div class="section">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow sh-eyebrow-green reveal">Privacy Guarantees</div>
+      <h2 class="reveal reveal-d1">Architecturally impossible to leak</h2>
+      <p class="reveal reveal-d2">Not privacy by policy. Privacy by engineering. Every guarantee is verifiable with standard network tools.</p>
+    </div>
+
+    <div class="privacy-grid reveal reveal-d3">
+      <div class="privacy-card">
+        <div class="privacy-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Zero Content Logging</h3>
+        <p>Metadata only &mdash; timestamps and token counts. Conversation content is never written to disk, log files, or any persistent storage.</p>
+      </div>
+      <div class="privacy-card">
+        <div class="privacy-icon"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+        <h3>No Telemetry</h3>
+        <p>Zero analytics. Zero error reporting. Zero update pings. Zero license callbacks. Verify with Wireshark &mdash; no packets leave your machine.</p>
+      </div>
+      <div class="privacy-card">
+        <div class="privacy-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div>
+        <h3>Monero (XMR) Payment</h3>
+        <p>No payment record. No email required. No account creation. Fully anonymous purchase. One-time payment &mdash; no recurring billing.</p>
+      </div>
+      <div class="privacy-card">
+        <div class="privacy-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+        <h3>Ed25519 Offline License Keys</h3>
+        <p>License validation works without any network call. Cryptographic signature verification happens entirely on your machine.</p>
+      </div>
+      <div class="privacy-card">
+        <div class="privacy-icon"><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></div>
+        <h3>Self-Delete Conversation</h3>
+        <p>User-initiated cryptographic wipe via POST /v1/session/end. Session content overwritten with random bytes before clearing. Unrecoverable.</p>
+      </div>
+      <div class="privacy-card">
+        <div class="privacy-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></div>
+        <h3>Open Source Server</h3>
+        <p>serve_local_4bit.py is fully auditable. Read every line. Verify zero outbound connections yourself with Wireshark or ss.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- VERIFY + UNIVERSAL PROTECTION (two columns) -->
+<div class="section">
+  <div class="wrap">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;">
+
+      <div>
+        <div class="sh" style="text-align: left; margin-bottom: 24px;">
+          <div class="sh-eyebrow sh-eyebrow-green">Verify It Yourself</div>
+          <h2 style="font-size: 22px;">Don't trust us. Check.</h2>
+        </div>
+        <div class="verify-grid" style="margin-top: 0;">
+          <div class="verify-card">
+            <h3>Windows</h3>
+            <div class="verify-code">Task Manager &rarr; Performance &rarr; Resource Monitor &rarr; Network tab &rarr; Filter python.exe</div>
+            <div class="verify-expect">Confirm: only 127.0.0.1</div>
+          </div>
+          <div class="verify-card">
+            <h3>Linux / WSL2</h3>
+            <div class="verify-code">watch -n 1 "ss -tp | grep python"</div>
+            <div class="verify-expect">Confirm: only localhost</div>
+          </div>
+          <div class="verify-card">
+            <h3>Wireshark</h3>
+            <div class="verify-code">Interface: loopback (lo) | Filter: tcp.port == 8000</div>
+            <div class="verify-expect">Confirm: zero external traffic</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sh" style="text-align: left; margin-bottom: 24px;">
+          <div class="sh-eyebrow">Universal Protection</div>
+          <h2 style="font-size: 22px;">Same security. Every product.</h2>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden;">
+          <div style="background: var(--surface); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 1px; text-transform: uppercase;">Personal</span>
+            <span style="font-size: 12px; color: var(--text2);">6 layers</span>
+          </div>
+          <div style="background: var(--surface); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 1px; text-transform: uppercase;">Professional</span>
+            <span style="font-size: 12px; color: var(--text2);">6 layers</span>
+          </div>
+          <div style="background: var(--surface); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 1px; text-transform: uppercase;">Air (CPU)</span>
+            <span style="font-size: 12px; color: var(--text2);">6 layers</span>
+          </div>
+          <div style="background: var(--surface); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 1px; text-transform: uppercase;">Apple Silicon</span>
+            <span style="font-size: 12px; color: var(--text2);">6 layers</span>
+          </div>
+          <div style="background: var(--surface); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--green); letter-spacing: 1px; text-transform: uppercase;">Custom LLM</span>
+            <span style="font-size: 12px; color: var(--text2);">6 layers</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
 <!-- PENTEST RESULTS -->
 <div class="section">
   <div class="wrap">
@@ -474,50 +580,6 @@ nav {
   </div>
 </div>
 
-<!-- PRIVACY -->
-<div class="section">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow sh-eyebrow-green reveal">Privacy Guarantees</div>
-      <h2 class="reveal reveal-d1">Architecturally impossible to leak</h2>
-      <p class="reveal reveal-d2">Not privacy by policy. Privacy by engineering. Every guarantee is verifiable with standard network tools.</p>
-    </div>
-
-    <div class="privacy-grid reveal reveal-d3">
-      <div class="privacy-card">
-        <div class="privacy-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <h3>Zero Content Logging</h3>
-        <p>Metadata only &mdash; timestamps and token counts. Conversation content is never written to disk, log files, or any persistent storage.</p>
-      </div>
-      <div class="privacy-card">
-        <div class="privacy-icon"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
-        <h3>No Telemetry</h3>
-        <p>Zero analytics. Zero error reporting. Zero update pings. Zero license callbacks. Verify with Wireshark &mdash; no packets leave your machine.</p>
-      </div>
-      <div class="privacy-card">
-        <div class="privacy-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div>
-        <h3>Monero (XMR) Payment</h3>
-        <p>No payment record. No email required. No account creation. Fully anonymous purchase. One-time payment &mdash; no recurring billing.</p>
-      </div>
-      <div class="privacy-card">
-        <div class="privacy-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
-        <h3>Ed25519 Offline License Keys</h3>
-        <p>License validation works without any network call. Cryptographic signature verification happens entirely on your machine.</p>
-      </div>
-      <div class="privacy-card">
-        <div class="privacy-icon"><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></div>
-        <h3>Self-Delete Conversation</h3>
-        <p>User-initiated cryptographic wipe via POST /v1/session/end. Session content overwritten with random bytes before clearing. Unrecoverable.</p>
-      </div>
-      <div class="privacy-card">
-        <div class="privacy-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></div>
-        <h3>Open Source Server</h3>
-        <p>serve_local_4bit.py is fully auditable. Read every line. Verify zero outbound connections yourself with Wireshark or ss.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- COMPLIANCE -->
 <div class="section">
   <div class="wrap">
@@ -577,82 +639,6 @@ nav {
           <strong style="color:var(--text);">GET /audit</strong> &mdash; metadata-only compliance log with security control attestation &nbsp;&middot;&nbsp;
           <strong style="color:var(--text);">GET /health</strong> &mdash; security stack status, watchdog, KV cache, streaming, VRAM usage
         </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- VERIFY ZERO TELEMETRY -->
-<div class="section">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow sh-eyebrow-green reveal">Verify It Yourself</div>
-      <h2 class="reveal reveal-d1">Don't trust us. Check.</h2>
-      <p class="reveal reveal-d2">We say Kwyre never phones home. Here's how you verify that claim with standard network tools on any platform.</p>
-    </div>
-
-    <div class="verify-grid reveal reveal-d3">
-      <div class="verify-card">
-        <h3>Windows</h3>
-        <div class="verify-code">Task Manager
-  &rarr; Performance
-  &rarr; Open Resource Monitor
-  &rarr; Network tab
-  &rarr; Filter by python.exe</div>
-        <div class="verify-expect">Confirm: only 127.0.0.1 connections</div>
-      </div>
-
-      <div class="verify-card">
-        <h3>Linux / WSL2</h3>
-        <div class="verify-code">watch -n 1 "ss -tp | grep python"
-
-# Should show only:
-# 127.0.0.1:8000</div>
-        <div class="verify-expect">Confirm: only localhost connections</div>
-      </div>
-
-      <div class="verify-card">
-        <h3>Wireshark (Definitive)</h3>
-        <div class="verify-code">Interface: loopback (lo)
-Filter: tcp.port == 8000
-
-# All traffic should be:
-# 127.0.0.1 &rarr; 127.0.0.1</div>
-        <div class="verify-expect">Confirm: zero external traffic</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ALL PRODUCTS -->
-<div class="section">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow">Universal Protection</div>
-      <h2>Same security. Every product.</h2>
-      <p>Whether you run Personal, Professional, Air, Apple Silicon, or a Custom LLM &mdash; every Kwyre product ships with the identical 6-layer security stack. No product gets a weaker version.</p>
-    </div>
-
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden; margin-top: 48px;">
-      <div style="background: var(--surface); padding: 20px;">
-        <div style="font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">Personal</div>
-        <div style="font-size: 13px; color: var(--text2);">6 layers &middot; All protections</div>
-      </div>
-      <div style="background: var(--surface); padding: 20px;">
-        <div style="font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">Professional</div>
-        <div style="font-size: 13px; color: var(--text2);">6 layers &middot; All protections</div>
-      </div>
-      <div style="background: var(--surface); padding: 20px;">
-        <div style="font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">Air (CPU)</div>
-        <div style="font-size: 13px; color: var(--text2);">6 layers &middot; All protections</div>
-      </div>
-      <div style="background: var(--surface); padding: 20px;">
-        <div style="font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">Apple Silicon</div>
-        <div style="font-size: 13px; color: var(--text2);">6 layers &middot; All protections</div>
-      </div>
-      <div style="background: var(--surface); padding: 20px;">
-        <div style="font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--green); letter-spacing: 1px; text-transform: uppercase; margin-bottom: 8px;">Custom LLM</div>
-        <div style="font-size: 13px; color: var(--text2);">6 layers &middot; All protections</div>
       </div>
     </div>
   </div>
