@@ -155,6 +155,16 @@ body {
   100% { top: 100vh; opacity: 0; }
 }
 
+/* --- EMBERS CANVAS --- */
+#embers2 { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+/* --- HEX PULSE --- */
+.hex-pulse { position: fixed; width: 200px; height: 200px; border-radius: 50%; pointer-events: none; z-index: 0; background: radial-gradient(circle, rgba(59,130,246,0.04), transparent 70%); transform: translate(-50%, -50%); transition: opacity 0.3s; opacity: 0; }
+.hex-pulse.visible { opacity: 1; }
+
+/* --- VIGNETTE --- */
+.m-vignette { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 35%, rgba(5,6,10,0.85) 100%); }
+
 /* --- SCROLL REVEAL --- */
 .reveal {
   opacity: 0; transform: translateY(32px);
@@ -1868,6 +1878,9 @@ html.light nav { background: rgba(245,246,250,0.9); }
 <div class="m-orb m-orb-1"></div>
 <div class="m-orb m-orb-2"></div>
 <div class="m-orb m-orb-3"></div>
+<canvas id="embers2"></canvas>
+<div class="hex-pulse" id="hexPulse2"></div>
+<div class="m-vignette"></div>
 
 <!-- Genesis 1:1 — In the beginning God created the heavens and the earth. -->
 
@@ -2416,22 +2429,57 @@ html.light nav { background: rgba(245,246,250,0.9); }
   const cv = document.getElementById('particles');
   const cx = cv.getContext('2d');
   let W, H, pts = [], mx = -9999, my = -9999;
-  const N = 55, CONN = 130, MOUSE_R = 180;
+  const N = 110, CONN = 160, MOUSE_R = 180;
+  let clickWaves = [];
 
   function resize(){ W = cv.width = innerWidth; H = cv.height = innerHeight; }
   function init(){
     pts = Array.from({length:N}, ()=>({
       x: Math.random()*W, y: Math.random()*H,
       vx: (Math.random()-.5)*.3, vy: (Math.random()-.5)*.3,
-      r: Math.random()*1.2+.4, p: Math.random()*Math.PI*2
+      r: Math.random()*1.2+.4, p: Math.random()*Math.PI*2,
+      ox: 0, oy: 0
     }));
   }
+
+  document.addEventListener('click', function(e){
+    if(e.target.closest('button, a, input, textarea, select, .nav-links, nav')) return;
+    const cx0 = e.clientX, cy0 = e.clientY;
+    clickWaves.push({ x: cx0, y: cy0, r: 0, maxR: 350, life: 1 });
+    pts.forEach(function(n){
+      const dx = n.x - cx0, dy = n.y - cy0;
+      const dist = Math.hypot(dx, dy);
+      if(dist < 250 && dist > 0){
+        const force = (1 - dist / 250) * 8;
+        n.ox += (dx / dist) * force;
+        n.oy += (dy / dist) * force;
+      }
+    });
+  });
+
   function frame(){
     cx.clearRect(0,0,W,H);
+
+    clickWaves.forEach(function(w){
+      w.r += 4; w.life -= 0.015;
+      cx.beginPath(); cx.arc(w.x, w.y, w.r, 0, Math.PI*2);
+      cx.strokeStyle = 'rgba(59,130,246,' + (0.3 * w.life) + ')';
+      cx.lineWidth = 1.5; cx.stroke();
+      cx.beginPath(); cx.arc(w.x, w.y, w.r * 0.7, 0, Math.PI*2);
+      cx.strokeStyle = 'rgba(34,197,94,' + (0.15 * w.life) + ')';
+      cx.lineWidth = 1; cx.stroke();
+    });
+    clickWaves = clickWaves.filter(function(w){ return w.life > 0; });
+
     pts.forEach(n=>{
+      n.vx += n.ox; n.vy += n.oy;
+      n.ox *= 0.94; n.oy *= 0.94;
       n.x+=n.vx; n.y+=n.vy; n.p+=.012;
+      n.vx *= 0.99; n.vy *= 0.99;
       if(n.x<0||n.x>W) n.vx*=-1;
       if(n.y<0||n.y>H) n.vy*=-1;
+      n.x = Math.max(0, Math.min(W, n.x));
+      n.y = Math.max(0, Math.min(H, n.y));
     });
     for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
       const a=pts[i],b=pts[j], d=Math.hypot(a.x-b.x,a.y-b.y);
@@ -2458,6 +2506,59 @@ html.light nav { background: rgba(245,246,250,0.9); }
   window.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
   window.addEventListener('resize',()=>{resize();init();});
   resize(); init(); frame();
+})();
+
+/* ── EMBER PARTICLES ── */
+(function(){
+  const ec = document.getElementById('embers2');
+  if(!ec) return;
+  const ex = ec.getContext('2d');
+  let eW, eH;
+  const EN = 55;
+  let embers = [];
+
+  function eResize(){ eW = ec.width = innerWidth; eH = ec.height = innerHeight; }
+  function eInit(){
+    embers = Array.from({length:EN}, ()=>({
+      x: Math.random()*eW,
+      y: Math.random()*eH,
+      vy: -(Math.random()*0.4+0.1),
+      vx: (Math.random()-0.5)*0.15,
+      r: Math.random()*1.5+0.5,
+      phase: Math.random()*Math.PI*2,
+      speed: Math.random()*0.02+0.01
+    }));
+  }
+  function eFrame(){
+    ex.clearRect(0,0,eW,eH);
+    embers.forEach(function(e){
+      e.x += e.vx; e.y += e.vy; e.phase += e.speed;
+      if(e.y < -10){ e.y = eH + 10; e.x = Math.random()*eW; }
+      if(e.x < -10) e.x = eW + 10;
+      if(e.x > eW + 10) e.x = -10;
+      var flicker = 0.15 + Math.sin(e.phase)*0.12;
+      ex.beginPath(); ex.arc(e.x, e.y, e.r, 0, Math.PI*2);
+      ex.fillStyle = 'rgba(59,130,246,' + flicker + ')';
+      ex.fill();
+    });
+    requestAnimationFrame(eFrame);
+  }
+  window.addEventListener('resize', function(){ eResize(); eInit(); });
+  eResize(); eInit(); eFrame();
+})();
+
+/* ── HEX PULSE FOLLOW ── */
+(function(){
+  var hp = document.getElementById('hexPulse2');
+  if(!hp) return;
+  document.addEventListener('mousemove', function(e){
+    hp.style.left = e.clientX + 'px';
+    hp.style.top = e.clientY + 'px';
+    hp.classList.add('visible');
+  });
+  document.addEventListener('mouseleave', function(){
+    hp.classList.remove('visible');
+  });
 })();
 
 /* ── SCROLL REVEAL ── */
