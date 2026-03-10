@@ -178,9 +178,9 @@ body {
 /* --- NAV --- */
 nav {
   position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(5,6,10,0.85);
+  background: rgba(255,255,255,0.95);
   backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid rgba(0,0,0,0.08);
 }
 
 .nav-inner {
@@ -195,7 +195,7 @@ nav {
   font-weight: 600;
   letter-spacing: 3px;
   text-transform: uppercase;
-  color: var(--text);
+  color: #1a1d2e;
   text-decoration: none;
 }
 
@@ -206,13 +206,13 @@ nav {
 .nav-links a {
   font-size: 13px;
   font-weight: 500;
-  color: var(--text2);
+  color: #5b6078;
   text-decoration: none;
   letter-spacing: 0.3px;
   transition: color 0.2s;
 }
 
-.nav-links a:hover { color: var(--text); }
+.nav-links a:hover { color: #1a1d2e; }
 
 .nav-cta {
   font-family: var(--mono) !important;
@@ -227,6 +227,22 @@ nav {
 }
 
 .nav-cta:hover { box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-1px) !important; }
+
+.nav-exposed {
+  font-family: var(--mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  padding: 8px 20px;
+  background: var(--red) !important;
+  color: #fff !important;
+  border-radius: 4px;
+  transition: box-shadow 0.2s, transform 0.1s !important;
+  cursor: pointer;
+  border: none;
+}
+
+.nav-exposed:hover { box-shadow: 0 0 20px rgba(239,68,68,0.4); transform: translateY(-1px) !important; }
 
 /* --- HERO --- */
 .hero {
@@ -1860,6 +1876,7 @@ html.light nav { background: rgba(245,246,250,0.9); }
       <a href="security.html">Security</a>
       <a href="platform.html">Platform</a>
       <a href="pay.html">Purchase</a>
+      <button class="nav-exposed" onclick="showExposure()">Have You Been Exposed?</button>
       <a href="main.html#trial" class="nav-cta">Try Free</a>
     </div>
   </div>
