@@ -8,6 +8,7 @@
 <meta name="referrer" content="no-referrer">
 <title>Kwyre AI — Secure Payment</title>
 <meta name="description" content="Purchase Kwyre AI inference server. One-time payment. No subscription. Monero (XMR) accepted.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script nonce="{{CSP_NONCE}}" src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
@@ -779,6 +780,69 @@ nav {
   letter-spacing: 0.3px;
 }
 
+/* --- PRODUCT ROWS --- */
+.product-row {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px 24px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.3s;
+}
+
+.product-row:hover { background: var(--surface2); border-color: var(--border-hi); }
+.product-row.featured { border-color: var(--accent); background: var(--surface2); }
+
+.product-row-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.product-row-name {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+
+.product-row-price {
+  font-size: 24px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.product-row-features {
+  list-style: none;
+  padding: 0;
+}
+
+.product-row-features li {
+  font-size: 13px;
+  color: var(--text2);
+  padding: 3px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.product-row-features li::before {
+  content: '';
+  width: 4px;
+  height: 4px;
+  border-radius: 1px;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+@media (max-width: 900px) {
+  #products-payment .wrap > div { grid-template-columns: 1fr !important; }
+}
+
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
   .nav-links a:not(.nav-cta) { display: none; }
@@ -809,10 +873,13 @@ nav {
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a href="main.html" class="nav-brand"><span>K</span>WYRE</a>
+    <a href="main.html" class="nav-brand"><img src="kwyre-icon.svg" alt="Kwyre" style="height:20px;vertical-align:middle;margin-right:8px;"><span>K</span>WYRE</a>
     <div class="nav-links">
-      <a href="main.html#security">Security</a>
-      <a href="main.html#features">Features</a>
+      <a href="technology.html">Technology</a>
+      <a href="custom.html">Custom</a>
+      <a href="security.html">Security</a>
+      <a href="platform.html">Platform</a>
+      <a href="pay.html">Purchase</a>
       <a href="main.html#trial" class="nav-cta">Try Free</a>
     </div>
   </div>
@@ -834,136 +901,186 @@ nav {
   </div>
 </div>
 
-<!-- PRICING TIERS -->
-<div class="section" id="pricing">
+<!-- PRODUCTS + PAYMENT -->
+<div class="section" id="products-payment">
   <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">Pricing</div>
-      <h2 class="reveal reveal-d1">Choose your deployment</h2>
-      <p class="reveal reveal-d2">Every tier includes the full 6-layer security stack and compliance documentation.</p>
-    </div>
+    <div style="display: grid; grid-template-columns: 1fr 380px; gap: 40px; align-items: start;">
 
-    <div class="pricing-grid reveal reveal-d3">
-      <div class="price-card" data-tier="personal" data-price="299">
-        <div class="price-name">Personal</div>
-        <div class="price-amount">$299</div>
-        <div class="price-type">One-time payment</div>
-        <div class="price-license"><span class="dot"></span> 1 machine license</div>
-        <ul class="price-features">
-          <li>Full inference server</li>
-          <li>6-layer security stack</li>
-          <li>Compliance docs</li>
-          <li>OpenAI-compatible API</li>
-        </ul>
-        <button class="price-select-btn" onclick="selectTier('personal')">Select Plan</button>
-      </div>
-
-      <div class="price-card featured" data-tier="professional" data-price="799">
-        <div class="price-name">Professional</div>
-        <div class="price-amount">$799</div>
-        <div class="price-type">One-time payment</div>
-        <div class="price-license"><span class="dot"></span> 3 machine licenses</div>
-        <ul class="price-features">
-          <li>Everything in Personal</li>
-          <li>Priority support</li>
-          <li>Multi-seat deployment</li>
-          <li>Full audit package</li>
-        </ul>
-        <button class="price-select-btn active" onclick="selectTier('professional')">Select Plan</button>
-      </div>
-
-      <div class="price-card" data-tier="airgapped" data-price="1499">
-        <div class="price-name">Air-Gapped Kit</div>
-        <div class="price-amount">$1,499</div>
-        <div class="price-type">One-time payment</div>
-        <div class="price-license"><span class="dot"></span> 5 machine licenses</div>
-        <ul class="price-features">
-          <li>Everything in Professional</li>
-          <li>Offline installer</li>
-          <li>Full audit package</li>
-          <li>White-glove setup</li>
-        </ul>
-        <button class="price-select-btn" onclick="selectTier('airgapped')">Select Plan</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- PAYMENT METHOD -->
-<div class="pay-section section" id="payment">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">Payment Method</div>
-      <h2 class="reveal reveal-d1">How would you like to pay?</h2>
-    </div>
-
-    <div class="reveal reveal-d2">
-      <div class="pay-method-toggle">
-        <button class="active" onclick="setPayMethod('xmr')">
-          Monero (XMR)
-          <span class="recommended">Recommended</span>
-        </button>
-        <button onclick="setPayMethod('cc')">Credit Card</button>
-      </div>
-    </div>
-
-    <!-- Monero Panel -->
-    <div class="pay-panel xmr-panel reveal reveal-d3" id="xmrPanel">
-      <div class="xmr-selected-tier" id="xmrTierLabel">Professional</div>
-      <div class="xmr-amount-usd" id="xmrAmountUsd">$799</div>
-      <div class="xmr-rate-note">Contact for current XMR rate</div>
-
-      <div id="qrCode" class="qr-container"></div>
-
-      <div class="xmr-address-wrap">
-        <div class="xmr-address-label">Monero (XMR) Address</div>
-        <div class="xmr-address" id="xmrAddress">84GhsVq5sQ3RE9DxMaRrmaX8L3am6VpJdfjz3KG3PFEiMVMjnFqYEochJCWBwREmUPNi7mYbSabKvP3kCB1oG4uiKxvpTvH</div>
-      </div>
-
-      <button class="copy-btn" id="copyBtn" onclick="copyAddress()">
-        <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-        <span id="copyLabel">Copy Address</span>
-      </button>
-    </div>
-
-    <!-- Credit Card Panel -->
-    <div class="pay-panel cc-panel pay-panel-hidden" id="ccPanel">
-      <div class="cc-icon">
-        <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
-      </div>
-      <h3>Coming soon</h3>
-      <p>Credit card processing is not yet available.<br>Use <span class="cc-highlight">Monero for immediate access</span> &mdash; no waiting, no intermediaries.</p>
-    </div>
-
-    <!-- After Payment -->
-    <div class="after-pay reveal reveal-d4">
-      <div class="after-pay-box">
-        <div class="after-pay-step">
-          <div class="after-pay-num">1</div>
-          <div class="after-pay-text">
-            <h4>Send payment</h4>
-            <p>Send the XMR amount to the address above. Double-check the address before confirming.</p>
-          </div>
+      <!-- LEFT: PRODUCTS -->
+      <div>
+        <div class="sh" style="text-align: left; margin-bottom: 24px;">
+          <div class="sh-eyebrow">Choose Your Product</div>
+          <h2 style="font-size: 24px;">Five ways to deploy Kwyre</h2>
         </div>
-        <div class="after-pay-step">
-          <div class="after-pay-num">2</div>
-          <div class="after-pay-text">
-            <h4>Email your Transaction ID</h4>
-            <p>After sending payment, email your Transaction ID to <a href="mailto:payments@kwyre.com">payments@kwyre.com</a></p>
+
+        <div style="display: flex; flex-direction: column; gap: 2px;">
+
+          <div class="product-row" data-tier="personal" data-price="299" onclick="selectTier('personal')">
+            <div class="product-row-header">
+              <div>
+                <div class="product-row-name">Kwyre Personal</div>
+                <div class="product-row-price">$299 <span style="font-size:12px;color:var(--text3);font-weight:400;">one-time</span></div>
+              </div>
+              <button class="price-select-btn" onclick="event.stopPropagation();selectTier('personal')">Select</button>
+            </div>
+            <ul class="product-row-features">
+              <li>Qwen3-4B + 0.6B draft model (pre-quantized NF4)</li>
+              <li>Speculative decoding (2-3x throughput)</li>
+              <li>SpikeServe activation encoding</li>
+              <li>3.9 GB VRAM &middot; 7-14 tok/s</li>
+              <li>6-layer security stack</li>
+              <li>SSE streaming &middot; KV cache &middot; RAG</li>
+              <li>1 machine license</li>
+            </ul>
           </div>
-        </div>
-        <div class="after-pay-step">
-          <div class="after-pay-num">3</div>
-          <div class="after-pay-text">
-            <h4>Receive your license key</h4>
-            <p>You'll receive your license key within 24 hours.</p>
+
+          <div class="product-row featured" data-tier="professional" data-price="799" onclick="selectTier('professional')">
+            <div class="product-row-header">
+              <div>
+                <div class="product-row-name">Kwyre Professional</div>
+                <div class="product-row-price">$799 <span style="font-size:12px;color:var(--text3);font-weight:400;">one-time</span></div>
+              </div>
+              <button class="price-select-btn active" onclick="event.stopPropagation();selectTier('professional')">Select</button>
+            </div>
+            <ul class="product-row-features">
+              <li>Custom-trained Qwen3.5-9B (GRPO + distillation)</li>
+              <li>Chain-of-thought reasoning baked into weights</li>
+              <li>Domain expertise: forensics, legal, financial</li>
+              <li>7.5 GB VRAM &middot; 3-5 tok/s</li>
+              <li>Everything in Personal</li>
+              <li>Multi-user RBAC &middot; Enterprise audit</li>
+              <li>3 machine licenses &middot; Priority support</li>
+            </ul>
           </div>
+
+          <div class="product-row" data-tier="air" data-price="299" onclick="selectTier('air')">
+            <div class="product-row-header">
+              <div>
+                <div class="product-row-name">Kwyre Air</div>
+                <div class="product-row-price">$299 <span style="font-size:12px;color:var(--text3);font-weight:400;">one-time</span></div>
+              </div>
+              <button class="price-select-btn" onclick="event.stopPropagation();selectTier('air')">Select</button>
+            </div>
+            <ul class="product-row-features">
+              <li>CPU-only inference via llama.cpp (any GGUF)</li>
+              <li>No GPU required &middot; runs on any hardware</li>
+              <li>8+ GB RAM &middot; 2-8 tok/s</li>
+              <li>6-layer security stack</li>
+              <li>SSE streaming</li>
+              <li>1 machine license</li>
+            </ul>
+          </div>
+
+          <div class="product-row" data-tier="mlx" data-price="299" onclick="selectTier('mlx')">
+            <div class="product-row-header">
+              <div>
+                <div class="product-row-name">Kwyre Apple Silicon</div>
+                <div class="product-row-price">$299 <span style="font-size:12px;color:var(--text3);font-weight:400;">one-time</span></div>
+              </div>
+              <button class="price-select-btn" onclick="event.stopPropagation();selectTier('mlx')">Select</button>
+            </div>
+            <ul class="product-row-features">
+              <li>Native Metal acceleration (MLX)</li>
+              <li>M1/M2/M3/M4 optimized</li>
+              <li>8+ GB unified memory &middot; 5-15 tok/s</li>
+              <li>6-layer security stack</li>
+              <li>SSE streaming</li>
+              <li>1 machine license</li>
+            </ul>
+          </div>
+
+          <div class="product-row" style="border-color: var(--green-dim);" onclick="window.location='custom.html'">
+            <div class="product-row-header">
+              <div>
+                <div class="product-row-name" style="color: var(--green);">Custom LLM</div>
+                <div class="product-row-price" style="color: var(--green);">Contact us</div>
+              </div>
+              <a href="custom.html" class="price-select-btn" style="background:var(--green);border-color:var(--green);" onclick="event.stopPropagation()">Request</a>
+            </div>
+            <ul class="product-row-features">
+              <li>Custom-trained model for your domain</li>
+              <li>Claude-distilled reasoning + GRPO RL</li>
+              <li>Turnkey appliance or self-hosted</li>
+              <li>Legal, financial, crypto, insurance, defense, healthcare</li>
+              <li>Full security stack + compliance docs</li>
+            </ul>
+          </div>
+
         </div>
       </div>
-      <div class="after-pay-note">
-        <span class="dot"></span>
-        All transactions verified manually for your security
+
+      <!-- RIGHT: PAYMENT METHOD -->
+      <div id="payment">
+        <div class="sh" style="text-align: left; margin-bottom: 24px;">
+          <div class="sh-eyebrow">Payment Method</div>
+          <h2 style="font-size: 24px;">How would you like to pay?</h2>
+        </div>
+
+        <div class="pay-method-toggle" style="max-width:none;margin-left:0;margin-right:0;">
+          <button class="active" onclick="setPayMethod('xmr')">
+            Monero (XMR)
+            <span class="recommended">Recommended</span>
+          </button>
+          <button onclick="setPayMethod('cc')">Credit Card</button>
+        </div>
+
+        <div class="pay-panel xmr-panel" id="xmrPanel" style="max-width:none;">
+          <div class="xmr-selected-tier" id="xmrTierLabel">Professional</div>
+          <div class="xmr-amount-usd" id="xmrAmountUsd">$799</div>
+          <div class="xmr-rate-note">Contact for current XMR rate</div>
+
+          <div id="qrCode" class="qr-container"></div>
+
+          <div class="xmr-address-wrap">
+            <div class="xmr-address-label">Monero (XMR) Address</div>
+            <div class="xmr-address" id="xmrAddress">84GhsVq5sQ3RE9DxMaRrmaX8L3am6VpJdfjz3KG3PFEiMVMjnFqYEochJCWBwREmUPNi7mYbSabKvP3kCB1oG4uiKxvpTvH</div>
+          </div>
+
+          <button class="copy-btn" id="copyBtn" onclick="copyAddress()">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="copyLabel">Copy Address</span>
+          </button>
+        </div>
+
+        <div class="pay-panel cc-panel pay-panel-hidden" id="ccPanel" style="max-width:none;">
+          <div class="cc-icon">
+            <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+          </div>
+          <h3>Coming soon</h3>
+          <p>Credit card processing is not yet available.<br>Use <span class="cc-highlight">Monero for immediate access</span> &mdash; no waiting, no intermediaries.</p>
+        </div>
+
+        <div class="after-pay">
+          <div class="after-pay-box">
+            <div class="after-pay-step">
+              <div class="after-pay-num">1</div>
+              <div class="after-pay-text">
+                <h4>Send payment</h4>
+                <p>Send the XMR amount to the address above. Double-check the address before confirming.</p>
+              </div>
+            </div>
+            <div class="after-pay-step">
+              <div class="after-pay-num">2</div>
+              <div class="after-pay-text">
+                <h4>Email your Transaction ID</h4>
+                <p>After sending payment, email your Transaction ID to <a href="mailto:payments@kwyre.com">payments@kwyre.com</a></p>
+              </div>
+            </div>
+            <div class="after-pay-step">
+              <div class="after-pay-num">3</div>
+              <div class="after-pay-text">
+                <h4>Receive your license key</h4>
+                <p>You'll receive your license key within 24 hours.</p>
+              </div>
+            </div>
+          </div>
+          <div class="after-pay-note">
+            <span class="dot"></span>
+            All transactions verified manually for your security
+          </div>
+        </div>
       </div>
+
     </div>
   </div>
 </div>
@@ -1121,21 +1238,23 @@ nav {
 
 /* ── TIER SELECTION ── */
 const TIERS = {
-  personal:     { label: 'Personal',     price: '$299' },
-  professional: { label: 'Professional', price: '$799' },
-  airgapped:    { label: 'Air-Gapped Kit', price: '$1,499' }
+  personal:     { label: 'Personal',       price: '$299' },
+  professional: { label: 'Professional',   price: '$799' },
+  air:          { label: 'Air (CPU)',       price: '$299' },
+  mlx:          { label: 'Apple Silicon',   price: '$299' }
 };
 let selectedTier = 'professional';
 
 function selectTier(tier) {
   selectedTier = tier;
 
-  document.querySelectorAll('.price-select-btn').forEach(btn => {
+  document.querySelectorAll('.product-row .price-select-btn').forEach(btn => {
     btn.classList.remove('active');
-    btn.textContent = 'Select Plan';
+    btn.textContent = 'Select';
   });
 
-  const card = document.querySelector(`[data-tier="${tier}"]`);
+  const card = document.querySelector(`.product-row[data-tier="${tier}"]`);
+  if (!card) return;
   const btn = card.querySelector('.price-select-btn');
   btn.classList.add('active');
   btn.textContent = 'Selected';
@@ -1307,7 +1426,7 @@ function showSuccess(result) {
 
 /* ── SET INITIAL STATE ── */
 selectTier('professional');
-document.querySelector('[data-tier="professional"] .price-select-btn').textContent = 'Selected';
+document.querySelector('.product-row[data-tier="professional"] .price-select-btn').textContent = 'Selected';
 </script>
 </body>
 </html>
