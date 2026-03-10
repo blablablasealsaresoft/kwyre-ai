@@ -1712,6 +1712,110 @@ html.light nav { background: rgba(245,246,250,0.9); }
   .news-ticker { display: none; }
 }
 
+/* EXPOSED ORB */
+.exposed-orb {
+  border-color: rgba(239,68,68,0.2) !important;
+  background: radial-gradient(circle at 35% 35%, rgba(239,68,68,0.15), rgba(239,68,68,0.03)) !important;
+  box-shadow: 0 0 30px rgba(239,68,68,0.1), inset 0 0 20px rgba(239,68,68,0.05) !important;
+}
+.exposed-orb:hover {
+  border-color: var(--red) !important;
+  box-shadow: 0 0 50px rgba(239,68,68,0.25), inset 0 0 30px rgba(239,68,68,0.1) !important;
+}
+.exposed-orb:hover .float-orb-inner { color: var(--red) !important; }
+
+@keyframes orb-drift-exposed {
+  0%   { top: 38%; left: 85%; }
+  25%  { top: 32%; left: 80%; }
+  50%  { top: 42%; left: 88%; }
+  75%  { top: 35%; left: 82%; }
+  100% { top: 38%; left: 85%; }
+}
+
+/* EXPOSURE POPUP */
+.exposure-overlay {
+  position: fixed; inset: 0; z-index: 250;
+  background: rgba(5,6,10,0.92);
+  backdrop-filter: blur(16px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.exposure-overlay.open { opacity: 1; pointer-events: all; }
+
+.exposure-popup {
+  background: var(--surface);
+  border: 1px solid var(--red-dim);
+  border-radius: 8px;
+  width: 100%; max-width: 560px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 32px;
+  position: relative;
+  transform: translateY(16px) scale(0.97);
+  transition: transform 0.3s ease;
+}
+.exposure-overlay.open .exposure-popup { transform: translateY(0) scale(1); }
+
+.exposure-close {
+  position: absolute; top: 12px; right: 12px;
+  background: none; border: none; color: var(--text3);
+  font-size: 22px; cursor: pointer;
+}
+
+.exposure-header {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--red); margin-bottom: 20px;
+}
+
+.exposure-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 10px rgba(239,68,68,0.6);
+  animation: threat-pulse 1.5s ease-in-out infinite;
+}
+
+.exposure-title {
+  font-size: 22px; font-weight: 700;
+  color: var(--text); margin-bottom: 8px;
+}
+
+.exposure-subtitle {
+  font-size: 13px; color: var(--text2);
+  line-height: 1.6; margin-bottom: 24px;
+}
+
+.exposure-grid {
+  display: flex; flex-direction: column; gap: 1px;
+  background: var(--border); border-radius: 6px;
+  overflow: hidden; margin-bottom: 24px;
+}
+
+.exposure-row {
+  display: flex; justify-content: space-between;
+  padding: 10px 14px; background: var(--bg);
+}
+
+.exposure-label {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--red); font-weight: 600;
+}
+
+.exposure-value {
+  font-size: 13px; color: var(--text);
+  text-align: right; max-width: 60%;
+  word-break: break-all;
+}
+
+.exposure-footer {
+  text-align: center;
+  font-size: 13px; color: var(--text2);
+  line-height: 1.6;
+}
+
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
   .nav-links a:not(.nav-cta) { display: none; }
@@ -2103,6 +2207,9 @@ html.light nav { background: rgba(245,246,250,0.9); }
   <div class="float-orb" onclick="togglePanel('panelFeatures')">
     <div class="float-orb-inner">Feat<br>ures</div>
   </div>
+  <div class="float-orb exposed-orb" onclick="showExposure()" style="animation: orb-drift-exposed 16s ease-in-out infinite;">
+    <div class="float-orb-inner" style="color: rgba(239,68,68,0.7);">EXP<br>OSED?</div>
+  </div>
 </div>
 
 <div class="float-panel" id="panelBuyers">
@@ -2241,6 +2348,31 @@ html.light nav { background: rgba(245,246,250,0.9); }
         <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
         <h3>Compliance & Audit</h3>
         <p>GET /audit for metadata-only compliance logs. GET /health for full security stack status. Architecture designed for HIPAA, FINRA, SOC2-adjacent requirements.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPOSURE POPUP -->
+<div class="exposure-overlay" id="exposureOverlay" onclick="if(event.target===this)closeExposure()">
+  <div class="exposure-popup">
+    <button class="exposure-close" onclick="closeExposure()">&times;</button>
+    
+    <div class="exposure-header">
+      <div class="exposure-dot"></div>
+      <span>SCANNING YOUR CONNECTION...</span>
+    </div>
+
+    <div id="exposureContent" style="display:none;">
+      <div class="exposure-title">Here's what we know about you.</div>
+      <div class="exposure-subtitle">You didn't type anything. We didn't ask. This is what EVERY website sees the moment you connect.</div>
+      
+      <div class="exposure-grid" id="exposureGrid"></div>
+
+      <div class="exposure-footer">
+        <p>Every cloud AI service collects this and more. Every query you send is tied to this fingerprint.</p>
+        <p style="color: var(--green); margin-top: 12px; font-weight: 600;">With Kwyre, none of this data exists. Your AI runs on YOUR machine.</p>
+        <a href="pay.html" class="btn btn-primary" style="margin-top: 16px;">Get Air-Gapped AI</a>
       </div>
     </div>
   </div>
@@ -2704,7 +2836,7 @@ document.getElementById('accessModal').addEventListener('click', e => {
 });
 
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeModal(); closeCase(); }
+  if (e.key === 'Escape') { closeModal(); closeCase(); closeExposure(); }
 });
 
 function setType(type) {
@@ -2737,6 +2869,138 @@ function submitAccess() {
 
   document.getElementById('accessEmail').value = '';
   document.getElementById('accessCompany').value = '';
+}
+
+function showExposure() {
+  document.getElementById('exposureOverlay').classList.add('open');
+  document.getElementById('exposureContent').style.display = 'none';
+  document.querySelector('.exposure-header span').textContent = 'SCANNING YOUR CONNECTION...';
+  
+  setTimeout(function() {
+    collectFingerprint();
+    document.getElementById('exposureContent').style.display = '';
+    document.querySelector('.exposure-header span').textContent = 'SCAN COMPLETE';
+  }, 2000);
+}
+
+function closeExposure() {
+  document.getElementById('exposureOverlay').classList.remove('open');
+}
+
+function collectFingerprint() {
+  var grid = document.getElementById('exposureGrid');
+  grid.innerHTML = '';
+  
+  var data = [];
+  
+  var ua = navigator.userAgent;
+  var browser = 'Unknown';
+  if (ua.indexOf('Edg/') > -1) browser = 'Microsoft Edge';
+  else if (ua.indexOf('Chrome/') > -1) browser = 'Google Chrome';
+  else if (ua.indexOf('Firefox/') > -1) browser = 'Mozilla Firefox';
+  else if (ua.indexOf('Safari/') > -1) browser = 'Apple Safari';
+  data.push(['Browser', browser]);
+  
+  var os = 'Unknown';
+  if (ua.indexOf('Windows') > -1) os = 'Windows';
+  else if (ua.indexOf('Mac') > -1) os = 'macOS';
+  else if (ua.indexOf('Linux') > -1) os = 'Linux';
+  else if (ua.indexOf('Android') > -1) os = 'Android';
+  else if (ua.indexOf('iOS') > -1) os = 'iOS';
+  data.push(['Operating System', os]);
+  
+  data.push(['Screen Resolution', screen.width + ' x ' + screen.height]);
+  data.push(['Color Depth', screen.colorDepth + '-bit']);
+  data.push(['Device Pixel Ratio', window.devicePixelRatio + 'x']);
+  data.push(['Window Size', window.innerWidth + ' x ' + window.innerHeight]);
+  
+  data.push(['CPU Cores', navigator.hardwareConcurrency || 'Hidden']);
+  data.push(['Device Memory', (navigator.deviceMemory ? navigator.deviceMemory + ' GB' : 'Hidden')]);
+  data.push(['Max Touch Points', navigator.maxTouchPoints]);
+  
+  try {
+    var canvas = document.createElement('canvas');
+    var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (gl) {
+      var ext = gl.getExtension('WEBGL_debug_renderer_info');
+      if (ext) {
+        data.push(['GPU Vendor', gl.getParameter(ext.UNMASKED_VENDOR_WEBGL)]);
+        data.push(['GPU Renderer', gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)]);
+      }
+    }
+  } catch(e) {}
+  
+  data.push(['Language', navigator.language]);
+  data.push(['Languages', (navigator.languages || []).join(', ')]);
+  data.push(['Timezone', Intl.DateTimeFormat().resolvedOptions().timeZone]);
+  data.push(['UTC Offset', 'UTC' + (new Date().getTimezoneOffset() > 0 ? '-' : '+') + Math.abs(new Date().getTimezoneOffset()/60)]);
+  
+  if (navigator.connection) {
+    data.push(['Connection Type', navigator.connection.effectiveType || 'Unknown']);
+    data.push(['Downlink Speed', (navigator.connection.downlink || '?') + ' Mbps']);
+  }
+  
+  data.push(['Platform', navigator.platform]);
+  data.push(['Do Not Track', navigator.doNotTrack === '1' ? 'Enabled (ignored by most sites)' : 'Disabled']);
+  data.push(['Cookies Enabled', navigator.cookieEnabled ? 'Yes' : 'No']);
+  data.push(['PDF Viewer', navigator.pdfViewerEnabled ? 'Built-in' : 'None']);
+  
+  if (navigator.getBattery) {
+    navigator.getBattery().then(function(battery) {
+      var batteryRow = document.createElement('div');
+      batteryRow.className = 'exposure-row';
+      batteryRow.innerHTML = '<span class="exposure-label">Battery Level</span><span class="exposure-value">' + Math.round(battery.level * 100) + '% ' + (battery.charging ? '(Charging)' : '(Not charging)') + '</span>';
+      grid.appendChild(batteryRow);
+    });
+  }
+  
+  try {
+    var c = document.createElement('canvas');
+    c.width = 200; c.height = 50;
+    var ctx = c.getContext('2d');
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillText('Kwyre fingerprint test \uD83D\uDD12', 2, 2);
+    var hash = 0;
+    var str = c.toDataURL();
+    for (var i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    data.push(['Canvas Fingerprint', 'Hash: ' + Math.abs(hash).toString(16)]);
+  } catch(e) {}
+  
+  try {
+    var c2 = document.createElement('canvas');
+    var gl2 = c2.getContext('webgl');
+    if (gl2) {
+      var params = [gl2.MAX_TEXTURE_SIZE, gl2.MAX_RENDERBUFFER_SIZE, gl2.MAX_VIEWPORT_DIMS];
+      data.push(['WebGL Fingerprint', params.map(function(p) { return gl2.getParameter(p); }).join(' / ')]);
+    }
+  } catch(e) {}
+  
+  var testFonts = ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana', 'Comic Sans MS', 'Impact', 'Lucida Console', 'Tahoma', 'Trebuchet MS'];
+  var detected = [];
+  var body = document.body;
+  var span = document.createElement('span');
+  span.style.cssText = 'position:absolute;left:-9999px;font-size:72px';
+  span.textContent = 'mmmmmmmmmmlli';
+  body.appendChild(span);
+  span.style.fontFamily = 'monospace';
+  var baseWidth = span.offsetWidth;
+  testFonts.forEach(function(font) {
+    span.style.fontFamily = '"' + font + '", monospace';
+    if (span.offsetWidth !== baseWidth) detected.push(font);
+  });
+  body.removeChild(span);
+  data.push(['Detected Fonts', detected.length + ' (' + detected.slice(0,5).join(', ') + (detected.length > 5 ? '...' : '') + ')']);
+  
+  data.forEach(function(item) {
+    var row = document.createElement('div');
+    row.className = 'exposure-row';
+    row.innerHTML = '<span class="exposure-label">' + item[0] + '</span><span class="exposure-value">' + item[1] + '</span>';
+    grid.appendChild(row);
+  });
 }
 </script>
 </body>
