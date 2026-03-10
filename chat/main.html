@@ -1554,6 +1554,131 @@ html.light .message-content pre { background: var(--surface2); }
 html.light .copy-btn { background: var(--surface); }
 html.light nav { background: rgba(245,246,250,0.9); }
 
+/* --- NEWS TICKER --- */
+.news-ticker {
+  position: fixed;
+  left: 0;
+  top: 56px;
+  bottom: 0;
+  width: 280px;
+  background: rgba(5,6,10,0.92);
+  backdrop-filter: blur(16px);
+  border-right: 1px solid var(--border);
+  z-index: 40;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.news-ticker-header {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.news-ticker-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 8px rgba(239,68,68,0.5);
+  animation: threat-pulse 2s ease-in-out infinite;
+}
+
+.news-ticker-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--red);
+}
+
+.news-ticker-scroll {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.news-ticker-track {
+  animation: ticker-scroll 120s linear infinite;
+  display: flex;
+  flex-direction: column;
+}
+
+.news-ticker-track:hover { animation-play-state: paused; }
+
+@keyframes ticker-scroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+.ticker-item {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(28,32,51,0.5);
+  text-decoration: none;
+  display: block;
+  transition: background 0.2s;
+}
+
+.ticker-item:hover { background: var(--surface2); }
+
+.ticker-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+  margin-bottom: 6px;
+}
+
+.ticker-tag-fine { background: var(--red-dim); color: var(--red); }
+.ticker-tag-breach { background: rgba(245,158,11,0.12); color: var(--amber); }
+.ticker-tag-legal { background: var(--accent-dim); color: var(--accent); }
+.ticker-tag-leak { background: var(--red-dim); color: var(--red); }
+
+.ticker-headline {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.ticker-source {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 0.3px;
+}
+
+.news-ticker-cta {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.news-ticker-cta a {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.news-ticker-cta a:hover { color: var(--text); }
+
+@media (max-width: 1100px) {
+  .news-ticker { display: none; }
+}
+
 /* --- RESPONSIVE --- */
 @media (max-width: 768px) {
   .nav-links a:not(.nav-cta) { display: none; }
@@ -1601,6 +1726,172 @@ html.light nav { background: rgba(245,246,250,0.9); }
     </div>
   </div>
 </nav>
+
+<!-- NEWS TICKER -->
+<div class="news-ticker">
+  <div class="news-ticker-header">
+    <div class="news-ticker-dot"></div>
+    <div class="news-ticker-title">AI Privacy Incidents</div>
+  </div>
+  <div class="news-ticker-scroll">
+    <div class="news-ticker-track">
+      <a href="https://www.reuters.com/technology/italy-fines-openai-15-million-euros-over-privacy-rules-breach-2024-12-20/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">&euro;15M FINE</div>
+        <div class="ticker-headline">Italy fines OpenAI for GDPR violations</div>
+        <div class="ticker-source">Reuters</div>
+      </a>
+      <a href="https://www.cnn.com/2025/09/05/business/anthropic-ai-settlement-authors-claude" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">$1.5B SETTLEMENT</div>
+        <div class="ticker-headline">Anthropic pays to settle copyright class action</div>
+        <div class="ticker-source">CNN</div>
+      </a>
+      <a href="https://techcrunch.com/2026/02/18/microsoft-says-office-bug-exposed-customers-confidential-emails-to-copilot-ai" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">DATA EXPOSURE</div>
+        <div class="ticker-headline">Microsoft Copilot bypassed DLP on confidential emails</div>
+        <div class="ticker-source">TechCrunch</div>
+      </a>
+      <a href="https://www.venturebeat.com/security/microsoft-copilot-ignoring-sensitivity-labels-dlp-cant-stop-ai-trust-failures" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">CVSS 9.3</div>
+        <div class="ticker-headline">Microsoft Copilot zero-click vulnerability</div>
+        <div class="ticker-source">VentureBeat</div>
+      </a>
+      <a href="https://incidentdatabase.ai/cite/768/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-leak">IP LEAKED</div>
+        <div class="ticker-headline">Samsung leaked source code to ChatGPT 3x</div>
+        <div class="ticker-source">Bloomberg</div>
+      </a>
+      <a href="https://www.reuters.com/legal/government/publishers-seek-join-lawsuit-against-google-over-ai-training-2026-01-15/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">CLASS ACTION</div>
+        <div class="ticker-headline">Google sued for copyright infringement for Gemini</div>
+        <div class="ticker-source">Reuters</div>
+      </a>
+      <a href="https://www.dataprivacyandsecurityinsider.com/2026/01/when-chats-become-evidence-court-affirms-order-requiring-openai-to-produce-20-million-de-identified-chatgpt-logs" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">COURT ORDER</div>
+        <div class="ticker-headline">OpenAI ordered to produce 20M chat logs</div>
+        <div class="ticker-source">DPSI</div>
+      </a>
+      <a href="https://www.reuters.com/legal/litigation/amazon-must-face-us-class-action-over-alexa-users-privacy-2025-07-07/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">CLASS ACTION</div>
+        <div class="ticker-headline">Amazon Alexa recording private conversations</div>
+        <div class="ticker-source">Reuters</div>
+      </a>
+      <a href="https://www.androidpolice.com/meta-ai-glasses-privacy-concern/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">PRIVACY VIOLATION</div>
+        <div class="ticker-headline">Meta contractors reviewed intimate Ray-Ban footage</div>
+        <div class="ticker-source">Android Police</div>
+      </a>
+      <a href="https://epic.org/wp-content/uploads/2024/10/EPIC-FTC-OpenAI-complaint.pdf" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">FTC COMPLAINT</div>
+        <div class="ticker-headline">EPIC complaint against OpenAI</div>
+        <div class="ticker-source">EPIC</div>
+      </a>
+      <a href="https://techcrunch.com/2025/02/26/thousands-of-exposed-github-repositories-now-private-can-still-be-accessed-through-copilot" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">DATA EXPOSURE</div>
+        <div class="ticker-headline">20K+ private repos accessible through Copilot</div>
+        <div class="ticker-source">TechCrunch</div>
+      </a>
+      <a href="https://basilai.app/articles/2025-11-27-zoom-ai-companion-analyzing-meeting-content-without-consent-privacy-violations.html.html" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">PRIVACY VIOLATION</div>
+        <div class="ticker-headline">Zoom AI analyzing meetings without consent</div>
+        <div class="ticker-source">Basil AI</div>
+      </a>
+      <a href="https://oag.ca.gov/news/press-releases/attorney-general-bonta-announces-largest-ccpa-settlement-date-secures-155" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">$1.55M FINE</div>
+        <div class="ticker-headline">California AG largest CCPA settlement</div>
+        <div class="ticker-source">CA AG</div>
+      </a>
+      <a href="https://www.mondaq.com/unitedstates/privacy-protection/1687822/california-privacy-violations-result-in-135-million-fine" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">$1.35M FINE</div>
+        <div class="ticker-headline">CPPA record fine for privacy failures</div>
+        <div class="ticker-source">CPPA</div>
+      </a>
+      <a href="https://www.americanbar.org/groups/litigation/resources/litigation-news/2023/use-chatgpt-research-bogus-cases-sanctions/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">SANCTIONED</div>
+        <div class="ticker-headline">Attorneys sanctioned for ChatGPT fake citations</div>
+        <div class="ticker-source">ABA</div>
+      </a>
+      <!-- DUPLICATE SET FOR SEAMLESS LOOP -->
+      <a href="https://www.reuters.com/technology/italy-fines-openai-15-million-euros-over-privacy-rules-breach-2024-12-20/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">&euro;15M FINE</div>
+        <div class="ticker-headline">Italy fines OpenAI for GDPR violations</div>
+        <div class="ticker-source">Reuters</div>
+      </a>
+      <a href="https://www.cnn.com/2025/09/05/business/anthropic-ai-settlement-authors-claude" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">$1.5B SETTLEMENT</div>
+        <div class="ticker-headline">Anthropic pays to settle copyright class action</div>
+        <div class="ticker-source">CNN</div>
+      </a>
+      <a href="https://techcrunch.com/2026/02/18/microsoft-says-office-bug-exposed-customers-confidential-emails-to-copilot-ai" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">DATA EXPOSURE</div>
+        <div class="ticker-headline">Microsoft Copilot bypassed DLP on confidential emails</div>
+        <div class="ticker-source">TechCrunch</div>
+      </a>
+      <a href="https://www.venturebeat.com/security/microsoft-copilot-ignoring-sensitivity-labels-dlp-cant-stop-ai-trust-failures" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">CVSS 9.3</div>
+        <div class="ticker-headline">Microsoft Copilot zero-click vulnerability</div>
+        <div class="ticker-source">VentureBeat</div>
+      </a>
+      <a href="https://incidentdatabase.ai/cite/768/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-leak">IP LEAKED</div>
+        <div class="ticker-headline">Samsung leaked source code to ChatGPT 3x</div>
+        <div class="ticker-source">Bloomberg</div>
+      </a>
+      <a href="https://www.reuters.com/legal/government/publishers-seek-join-lawsuit-against-google-over-ai-training-2026-01-15/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">CLASS ACTION</div>
+        <div class="ticker-headline">Google sued for copyright infringement for Gemini</div>
+        <div class="ticker-source">Reuters</div>
+      </a>
+      <a href="https://www.dataprivacyandsecurityinsider.com/2026/01/when-chats-become-evidence-court-affirms-order-requiring-openai-to-produce-20-million-de-identified-chatgpt-logs" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">COURT ORDER</div>
+        <div class="ticker-headline">OpenAI ordered to produce 20M chat logs</div>
+        <div class="ticker-source">DPSI</div>
+      </a>
+      <a href="https://www.reuters.com/legal/litigation/amazon-must-face-us-class-action-over-alexa-users-privacy-2025-07-07/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">CLASS ACTION</div>
+        <div class="ticker-headline">Amazon Alexa recording private conversations</div>
+        <div class="ticker-source">Reuters</div>
+      </a>
+      <a href="https://www.androidpolice.com/meta-ai-glasses-privacy-concern/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">PRIVACY VIOLATION</div>
+        <div class="ticker-headline">Meta contractors reviewed intimate Ray-Ban footage</div>
+        <div class="ticker-source">Android Police</div>
+      </a>
+      <a href="https://epic.org/wp-content/uploads/2024/10/EPIC-FTC-OpenAI-complaint.pdf" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">FTC COMPLAINT</div>
+        <div class="ticker-headline">EPIC complaint against OpenAI</div>
+        <div class="ticker-source">EPIC</div>
+      </a>
+      <a href="https://techcrunch.com/2025/02/26/thousands-of-exposed-github-repositories-now-private-can-still-be-accessed-through-copilot" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">DATA EXPOSURE</div>
+        <div class="ticker-headline">20K+ private repos accessible through Copilot</div>
+        <div class="ticker-source">TechCrunch</div>
+      </a>
+      <a href="https://basilai.app/articles/2025-11-27-zoom-ai-companion-analyzing-meeting-content-without-consent-privacy-violations.html.html" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">PRIVACY VIOLATION</div>
+        <div class="ticker-headline">Zoom AI analyzing meetings without consent</div>
+        <div class="ticker-source">Basil AI</div>
+      </a>
+      <a href="https://oag.ca.gov/news/press-releases/attorney-general-bonta-announces-largest-ccpa-settlement-date-secures-155" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">$1.55M FINE</div>
+        <div class="ticker-headline">California AG largest CCPA settlement</div>
+        <div class="ticker-source">CA AG</div>
+      </a>
+      <a href="https://www.mondaq.com/unitedstates/privacy-protection/1687822/california-privacy-violations-result-in-135-million-fine" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">$1.35M FINE</div>
+        <div class="ticker-headline">CPPA record fine for privacy failures</div>
+        <div class="ticker-source">CPPA</div>
+      </a>
+      <a href="https://www.americanbar.org/groups/litigation/resources/litigation-news/2023/use-chatgpt-research-bogus-cases-sanctions/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">SANCTIONED</div>
+        <div class="ticker-headline">Attorneys sanctioned for ChatGPT fake citations</div>
+        <div class="ticker-source">ABA</div>
+      </a>
+    </div>
+  </div>
+  <div class="news-ticker-cta">
+    <a href="technology.html">View all incidents &rarr;</a>
+  </div>
+</div>
 
 <!-- HERO -->
 <div class="hero">
