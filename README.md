@@ -25,9 +25,9 @@ It is not a hobbyist local model runner. It is a **certified, auditable, breach-
 
 ---
 
-## Four Products, One Mission
+## Five Products, One Mission
 
-Every Kwyre product runs 100% locally with zero data leaving your machine. Choose the one that fits your hardware.
+Every Kwyre product runs 100% locally with zero data leaving your machine. Choose the one that fits your hardware and workflow.
 
 | Product | Model | Hardware | VRAM / RAM | Speed | Price | Identity |
 |---------|-------|----------|-----------|-------|-------|----------|
@@ -35,6 +35,7 @@ Every Kwyre product runs 100% locally with zero data leaving your machine. Choos
 | **Kwyre Professional** | Qwen3.5-9B + 0.6B draft | NVIDIA GPU (RTX 4090/3090) | 7.5 GB VRAM | 3-5 tok/s | $799 | Custom-trained domain specialist — Claude-distilled reasoning + GRPO emergent problem-solving for legal, financial, and forensic analysis |
 | **Kwyre Air** | Any GGUF model | Any CPU | 8+ GB RAM | 2-8 tok/s | $299 | Lightweight portable — runs on any hardware, no GPU required |
 | **Kwyre (Apple Silicon)** | Any MLX model | M1/M2/M3/M4 Mac | 8+ GB unified | 5-15 tok/s | $299 | Native Metal acceleration, zero CUDA dependency |
+| **Custom LLM** | Domain-specific (we train) | Any (we configure) | Varies | Varies | Contact | Turnkey appliance or self-hosted — legal, financial, crypto, insurance, defense, healthcare |
 
 **All products share:** 6-layer security stack, OpenAI-compatible API, SSE streaming, cryptographic session wipe, intrusion detection, offline license validation.
 
@@ -679,7 +680,7 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] Kubernetes Helm chart — `deploy/helm/kwyre/` with GPU scheduling, health probes, PVC, secrets
 - [x] Extended `.env.example` — comprehensive config covering all 30+ environment variables
 
-**v1.3 (Current — Four Products + Custom-Trained Professional Model)**
+**v1.3 (Complete — Four Products + Custom-Trained Professional Model)**
 - [x] Four distinct products — Personal (4B speed), Professional (9B domain specialist), Air (CPU portable), Apple Silicon (MLX native)
 - [x] Product-specific system prompts — each backend has its own identity and personality
 - [x] Product identity in API — `/health` and `/v1/models` report product name and capabilities
@@ -694,7 +695,16 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] Deployment GGUFs exported — Q5_K_M (6.1 GB, quality tier) and Q4_K_M (5.3 GB, speed tier)
 - [x] Training loss: 0.99 → 0.51 over 75 steps (3 epochs on 200 samples)
 - [x] Baked-in capabilities: Kwyre personality, chain-of-thought `<think>` reasoning, crypto forensics, legal analysis, financial regulation expertise
-- [x] **Vanilla GRPO reinforcement learning** — 100 steps on GSM8K via pure HuggingFace + TRL (no Unsloth), emergent reasoning on H100
+- [x] **Vanilla GRPO reinforcement learning v2** — 500 steps on GSM8K via pure HuggingFace + TRL (no Unsloth), emergent reasoning on H100, LoRA rank 16, 2 generations/prompt
+
+**v1.4 (Current — Website + Products)**
+- [x] Products page — all 5 products with full specs and competitive comparison table
+- [x] Enhanced particle system — 120 nodes, click-to-scatter interaction, ember layer, vignette, sweep line
+- [x] Neon green interactive orbs — company orbs (data privacy), industry orbs (custom), float orbs (main)
+- [x] 9-competitor comparison table — Kwyre vs GPT-4o, Claude, Gemini, DeepSeek, Copilot, Llama 4, Mistral 3, Grok
+- [x] GRPO v2 training — 500 steps on GSM8K with LoRA rank 16, 2 generations/prompt, cosine LR schedule
+- [ ] Custom LLM service launch — turnkey domain-specific model delivery
+- [ ] Credit card payment integration
 
 ---
 
@@ -790,7 +800,7 @@ Custom Training (Professional 9B):
   Pipeline:          Claude traces → Unsloth QLoRA distillation → GRPO RL → GGUF export
   Trace generation:  200 Claude claude-sonnet-4-20250514 traces across 4 domains (parallel)
   Distillation:      Unsloth QLoRA on H100 80GB, 3 epochs, 75 steps, loss 0.99 → 0.51
-  GRPO RL:           Vanilla HuggingFace + TRL, 100 steps on GSM8K (emergent reasoning)
+  GRPO RL:           Vanilla HuggingFace + TRL, 500 steps on GSM8K (emergent reasoning, v2 training)
   LoRA rank:         32 (distillation) + 8 (GRPO)
   LoRA targets:      q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj
   Domains:           blockchain forensics, legal/financial, physics/math, conversational
@@ -917,8 +927,14 @@ kwyre/
 ├── deploy/
 │   └── helm/kwyre/            # Kubernetes Helm chart (GPU, probes, PVC)
 ├── chat/
-│   ├── main.html              # Product page + chat UI (SSE streaming, RAG upload)
-│   ├── landing.html           # Marketing landing page
+│   ├── index.html             # Cinematic intro sequence
+│   ├── landing.html           # Alternate landing page
+│   ├── main.html              # Product overview + security stack
+│   ├── technology.html        # Data privacy — cloud AI incidents
+│   ├── products.html          # Product lineup + competitive comparison
+│   ├── custom.html            # Custom LLM service + request form
+│   ├── security.html          # Penetration testing + compliance
+│   ├── platform.html          # Installation + deployment guides
 │   └── pay.html               # Payment + license download gate
 ├── installer/
 │   ├── install_windows.ps1    # Windows CLI installer
@@ -958,6 +974,24 @@ The model weights (Qwen3-4B, Qwen3-0.6B base) are licensed under Apache 2.0 by A
 APOLLO CyberSentinel LLC — blockchain forensics, cryptocurrency fraud investigation, OSINT analysis.
 
 We built this because we needed it ourselves. We cannot upload active federal investigation evidence to OpenAI. Neither can you.
+
+---
+
+## Website
+
+**[kwyre.com](https://kwyre.com)** — Live product site deployed on Cloudflare Pages.
+
+| Page | URL | Description |
+|------|-----|-------------|
+| Landing | `/` | Animated intro sequence with neural canvas |
+| Index | `/index.html` | Full-screen cinematic entry |
+| Main | `/main.html` | Product overview, security stack, buyer personas |
+| Data Privacy | `/technology.html` | Cloud AI incident tracker, company orbs |
+| Products | `/products.html` | All 5 products with specs + competitive comparison |
+| Custom | `/custom.html` | Custom LLM service, industry orbs, request form |
+| Security | `/security.html` | Penetration testing, privacy guarantees, compliance |
+| Platform | `/platform.html` | Installation guides, deployment options, build pipeline |
+| Purchase | `/pay.html` | Monero payment, license verification, downloads |
 
 ---
 
