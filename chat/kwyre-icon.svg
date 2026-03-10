@@ -1,21 +1,21 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
   <defs>
     <linearGradient id="beam" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#8AAAFF"/>
-      <stop offset="50%" stop-color="#6E8FFF"/>
-      <stop offset="100%" stop-color="#5577EE"/>
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#f0f0ff"/>
+      <stop offset="100%" stop-color="#e0e4ff"/>
     </linearGradient>
     <linearGradient id="beamV" x1="0%" y1="0%" x2="0%" y2="100%">
-      <stop offset="0%" stop-color="#8AAAFF" stop-opacity="0.9"/>
-      <stop offset="100%" stop-color="#6E8FFF" stop-opacity="0.7"/>
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#e8ecff" stop-opacity="0.85"/>
     </linearGradient>
     <linearGradient id="beamDiag1" x1="0%" y1="100%" x2="100%" y2="0%">
-      <stop offset="0%" stop-color="#6E8FFF" stop-opacity="0.65"/>
-      <stop offset="100%" stop-color="#8AAAFF" stop-opacity="0.9"/>
+      <stop offset="0%" stop-color="#e8ecff" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.95"/>
     </linearGradient>
     <linearGradient id="beamDiag2" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#6E8FFF" stop-opacity="0.65"/>
-      <stop offset="100%" stop-color="#8AAAFF" stop-opacity="0.85"/>
+      <stop offset="0%" stop-color="#e8ecff" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.95"/>
     </linearGradient>
     <linearGradient id="fieldS" x1="0%" y1="0%" x2="100%" y2="100%">
       <stop offset="0%" stop-color="#8AAAFF" stop-opacity="0.5"/>
@@ -152,14 +152,14 @@
     
     <!-- VERTICAL BEAM — looks like an energy conduit / particle accelerator channel -->
     <!-- Thinner than before, same weight as orbital lines but brighter -->
-    <line x1="178" y1="110" x2="178" y2="410" stroke="url(#beamV)" stroke-width="8" stroke-linecap="round"/>
+    <line x1="178" y1="110" x2="178" y2="410" stroke="url(#beamV)" stroke-width="11" stroke-linecap="round"/>
     
     <!-- UPPER DIAGONAL — energy vector shooting to top-right -->
     <!-- Could be a force diagram line or orbital path -->
-    <line x1="186" y1="270" x2="365" y2="115" stroke="url(#beamDiag1)" stroke-width="8" stroke-linecap="round"/>
+    <line x1="186" y1="270" x2="365" y2="115" stroke="url(#beamDiag1)" stroke-width="11" stroke-linecap="round"/>
     
     <!-- LOWER DIAGONAL — energy vector shooting to bottom-right -->
-    <line x1="186" y1="270" x2="365" y2="408" stroke="url(#beamDiag2)" stroke-width="8" stroke-linecap="round"/>
+    <line x1="186" y1="270" x2="365" y2="408" stroke="url(#beamDiag2)" stroke-width="11" stroke-linecap="round"/>
   </g>
   
   <!-- Energy nexus nodes — where beams intersect/terminate -->
