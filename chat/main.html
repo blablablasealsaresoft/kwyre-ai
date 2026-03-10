@@ -201,15 +201,17 @@ nav {
 
 .nav-brand {
   font-family: var(--mono);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 3px;
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 4px;
   text-transform: uppercase;
-  color: var(--text);
+  color: #fff;
   text-decoration: none;
+  text-shadow: 0 0 12px rgba(255,255,255,0.25);
 }
 
-.nav-brand span { color: var(--accent); }
+.nav-brand span { color: #fff; }
+.nav-brand img { filter: brightness(1.6) contrast(1.2); }
 
 .nav-links { display: flex; gap: 32px; align-items: center; }
 
@@ -1887,7 +1889,7 @@ html.light nav { background: rgba(245,246,250,0.9); }
 <!-- NAV -->
 <nav>
   <div class="nav-inner">
-    <a href="main.html" class="nav-brand"><img src="kwyre-icon.svg" alt="Kwyre" style="height:20px;vertical-align:middle;margin-right:8px;"><span>K</span>WYRE</a>
+    <a href="main.html" class="nav-brand"><img src="kwyre-icon.svg" alt="Kwyre" style="height:28px;vertical-align:middle;margin-right:10px;"><span>K</span>WYRE</a>
     <div class="nav-links">
       <a href="technology.html">Data Privacy</a>
       <a href="custom.html">Custom</a>
