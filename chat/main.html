@@ -2994,7 +2994,83 @@ function collectFingerprint() {
   });
   body.removeChild(span);
   data.push(['Detected Fonts', detected.length + ' (' + detected.slice(0,5).join(', ') + (detected.length > 5 ? '...' : '') + ')']);
-  
+
+  // Plugins
+  var plugins = [];
+  for (var i = 0; i < navigator.plugins.length; i++) plugins.push(navigator.plugins[i].name);
+  data.push(['Browser Plugins', plugins.length > 0 ? plugins.join(', ') : 'None detected']);
+
+  // Storage usage
+  var lsCount = 0; try { lsCount = localStorage.length; } catch(e) {}
+  var ssCount = 0; try { ssCount = sessionStorage.length; } catch(e) {}
+  data.push(['LocalStorage Keys', lsCount + ' items stored on your machine']);
+  data.push(['SessionStorage Keys', ssCount + ' items this session']);
+
+  // Cookies
+  var cookieCount = document.cookie ? document.cookie.split(';').length : 0;
+  data.push(['Cookies (this site)', cookieCount + ' cookies']);
+
+  // Ad blocker detection
+  var adBlocked = false;
+  var adTest = document.createElement('div');
+  adTest.innerHTML = '&nbsp;';
+  adTest.className = 'adsbox ad-placement ad-banner';
+  adTest.style.cssText = 'position:absolute;left:-9999px;height:1px;width:1px;';
+  document.body.appendChild(adTest);
+  if (adTest.offsetHeight === 0 || adTest.clientHeight === 0) adBlocked = true;
+  document.body.removeChild(adTest);
+  data.push(['Ad Blocker', adBlocked ? 'DETECTED (good for you)' : 'Not detected (you see all the ads)']);
+
+  // WebRTC leak check
+  data.push(['WebRTC Enabled', (typeof RTCPeerConnection !== 'undefined') ? 'Yes (can leak real IP behind VPN)' : 'Disabled']);
+
+  // Autofill detection
+  var afInput = document.createElement('input');
+  afInput.type = 'email'; afInput.name = 'email'; afInput.autocomplete = 'email';
+  afInput.style.cssText = 'position:absolute;left:-9999px;';
+  document.body.appendChild(afInput);
+  var hasAutofill = (typeof afInput.webkitAutoFill !== 'undefined') || navigator.credentials;
+  document.body.removeChild(afInput);
+  data.push(['Autofill/Credentials API', hasAutofill ? 'Available (sites can probe saved logins)' : 'Not detected']);
+
+  // Clipboard API
+  data.push(['Clipboard Access', navigator.clipboard ? 'Available (sites can request your clipboard)' : 'Restricted']);
+
+  // Notifications
+  data.push(['Notification Permission', typeof Notification !== 'undefined' ? Notification.permission : 'Not supported']);
+
+  // Geolocation API
+  data.push(['Geolocation API', navigator.geolocation ? 'Available (sites can request your exact location)' : 'Not available']);
+
+  // Camera/Mic
+  data.push(['Camera/Mic Access', navigator.mediaDevices ? 'Available (sites can request camera & microphone)' : 'Not available']);
+
+  // Service Workers
+  data.push(['Service Workers', 'serviceWorker' in navigator ? 'Supported (sites can run background code)' : 'Not supported']);
+
+  // Popular extension detection (probe web-accessible resources)
+  var extChecks = [
+    {name: 'uBlock Origin', url: 'chrome-extension://cjpalhdlnbpafiamejdnhcphjbkeiagm/web-accessible-resources/noop.js'},
+    {name: 'LastPass', url: 'chrome-extension://hdokiejnpimakedhajhdlcegeplioahd/overlay.js'},
+    {name: 'Grammarly', url: 'chrome-extension://kbfnbcaeplbcioakkpcpgfkobkghlhen/src/shared/otel/otel.js'},
+    {name: 'Dark Reader', url: 'chrome-extension://eimadpbcbfnmbkopoojfekhnkhdbieeh/darkreader.js'},
+  ];
+  var detectedExts = [];
+  var extPromises = extChecks.map(function(ext) {
+    return fetch(ext.url, {method:'HEAD',mode:'no-cors'}).then(function() {
+      detectedExts.push(ext.name);
+    }).catch(function(){});
+  });
+  Promise.all(extPromises).then(function() {
+    if (detectedExts.length > 0 || true) {
+      var extRow = document.createElement('div');
+      extRow.className = 'exposure-row';
+      extRow.innerHTML = '<span class="exposure-label">Extensions Detected</span><span class="exposure-value">' +
+        (detectedExts.length > 0 ? detectedExts.join(', ') : 'None detected (or using Firefox)') + '</span>';
+      grid.appendChild(extRow);
+    }
+  });
+
   data.forEach(function(item) {
     var row = document.createElement('div');
     row.className = 'exposure-row';
