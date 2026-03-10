@@ -11,41 +11,41 @@ Usage:
 Output: ~/.kwyre/training-data/kwyre-traces/*.jsonl
 """
 
-import json
-import os
-import sys
-import time
-import random
-from pathlib import Path
+import json  # JSON serialization and deserialization
+import os  # filesystem and environment variable access
+import sys  # system-level utilities and exit
+import time  # timestamps and sleep delays
+import random  # random sampling and shuffling
+from pathlib import Path  # object-oriented filesystem paths
 
-KWYRE_HOME = os.path.expanduser("~/.kwyre")
-OUTPUT_DIR = os.path.join(KWYRE_HOME, "training-data", "kwyre-traces")
-os.makedirs(OUTPUT_DIR, exist_ok=True)
+KWYRE_HOME = os.path.expanduser("~/.kwyre")  # user-level kwyre configuration directory
+OUTPUT_DIR = os.path.join(KWYRE_HOME, "training-data", "kwyre-traces")  # output directory for trace files
+os.makedirs(OUTPUT_DIR, exist_ok=True)  # ensure output directory exists
 
-TRACES_PER_DOMAIN = int(os.environ.get("KWYRE_TRACES_PER_DOMAIN", "2000"))
-PROVIDER = None
+TRACES_PER_DOMAIN = int(os.environ.get("KWYRE_TRACES_PER_DOMAIN", "2000"))  # target trace count per domain
+PROVIDER = None  # will hold the selected API provider name
 
-if os.environ.get("ANTHROPIC_API_KEY"):
-    import anthropic
-    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
-    MODEL = os.environ.get("KWYRE_MODEL_NAME", "claude-sonnet-4-20250514")
-    PROVIDER = "anthropic"
-    print(f"Using Anthropic {MODEL} API")
-elif os.environ.get("DEEPSEEK_API_KEY"):
-    from openai import OpenAI
-    client = OpenAI(api_key=os.environ["DEEPSEEK_API_KEY"], base_url="https://api.deepseek.com")
-    MODEL = "deepseek-reasoner"
-    PROVIDER = "openai"
-    print("Using DeepSeek R1 API")
-elif os.environ.get("OPENAI_API_KEY"):
-    from openai import OpenAI
-    client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
-    MODEL = os.environ.get("KWYRE_MODEL_NAME", "gpt-4-turbo")
-    PROVIDER = "openai"
-    print(f"Using OpenAI {MODEL} API")
+if os.environ.get("ANTHROPIC_API_KEY"):  # Anthropic API key found
+    import anthropic  # Anthropic Python SDK
+    client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])  # initialize Anthropic client
+    MODEL = os.environ.get("KWYRE_MODEL_NAME", "claude-sonnet-4-20250514")  # model name with default
+    PROVIDER = "anthropic"  # set provider flag
+    print(f"Using Anthropic {MODEL} API")  # confirm provider selection
+elif os.environ.get("DEEPSEEK_API_KEY"):  # DeepSeek API key found
+    from openai import OpenAI  # OpenAI-compatible SDK for DeepSeek
+    client = OpenAI(api_key=os.environ["DEEPSEEK_API_KEY"], base_url="https://api.deepseek.com")  # initialize DeepSeek client
+    MODEL = "deepseek-reasoner"  # DeepSeek reasoning model
+    PROVIDER = "openai"  # uses OpenAI-compatible interface
+    print("Using DeepSeek R1 API")  # confirm provider selection
+elif os.environ.get("OPENAI_API_KEY"):  # OpenAI API key found
+    from openai import OpenAI  # OpenAI Python SDK
+    client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])  # initialize OpenAI client
+    MODEL = os.environ.get("KWYRE_MODEL_NAME", "gpt-4-turbo")  # model name with default
+    PROVIDER = "openai"  # set provider flag
+    print(f"Using OpenAI {MODEL} API")  # confirm provider selection
 else:
-    print("ERROR: No API key. Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or DEEPSEEK_API_KEY.")
-    sys.exit(1)
+    print("ERROR: No API key. Set ANTHROPIC_API_KEY, OPENAI_API_KEY, or DEEPSEEK_API_KEY.")  # no API key found
+    sys.exit(1)  # abort without API credentials
 
 DOMAINS = {
     "blockchain_forensics": {
@@ -111,146 +111,146 @@ DOMAINS = {
 }
 
 
-COT_INSTRUCTION = (
+COT_INSTRUCTION = (  # appended to prompts to elicit chain-of-thought reasoning
     "\n\nIMPORTANT: Show your complete reasoning process inside <think>...</think> tags FIRST, "
     "then provide your final answer AFTER the closing </think> tag. "
     "Think step by step. Be thorough in your reasoning."
 )
 
 
-def _call_api(system_prompt: str, user_prompt: str, max_tokens: int = 4096, temperature: float = 0.6):
-    if PROVIDER == "anthropic":
-        response = client.messages.create(
+def _call_api(system_prompt: str, user_prompt: str, max_tokens: int = 4096, temperature: float = 0.6):  # unified API call wrapper
+    if PROVIDER == "anthropic":  # use Anthropic messages API
+        response = client.messages.create(  # send message to Anthropic
             model=MODEL,
             max_tokens=max_tokens,
             temperature=temperature,
             system=system_prompt,
             messages=[{"role": "user", "content": user_prompt}],
         )
-        return response.content[0].text
-    else:
-        response = client.chat.completions.create(
+        return response.content[0].text  # extract text from first content block
+    else:  # use OpenAI-compatible chat completions API
+        response = client.chat.completions.create(  # send chat completion request
             model=MODEL,
             messages=[
-                {"role": "system", "content": system_prompt},
-                {"role": "user", "content": user_prompt},
+                {"role": "system", "content": system_prompt},  # system prompt sets persona
+                {"role": "user", "content": user_prompt},  # user prompt is the question
             ],
             temperature=temperature,
             max_tokens=max_tokens,
         )
-        content = response.choices[0].message.content
-        reasoning = getattr(response.choices[0].message, 'reasoning_content', None)
-        if reasoning:
-            return f"<think>\n{reasoning}\n</think>\n\n{content}"
-        return content
+        content = response.choices[0].message.content  # extract response text
+        reasoning = getattr(response.choices[0].message, 'reasoning_content', None)  # check for DeepSeek reasoning
+        if reasoning:  # DeepSeek R1 includes separate reasoning
+            return f"<think>\n{reasoning}\n</think>\n\n{content}"  # wrap reasoning in think tags
+        return content  # return plain content
 
 
-def generate_trace(system_prompt: str, user_prompt: str, retries: int = 3):
-    for attempt in range(retries):
+def generate_trace(system_prompt: str, user_prompt: str, retries: int = 3):  # generate single reasoning trace with retries
+    for attempt in range(retries):  # retry loop for transient API failures
         try:
-            enhanced_prompt = user_prompt + COT_INSTRUCTION
-            content = _call_api(system_prompt, enhanced_prompt)
+            enhanced_prompt = user_prompt + COT_INSTRUCTION  # append CoT instruction to prompt
+            content = _call_api(system_prompt, enhanced_prompt)  # call teacher model API
 
-            if "<think>" in content and "</think>" in content:
-                formatted = content
+            if "<think>" in content and "</think>" in content:  # response already has think tags
+                formatted = content  # use as-is
             else:
-                lines = content.strip().split("\n")
-                last_line = lines[-1] if lines else content
-                formatted = f"<think>\n{content}\n</think>\n\n{last_line}"
+                lines = content.strip().split("\n")  # split response into lines
+                last_line = lines[-1] if lines else content  # extract final answer line
+                formatted = f"<think>\n{content}\n</think>\n\n{last_line}"  # wrap entire response in think tags
 
-            return {
+            return {  # return structured training example
                 "messages": [
-                    {"role": "system", "content": system_prompt},
-                    {"role": "user", "content": user_prompt},
-                    {"role": "assistant", "content": formatted},
+                    {"role": "system", "content": system_prompt},  # system prompt for this domain
+                    {"role": "user", "content": user_prompt},  # original user question
+                    {"role": "assistant", "content": formatted},  # model response with reasoning
                 ]
             }
-        except Exception as e:
-            print(f"    Attempt {attempt+1} failed: {e}")
-            time.sleep(2 ** attempt)
-    return None
+        except Exception as e:  # API call failed
+            print(f"    Attempt {attempt+1} failed: {e}")  # log failure details
+            time.sleep(2 ** attempt)  # exponential backoff between retries
+    return None  # all retries exhausted
 
 
-def expand_prompts(prompts: list, count: int) -> list:
-    if count <= len(prompts):
-        return prompts[:count]
-    expanded = list(prompts)
-    while len(expanded) < count:
-        seed = random.choice(prompts)
+def expand_prompts(prompts: list, count: int) -> list:  # expand seed prompts to target count using LLM
+    if count <= len(prompts):  # already have enough prompts
+        return prompts[:count]  # return subset of existing prompts
+    expanded = list(prompts)  # copy seed prompts as starting list
+    while len(expanded) < count:  # keep expanding until target reached
+        seed = random.choice(prompts)  # randomly select a seed prompt
         try:
-            content = _call_api(
+            content = _call_api(  # ask LLM to generate prompt variations
                 "You generate diverse question variations.",
                 f"Generate 5 diverse variations of this problem/question. Each should test different aspects. Make them progressively harder. Return ONLY the questions, one per line, numbered 1-5.\n\nOriginal: {seed}",
                 max_tokens=2048,
                 temperature=0.9,
             )
-            new_prompts = [
-                line.strip().lstrip("0123456789.)- ")
-                for line in content.strip().split("\n")
-                if line.strip() and len(line.strip()) > 20
+            new_prompts = [  # parse generated questions from response
+                line.strip().lstrip("0123456789.)- ")  # strip numbering and punctuation
+                for line in content.strip().split("\n")  # split response by newlines
+                if line.strip() and len(line.strip()) > 20  # filter out short/empty lines
             ]
-            expanded.extend(new_prompts)
-            print(f"    Expanded: {len(expanded)}/{count} prompts")
-        except Exception as e:
-            print(f"    Expansion error: {e}")
-            time.sleep(2)
-    return expanded[:count]
+            expanded.extend(new_prompts)  # add new prompts to expanded list
+            print(f"    Expanded: {len(expanded)}/{count} prompts")  # display expansion progress
+        except Exception as e:  # API call for expansion failed
+            print(f"    Expansion error: {e}")  # log expansion failure
+            time.sleep(2)  # brief pause before retry
+    return expanded[:count]  # trim to exact target count
 
 
-def main():
-    all_traces = []
-    total_generated = 0
+def main():  # main trace generation pipeline
+    all_traces = []  # accumulator for all domain traces
+    total_generated = 0  # counter for successfully generated traces
 
-    for domain_name, domain_config in DOMAINS.items():
-        output_file = os.path.join(OUTPUT_DIR, f"{domain_name}.jsonl")
-        print(f"\n{'='*60}")
-        print(f"  Domain: {domain_name}")
-        print(f"  Target: {TRACES_PER_DOMAIN} traces")
-        print(f"{'='*60}")
+    for domain_name, domain_config in DOMAINS.items():  # iterate each training domain
+        output_file = os.path.join(OUTPUT_DIR, f"{domain_name}.jsonl")  # per-domain output file path
+        print(f"\n{'='*60}")  # print domain header separator
+        print(f"  Domain: {domain_name}")  # display current domain name
+        print(f"  Target: {TRACES_PER_DOMAIN} traces")  # display target count
+        print(f"{'='*60}")  # print footer separator
 
-        prompts = expand_prompts(domain_config["prompts"], TRACES_PER_DOMAIN)
-        print(f"  Got {len(prompts)} prompts. Generating traces...")
+        prompts = expand_prompts(domain_config["prompts"], TRACES_PER_DOMAIN)  # expand prompts to target count
+        print(f"  Got {len(prompts)} prompts. Generating traces...")  # confirm prompt count
 
-        domain_traces = []
-        for i, prompt in enumerate(prompts):
-            t0 = time.time()
-            sys.stdout.write(f"    [{i+1}/{len(prompts)}] Generating... ")
-            sys.stdout.flush()
-            trace = generate_trace(domain_config["system"], prompt)
-            elapsed = time.time() - t0
-            if trace:
-                domain_traces.append(trace)
-                all_traces.append(trace)
-                total_generated += 1
-                content_len = len(trace["messages"][-1]["content"])
-                print(f"OK ({elapsed:.0f}s, {content_len} chars)")
+        domain_traces = []  # accumulator for this domain's traces
+        for i, prompt in enumerate(prompts):  # iterate each prompt
+            t0 = time.time()  # record start time for timing
+            sys.stdout.write(f"    [{i+1}/{len(prompts)}] Generating... ")  # display progress inline
+            sys.stdout.flush()  # force output buffer flush
+            trace = generate_trace(domain_config["system"], prompt)  # generate reasoning trace
+            elapsed = time.time() - t0  # compute generation duration
+            if trace:  # trace generated successfully
+                domain_traces.append(trace)  # add to domain accumulator
+                all_traces.append(trace)  # add to global accumulator
+                total_generated += 1  # increment success counter
+                content_len = len(trace["messages"][-1]["content"])  # measure response length
+                print(f"OK ({elapsed:.0f}s, {content_len} chars)")  # display success with stats
             else:
-                print(f"FAILED ({elapsed:.0f}s)")
+                print(f"FAILED ({elapsed:.0f}s)")  # display failure with elapsed time
 
-            if (i + 1) % 5 == 0:
-                with open(output_file, "w", encoding="utf-8") as f:
-                    for t in domain_traces:
-                        f.write(json.dumps(t, ensure_ascii=False) + "\n")
-                print(f"    Saved {len(domain_traces)} traces to {output_file}")
-            time.sleep(0.3)
+            if (i + 1) % 5 == 0:  # checkpoint every 5 traces
+                with open(output_file, "w", encoding="utf-8") as f:  # open domain output file
+                    for t in domain_traces:  # write all domain traces so far
+                        f.write(json.dumps(t, ensure_ascii=False) + "\n")  # serialize as JSONL line
+                print(f"    Saved {len(domain_traces)} traces to {output_file}")  # confirm checkpoint save
+            time.sleep(0.3)  # brief rate-limit delay between API calls
 
-        with open(output_file, "w", encoding="utf-8") as f:
-            for t in domain_traces:
-                f.write(json.dumps(t, ensure_ascii=False) + "\n")
-        print(f"  Domain '{domain_name}': {len(domain_traces)} traces saved.")
+        with open(output_file, "w", encoding="utf-8") as f:  # final save for this domain
+            for t in domain_traces:  # write all domain traces
+                f.write(json.dumps(t, ensure_ascii=False) + "\n")  # serialize as JSONL line
+        print(f"  Domain '{domain_name}': {len(domain_traces)} traces saved.")  # confirm domain completion
 
-    combined_file = os.path.join(OUTPUT_DIR, "kwyre-all-traces.jsonl")
-    random.shuffle(all_traces)
-    with open(combined_file, "w", encoding="utf-8") as f:
-        for t in all_traces:
-            f.write(json.dumps(t, ensure_ascii=False) + "\n")
+    combined_file = os.path.join(OUTPUT_DIR, "kwyre-all-traces.jsonl")  # path for combined output
+    random.shuffle(all_traces)  # shuffle traces for training diversity
+    with open(combined_file, "w", encoding="utf-8") as f:  # open combined output file
+        for t in all_traces:  # write all traces from all domains
+            f.write(json.dumps(t, ensure_ascii=False) + "\n")  # serialize as JSONL line
 
-    print(f"\n{'='*60}")
-    print(f"  COMPLETE: {total_generated} total traces generated")
-    print(f"  Combined: {combined_file}")
-    print(f"  Est cost: ~${total_generated * 0.003:.2f}")
-    print(f"{'='*60}")
+    print(f"\n{'='*60}")  # print summary header separator
+    print(f"  COMPLETE: {total_generated} total traces generated")  # display total trace count
+    print(f"  Combined: {combined_file}")  # display combined file path
+    print(f"  Est cost: ~${total_generated * 0.003:.2f}")  # estimate API cost
+    print(f"{'='*60}")  # print summary footer separator
 
 
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__":  # only run when executed directly
+    main()  # invoke main trace generation pipeline
