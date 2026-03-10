@@ -543,153 +543,6 @@ select.form-input { cursor: pointer; }
   </div>
 </div>
 
-<!-- THE PIPELINE -->
-<div class="section" id="pipeline">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">The Pipeline</div>
-      <h2 class="reveal reveal-d1">Five steps to a custom model</h2>
-      <p class="reveal reveal-d2">From raw domain knowledge to a deployment-ready air-gapped AI in under 24 hours.</p>
-    </div>
-
-    <div class="pipeline-steps reveal reveal-d3">
-      <div class="pipeline-step">
-        <div class="pipeline-num">01</div>
-        <h3>Reasoning Trace Generation</h3>
-        <p>We generate thousands of chain-of-thought reasoning traces from frontier models across YOUR specific domains. These traces teach the model HOW to think about your problems.</p>
-        <div class="pipeline-detail">
-          <span>Claude traces</span>
-          <span>Custom domains</span>
-          <span>200+ traces</span>
-          <span>~$2 API cost</span>
-        </div>
-      </div>
-      <div class="pipeline-step">
-        <div class="pipeline-num">02</div>
-        <h3>Distillation Fine-Tuning</h3>
-        <p>Using Unsloth QLoRA, we fine-tune on your reasoning traces. The model learns your domain vocabulary, reasoning patterns, and personality &mdash; baked into the weights, not just a system prompt.</p>
-        <div class="pipeline-detail">
-          <span>Unsloth QLoRA</span>
-          <span>3 epochs</span>
-          <span>~30 min on H100</span>
-        </div>
-      </div>
-      <div class="pipeline-step">
-        <div class="pipeline-num">03</div>
-        <h3>GRPO Reinforcement Learning</h3>
-        <p>Group Relative Policy Optimization teaches the model to INVENT solutions, not just copy them. It generates multiple answers, scores them against correctness and reasoning quality, then updates its strategy. This is what gives your model emergent problem-solving.</p>
-        <div class="pipeline-detail">
-          <span>100 RL steps</span>
-          <span>Emergent reasoning</span>
-          <span>2 reward functions</span>
-        </div>
-      </div>
-      <div class="pipeline-step">
-        <div class="pipeline-num">04</div>
-        <h3>Quantization &amp; Export</h3>
-        <p>The trained model is exported to optimized GGUF format with domain-calibrated importance matrix quantization. Your users get a 5&ndash;6 GB file that runs on consumer hardware.</p>
-        <div class="pipeline-detail">
-          <span>Q5_K_M (6.1 GB)</span>
-          <span>Q4_K_M (5.3 GB)</span>
-          <span>imatrix calibrated</span>
-        </div>
-      </div>
-      <div class="pipeline-step">
-        <div class="pipeline-num">05</div>
-        <h3>Air-Gapped Deployment</h3>
-        <p>Your custom model is packaged with the Kwyre 6-layer security stack, standard chat completions API, SSE streaming, RAG document ingestion, and intrusion detection. One command to deploy. Zero data leaves the machine.</p>
-        <div class="pipeline-detail">
-          <span>docker compose up</span>
-          <span>6-layer security</span>
-          <span>Zero telemetry</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- INDUSTRY SOLUTIONS -->
-<div class="section" id="industries">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">Industry Solutions</div>
-      <h2 class="reveal reveal-d1">Domain expertise, baked in</h2>
-      <p class="reveal reveal-d2">We train models that speak your industry's language, understand your workflows, and reason about your specific problems.</p>
-    </div>
-
-    <div class="custom-grid reveal reveal-d3">
-      <div class="custom-card">
-        <h3>Legal &amp; Compliance</h3>
-        <p>NDA analysis, contract review, privilege screening, regulatory citations, SEC filings, FINRA compliance. Your model understands legal reasoning and precedent chains.</p>
-      </div>
-      <div class="custom-card">
-        <h3>Financial Forensics</h3>
-        <p>Fraud detection, BSA/AML analysis, forensic accounting, transaction pattern recognition, whistleblower case support. Trained on financial investigative reasoning.</p>
-      </div>
-      <div class="custom-card">
-        <h3>Blockchain &amp; Crypto</h3>
-        <p>On-chain tracing, rug pull detection, cross-chain analysis, MEV research, DeFi risk assessment, RICO case building. Understands wallet graphs and token flows.</p>
-      </div>
-      <div class="custom-card">
-        <h3>Insurance &amp; Actuarial</h3>
-        <p>Policy analysis, claims processing, reinsurance treaty review, risk modeling, cedent PII handling. Speaks actuarial math and underwriting logic.</p>
-      </div>
-      <div class="custom-card">
-        <h3>Defense &amp; Intelligence</h3>
-        <p>CUI document analysis, OSINT processing, threat assessment, NIST 800-171 compliant deployment. No classified facility required &mdash; the model runs on YOUR machine.</p>
-      </div>
-      <div class="custom-card">
-        <h3>Healthcare &amp; Life Sciences</h3>
-        <p>Clinical trial data analysis, HIPAA-compliant medical record review, drug interaction research, regulatory submissions. Built for medical reasoning workflows.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- WHAT MAKES THIS YOURS -->
-<div class="section" id="layers">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow reveal">What Makes This Yours</div>
-      <h2 class="reveal reveal-d1">Five layers of customization</h2>
-      <p class="reveal reveal-d2">Every custom model is unique. Five independent customization layers combine to create an AI that no one else has.</p>
-    </div>
-
-    <div class="layers-steps reveal reveal-d3">
-      <div class="layer-step">
-        <div class="layer-num">01</div>
-        <h3>Reasoning Distillation</h3>
-        <div class="layer-tag">Your custom topic mix</div>
-        <p>Forensics, legal, financial, blockchain, medical, defense &mdash; we generate reasoning traces from frontier models specifically tuned to the problems YOUR team solves every day.</p>
-      </div>
-      <div class="layer-step">
-        <div class="layer-num">02</div>
-        <h3>GRPO Reinforcement Learning</h3>
-        <div class="layer-tag">Emergent reasoning beyond the teacher model</div>
-        <p>GRPO doesn't just copy &mdash; it teaches the model to discover novel solutions by scoring multiple candidate answers and reinforcing the best strategies. Your model invents, not imitates.</p>
-      </div>
-      <div class="layer-step">
-        <div class="layer-num">03</div>
-        <h3>Domain LoRAs</h3>
-        <div class="layer-tag">Specialized knowledge in YOUR areas</div>
-        <p>Low-rank adapters trained on your domain vocabulary, jargon, document formats, and reasoning patterns. Not a system prompt &mdash; the expertise is baked into the weights permanently.</p>
-      </div>
-      <div class="layer-step">
-        <div class="layer-num">04</div>
-        <h3>imatrix Calibration</h3>
-        <div class="layer-tag">Quantization optimized for YOUR use cases</div>
-        <p>We generate importance matrices from your domain data so the quantized model preserves precision exactly where your workload needs it most. No generic calibration.</p>
-      </div>
-      <div class="layer-step">
-        <div class="layer-num">05</div>
-        <h3>RAG Corpus</h3>
-        <div class="layer-tag">Your proprietary knowledge base</div>
-        <p>Upload internal documents, policies, and reference material. The model retrieves and cites relevant passages alongside its trained reasoning &mdash; searched at inference time, never uploaded anywhere.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- DELIVERY OPTIONS -->
 <div class="section" id="delivery">
   <div class="wrap">
@@ -723,6 +576,44 @@ select.form-input { cursor: pointer; }
           <li>Bare-metal support</li>
           <li>Full deployment documentation</li>
         </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INDUSTRY SOLUTIONS -->
+<div class="section" id="industries">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow reveal">Industry Solutions</div>
+      <h2 class="reveal reveal-d1">Domain expertise, baked in</h2>
+      <p class="reveal reveal-d2">We train models that speak your industry's language, understand your workflows, and reason about your specific problems.</p>
+    </div>
+
+    <div class="custom-grid reveal reveal-d3">
+      <div class="custom-card">
+        <h3>Legal &amp; Compliance</h3>
+        <p>NDA analysis, contract review, privilege screening, regulatory citations, SEC filings, FINRA compliance.</p>
+      </div>
+      <div class="custom-card">
+        <h3>Financial Forensics</h3>
+        <p>Fraud detection, BSA/AML analysis, forensic accounting, transaction pattern recognition, whistleblower case support.</p>
+      </div>
+      <div class="custom-card">
+        <h3>Blockchain &amp; Crypto</h3>
+        <p>On-chain tracing, rug pull detection, cross-chain analysis, MEV research, DeFi risk assessment, RICO case building.</p>
+      </div>
+      <div class="custom-card">
+        <h3>Insurance &amp; Actuarial</h3>
+        <p>Policy analysis, claims processing, reinsurance treaty review, risk modeling, cedent PII handling.</p>
+      </div>
+      <div class="custom-card">
+        <h3>Defense &amp; Intelligence</h3>
+        <p>CUI document analysis, OSINT processing, threat assessment, NIST 800-171 compliant. No classified facility required.</p>
+      </div>
+      <div class="custom-card">
+        <h3>Healthcare &amp; Life Sciences</h3>
+        <p>Clinical trial data analysis, HIPAA-compliant medical record review, drug interaction research, regulatory submissions.</p>
       </div>
     </div>
   </div>
