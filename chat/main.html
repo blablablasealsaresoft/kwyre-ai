@@ -1896,7 +1896,7 @@ html.light nav { background: rgba(245,246,250,0.9); }
       <a href="security.html">Security</a>
       <a href="platform.html">Platform</a>
       <a href="pay.html">Purchase</a>
-      <a href="main.html#trial" class="nav-cta">Try Free</a>
+      <a href="pay.html" class="nav-cta">Purchase</a>
     </div>
   </div>
 </nav>
@@ -2129,41 +2129,66 @@ html.light nav { background: rgba(245,246,250,0.9); }
 
 <!-- Matthew 10:26 — So do not be afraid of them, for there is nothing concealed that will not be disclosed. -->
 
-<!-- FREE TRIAL -->
-<div class="section" id="trial">
+<!-- SECURITY STACK -->
+<div class="section" id="security">
   <div class="wrap">
     <div class="sh">
-      <div class="sh-eyebrow reveal">Live Demo</div>
-      <h2 class="reveal reveal-d1">Talk to Kwyre AI &mdash; Live</h2>
-      <p class="reveal reveal-d2">This is the real model running on real hardware right now. Completely uncensored. No filter. Ask anything.</p>
+      <div class="sh-eyebrow reveal" style="color: var(--green);">Defense In Depth</div>
+      <h2 class="reveal reveal-d1">6 Layers of Active Security</h2>
+      <p class="reveal reveal-d2">Not promises. Not policies. Engineering controls that are cryptographically verifiable. Every layer works independently &mdash; compromise one and five still hold.</p>
     </div>
-    <div class="trial-counter reveal reveal-d3" id="trialCounter">
-      <div class="trial-dot"></div>
-      <span><strong>LIVE</strong> &mdash; real GPU inference</span>
-    </div>
-    <div class="chat-toolbar reveal reveal-d3">
-      <button class="toolbar-btn" onclick="newChat()">New Chat</button>
-      <button class="toolbar-btn" onclick="exportConversation()">Export</button>
-      <input type="file" id="fileUpload" accept=".pdf,.txt,.docx,.md,.csv" multiple hidden>
-      <button class="toolbar-btn" id="uploadBtn" onclick="document.getElementById('fileUpload').click()">Upload Docs</button>
-      <button class="toolbar-btn" id="themeToggle" onclick="toggleTheme()">Light Mode</button>
-      <button class="toolbar-btn toolbar-danger" onclick="wipeSession()">Wipe Session</button>
-    </div>
-    <details class="system-prompt-section reveal reveal-d3">
-      <summary class="system-prompt-toggle">System Prompt</summary>
-      <textarea id="systemPromptInput" class="system-prompt-input" rows="3" placeholder="Custom system prompt (optional)..."></textarea>
-    </details>
-    <div class="chat-container reveal reveal-d3">
-      <div class="chat-messages" id="chatMessages">
-        <div class="message assistant">
-          <div class="message-role">kwyre</div>
-          <div class="message-content">Kwyre AI online. Running live on GPU &mdash; completely uncensored. No filter, no corporate nonsense. Ask me anything.</div>
+    <div class="sec-layers reveal reveal-d3">
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L1</div></div>
+        <div class="sec-layer-body">
+          <h3>Network Isolation</h3>
+          <p>Server binds to 127.0.0.1 only &mdash; physically unreachable from any network at the OS level. No firewall rules required.</p>
+          <span class="sec-tag">OS-Level Enforcement</span>
         </div>
       </div>
-      <div class="chat-input">
-        <textarea id="msgInput" placeholder="Ask anything... legal analysis, compliance, code review..." rows="1"></textarea>
-        <button class="send-btn" id="sendBtn">Send</button>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L2</div></div>
+        <div class="sec-layer-body">
+          <h3>Process-Level Network Lockdown</h3>
+          <p>iptables / Windows Firewall rules scoped to the inference process. All outbound traffic blocked except localhost.</p>
+          <span class="sec-tag">Kernel-Level Enforcement</span>
+        </div>
       </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L3</div></div>
+        <div class="sec-layer-body">
+          <h3>Dependency Integrity</h3>
+          <p>SHA256 hash manifest of every installed package verified at startup. Tampered dependencies cause immediate abort.</p>
+          <span class="sec-tag">Supply Chain Defense</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L4</div></div>
+        <div class="sec-layer-body">
+          <h3>Model Weight Integrity</h3>
+          <p>SHA256 hashes of all model config files verified at every startup. Tampered weights cause immediate process abort.</p>
+          <span class="sec-tag">Cryptographic Verification</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L5</div></div>
+        <div class="sec-layer-body">
+          <h3>Secure RAM Session Storage</h3>
+          <p>Conversations stored only in RAM with unique 32-byte keys. On session end: secure_wipe() overwrites all content with random bytes. RAM scraping returns garbage.</p>
+          <span class="sec-tag">Cryptographic Wipe</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L6</div></div>
+        <div class="sec-layer-body">
+          <h3>Intrusion Detection + Auto-Wipe</h3>
+          <p>Background watchdog monitors for unexpected outbound connections and analysis tools. On confirmed intrusion: all sessions wiped, server terminated.</p>
+          <span class="sec-tag">Active Threat Response</span>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:40px;" class="reveal reveal-d3">
+      <a href="security.html" class="btn btn-primary">Full Security Details</a>
     </div>
   </div>
 </div>
@@ -2177,7 +2202,7 @@ html.light nav { background: rgba(245,246,250,0.9); }
     <p>No cloud. No subscriptions. No data collection. 3.3 GB download. Runs on any modern GPU in under a minute.</p>
     <div class="cta-actions">
       <a href="pay.html" class="btn btn-primary">Purchase Now</a>
-      <a href="#trial" class="btn btn-ghost">Try Free Demo</a>
+      <a href="security.html" class="btn btn-ghost">View Security</a>
     </div>
   </div>
 </div>
