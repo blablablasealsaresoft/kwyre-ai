@@ -696,8 +696,8 @@ a.incident:hover {
 
 <!-- Proverbs 27:12 — The prudent see danger and take refuge, but the simple keep going and pay the penalty. -->
 
-<!-- COMPANY ORBS -->
-<div class="section" id="orbs-section" style="position: relative; min-height: 500px; overflow: hidden;">
+<!-- SECTION 1: ORBS + INCIDENTS -->
+<div class="section" id="orbs-section" style="position: relative; overflow: hidden;">
   <div class="wrap" style="text-align: center;">
     <div class="sh">
       <div class="sh-eyebrow">The Offenders</div>
@@ -705,7 +705,7 @@ a.incident:hover {
     </div>
   </div>
 
-  <div class="company-orbs-container">
+  <div class="company-orbs-container" style="min-height: 420px;">
     <div class="company-orb" style="animation: corb-1 20s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="OpenAI" data-users="200M+ weekly users" data-data="Scraped the entire internet. 20M+ chat logs subpoenaed. Fined &euro;15M by Italy. FTC complaint filed. Trains on your conversations unless you opt out." data-amount="Trillions of tokens from billions of web pages">
       <div class="company-orb-name">OpenAI</div>
     </div>
@@ -726,6 +726,91 @@ a.incident:hover {
     </div>
     <div class="company-orb" style="animation: corb-7 21s ease-in-out infinite;" onclick="showCompanyData(this)" data-company="Zoom" data-users="300M+ meeting participants" data-data="AI Companion analyzes meeting content without participant consent. Hosts can enable AI analysis that processes everyone's speech. Sentiment analysis and behavioral profiling." data-amount="Billions of hours of private meetings, calls, and screen shares">
       <div class="company-orb-name">Zoom</div>
+    </div>
+  </div>
+
+  <div class="wrap" style="margin-top: 48px;">
+    <div class="sh">
+      <div class="sh-eyebrow">The Receipts</div>
+      <h2>They got caught.</h2>
+    </div>
+
+    <div class="incident-feed-compact" style="max-width: 800px; margin: 0 auto;">
+      <a href="https://www.reuters.com/technology/italy-fines-openai-15-million-euros-over-privacy-rules-breach-2024-12-20/" target="_blank" rel="noopener" class="incident-compact">
+        <span class="ic-tag ic-fine">&euro;15M FINE</span>
+        <span class="ic-text">Italy fines OpenAI for GDPR violations</span>
+        <span class="ic-src">Reuters</span>
+      </a>
+      <a href="https://www.cnn.com/2025/09/05/business/anthropic-ai-settlement-authors-claude" target="_blank" rel="noopener" class="incident-compact">
+        <span class="ic-tag ic-fine">$1.5B</span>
+        <span class="ic-text">Anthropic pays to settle copyright class action</span>
+        <span class="ic-src">CNN</span>
+      </a>
+      <a href="https://techcrunch.com/2026/02/18/microsoft-says-office-bug-exposed-customers-confidential-emails-to-copilot-ai" target="_blank" rel="noopener" class="incident-compact">
+        <span class="ic-tag ic-breach">BREACH</span>
+        <span class="ic-text">Copilot bypassed DLP on confidential emails</span>
+        <span class="ic-src">TechCrunch</span>
+      </a>
+      <a href="https://www.venturebeat.com/security/microsoft-copilot-ignoring-sensitivity-labels-dlp-cant-stop-ai-trust-failures" target="_blank" rel="noopener" class="incident-compact">
+        <span class="ic-tag ic-breach">CVSS 9.3</span>
+        <span class="ic-text">Copilot zero-click data exfiltration</span>
+        <span class="ic-src">VentureBeat</span>
+      </a>
+      <a href="https://incidentdatabase.ai/cite/768/" target="_blank" rel="noopener" class="incident-compact">
+        <span class="ic-tag ic-leak">LEAKED</span>
+        <span class="ic-text">Samsung leaked source code to ChatGPT 3x</span>
+        <span class="ic-src">Bloomberg</span>
+      </a>
+      <a href="https://www.reuters.com/legal/government/publishers-seek-join-lawsuit-against-google-over-ai-training-2026-01-15/" target="_blank" rel="noopener" class="incident-compact">
+        <span class="ic-tag ic-legal">LAWSUIT</span>
+        <span class="ic-text">Google sued for mass copyright infringement</span>
+        <span class="ic-src">Reuters</span>
+      </a>
+      <a href="https://www.dataprivacyandsecurityinsider.com/2026/01/when-chats-become-evidence-court-affirms-order-requiring-openai-to-produce-20-million-de-identified-chatgpt-logs" target="_blank" rel="noopener" class="incident-compact">
+        <span class="ic-tag ic-legal">ORDER</span>
+        <span class="ic-text">OpenAI ordered to produce 20M chat logs</span>
+        <span class="ic-src">DPSI</span>
+      </a>
+      <a href="https://www.reuters.com/legal/litigation/amazon-must-face-us-class-action-over-alexa-users-privacy-2025-07-07/" target="_blank" rel="noopener" class="incident-compact">
+        <span class="ic-tag ic-legal">CLASS ACTION</span>
+        <span class="ic-text">Amazon Alexa recording private conversations</span>
+        <span class="ic-src">Reuters</span>
+      </a>
+      <a href="https://www.androidpolice.com/meta-ai-glasses-privacy-concern/" target="_blank" rel="noopener" class="incident-compact">
+        <span class="ic-tag ic-breach">PRIVACY</span>
+        <span class="ic-text">Meta contractors reviewed intimate Ray-Ban footage</span>
+        <span class="ic-src">Android Police</span>
+      </a>
+      <a href="https://epic.org/wp-content/uploads/2024/10/EPIC-FTC-OpenAI-complaint.pdf" target="_blank" rel="noopener" class="incident-compact">
+        <span class="ic-tag ic-legal">FTC</span>
+        <span class="ic-text">EPIC complaint against OpenAI</span>
+        <span class="ic-src">EPIC</span>
+      </a>
+      <a href="https://techcrunch.com/2025/02/26/thousands-of-exposed-github-repositories-now-private-can-still-be-accessed-through-copilot" target="_blank" rel="noopener" class="incident-compact">
+        <span class="ic-tag ic-breach">EXPOSED</span>
+        <span class="ic-text">20K+ private repos still in Copilot</span>
+        <span class="ic-src">TechCrunch</span>
+      </a>
+      <a href="https://basilai.app/articles/2025-11-27-zoom-ai-companion-analyzing-meeting-content-without-consent-privacy-violations.html.html" target="_blank" rel="noopener" class="incident-compact">
+        <span class="ic-tag ic-breach">NO CONSENT</span>
+        <span class="ic-text">Zoom AI analyzing meetings without consent</span>
+        <span class="ic-src">Basil AI</span>
+      </a>
+      <a href="https://oag.ca.gov/news/press-releases/attorney-general-bonta-announces-largest-ccpa-settlement-date-secures-155" target="_blank" rel="noopener" class="incident-compact">
+        <span class="ic-tag ic-fine">$1.55M</span>
+        <span class="ic-text">California AG largest CCPA settlement</span>
+        <span class="ic-src">CA AG</span>
+      </a>
+      <a href="https://www.mondaq.com/unitedstates/privacy-protection/1687822/california-privacy-violations-result-in-135-million-fine" target="_blank" rel="noopener" class="incident-compact">
+        <span class="ic-tag ic-fine">$1.35M</span>
+        <span class="ic-text">CPPA record fine for privacy failures</span>
+        <span class="ic-src">CPPA</span>
+      </a>
+      <a href="https://www.americanbar.org/groups/litigation/resources/litigation-news/2023/use-chatgpt-research-bogus-cases-sanctions/" target="_blank" rel="noopener" class="incident-compact">
+        <span class="ic-tag ic-legal">SANCTIONED</span>
+        <span class="ic-text">Attorneys fined for ChatGPT fake citations</span>
+        <span class="ic-src">ABA</span>
+      </a>
     </div>
   </div>
 </div>
@@ -752,136 +837,53 @@ a.incident:hover {
 
 <!-- Ecclesiastes 1:9 — What has been will be again, what has been done will be done again; there is nothing new under the sun. -->
 
-<!-- CONTENT: TWO COLUMNS -->
+<!-- SECTION 2: COMPARISON TABLE (SINGLE COLUMN) -->
 <div class="section" id="content">
   <div class="wrap">
-    <div class="two-col">
+    <div class="sh">
+      <div class="sh-eyebrow" style="color: var(--green);">The Solution</div>
+      <h2>What we built instead.</h2>
+      <p>Kwyre vs. every major AI platform. One row at a time.</p>
+    </div>
 
-      <!-- LEFT COLUMN: INCIDENTS -->
-      <div class="col-left">
-        <div class="sh">
-          <div class="sh-eyebrow">The Receipts</div>
-          <h2>They got caught.</h2>
-        </div>
+    <div class="matrix-wrap" style="max-width: 960px; margin: 0 auto;">
+      <table class="matrix-compact" style="font-size: 12px;">
+        <thead>
+          <tr>
+            <th></th>
+            <th class="m-kwyre">Kwyre</th>
+            <th>GPT-4o</th>
+            <th>Claude</th>
+            <th>Gemini</th>
+            <th>DeepSeek</th>
+            <th>Copilot</th>
+            <th>Llama</th>
+            <th>Grok</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td class="m-label">100% local</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td><span class="m-y">YES</span></td><td class="m-n">&mdash;</td><td><span class="m-y">YES</span></td><td class="m-n">&mdash;</td></tr>
+          <tr><td class="m-label">Zero telemetry</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">Varies</td><td class="m-n">&mdash;</td></tr>
+          <tr><td class="m-label">6-layer security</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td></tr>
+          <tr><td class="m-label">Intrusion detection</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td></tr>
+          <tr><td class="m-label">Crypto wipe</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td></tr>
+          <tr><td class="m-label">No content logging</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">Logged</td><td class="m-n">Logged</td><td class="m-n">Logged</td><td class="m-n">Logged</td><td class="m-n">Logged</td><td class="m-n">Varies</td><td class="m-n">Logged</td></tr>
+          <tr><td class="m-label">No subscription</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">$20/mo</td><td class="m-n">$20/mo</td><td class="m-n">$20/mo</td><td class="m-n">$9/mo</td><td class="m-n">$30/mo</td><td><span class="m-y">Free</span></td><td class="m-n">$8/mo</td></tr>
+          <tr><td class="m-label">Custom training</td><td class="m-kwyre"><span class="m-y">GRPO</span></td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">DIY</td><td class="m-n">&mdash;</td></tr>
+          <tr><td class="m-label">Air-gapped capable</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td><span class="m-y">YES</span></td><td class="m-n">&mdash;</td></tr>
+          <tr><td class="m-label">Compliance docs</td><td class="m-kwyre"><span class="m-y">SOC2</span></td><td>Partial</td><td>Partial</td><td>Partial</td><td class="m-n">&mdash;</td><td>Partial</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td></tr>
+          <tr><td class="m-label">Trains on your data</td><td class="m-kwyre"><span class="m-y">NEVER</span></td><td class="m-n">Opt-out</td><td class="m-n">Opt-out</td><td class="m-n">Yes</td><td class="m-n">Yes</td><td class="m-n">Yes</td><td><span class="m-y">No</span></td><td class="m-n">Yes</td></tr>
+          <tr><td class="m-label">Data stays private</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">No</td><td class="m-n">No</td><td class="m-n">No</td><td class="m-n">No</td><td class="m-n">No</td><td><span class="m-y">YES</span></td><td class="m-n">No</td></tr>
+          <tr><td class="m-label">MMLU-Pro</td><td class="m-kwyre">82.5%</td><td>~85%</td><td>~84%</td><td>~83%</td><td>82.4%</td><td>~82%</td><td>~80%</td><td>~81%</td></tr>
+          <tr><td class="m-label">HumanEval</td><td class="m-kwyre">82.6%</td><td>~90%</td><td>~88%</td><td>~85%</td><td>78.2%</td><td>~87%</td><td>~77%</td><td>~74%</td></tr>
+          <tr><td class="m-label">Model size</td><td class="m-kwyre">9B</td><td>200B+</td><td>70B+</td><td>~400B</td><td>7B</td><td>200B+</td><td>70B</td><td>314B</td></tr>
+        </tbody>
+      </table>
+    </div>
 
-        <div class="incident-feed-compact">
-          <a href="https://www.reuters.com/technology/italy-fines-openai-15-million-euros-over-privacy-rules-breach-2024-12-20/" target="_blank" rel="noopener" class="incident-compact">
-            <span class="ic-tag ic-fine">&euro;15M FINE</span>
-            <span class="ic-text">Italy fines OpenAI for GDPR violations</span>
-            <span class="ic-src">Reuters</span>
-          </a>
-          <a href="https://www.cnn.com/2025/09/05/business/anthropic-ai-settlement-authors-claude" target="_blank" rel="noopener" class="incident-compact">
-            <span class="ic-tag ic-fine">$1.5B</span>
-            <span class="ic-text">Anthropic pays to settle copyright class action</span>
-            <span class="ic-src">CNN</span>
-          </a>
-          <a href="https://techcrunch.com/2026/02/18/microsoft-says-office-bug-exposed-customers-confidential-emails-to-copilot-ai" target="_blank" rel="noopener" class="incident-compact">
-            <span class="ic-tag ic-breach">BREACH</span>
-            <span class="ic-text">Copilot bypassed DLP on confidential emails</span>
-            <span class="ic-src">TechCrunch</span>
-          </a>
-          <a href="https://www.venturebeat.com/security/microsoft-copilot-ignoring-sensitivity-labels-dlp-cant-stop-ai-trust-failures" target="_blank" rel="noopener" class="incident-compact">
-            <span class="ic-tag ic-breach">CVSS 9.3</span>
-            <span class="ic-text">Copilot zero-click data exfiltration</span>
-            <span class="ic-src">VentureBeat</span>
-          </a>
-          <a href="https://incidentdatabase.ai/cite/768/" target="_blank" rel="noopener" class="incident-compact">
-            <span class="ic-tag ic-leak">LEAKED</span>
-            <span class="ic-text">Samsung leaked source code to ChatGPT 3x</span>
-            <span class="ic-src">Bloomberg</span>
-          </a>
-          <a href="https://www.reuters.com/legal/government/publishers-seek-join-lawsuit-against-google-over-ai-training-2026-01-15/" target="_blank" rel="noopener" class="incident-compact">
-            <span class="ic-tag ic-legal">LAWSUIT</span>
-            <span class="ic-text">Google sued for mass copyright infringement</span>
-            <span class="ic-src">Reuters</span>
-          </a>
-          <a href="https://www.dataprivacyandsecurityinsider.com/2026/01/when-chats-become-evidence-court-affirms-order-requiring-openai-to-produce-20-million-de-identified-chatgpt-logs" target="_blank" rel="noopener" class="incident-compact">
-            <span class="ic-tag ic-legal">ORDER</span>
-            <span class="ic-text">OpenAI ordered to produce 20M chat logs</span>
-            <span class="ic-src">DPSI</span>
-          </a>
-          <a href="https://www.reuters.com/legal/litigation/amazon-must-face-us-class-action-over-alexa-users-privacy-2025-07-07/" target="_blank" rel="noopener" class="incident-compact">
-            <span class="ic-tag ic-legal">CLASS ACTION</span>
-            <span class="ic-text">Amazon Alexa recording private conversations</span>
-            <span class="ic-src">Reuters</span>
-          </a>
-          <a href="https://www.androidpolice.com/meta-ai-glasses-privacy-concern/" target="_blank" rel="noopener" class="incident-compact">
-            <span class="ic-tag ic-breach">PRIVACY</span>
-            <span class="ic-text">Meta contractors reviewed intimate Ray-Ban footage</span>
-            <span class="ic-src">Android Police</span>
-          </a>
-          <a href="https://epic.org/wp-content/uploads/2024/10/EPIC-FTC-OpenAI-complaint.pdf" target="_blank" rel="noopener" class="incident-compact">
-            <span class="ic-tag ic-legal">FTC</span>
-            <span class="ic-text">EPIC complaint against OpenAI</span>
-            <span class="ic-src">EPIC</span>
-          </a>
-          <a href="https://techcrunch.com/2025/02/26/thousands-of-exposed-github-repositories-now-private-can-still-be-accessed-through-copilot" target="_blank" rel="noopener" class="incident-compact">
-            <span class="ic-tag ic-breach">EXPOSED</span>
-            <span class="ic-text">20K+ private repos still in Copilot</span>
-            <span class="ic-src">TechCrunch</span>
-          </a>
-          <a href="https://basilai.app/articles/2025-11-27-zoom-ai-companion-analyzing-meeting-content-without-consent-privacy-violations.html.html" target="_blank" rel="noopener" class="incident-compact">
-            <span class="ic-tag ic-breach">NO CONSENT</span>
-            <span class="ic-text">Zoom AI analyzing meetings without consent</span>
-            <span class="ic-src">Basil AI</span>
-          </a>
-          <a href="https://oag.ca.gov/news/press-releases/attorney-general-bonta-announces-largest-ccpa-settlement-date-secures-155" target="_blank" rel="noopener" class="incident-compact">
-            <span class="ic-tag ic-fine">$1.55M</span>
-            <span class="ic-text">California AG largest CCPA settlement</span>
-            <span class="ic-src">CA AG</span>
-          </a>
-          <a href="https://www.mondaq.com/unitedstates/privacy-protection/1687822/california-privacy-violations-result-in-135-million-fine" target="_blank" rel="noopener" class="incident-compact">
-            <span class="ic-tag ic-fine">$1.35M</span>
-            <span class="ic-text">CPPA record fine for privacy failures</span>
-            <span class="ic-src">CPPA</span>
-          </a>
-          <a href="https://www.americanbar.org/groups/litigation/resources/litigation-news/2023/use-chatgpt-research-bogus-cases-sanctions/" target="_blank" rel="noopener" class="incident-compact">
-            <span class="ic-tag ic-legal">SANCTIONED</span>
-            <span class="ic-text">Attorneys fined for ChatGPT fake citations</span>
-            <span class="ic-src">ABA</span>
-          </a>
-        </div>
-      </div>
-
-      <!-- RIGHT COLUMN: BENCHMARKS -->
-      <div class="col-right">
-        <div class="sh">
-          <div class="sh-eyebrow">The Solution</div>
-          <h2>What we built instead.</h2>
-        </div>
-
-        <table class="matrix-compact">
-          <thead>
-            <tr>
-              <th></th>
-              <th class="m-kwyre">Kwyre</th>
-              <th>GPT-4o</th>
-              <th>Claude</th>
-              <th>DeepSeek</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr><td class="m-label">MMLU-Pro</td><td class="m-kwyre">82.5%</td><td>~85%</td><td>~84%</td><td>82.4%</td></tr>
-            <tr><td class="m-label">GPQA Diamond</td><td class="m-kwyre">81.7%</td><td>~80%</td><td>~78%</td><td>&mdash;</td></tr>
-            <tr><td class="m-label">GSM8K</td><td class="m-kwyre">~88%</td><td>~95%</td><td>~93%</td><td>91.2%</td></tr>
-            <tr><td class="m-label">HumanEval</td><td class="m-kwyre">82.6%</td><td>~90%</td><td>~88%</td><td>78.2%</td></tr>
-            <tr><td class="m-label">Model size</td><td class="m-kwyre">9B</td><td>200B+</td><td>70B+</td><td>7B</td></tr>
-            <tr><td class="m-label">100% local</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td><span class="m-y">YES</span></td></tr>
-            <tr><td class="m-label">6-layer security</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td></tr>
-            <tr><td class="m-label">Intrusion detection</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td></tr>
-            <tr><td class="m-label">Crypto wipe</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td></tr>
-            <tr><td class="m-label">Custom training</td><td class="m-kwyre"><span class="m-y">GRPO</span></td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td><td class="m-n">&mdash;</td></tr>
-            <tr><td class="m-label">Compliance</td><td class="m-kwyre"><span class="m-y">SOC2</span></td><td>Partial</td><td>Partial</td><td class="m-n">&mdash;</td></tr>
-            <tr><td class="m-label">Data stays private</td><td class="m-kwyre"><span class="m-y">YES</span></td><td class="m-n">See left</td><td class="m-n">See left</td><td><span class="m-y">YES</span></td></tr>
-          </tbody>
-        </table>
-
-        <div style="text-align: center; margin-top: 24px;">
-          <a href="custom.html" class="btn btn-primary" style="margin-right: 8px;">Get Air-Gapped AI</a>
-          <a href="pay.html" class="btn btn-ghost">Purchase</a>
-        </div>
-      </div>
-
+    <div style="text-align: center; margin-top: 32px;">
+      <a href="custom.html" class="btn btn-primary" style="margin-right: 8px;">Get Air-Gapped AI</a>
+      <a href="pay.html" class="btn btn-ghost">Purchase</a>
     </div>
   </div>
 </div>
