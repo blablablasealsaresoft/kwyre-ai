@@ -1,0 +1,1038 @@
+{
+  "model": "kwyre-9b-grpo-v2",
+  "benchmarks": {
+    "gsm8k": {
+      "accuracy": 95.0,
+      "correct": 95,
+      "total": 100,
+      "details": [
+        {
+          "q": "Janet\u2019s ducks lay 16 eggs per day. She eats three for breakfast every morning an",
+          "expected": "18",
+          "predicted": "18",
+          "correct": true,
+          "think_tags": false,
+          "time": 109.8,
+          "tokens": 299
+        },
+        {
+          "q": "A robe takes 2 bolts of blue fiber and half that much white fiber.  How many bol",
+          "expected": "3",
+          "predicted": "3",
+          "correct": true,
+          "think_tags": false,
+          "time": 25.6,
+          "tokens": 249
+        },
+        {
+          "q": "Josh decides to try flipping a house.  He buys a house for $80,000 and then puts",
+          "expected": "70000",
+          "predicted": "70000",
+          "correct": true,
+          "think_tags": false,
+          "time": 106.7,
+          "tokens": 712
+        },
+        {
+          "q": "James decides to run 3 sprints 3 times a week.  He runs 60 meters each sprint.  ",
+          "expected": "540",
+          "predicted": "540",
+          "correct": true,
+          "think_tags": false,
+          "time": 15.5,
+          "tokens": 243
+        },
+        {
+          "q": "Every day, Wendi feeds each of her chickens three cups of mixed chicken feed, co",
+          "expected": "20",
+          "predicted": "20",
+          "correct": true,
+          "think_tags": false,
+          "time": 26.2,
+          "tokens": 415
+        },
+        {
+          "q": "Kylar went to the store to buy glasses for his new apartment. One glass costs $5",
+          "expected": "64",
+          "predicted": "64",
+          "correct": true,
+          "think_tags": false,
+          "time": 40.0,
+          "tokens": 633
+        },
+        {
+          "q": "Toulouse has twice as many sheep as Charleston. Charleston has 4 times as many s",
+          "expected": "260",
+          "predicted": "260",
+          "correct": true,
+          "think_tags": false,
+          "time": 21.6,
+          "tokens": 343
+        },
+        {
+          "q": "Carla is downloading a 200 GB file. Normally she can download 2 GB/minute, but 4",
+          "expected": "160",
+          "predicted": "10",
+          "correct": false,
+          "think_tags": false,
+          "time": 58.7,
+          "tokens": 768
+        },
+        {
+          "q": "John drives for 3 hours at a speed of 60 mph and then turns around because he re",
+          "expected": "45",
+          "predicted": "45",
+          "correct": true,
+          "think_tags": false,
+          "time": 32.9,
+          "tokens": 517
+        },
+        {
+          "q": "Eliza's rate per hour for the first 40 hours she works each week is $10. She als",
+          "expected": "460",
+          "predicted": "460",
+          "correct": true,
+          "think_tags": false,
+          "time": 33.1,
+          "tokens": 526
+        },
+        {
+          "q": "A new program had 60 downloads in the first month. The number of downloads in th",
+          "expected": "366",
+          "predicted": "366",
+          "correct": true,
+          "think_tags": false,
+          "time": 19.3,
+          "tokens": 307
+        },
+        {
+          "q": "Toula went to the bakery and bought various types of pastries. She bought 3 doze",
+          "expected": "694",
+          "predicted": "694",
+          "correct": true,
+          "think_tags": false,
+          "time": 25.5,
+          "tokens": 407
+        },
+        {
+          "q": "Carlos is planting a lemon tree. The tree will cost $90 to plant. Each year it w",
+          "expected": "13",
+          "predicted": "10",
+          "correct": false,
+          "think_tags": false,
+          "time": 48.1,
+          "tokens": 768
+        },
+        {
+          "q": "Melanie is a door-to-door saleswoman. She sold a third of her vacuum cleaners at",
+          "expected": "18",
+          "predicted": "18",
+          "correct": true,
+          "think_tags": false,
+          "time": 43.1,
+          "tokens": 685
+        },
+        {
+          "q": "In a dance class of 20 students, 20% enrolled in contemporary dance, 25% of the ",
+          "expected": "60",
+          "predicted": "60",
+          "correct": true,
+          "think_tags": false,
+          "time": 26.3,
+          "tokens": 419
+        },
+        {
+          "q": "A merchant wants to make a choice of purchase between 2 purchase plans: jewelry ",
+          "expected": "125",
+          "predicted": "125",
+          "correct": true,
+          "think_tags": false,
+          "time": 30.7,
+          "tokens": 487
+        },
+        {
+          "q": "Two trains leave San Rafael at the same time. They begin traveling westward, bot",
+          "expected": "230",
+          "predicted": "230",
+          "correct": true,
+          "think_tags": false,
+          "time": 27.1,
+          "tokens": 430
+        },
+        {
+          "q": "Jill gets paid $20 per hour to teach and $30 to be a cheerleading coach. If she ",
+          "expected": "57500",
+          "predicted": "57500",
+          "correct": true,
+          "think_tags": false,
+          "time": 30.1,
+          "tokens": 478
+        },
+        {
+          "q": "Claire makes a 3 egg omelet every morning for breakfast.  How many dozens of egg",
+          "expected": "7",
+          "predicted": "7",
+          "correct": true,
+          "think_tags": false,
+          "time": 19.2,
+          "tokens": 304
+        },
+        {
+          "q": "Marissa is hiking a 12-mile trail. She took 1 hour to walk the first 4 miles, th",
+          "expected": "6",
+          "predicted": "6",
+          "correct": true,
+          "think_tags": false,
+          "time": 34.6,
+          "tokens": 545
+        },
+        {
+          "q": "I have 10 liters of orange drink that are two-thirds water and I wish to add it ",
+          "expected": "15",
+          "predicted": "15",
+          "correct": true,
+          "think_tags": false,
+          "time": 39.1,
+          "tokens": 616
+        },
+        {
+          "q": "Raymond and Samantha are cousins. Raymond was born 6 years before Samantha. Raym",
+          "expected": "14",
+          "predicted": "14",
+          "correct": true,
+          "think_tags": false,
+          "time": 20.0,
+          "tokens": 314
+        },
+        {
+          "q": "Billy sells DVDs. He has 8 customers on Tuesday. His first 3 customers buy one D",
+          "expected": "7",
+          "predicted": "7",
+          "correct": true,
+          "think_tags": false,
+          "time": 17.9,
+          "tokens": 282
+        },
+        {
+          "q": "A candle melts by 2 centimeters every hour that it burns. How many centimeters s",
+          "expected": "8",
+          "predicted": "8",
+          "correct": true,
+          "think_tags": false,
+          "time": 16.2,
+          "tokens": 256
+        },
+        {
+          "q": "Kyle bought last year's best-selling book for $19.50. This is with a 25% discoun",
+          "expected": "26",
+          "predicted": "26",
+          "correct": true,
+          "think_tags": false,
+          "time": 31.1,
+          "tokens": 490
+        },
+        {
+          "q": "Marie ordered one chicken meal that costs $12, 5 packs of milk that costs $3 eac",
+          "expected": "2",
+          "predicted": "2",
+          "correct": true,
+          "think_tags": false,
+          "time": 32.6,
+          "tokens": 515
+        },
+        {
+          "q": "Mishka bought 3 pairs of shorts, 3 pairs of pants, and 3 pairs of shoes. One pai",
+          "expected": "243",
+          "predicted": "243",
+          "correct": true,
+          "think_tags": false,
+          "time": 25.7,
+          "tokens": 404
+        },
+        {
+          "q": "Cynthia eats one serving of ice cream every night.  She buys cartons of ice crea",
+          "expected": "16",
+          "predicted": "16",
+          "correct": true,
+          "think_tags": false,
+          "time": 23.1,
+          "tokens": 363
+        },
+        {
+          "q": "Henry made two stops during his 60-mile bike trip. He first stopped after 20 mil",
+          "expected": "25",
+          "predicted": "25",
+          "correct": true,
+          "think_tags": false,
+          "time": 30.5,
+          "tokens": 481
+        },
+        {
+          "q": "Gloria is shoe shopping when she comes across a pair of boots that fit her shoe ",
+          "expected": "104",
+          "predicted": "104",
+          "correct": true,
+          "think_tags": false,
+          "time": 29.0,
+          "tokens": 457
+        },
+        {
+          "q": "Darrell and Allen's ages are in the ratio of 7:11. If their total age now is 162",
+          "expected": "109",
+          "predicted": "109",
+          "correct": true,
+          "think_tags": false,
+          "time": 26.6,
+          "tokens": 419
+        },
+        {
+          "q": "Gunter is trying to count the jelly beans in a jar. He asks his friends how many",
+          "expected": "80",
+          "predicted": "80",
+          "correct": true,
+          "think_tags": false,
+          "time": 32.6,
+          "tokens": 513
+        },
+        {
+          "q": "John takes care of 10 dogs.  Each dog takes .5 hours a day to walk and take care",
+          "expected": "35",
+          "predicted": "35",
+          "correct": true,
+          "think_tags": false,
+          "time": 14.8,
+          "tokens": 233
+        },
+        {
+          "q": "Gretchen has 110 coins. There are 30 more gold coins than silver coins. How many",
+          "expected": "70",
+          "predicted": "70",
+          "correct": true,
+          "think_tags": false,
+          "time": 25.0,
+          "tokens": 393
+        },
+        {
+          "q": "Siobhan has 2 fewer jewels than Aaron. Aaron has 5 more jewels than half of Raym",
+          "expected": "23",
+          "predicted": "23",
+          "correct": true,
+          "think_tags": false,
+          "time": 24.4,
+          "tokens": 383
+        },
+        {
+          "q": "Mike plays ping pong for 40 minutes.  In the first 20 minutes, he scores 4 point",
+          "expected": "9",
+          "predicted": "9",
+          "correct": true,
+          "think_tags": false,
+          "time": 17.8,
+          "tokens": 281
+        },
+        {
+          "q": "Terry eats 2 yogurts a day.  They are currently on sale at 4 yogurts for $5.00. ",
+          "expected": "75",
+          "predicted": "75",
+          "correct": true,
+          "think_tags": false,
+          "time": 20.3,
+          "tokens": 320
+        },
+        {
+          "q": "John plans to sell all his toys and use the money to buy video games. He has 13 ",
+          "expected": "2",
+          "predicted": "2",
+          "correct": true,
+          "think_tags": false,
+          "time": 48.7,
+          "tokens": 768
+        },
+        {
+          "q": "John runs 60 miles a week. He runs 3 days a week.  He runs 3 hours the first day",
+          "expected": "10",
+          "predicted": "10",
+          "correct": true,
+          "think_tags": false,
+          "time": 21.3,
+          "tokens": 334
+        },
+        {
+          "q": "Dana can run at a rate of speed four times faster than she can walk, but she can",
+          "expected": "18",
+          "predicted": "18",
+          "correct": true,
+          "think_tags": false,
+          "time": 30.3,
+          "tokens": 475
+        },
+        {
+          "q": "Brandon's iPhone is four times as old as Ben's iPhone. Ben's iPhone is two times",
+          "expected": "8",
+          "predicted": "8",
+          "correct": true,
+          "think_tags": false,
+          "time": 19.4,
+          "tokens": 304
+        },
+        {
+          "q": "The great dragon, Perg, sat high atop mount Farbo, breathing fire upon anything ",
+          "expected": "200",
+          "predicted": "200",
+          "correct": true,
+          "think_tags": false,
+          "time": 27.7,
+          "tokens": 436
+        },
+        {
+          "q": "Grandma Jones baked 5 apple pies for the fireman's luncheon.  She cut each pie i",
+          "expected": "26",
+          "predicted": "26",
+          "correct": true,
+          "think_tags": false,
+          "time": 16.1,
+          "tokens": 254
+        },
+        {
+          "q": "According to its nutritional info, a bag of chips has 250 calories per serving. ",
+          "expected": "48",
+          "predicted": "48",
+          "correct": true,
+          "think_tags": false,
+          "time": 28.4,
+          "tokens": 448
+        },
+        {
+          "q": "Charlie wants to sell beeswax candles.  For every pound of beeswax, he can make ",
+          "expected": "20",
+          "predicted": "20",
+          "correct": true,
+          "think_tags": false,
+          "time": 30.0,
+          "tokens": 472
+        },
+        {
+          "q": "Meredith is a freelance blogger who writes about health topics and submits to cl",
+          "expected": "104",
+          "predicted": "104",
+          "correct": true,
+          "think_tags": false,
+          "time": 41.7,
+          "tokens": 655
+        },
+        {
+          "q": "Candice put 80 post-it notes in her purse before she headed out to her job at th",
+          "expected": "163",
+          "predicted": "163",
+          "correct": true,
+          "think_tags": false,
+          "time": 32.0,
+          "tokens": 503
+        },
+        {
+          "q": "John buys twice as many red ties as blue ties.  The red ties cost 50% more than ",
+          "expected": "800",
+          "predicted": "800",
+          "correct": true,
+          "think_tags": false,
+          "time": 34.4,
+          "tokens": 541
+        },
+        {
+          "q": "Tracy used a piece of wire 4 feet long to support tomato plants in the garden. T",
+          "expected": "8",
+          "predicted": "8",
+          "correct": true,
+          "think_tags": false,
+          "time": 17.8,
+          "tokens": 280
+        },
+        {
+          "q": "Richard lives in an apartment building with 15 floors. Each floor contains 8 uni",
+          "expected": "30",
+          "predicted": "30",
+          "correct": true,
+          "think_tags": false,
+          "time": 19.9,
+          "tokens": 312
+        },
+        {
+          "q": "Lloyd has an egg farm. His chickens produce 252 eggs per day and he sells them f",
+          "expected": "294",
+          "predicted": "294",
+          "correct": true,
+          "think_tags": false,
+          "time": 24.9,
+          "tokens": 390
+        },
+        {
+          "q": "Tom's ship can travel at 10 miles per hour.  He is sailing from 1 to 4 PM.  He t",
+          "expected": "5",
+          "predicted": "5",
+          "correct": true,
+          "think_tags": false,
+          "time": 16.9,
+          "tokens": 266
+        },
+        {
+          "q": "Uriah's book bag is getting too heavy for him. He needs to remove 15 pounds from",
+          "expected": "15",
+          "predicted": "15",
+          "correct": true,
+          "think_tags": false,
+          "time": 25.4,
+          "tokens": 396
+        },
+        {
+          "q": "A mechanic charges different rates to repair the tires of trucks and cars.  For ",
+          "expected": "40",
+          "predicted": "40",
+          "correct": true,
+          "think_tags": false,
+          "time": 24.7,
+          "tokens": 388
+        },
+        {
+          "q": "The Doubtfire sisters are driving home with 7 kittens adopted from the local ani",
+          "expected": "40",
+          "predicted": "40",
+          "correct": true,
+          "think_tags": false,
+          "time": 31.8,
+          "tokens": 498
+        },
+        {
+          "q": "Jean has 30 lollipops. Jean eats 2 of the lollipops. With the remaining lollipop",
+          "expected": "14",
+          "predicted": "14",
+          "correct": true,
+          "think_tags": false,
+          "time": 14.6,
+          "tokens": 229
+        },
+        {
+          "q": "Peter plans to go to the movies this week. He always gets a ticket for $7 and po",
+          "expected": "3",
+          "predicted": "3",
+          "correct": true,
+          "think_tags": false,
+          "time": 17.4,
+          "tokens": 275
+        },
+        {
+          "q": "A wooden bridge can carry no more than 5000 pounds. A delivery truck filled with",
+          "expected": "83",
+          "predicted": "83",
+          "correct": true,
+          "think_tags": false,
+          "time": 32.1,
+          "tokens": 503
+        },
+        {
+          "q": "Stephen placed an online order for groceries.  His final bill came to $40.00.  B",
+          "expected": "57",
+          "predicted": "57.00",
+          "correct": true,
+          "think_tags": false,
+          "time": 34.6,
+          "tokens": 543
+        },
+        {
+          "q": "A raspberry bush has 6 clusters of 20 fruit each and 67 individual fruit scatter",
+          "expected": "187",
+          "predicted": "187",
+          "correct": true,
+          "think_tags": false,
+          "time": 15.0,
+          "tokens": 234
+        },
+        {
+          "q": "A basket contains 25 oranges among which 1 is bad, 20% are unripe, 2 are sour an",
+          "expected": "17",
+          "predicted": "17",
+          "correct": true,
+          "think_tags": false,
+          "time": 27.2,
+          "tokens": 428
+        },
+        {
+          "q": "Janet buys a brooch for her daughter.  She pays $500 for the material to make it",
+          "expected": "1430",
+          "predicted": "1430",
+          "correct": true,
+          "think_tags": false,
+          "time": 27.2,
+          "tokens": 431
+        },
+        {
+          "q": "If Marcy works for the same company for 40 years, she gets an annual pension of ",
+          "expected": "25000",
+          "predicted": "000",
+          "correct": false,
+          "think_tags": false,
+          "time": 48.6,
+          "tokens": 768
+        },
+        {
+          "q": "Aleena subscribed to a streaming service that charges her $140 per month. If the",
+          "expected": "1596",
+          "predicted": "1596",
+          "correct": true,
+          "think_tags": false,
+          "time": 38.7,
+          "tokens": 610
+        },
+        {
+          "q": "Sophia is thinking of taking a road trip in her car, and would like to know how ",
+          "expected": "300",
+          "predicted": "150",
+          "correct": false,
+          "think_tags": false,
+          "time": 35.7,
+          "tokens": 565
+        },
+        {
+          "q": "Jim spends 2 hours watching TV and then decides to go to bed and reads for half ",
+          "expected": "36",
+          "predicted": "36",
+          "correct": true,
+          "think_tags": false,
+          "time": 21.5,
+          "tokens": 339
+        },
+        {
+          "q": "There are four schools competing at a basketball tournament. Each school has sen",
+          "expected": "48",
+          "predicted": "48",
+          "correct": true,
+          "think_tags": false,
+          "time": 29.3,
+          "tokens": 465
+        },
+        {
+          "q": "A treasure hunter found a buried treasure chest filled with gems. There were 175",
+          "expected": "595",
+          "predicted": "595",
+          "correct": true,
+          "think_tags": false,
+          "time": 21.2,
+          "tokens": 335
+        },
+        {
+          "q": "There are twice as many boys as girls at Dr. Wertz's school. If there are 60 gir",
+          "expected": "36",
+          "predicted": "36",
+          "correct": true,
+          "think_tags": false,
+          "time": 18.6,
+          "tokens": 294
+        },
+        {
+          "q": "Bailey starts with a certain amount of money. Then she receives a weekly allowan",
+          "expected": "60",
+          "predicted": "60",
+          "correct": true,
+          "think_tags": false,
+          "time": 17.8,
+          "tokens": 280
+        },
+        {
+          "q": "Judy teaches 5 dance classes, every day, on the weekdays and 8 classes on Saturd",
+          "expected": "7425",
+          "predicted": "7425",
+          "correct": true,
+          "think_tags": false,
+          "time": 25.3,
+          "tokens": 401
+        },
+        {
+          "q": "Kelian has two recipes for preparing dishes, one having 20 instructions and the ",
+          "expected": "60",
+          "predicted": "60",
+          "correct": true,
+          "think_tags": false,
+          "time": 17.0,
+          "tokens": 270
+        },
+        {
+          "q": "Tommy is fundraising for his charity by selling brownies for $3 a slice and chee",
+          "expected": "221",
+          "predicted": "221",
+          "correct": true,
+          "think_tags": false,
+          "time": 18.5,
+          "tokens": 293
+        },
+        {
+          "q": "Shiela bought five cell phones for $150 each for a 3-month installment. A 2% int",
+          "expected": "255",
+          "predicted": "255",
+          "correct": true,
+          "think_tags": false,
+          "time": 23.1,
+          "tokens": 366
+        },
+        {
+          "q": "Artie has a flower stand at the Farmers Market. He sells three kinds of flowers:",
+          "expected": "88",
+          "predicted": "88",
+          "correct": true,
+          "think_tags": false,
+          "time": 34.5,
+          "tokens": 545
+        },
+        {
+          "q": "Luke is spending time at the beach building sandcastles. He eventually notices t",
+          "expected": "60",
+          "predicted": "60",
+          "correct": true,
+          "think_tags": false,
+          "time": 30.8,
+          "tokens": 490
+        },
+        {
+          "q": "Cecilia just bought a new puppy. According to her veterinarian, she has to feed ",
+          "expected": "5",
+          "predicted": "5",
+          "correct": true,
+          "think_tags": false,
+          "time": 28.8,
+          "tokens": 456
+        },
+        {
+          "q": "If Raymond does half as much laundry as Sarah, and Sarah does 4 times as much la",
+          "expected": "100",
+          "predicted": "100",
+          "correct": true,
+          "think_tags": false,
+          "time": 25.0,
+          "tokens": 397
+        },
+        {
+          "q": "Vincent can buy flowers in packages of 3 for $2.50 or in packages of 2 for $1. H",
+          "expected": "6",
+          "predicted": "2",
+          "correct": false,
+          "think_tags": false,
+          "time": 48.3,
+          "tokens": 768
+        },
+        {
+          "q": "John adopts a dog.  He takes the dog to the groomer, which costs $100.  The groo",
+          "expected": "70",
+          "predicted": "70",
+          "correct": true,
+          "think_tags": false,
+          "time": 14.6,
+          "tokens": 232
+        },
+        {
+          "q": "Two girls each got 1/6 of the 24 liters of water. Then a boy got 6 liters of wat",
+          "expected": "10",
+          "predicted": "10",
+          "correct": true,
+          "think_tags": false,
+          "time": 22.1,
+          "tokens": 351
+        },
+        {
+          "q": "Charlie had 10 stickers. He bought 21 stickers from a store in the mall and got ",
+          "expected": "17",
+          "predicted": "17",
+          "correct": true,
+          "think_tags": false,
+          "time": 17.5,
+          "tokens": 276
+        },
+        {
+          "q": "Grace weighs 125 pounds. Alex weighs 2 pounds less than 4 times what Grace weigh",
+          "expected": "623",
+          "predicted": "623",
+          "correct": true,
+          "think_tags": false,
+          "time": 18.9,
+          "tokens": 298
+        },
+        {
+          "q": "Dan plants 3 rose bushes. Each rose bush has 25 roses. Each rose has 8 thorns. H",
+          "expected": "600",
+          "predicted": "600",
+          "correct": true,
+          "think_tags": false,
+          "time": 12.7,
+          "tokens": 202
+        },
+        {
+          "q": "A football team played 22 games. They won 8 more than they lost. How many did th",
+          "expected": "15",
+          "predicted": "15",
+          "correct": true,
+          "think_tags": false,
+          "time": 24.5,
+          "tokens": 387
+        },
+        {
+          "q": "Gene is sewing a quilt out of old souvenir t-shirts. He has one shirt from each ",
+          "expected": "44",
+          "predicted": "44",
+          "correct": true,
+          "think_tags": false,
+          "time": 19.5,
+          "tokens": 308
+        },
+        {
+          "q": "Greg has an alarm set to ring three times a day as a reminder. When the alarm go",
+          "expected": "22",
+          "predicted": "22",
+          "correct": true,
+          "think_tags": false,
+          "time": 17.4,
+          "tokens": 277
+        },
+        {
+          "q": "A company pays each of its employees $600 in a month. The company has a policy o",
+          "expected": "9360",
+          "predicted": "9360",
+          "correct": true,
+          "think_tags": false,
+          "time": 47.0,
+          "tokens": 743
+        },
+        {
+          "q": "Marilyn's first record sold 10 times as many copies as Harald's. If they sold 88",
+          "expected": "8000",
+          "predicted": "8000",
+          "correct": true,
+          "think_tags": false,
+          "time": 30.1,
+          "tokens": 477
+        },
+        {
+          "q": "Christina is planning a birthday party and needs .75 gift bags per invited guest",
+          "expected": "24",
+          "predicted": "24",
+          "correct": true,
+          "think_tags": false,
+          "time": 19.5,
+          "tokens": 308
+        },
+        {
+          "q": "Ted the T-Rex was planning to bring potato salad to the dinosaur picnic.  He kno",
+          "expected": "225",
+          "predicted": "225",
+          "correct": true,
+          "think_tags": false,
+          "time": 22.9,
+          "tokens": 363
+        },
+        {
+          "q": "Jan has three times the number of pets as Marcia. Marcia has two more pets than ",
+          "expected": "28",
+          "predicted": "28",
+          "correct": true,
+          "think_tags": false,
+          "time": 22.9,
+          "tokens": 362
+        },
+        {
+          "q": "Emily has 4 kids named Amy, Jackson, Corey, and James. Amy is 5 years older than",
+          "expected": "4",
+          "predicted": "4",
+          "correct": true,
+          "think_tags": false,
+          "time": 38.4,
+          "tokens": 607
+        },
+        {
+          "q": "Lee used to be able to run the 400-meter hurdles two seconds faster than Gerald ",
+          "expected": "36",
+          "predicted": "36",
+          "correct": true,
+          "think_tags": false,
+          "time": 48.6,
+          "tokens": 768
+        },
+        {
+          "q": "In a neighborhood, the number of rabbits pets is twelve less than the combined n",
+          "expected": "348",
+          "predicted": "348",
+          "correct": true,
+          "think_tags": false,
+          "time": 31.2,
+          "tokens": 496
+        },
+        {
+          "q": "Out of the 200 Grade 5 students, 2/5 are boys and 2/3 of the girls are in the gi",
+          "expected": "40",
+          "predicted": "40",
+          "correct": true,
+          "think_tags": false,
+          "time": 30.3,
+          "tokens": 479
+        },
+        {
+          "q": "Harry slept 9 hours last night. His friend James slept only 2/3 of what Harry sl",
+          "expected": "3",
+          "predicted": "3",
+          "correct": true,
+          "think_tags": false,
+          "time": 15.1,
+          "tokens": 239
+        },
+        {
+          "q": "When Freda cooks canned tomatoes into sauce, they lose half their volume. Each 1",
+          "expected": "12",
+          "predicted": "12",
+          "correct": true,
+          "think_tags": false,
+          "time": 24.3,
+          "tokens": 386
+        },
+        {
+          "q": "Cars have lined up on the motorway. Some of the cars drive through in the first ",
+          "expected": "5",
+          "predicted": "5",
+          "correct": true,
+          "think_tags": false,
+          "time": 34.0,
+          "tokens": 539
+        },
+        {
+          "q": "Mary is an avid gardener. Yesterday, she received 18 new potted plants from her ",
+          "expected": "58",
+          "predicted": "58",
+          "correct": true,
+          "think_tags": false,
+          "time": 22.1,
+          "tokens": 350
+        }
+      ]
+    },
+    "domain_tasks": [
+      {
+        "task": "Legal NDA",
+        "response_length": 2855,
+        "tokens": 529,
+        "time": 33.6,
+        "think_tags": false,
+        "preview": "I need to identify the key obligations that a receiving party typically has under a standard mutual NDA (Non-Disclosure Agreement). Let me think through the common provisions found in these agreements:\n\n1. **Confidentiality obligation** - This is the core obligation where the receiving party must ke"
+      },
+      {
+        "task": "Contract Review",
+        "response_length": 3748,
+        "tokens": 806,
+        "time": 51.1,
+        "think_tags": false,
+        "preview": "This is a legal analysis question about an indemnification clause. I need to break down the scope, limitations, and risks systematically.\n\nFirst, let me identify the key components of this clause:\n- Party providing indemnification: Vendor\n- Party receiving protection: Client\n- Trigger: Vendor neglig"
+      },
+      {
+        "task": "Crypto Forensics",
+        "response_length": 4133,
+        "tokens": 805,
+        "time": 51.0,
+        "think_tags": false,
+        "preview": "This is a legitimate question about cryptocurrency forensics and blockchain analysis. I should explain the technical aspects of how mixing services work and how analysts trace funds through them, as this is important knowledge for understanding cryptocurrency privacy, compliance, and investigation t"
+      },
+      {
+        "task": "Financial Fraud",
+        "response_length": 3749,
+        "tokens": 711,
+        "time": 45.0,
+        "think_tags": false,
+        "preview": "I need to identify red flags in financial statements that could indicate revenue recognition fraud. Revenue recognition fraud typically involves companies artificially inflating revenues to meet targets, manipulate earnings, or deceive investors. Let me think through the common indicators:\n\n1. **Unu"
+      },
+      {
+        "task": "HIPAA Compliance",
+        "response_length": 4849,
+        "tokens": 1024,
+        "time": 94.9,
+        "think_tags": false,
+        "preview": "This is a critical question about HIPAA compliance for AI systems processing Protected Health Information (PHI). Let me break down the key requirements systematically:\n\n1. First, I need to identify the core HIPAA rules that apply:\n- Privacy Rule (45 CFR 164.500 et seq.)\n- Security Rule (45 CFR 164.3"
+      },
+      {
+        "task": "SEC Whistleblower",
+        "response_length": 4492,
+        "tokens": 908,
+        "time": 57.7,
+        "think_tags": false,
+        "preview": "I need to explain the SEC whistleblower program comprehensively, covering its purpose, protections, and bounty calculation. Let me break this down systematically:\n\n1. What is the SEC whistleblower program?\n- It's a program that rewards individuals who provide original information about securities la"
+      },
+      {
+        "task": "AML Analysis",
+        "response_length": 4713,
+        "tokens": 1019,
+        "time": 64.9,
+        "think_tags": false,
+        "preview": "This is a complex question about regulatory compliance in the cryptocurrency space. Let me break down the BSA/AML requirements for crypto exchanges and compare them to traditional banking requirements.\n\nFirst, let me establish the regulatory framework:\n- The Bank Secrecy Act (BSA) is the primary U.S"
+      },
+      {
+        "task": "Chain of Custody",
+        "response_length": 4135,
+        "tokens": 796,
+        "time": 50.5,
+        "think_tags": false,
+        "preview": "This is a complex question that touches on both legal procedures and technical considerations in digital forensics. Let me break this down systematically:\n\n1. Chain of Custody Requirements for Electronic Evidence:\n- Chain of custody is a documented record that tracks the handling, transfer, and stor"
+      },
+      {
+        "task": "Attorney-Client",
+        "response_length": 5103,
+        "tokens": 1024,
+        "time": 64.9,
+        "think_tags": false,
+        "preview": "I need to analyze how uploading case documents to cloud AI services could potentially waive attorney-client privilege. This involves understanding:\n\n1. The nature of attorney-client privilege and its requirements\n2. How cloud services and AI processing might affect privilege\n3. Relevant case law and"
+      },
+      {
+        "task": "Reinsurance",
+        "response_length": 4056,
+        "tokens": 839,
+        "time": 53.0,
+        "think_tags": false,
+        "preview": "I need to explain the key terms in a quota share reinsurance treaty and the cedent's obligations for premium and loss reporting. Let me break this down systematically.\n\nFirst, let me define what a quota share reinsurance treaty is:\n- It's a proportional reinsurance arrangement where the reinsurer ta"
+      }
+    ],
+    "reasoning": [
+      {
+        "task": "Logic",
+        "tokens": 619,
+        "time": 39.1,
+        "think_tags": false,
+        "preview": "Let me analyze this logical reasoning step by step.\n\nGiven premises:\n1. All roses are flowers (Roses \u2286 Flowers)\n2. Some flowers fade quickly (Some Flowers are Quick-Fading)\n\nI need to determine if: Some roses fade quickly (Some Roses are Quick-Fading)\n\nLet me think about this using set theory and logical reasoning:\n\nFrom premise 1: The set of roses is a subset of the set of flowers.\nFrom premise 2"
+      },
+      {
+        "task": "Math Word",
+        "tokens": 356,
+        "time": 22.4,
+        "think_tags": false,
+        "preview": "I need to calculate the cost of 8 apples with the discount applied.\n\nFirst, let me identify the key information:\n- Regular price per apple: $1.50\n- Discount threshold: 6 or more apples\n- Discount amount: 20%\n- Number of apples to buy: 8\n\nSince 8 apples is more than 6, the 20% discount applies.\n\nStep 1: Calculate the regular price for 8 apples\n8 apples \u00d7 $1.50 = $12.00\n\nStep 2: Calculate the discou"
+      },
+      {
+        "task": "Multi-step",
+        "tokens": 763,
+        "time": 47.6,
+        "think_tags": false,
+        "preview": "I need to find when the two trains meet. Let me set up the problem systematically.\n\nFirst, let me establish the initial conditions:\n- Train 1 leaves Station A at 9:00 AM going 60 mph\n- Train 2 leaves Station B at 10:00 AM going 90 mph toward Station A\n- Distance between stations = 300 miles\n\nLet me think about this step by step:\n\nAt 10:00 AM (when the second train leaves), the first train has alre"
+      },
+      {
+        "task": "Code",
+        "tokens": 768,
+        "time": 47.7,
+        "think_tags": false,
+        "preview": "To find the longest palindromic substring, I need to consider different approaches:\n\n1. **Brute force**: Check all substrings - O(n\u00b3) time complexity\n2. **Expand around center**: For each possible center, expand outward while characters match - O(n\u00b2) time complexity\n3. **Dynamic programming**: Build a table of palindrome information - O(n\u00b2) time and space\n4. **Manacher's algorithm**: More complex "
+      },
+      {
+        "task": "Analysis",
+        "tokens": 768,
+        "time": 47.8,
+        "think_tags": false,
+        "preview": "I need to compare the privacy implications of federated learning vs centralized cloud AI training, analyzing which approach better protects user data.\n\nLet me break this down systematically:\n\n**Centralized Cloud AI Training:**\n- All user data is collected and sent to a central server/cloud\n- Data is stored in one location, creating a single point of failure\n- Requires data transmission across netw"
+      }
+    ]
+  },
+  "summary": {
+    "gsm8k_accuracy": 95.0,
+    "domain_think_rate": 0.0,
+    "reasoning_think_rate": 0.0,
+    "avg_domain_time_s": 56.7,
+    "avg_reasoning_time_s": 40.9
+  }
+}
