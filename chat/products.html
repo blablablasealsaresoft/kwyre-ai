@@ -330,32 +330,6 @@ nav {
 }
 .hex-pulse.visible { opacity: 1; }
 
-/* RACE BUTTON + MODAL */
-.race-btn {
-  padding: 14px 36px;
-  font-family: var(--mono); font-size: 12px; font-weight: 700;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  color: #000; background: linear-gradient(135deg, #22c55e, #3b82f6);
-  border: none; border-radius: 6px; cursor: pointer;
-  transition: box-shadow .2s, transform .1s;
-  box-shadow: 0 4px 20px rgba(34,197,94,.25);
-}
-.race-btn:hover { box-shadow: 0 6px 32px rgba(34,197,94,.4); transform: translateY(-2px); }
-.race-modal {
-  position: fixed; inset: 0; z-index: 500;
-  background: rgba(5,6,10,.95); backdrop-filter: blur(12px);
-  display: none; align-items: center; justify-content: center;
-}
-.race-modal.open { display: flex; }
-.race-close {
-  position: absolute; top: 16px; right: 20px; z-index: 510;
-  background: none; border: none; color: #6b7294;
-  font-size: 32px; cursor: pointer; transition: color .2s;
-}
-.race-close:hover { color: #e2e4ea; }
-.race-iframe {
-  width: 95vw; height: 92vh; border: none; border-radius: 8px;
-}
 
 @media (max-width: 768px) {
   .nav-links a:not(.nav-cta) { display: none; }
@@ -403,16 +377,6 @@ nav {
   </div>
 </div>
 
-<!-- RACE BUTTON -->
-<div style="text-align:center; margin: -10px 0 20px;" class="reveal reveal-d3">
-  <button class="race-btn" onclick="openRace()">Race the AI Models</button>
-</div>
-
-<!-- RACE MODAL -->
-<div id="raceModal" class="race-modal" onclick="if(event.target===this)closeRace()">
-  <button class="race-close" onclick="closeRace()">&times;</button>
-  <iframe id="raceFrame" class="race-iframe" src="about:blank"></iframe>
-</div>
 
 <!-- SECTION 1: PRODUCTS -->
 <div class="section" id="products">
@@ -728,17 +692,7 @@ nav {
   document.querySelectorAll('.reveal').forEach(el=> obs.observe(el));
 })();
 
-function openRace(){
-  document.getElementById('raceFrame').src = 'race.html';
-  document.getElementById('raceModal').classList.add('open');
-  document.body.style.overflow = 'hidden';
-}
-function closeRace(){
-  document.getElementById('raceModal').classList.remove('open');
-  document.getElementById('raceFrame').src = 'about:blank';
-  document.body.style.overflow = '';
-}
-document.addEventListener('keydown', function(e){ if(e.key==='Escape') closeRace(); });
+
 </script>
 </body>
 </html>
