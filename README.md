@@ -51,7 +51,7 @@ Kwyre Professional uses a custom-trained Qwen3.5-9B with Claude-distilled reason
 
 | Model | Size | MMLU-Pro | GPQA Diamond | GSM8K | Context | Runs Locally |
 |-------|------|----------|-------------|-------|---------|-------------|
-| **Kwyre Professional** | 9B (custom-trained) | ~82.5 | ~81.7 | 95.0 | 8K | Yes (air-gapped) |
+| **Kwyre Professional** | 9B (custom-trained) | ~82.5 | ~81.7 | 95.0 | 32K | Yes (air-gapped) |
 | GPT-4o | ~200B+ | ~85 | ~80 | ~95 | 128K | No (cloud only) |
 | Claude Sonnet | ~70B+ | ~84 | ~78 | ~93 | 200K | No (cloud only) |
 | DeepSeek R1 7B | 7B | 82.4 | — | 91.2 | 128K | Yes (no security) |
@@ -558,7 +558,7 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 | `KWYRE_DRAFT_PATH` | auto-detect | Path to pre-quantized draft model directory |
 | `KWYRE_GGUF_PATH` | — | Path to GGUF model for CPU mode |
 | `KWYRE_AWQ_MODEL_PATH` | — | Path to pre-quantized AWQ model |
-| `KWYRE_CTX_LENGTH` | `8192` | Context length for CPU mode |
+| `KWYRE_CTX_LENGTH` | `32768` | Context length |
 | `KWYRE_SPECULATIVE` | `1` | Enable speculative decoding with draft model |
 | `KWYRE_QUANT` | `nf4` | Quantization mode (`nf4` or `awq`) |
 | `KWYRE_KV_CACHE_MAX` | `8` | Max sessions with cached KV state |
@@ -787,7 +787,7 @@ VRAM at inference:        Personal ~3.9 GB | Professional ~7.5 GB (both models +
 KV cache:                 Per-session, LRU eviction, 2 GB VRAM cap default
 Streaming:                SSE (text/event-stream), token-by-token
 Concurrency:              Inference queue (serialized GPU) + threaded HTTP
-Context length:           8192 tokens
+Context length:           32768 tokens
 API compatibility:       OpenAI /v1/chat/completions (blocking + streaming)
 Docker image:             ~10 GB (includes CUDA runtime)
 Model download:           Personal 3.3 GB | Professional 7.6 GB (pre-quantized, from kwyre.com)
