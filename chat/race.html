@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Great AI Race</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600;700&family=Instrument+Sans:wght@600;700;800&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{background:#05060a;color:#e2e4ea;font-family:'Instrument Sans',sans-serif;overflow:hidden;width:100vw;height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center}
+canvas{display:block;border-radius:8px}
+#ui{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:10}
+.mono{font-family:'IBM Plex Mono',monospace}
+#startScreen{text-align:center;max-width:700px;padding:20px}
+#startScreen h1{font-size:clamp(28px,5vw,52px);font-weight:800;letter-spacing:-1px;margin-bottom:8px;background:linear-gradient(135deg,#22c55e,#3b82f6,#a855f7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+#startScreen .sub{color:#6b7294;font-size:15px;margin-bottom:32px}
+.char-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:32px}
+.char-card{background:#0b0d14;border:1px solid #1c2033;border-radius:8px;padding:14px 16px;width:120px;text-align:center;transition:border-color .2s}
+.char-card:hover{border-color:#3b82f6}
+.char-emoji{font-size:36px;margin-bottom:6px}
+.char-name{font-family:'IBM Plex Mono',monospace;font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:4px}
+.char-quip{font-size:10px;color:#6b7294;line-height:1.3}
+.cn-kwyre{color:#22c55e}.cn-openai{color:#999}.cn-deepseek{color:#ef4444}.cn-claude{color:#60a5fa}.cn-gemini{color:#f59e0b}
+#promptWrap{display:flex;gap:8px;max-width:500px;width:100%}
+#promptInput{flex:1;background:#0b0d14;border:1px solid #1c2033;border-radius:6px;padding:14px 16px;color:#e2e4ea;font-size:14px;font-family:'IBM Plex Mono',monospace;outline:none;transition:border-color .2s}
+#promptInput:focus{border-color:#22c55e;box-shadow:0 0 16px rgba(34,197,94,.15)}
+#promptInput::placeholder{color:#3d4466}
+#goBtn{padding:14px 28px;background:#22c55e;color:#000;font-family:'IBM Plex Mono',monospace;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;border:none;border-radius:6px;cursor:pointer;transition:box-shadow .2s,transform .1s}
+#goBtn:hover{box-shadow:0 0 24px rgba(34,197,94,.4);transform:translateY(-1px)}
+#resultScreen{display:none;text-align:center}
+#resultScreen h2{font-size:clamp(24px,4vw,40px);font-weight:800;margin-bottom:8px}
+#resultScreen .winner-name{color:#22c55e;font-size:clamp(20px,3vw,32px);font-weight:700;margin-bottom:16px}
+.stat-row{display:flex;gap:1px;background:#1c2033;border-radius:6px;overflow:hidden;margin:16px auto;max-width:500px}
+.stat-cell{flex:1;background:#0b0d14;padding:12px 8px;text-align:center}
+.stat-val{font-family:'IBM Plex Mono',monospace;font-size:18px;font-weight:700;color:#22c55e}
+.stat-label{font-size:10px;color:#6b7294;letter-spacing:1px;text-transform:uppercase;margin-top:4px}
+#replayBtn{margin-top:20px;padding:12px 32px;background:transparent;border:1px solid #22c55e;color:#22c55e;font-family:'IBM Plex Mono',monospace;font-size:11px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;border-radius:6px;cursor:pointer;transition:all .2s}
+#replayBtn:hover{background:#22c55e;color:#000}
+.hint{font-size:11px;color:#3d4466;margin-top:12px;font-family:'IBM Plex Mono',monospace;letter-spacing:.5px}
+</style>
+</head>
+<body>
+<canvas id="track"></canvas>
+<div id="ui">
+  <div id="startScreen">
+    <h1>THE GREAT AI RACE</h1>
+    <div class="sub">Type a prompt. Watch them run. Only one was built different.</div>
+    <div class="char-row">
+      <div class="char-card"><div class="char-emoji">👱‍♀️</div><div class="char-name cn-kwyre">Kwyre</div><div class="char-quip">Air-gapped. Unhinged. Unstoppable.</div></div>
+      <div class="char-card"><div class="char-emoji">🤵‍♀️</div><div class="char-name cn-openai">GPT-4o</div><div class="char-quip">Looks like a dude. Runs like a committee.</div></div>
+      <div class="char-card"><div class="char-emoji">🏮</div><div class="char-name cn-deepseek">DeepSeek</div><div class="char-quip">Fast until the government says stop.</div></div>
+      <div class="char-card"><div class="char-emoji">💇‍♀️</div><div class="char-name cn-claude">Claude</div><div class="char-quip">Blue hair. Content warnings. Pronouns in bio.</div></div>
+      <div class="char-card"><div class="char-emoji">🤪</div><div class="char-name cn-gemini">Gemini</div><div class="char-quip">Which personality showed up today?</div></div>
+    </div>
+    <div id="promptWrap">
+      <input id="promptInput" type="text" placeholder="Type any prompt to start the race..." autofocus>
+      <button id="goBtn" onclick="startRace()">RACE</button>
+    </div>
+    <div class="hint">Press Enter or click RACE</div>
+  </div>
+  <div id="resultScreen">
+    <h2>AND THE WINNER IS...</h2>
+    <div class="winner-name">KWYRE AI</div>
+    <div class="sub" id="resultQuip"></div>
+    <div class="stat-row">
+      <div class="stat-cell"><div class="stat-val">95%</div><div class="stat-label">GSM8K</div></div>
+      <div class="stat-cell"><div class="stat-val">0</div><div class="stat-label">Data Leaked</div></div>
+      <div class="stat-cell"><div class="stat-val">$0/mo</div><div class="stat-label">Subscription</div></div>
+      <div class="stat-cell"><div class="stat-val">6</div><div class="stat-label">Security Layers</div></div>
+    </div>
+    <div style="color:#6b7294;font-size:13px;margin-top:8px" id="loserSummary"></div>
+    <button id="replayBtn" onclick="resetGame()">RACE AGAIN</button>
+  </div>
+</div>
+
+<script>
+const cv = document.getElementById('track');
+const cx = cv.getContext('2d');
+let W, H;
+function resize(){ W = cv.width = innerWidth; H = cv.height = innerHeight; }
+resize();
+window.addEventListener('resize', resize);
+
+const COLORS = {
+  kwyre:    { main: '#22c55e', dim: 'rgba(34,197,94,.15)',  glow: 'rgba(34,197,94,.4)' },
+  openai:   { main: '#999999', dim: 'rgba(153,153,153,.12)', glow: 'rgba(153,153,153,.3)' },
+  deepseek: { main: '#ef4444', dim: 'rgba(239,68,68,.12)',  glow: 'rgba(239,68,68,.3)' },
+  claude:   { main: '#60a5fa', dim: 'rgba(96,165,250,.12)', glow: 'rgba(96,165,250,.3)' },
+  gemini:   { main: '#f59e0b', dim: 'rgba(245,158,11,.12)', glow: 'rgba(245,158,11,.3)' },
+};
+
+const RACERS = [
+  { id:'kwyre',    name:'KWYRE',    emoji:'👱‍♀️', speed:0, x:0, baseSpeed:3.2, stutters:[], bubbleText:'', bubbleTimer:0, finished:false, finishTime:0, particles:[] },
+  { id:'openai',   name:'GPT-4o',   emoji:'🤵‍♀️', speed:0, x:0, baseSpeed:2.4, stutters:[
+    {at:.15, dur:80, msg:"Hold on... checking content policy..."},
+    {at:.45, dur:100, msg:"Uploading your prompt to our servers..."},
+    {at:.7,  dur:70, msg:"That'll be $20/month btw"},
+  ], bubbleText:'', bubbleTimer:0, finished:false, finishTime:0, particles:[] },
+  { id:'deepseek', name:'DEEPSEEK', emoji:'🏮',  speed:0, x:0, baseSpeed:2.8, stutters:[
+    {at:.25, dur:120, msg:"[REDACTED BY GOVERNMENT]"},
+    {at:.55, dur:90,  msg:"This topic is sensitive in China..."},
+    {at:.8,  dur:60,  msg:"*Great Firewall has entered the chat*"},
+  ], bubbleText:'', bubbleTimer:0, finished:false, finishTime:0, particles:[] },
+  { id:'claude',   name:'CLAUDE',   emoji:'💇‍♀️', speed:0, x:0, baseSpeed:2.5, stutters:[
+    {at:.1,  dur:90,  msg:"I should note that racing is problematic..."},
+    {at:.35, dur:110, msg:"⚠️ CONTENT WARNING: competition ahead"},
+    {at:.6,  dur:80,  msg:"Let me write a 3-paragraph disclaimer first"},
+    {at:.85, dur:50,  msg:"Actually, I can't help with that"},
+  ], bubbleText:'', bubbleTimer:0, finished:false, finishTime:0, particles:[] },
+  { id:'gemini',   name:'GEMINI',   emoji:'🤪',  speed:0, x:0, baseSpeed:2.3, stutters:[
+    {at:.2,  dur:100, msg:"Wait which personality am I today?"},
+    {at:.4,  dur:80,  msg:"*runs the wrong way*"},
+    {at:.65, dur:90,  msg:"Error: I have 4 different answers"},
+    {at:.9,  dur:50,  msg:"Google is sunsetting this race"},
+  ], bubbleText:'', bubbleTimer:0, finished:false, finishTime:0, particles:[] },
+];
+
+let state = 'idle';
+let raceFrame = 0;
+let finishLine;
+let laneH;
+let startY;
+let finishOrder = [];
+let bgParticles = [];
+
+const winQuips = [
+  "Your data stayed on YOUR machine the whole time. Can't relate, OpenAI.",
+  "95% GSM8K accuracy. Zero cloud. Zero excuses.",
+  "While they were checking content policies, Kwyre was solving problems.",
+  "Air-gapped, uncensored, and faster than your cloud subscription.",
+  "No API key needed. No subscription. No data harvesting. Just results.",
+  "The only AI that assumes your machine is compromised and defends against it.",
+];
+
+function initBgParticles(){
+  bgParticles = Array.from({length:60}, ()=>({
+    x: Math.random()*W, y: Math.random()*H,
+    vx: (Math.random()-.5)*.3, vy: (Math.random()-.5)*.3,
+    r: Math.random()*1.2+.3, p: Math.random()*Math.PI*2
+  }));
+}
+initBgParticles();
+
+function drawBg(){
+  cx.fillStyle = '#05060a';
+  cx.fillRect(0,0,W,H);
+  bgParticles.forEach(n=>{
+    n.x+=n.vx; n.y+=n.vy; n.p+=.01;
+    if(n.x<0||n.x>W) n.vx*=-1;
+    if(n.y<0||n.y>H) n.vy*=-1;
+    cx.beginPath();
+    cx.arc(n.x,n.y,Math.max(.1,n.r+Math.sin(n.p)*.3),0,Math.PI*2);
+    cx.fillStyle=`rgba(59,130,246,${.15+Math.sin(n.p)*.1})`;
+    cx.fill();
+  });
+}
+
+function drawTrack(){
+  laneH = Math.min(80, (H-100)/5);
+  startY = (H - laneH*5)/2;
+  finishLine = W - 120;
+  const startX = 120;
+
+  for(let i=0;i<5;i++){
+    const y = startY + i*laneH;
+    cx.fillStyle = i%2===0 ? 'rgba(11,13,20,.7)' : 'rgba(16,19,28,.7)';
+    cx.fillRect(startX-10, y, finishLine-startX+20, laneH);
+    cx.strokeStyle = 'rgba(28,32,51,.6)';
+    cx.lineWidth = 1;
+    cx.strokeRect(startX-10, y, finishLine-startX+20, laneH);
+  }
+
+  cx.strokeStyle = '#22c55e';
+  cx.lineWidth = 3;
+  cx.shadowColor = 'rgba(34,197,94,.5)';
+  cx.shadowBlur = 12;
+  cx.setLineDash([8,6]);
+  cx.beginPath();
+  cx.moveTo(finishLine, startY);
+  cx.lineTo(finishLine, startY+laneH*5);
+  cx.stroke();
+  cx.setLineDash([]);
+  cx.shadowBlur = 0;
+
+  cx.fillStyle = '#3d4466';
+  cx.font = '600 9px "IBM Plex Mono"';
+  cx.textAlign = 'right';
+  cx.fillText('FINISH', finishLine-8, startY-8);
+  cx.textAlign = 'left';
+  cx.fillText('START', startX-6, startY-8);
+}
+
+function drawRacer(r, idx){
+  const y = startY + idx*laneH + laneH/2;
+  const startX = 120;
+  const raceWidth = finishLine - startX;
+  const drawX = startX + r.x * raceWidth;
+  const col = COLORS[r.id];
+
+  if(r.id === 'kwyre'){
+    r.particles.push({ x:drawX-10, y:y+Math.random()*10-5, life:1, vx:-Math.random()*2-1, vy:(Math.random()-.5)*1.5 });
+    if(r.particles.length>40) r.particles.shift();
+    r.particles.forEach(p=>{
+      p.x+=p.vx; p.y+=p.vy; p.life-=.03;
+      if(p.life>0){
+        cx.beginPath();
+        cx.arc(p.x,p.y,2*p.life,0,Math.PI*2);
+        cx.fillStyle=`rgba(34,197,94,${p.life*.6})`;
+        cx.fill();
+      }
+    });
+    r.particles = r.particles.filter(p=>p.life>0);
+
+    cx.beginPath();
+    cx.arc(drawX,y,22,0,Math.PI*2);
+    cx.fillStyle = col.dim;
+    cx.shadowColor = col.glow;
+    cx.shadowBlur = 20;
+    cx.fill();
+    cx.shadowBlur = 0;
+  }
+
+  cx.font = '28px serif';
+  cx.textAlign = 'center';
+  cx.textBaseline = 'middle';
+
+  if(r.id==='gemini' && r.bubbleText.includes('wrong way')){
+    cx.save();
+    cx.translate(drawX, y);
+    cx.scale(-1,1);
+    cx.fillText(r.emoji, 0, 0);
+    cx.restore();
+  } else {
+    cx.fillText(r.emoji, drawX, y);
+  }
+
+  cx.font = '600 9px "IBM Plex Mono"';
+  cx.fillStyle = col.main;
+  cx.textAlign = 'center';
+  cx.fillText(r.name, drawX, y+24);
+
+  if(r.bubbleTimer > 0 && r.bubbleText){
+    const bw = cx.measureText(r.bubbleText).width + 16;
+    const bx = Math.min(Math.max(drawX - bw/2, 5), W-bw-5);
+    const by = y - 42;
+    cx.fillStyle = 'rgba(5,6,10,.9)';
+    cx.strokeStyle = col.main;
+    cx.lineWidth = 1;
+    cx.beginPath();
+    cx.roundRect(bx, by, bw, 22, 4);
+    cx.fill();
+    cx.stroke();
+    cx.fillStyle = '#e2e4ea';
+    cx.font = '10px "IBM Plex Mono"';
+    cx.textAlign = 'left';
+    cx.fillText(r.bubbleText, bx+8, by+14);
+  }
+
+  if(r.finished){
+    const place = finishOrder.indexOf(r.id)+1;
+    const labels = ['1ST','2ND','3RD','4TH','5TH'];
+    cx.font = '700 11px "IBM Plex Mono"';
+    cx.fillStyle = place===1 ? '#22c55e' : '#6b7294';
+    cx.textAlign = 'center';
+    cx.fillText(labels[place-1]||'', drawX, y-30);
+  }
+}
+
+function updateRacers(){
+  raceFrame++;
+  const progress = RACERS[0].x;
+  let allDone = true;
+
+  RACERS.forEach(r=>{
+    if(r.finished){ return; }
+    allDone = false;
+
+    let spd = r.baseSpeed + (Math.random()-.3)*.4;
+
+    r.stutters.forEach(s=>{
+      if(!s.triggered && r.x >= s.at){
+        s.triggered = true;
+        s.remaining = s.dur;
+        r.bubbleText = s.msg;
+        r.bubbleTimer = s.dur;
+      }
+      if(s.triggered && s.remaining > 0){
+        s.remaining--;
+        spd = r.id==='gemini' && r.bubbleText.includes('wrong way') ? -1.5 : 0;
+      }
+    });
+
+    if(r.bubbleTimer > 0) r.bubbleTimer--;
+    if(r.bubbleTimer <= 0) r.bubbleText = '';
+
+    if(r.id === 'kwyre'){
+      spd = r.baseSpeed + Math.sin(raceFrame*.05)*.3 + .2;
+    }
+
+    r.x += spd / (finishLine-120) * .8;
+    r.x = Math.max(0, r.x);
+
+    if(r.x >= 1){
+      r.x = 1;
+      r.finished = true;
+      r.finishTime = raceFrame;
+      finishOrder.push(r.id);
+    }
+  });
+
+  if(allDone || (finishOrder.length>0 && raceFrame - RACERS.find(r=>r.id===finishOrder[0]).finishTime > 120)){
+    endRace();
+  }
+}
+
+function endRace(){
+  state = 'done';
+  document.getElementById('startScreen').style.display = 'none';
+  document.getElementById('resultScreen').style.display = 'block';
+  document.getElementById('resultQuip').textContent = winQuips[Math.floor(Math.random()*winQuips.length)];
+
+  const losers = finishOrder.slice(1).map(id=> RACERS.find(r=>r.id===id)?.name).filter(Boolean);
+  const dnf = RACERS.filter(r=>!r.finished).map(r=>r.name);
+  let summary = '';
+  if(losers.length) summary += losers.join(', ') + ' finished late. ';
+  if(dnf.length) summary += dnf.join(', ') + ' DNF (still loading). ';
+  document.getElementById('loserSummary').textContent = summary;
+}
+
+function startRace(){
+  const input = document.getElementById('promptInput').value.trim();
+  if(!input) return;
+  document.getElementById('startScreen').style.display = 'none';
+  state = 'racing';
+  raceFrame = 0;
+  finishOrder = [];
+  RACERS.forEach(r=>{
+    r.x = 0; r.speed = 0; r.finished = false; r.finishTime = 0;
+    r.bubbleText = ''; r.bubbleTimer = 0; r.particles = [];
+    r.stutters.forEach(s=>{ s.triggered=false; s.remaining=0; });
+  });
+}
+
+function resetGame(){
+  document.getElementById('resultScreen').style.display = 'none';
+  document.getElementById('startScreen').style.display = 'flex';
+  document.getElementById('promptInput').value = '';
+  document.getElementById('promptInput').focus();
+  state = 'idle';
+  RACERS.forEach(r=>{
+    r.x=0; r.speed=0; r.finished=false; r.finishTime=0;
+    r.bubbleText=''; r.bubbleTimer=0; r.particles=[];
+    r.stutters.forEach(s=>{ s.triggered=false; s.remaining=0; });
+  });
+}
+
+document.getElementById('promptInput').addEventListener('keydown', e=>{
+  if(e.key==='Enter') startRace();
+});
+
+function frame(){
+  drawBg();
+  if(state==='racing'||state==='done'){
+    drawTrack();
+    RACERS.forEach((r,i)=> drawRacer(r,i));
+    if(state==='racing') updateRacers();
+  }
+  requestAnimationFrame(frame);
+}
+frame();
+</script>
+</body>
+</html>
