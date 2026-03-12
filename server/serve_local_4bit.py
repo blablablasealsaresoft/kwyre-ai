@@ -1653,6 +1653,19 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             tmp_zip = os.path.join(ADAPTER_DIR, f"_{domain}_update.zip")
             _urllib_request.urlretrieve(download_url, tmp_zip)
 
+            expected_sha = remote_info.get("sha256", "")
+            if expected_sha:
+                with open(tmp_zip, "rb") as fh:
+                    actual_sha = hashlib.sha256(fh.read()).hexdigest()
+                if actual_sha != expected_sha:
+                    os.remove(tmp_zip)
+                    self._send_json(502, {
+                        "error": "SHA-256 mismatch — adapter download corrupted or tampered",
+                        "expected": expected_sha,
+                        "actual": actual_sha,
+                    })
+                    return
+
             if os.path.isdir(adapter_path):
                 shutil.rmtree(adapter_path)
 

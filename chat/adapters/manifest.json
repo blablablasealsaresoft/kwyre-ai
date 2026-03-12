@@ -1,0 +1,46 @@
+{
+  "_comment": "Kwyre domain adapter CDN manifest — served at https://kwyre.com/adapters/manifest.json",
+  "_updated": "2026-03-12",
+  "blockchain_crypto": {
+    "version": "0.0.0",
+    "url": "",
+    "sha256": "",
+    "model_tier": "4b",
+    "description": "Blockchain forensics, crypto transaction tracing, wallet clustering, AML"
+  },
+  "legal_compliance": {
+    "version": "0.0.0",
+    "url": "",
+    "sha256": "",
+    "model_tier": "4b",
+    "description": "Contract analysis, NDA review, privilege review, regulatory citation"
+  },
+  "insurance_actuarial": {
+    "version": "0.0.0",
+    "url": "",
+    "sha256": "",
+    "model_tier": "4b",
+    "description": "Policy analysis, actuarial notation, claims review, risk assessment"
+  },
+  "defense_intelligence": {
+    "version": "0.0.0",
+    "url": "",
+    "sha256": "",
+    "model_tier": "4b",
+    "description": "OSINT analysis, threat intelligence, ITAR/EAR compliance, SIGINT"
+  },
+  "financial_trading": {
+    "version": "0.0.0",
+    "url": "",
+    "sha256": "",
+    "model_tier": "4b",
+    "description": "SEC filings, BSA/AML, forensic accounting, trading regulation"
+  },
+  "healthcare_lifesciences": {
+    "version": "0.0.0",
+    "url": "",
+    "sha256": "",
+    "model_tier": "4b",
+    "description": "HIPAA compliance, clinical trial analysis, drug regulation, EHR review"
+  }
+}
