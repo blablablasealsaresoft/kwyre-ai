@@ -637,8 +637,220 @@ a.incident:hover {
 }
 .hex-pulse.visible { opacity: 1; }
 
+/* THREE THINGS SECTION */
+.three-col {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+  margin-top: 48px;
+}
+
+.adv-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 28px 24px 32px;
+  position: relative;
+  transition: background 0.2s, border-color 0.3s, box-shadow 0.3s;
+  overflow: hidden;
+}
+
+.adv-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 8px 8px 0 0;
+}
+
+.adv-card-blue  { border-top-color: rgba(59,130,246,0.45); }
+.adv-card-green { border-top-color: rgba(34,197,94,0.45); }
+.adv-card-amber { border-top-color: rgba(245,158,11,0.45); }
+
+.adv-card-blue::before  { background: linear-gradient(90deg, var(--accent) 0%, rgba(59,130,246,0.1) 100%); }
+.adv-card-green::before { background: linear-gradient(90deg, var(--green) 0%, rgba(34,197,94,0.1) 100%); }
+.adv-card-amber::before { background: linear-gradient(90deg, var(--amber) 0%, rgba(245,158,11,0.1) 100%); }
+
+.adv-card-blue:hover  { background: var(--surface2); border-color: rgba(59,130,246,0.5); box-shadow: 0 0 40px rgba(59,130,246,0.06); }
+.adv-card-green:hover { background: var(--surface2); border-color: rgba(34,197,94,0.5); box-shadow: 0 0 40px rgba(34,197,94,0.06); }
+.adv-card-amber:hover { background: var(--surface2); border-color: rgba(245,158,11,0.5); box-shadow: 0 0 40px rgba(245,158,11,0.06); }
+
+.adv-card-num {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2.5px;
+  text-transform: uppercase;
+  margin-bottom: 14px;
+}
+.adv-card-blue  .adv-card-num { color: rgba(59,130,246,0.6); }
+.adv-card-green .adv-card-num { color: rgba(34,197,94,0.6); }
+.adv-card-amber .adv-card-num { color: rgba(245,158,11,0.6); }
+
+.adv-card-title {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  line-height: 1.35;
+  margin-bottom: 22px;
+}
+.adv-card-blue  .adv-card-title { color: var(--accent); }
+.adv-card-green .adv-card-title { color: var(--green); }
+.adv-card-amber .adv-card-title { color: var(--amber); }
+
+.adv-card-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.adv-card-list li {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.55;
+  padding-left: 18px;
+  position: relative;
+}
+
+.adv-card-list li::before {
+  content: '›';
+  position: absolute;
+  left: 0;
+  top: 0;
+  font-family: var(--mono);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.adv-card-blue  .adv-card-list li::before { color: var(--accent); }
+.adv-card-green .adv-card-list li::before { color: var(--green); }
+.adv-card-amber .adv-card-list li::before { color: var(--amber); }
+
+.adv-card-list li strong {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.adv-quote {
+  margin-top: 44px;
+  padding: 24px 36px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+  position: relative;
+}
+
+.adv-quote p {
+  font-size: 15px;
+  font-style: italic;
+  color: var(--text2);
+  line-height: 1.75;
+  text-align: center;
+}
+
+/* THREAT STAT CARDS */
+.threat-cards {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 40px;
+}
+
+.threat-card {
+  background: var(--surface);
+  border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 6px;
+  padding: 28px 24px;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.2s, border-color 0.3s, box-shadow 0.3s;
+}
+
+.threat-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--red), rgba(239,68,68,0.2), transparent);
+}
+
+.threat-card:hover {
+  background: var(--surface2);
+  border-color: rgba(239,68,68,0.4);
+  box-shadow: 0 0 28px rgba(239,68,68,0.07);
+}
+
+.threat-card-stat {
+  font-family: var(--mono);
+  font-size: clamp(30px, 3.5vw, 44px);
+  font-weight: 700;
+  color: var(--red);
+  letter-spacing: -1px;
+  line-height: 1;
+  margin-bottom: 4px;
+  text-shadow: 0 0 20px rgba(239,68,68,0.3);
+}
+
+.threat-card-stat-sm {
+  font-size: clamp(16px, 1.8vw, 22px);
+  letter-spacing: 0.5px;
+}
+
+.threat-card-sub {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(239,68,68,0.5);
+  margin-bottom: 16px;
+}
+
+.threat-card-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--text3);
+  margin-bottom: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.threat-card-desc {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.7;
+}
+
+.threat-note {
+  text-align: center;
+  margin-top: 32px;
+  font-size: 13px;
+  font-style: italic;
+  color: var(--text3);
+  max-width: 680px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.7;
+  padding: 16px 20px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--surface);
+}
+
 @media (max-width: 768px) {
   .two-col { grid-template-columns: 1fr; }
+  .three-col { grid-template-columns: 1fr; }
+  .threat-cards { grid-template-columns: 1fr; }
   .company-orbs-container { height: 600px; }
   .company-orb { width: 80px; height: 80px; }
   .company-orb-name { font-size: 8px; }
@@ -649,6 +861,7 @@ a.incident:hover {
   .matrix { font-size: 11px; }
   .matrix th, .matrix td { padding: 10px 12px; }
   .incident { padding: 20px; }
+  .adv-quote { padding: 20px 24px; }
 }
 </style>
 </head>
@@ -696,6 +909,101 @@ a.incident:hover {
 </div>
 
 <!-- Proverbs 27:12 — The prudent see danger and take refuge, but the simple keep going and pay the penalty. -->
+
+<!-- THREE THINGS NO COMPETITOR HAS COMBINED -->
+<div class="section">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow reveal">TECHNOLOGY</div>
+      <h2 class="reveal reveal-d1">Three Things No Competitor Has Combined</h2>
+    </div>
+
+    <div class="three-col">
+
+      <!-- CARD 1 -->
+      <div class="adv-card adv-card-blue reveal reveal-d1">
+        <div class="adv-card-num">01 / Uncensored Model</div>
+        <div class="adv-card-title">UNCENSORED + HOT-SWAP</div>
+        <ul class="adv-card-list">
+          <li><strong>Qwen3.5-4B Uncensored</strong> — 0/465 refusals, zero capability loss</li>
+          <li><strong>Qwen3.5-0.8B draft</strong> — speculative decoding (2–3× speed)</li>
+          <li>6 domain LoRA adapters hot-swap at runtime via API</li>
+          <li>~100 MB per adapter on ~2.5 GB base</li>
+          <li>Your sensitive data never refuses to be analyzed</li>
+        </ul>
+      </div>
+
+      <!-- CARD 2 -->
+      <div class="adv-card adv-card-green reveal reveal-d2">
+        <div class="adv-card-num">02 / Domain Expertise</div>
+        <div class="adv-card-title">6 DOMAIN LoRA ADAPTERS</div>
+        <ul class="adv-card-list">
+          <li><strong>Legal &amp; Compliance</strong> — NDA, SEC, FINRA</li>
+          <li><strong>Insurance &amp; Actuarial</strong> — treaties, reserves</li>
+          <li><strong>Healthcare</strong> — HIPAA, 21 CFR, trials</li>
+          <li><strong>Defense &amp; Intel</strong> — CUI, OSINT, NIST</li>
+          <li><strong>Financial Trading</strong> — HFT, VaR, Reg SCI</li>
+          <li><strong>Blockchain &amp; Crypto</strong> — tracing, RICO</li>
+        </ul>
+      </div>
+
+      <!-- CARD 3 -->
+      <div class="adv-card adv-card-amber reveal reveal-d3">
+        <div class="adv-card-num">03 / Deployment Flexibility</div>
+        <div class="adv-card-title">PIPELINE + 4 BACKENDS</div>
+        <ul class="adv-card-list">
+          <li>Claude → QLoRA → domain GRPO → LoRA export</li>
+          <li>300 traces/domain, custom reward functions</li>
+          <li><strong>GPU</strong>: NF4/AWQ + Flash Attn 2 + speculative</li>
+          <li><strong>vLLM</strong>: PagedAttention + continuous batching</li>
+          <li><strong>CPU</strong>: llama.cpp &nbsp;·&nbsp; <strong>MLX</strong>: Apple Silicon</li>
+          <li><strong>RAG</strong>: FAISS, RAM-only, crypto-wipe</li>
+        </ul>
+      </div>
+
+    </div>
+
+    <blockquote class="adv-quote reveal reveal-d4">
+      <p>"Every local AI treats 'local' as the security boundary. Kwyre treats the machine itself as potentially compromised. That is the moat."</p>
+    </blockquote>
+  </div>
+</div>
+
+<!-- SECTION: ONE UPLOAD DESTROYS EVERYTHING -->
+<div class="section">
+  <div class="wrap">
+    <div class="sh reveal">
+      <div class="sh-eyebrow" style="color: var(--red);">Active Threat Vector</div>
+      <h2>One Upload Destroys Everything</h2>
+      <p>Cloud AI is not just risky — it's an active threat vector for regulated professionals</p>
+    </div>
+
+    <div class="threat-cards">
+      <div class="threat-card reveal reveal-d1">
+        <div class="threat-card-stat">100%</div>
+        <div class="threat-card-sub">of cloud queries discoverable</div>
+        <div class="threat-card-label">Privilege Waived</div>
+        <div class="threat-card-desc">Uploading case docs to ChatGPT constitutes waiver of attorney-client privilege. Associates are doing it every day.</div>
+      </div>
+      <div class="threat-card reveal reveal-d2">
+        <div class="threat-card-stat">$3B+</div>
+        <div class="threat-card-sub">in active cases at risk</div>
+        <div class="threat-card-label">Evidence Chain Broken</div>
+        <div class="threat-card-desc">Forensic investigators cannot submit evidence to external AI during live federal investigations. One upload = case compromised.</div>
+      </div>
+      <div class="threat-card reveal reveal-d3">
+        <div class="threat-card-stat threat-card-stat-sm">HIPAA · FINRA · SOC2</div>
+        <div class="threat-card-sub">all prohibit cloud sharing</div>
+        <div class="threat-card-label">Regulatory Violation</div>
+        <div class="threat-card-desc">Underwriters, actuaries, and forensic accountants work under strict data residency rules cloud AI architecturally violates.</div>
+      </div>
+    </div>
+
+    <p class="threat-note reveal reveal-d4">
+      "Zero purpose-built compliance AI exists. Cloud tools are the threat. Developer tools (Ollama, LM Studio) have no security architecture."
+    </p>
+  </div>
+</div>
 
 <!-- SECTION 1: ORBS + INCIDENTS -->
 <div class="section" id="orbs-section" style="position: relative; overflow: hidden;">

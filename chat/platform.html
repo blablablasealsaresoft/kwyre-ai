@@ -553,6 +553,12 @@ nav {
             <td>Any MLX model</td>
             <td><code>python server/serve_mlx.py</code></td>
           </tr>
+          <tr>
+            <td class="m-label">vLLM Backend</td>
+            <td>NVIDIA GPU (multi-GPU supported)</td>
+            <td>Any vLLM-compatible model</td>
+            <td><code>KWYRE_BACKEND=vllm python server/serve_vllm.py</code></td>
+          </tr>
           <tr style="border-top: 2px solid var(--accent);">
             <td class="m-label" style="color: var(--green);">Custom LLM</td>
             <td>Any (we configure)</td>
@@ -656,6 +662,32 @@ python server/serve_local_4bit.py</div>
   --model Qwen/Qwen3-4B \
   --output ./models/kwyre-4b-mlx
 python server/serve_mlx.py</div>
+      </div>
+
+      <div class="deploy-card">
+        <h3>vLLM (High-Throughput)</h3>
+        <div class="deploy-sub">PagedAttention &middot; Continuous Batching &middot; Multi-user</div>
+        <p>Production-grade serving with vLLM. PagedAttention dramatically increases throughput for multi-user deployments. Continuous batching handles concurrent requests without GPU memory waste.</p>
+        <div class="deploy-cmd">KWYRE_BACKEND=vllm python server/serve_vllm.py</div>
+        <ul class="plat-features">
+          <li>PagedAttention memory management</li>
+          <li>Continuous batching</li>
+          <li>Multi-user concurrent requests</li>
+          <li>Tensor parallelism (KWYRE_VLLM_TENSOR_PARALLEL)</li>
+        </ul>
+      </div>
+
+      <div class="deploy-card">
+        <h3>Kubernetes / Helm</h3>
+        <div class="deploy-sub">GPU scheduling &middot; Health probes &middot; PVC &middot; Secrets</div>
+        <p>Full Helm chart for Kubernetes deployments. Includes GPU resource scheduling, liveness/readiness probes, persistent volume claims for model storage, and Kubernetes secrets for API keys.</p>
+        <div class="deploy-cmd">helm install kwyre ./deploy/helm/kwyre</div>
+        <ul class="plat-features">
+          <li>GPU resource requests/limits</li>
+          <li>Liveness + readiness probes</li>
+          <li>PVC for model storage</li>
+          <li>Kubernetes secrets</li>
+        </ul>
       </div>
     </div>
 
