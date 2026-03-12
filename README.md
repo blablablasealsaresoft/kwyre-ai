@@ -910,7 +910,7 @@ The model weights (Qwen3.5-4B, Qwen3.5-9B, Qwen3.5-0.8B base) are licensed under
 
 ## Built By
 
-APOLLO CyberSentinel LLC — blockchain forensics, cryptocurrency fraud investigation, OSINT analysis.
+Mint Rail LLC — blockchain forensics, cryptocurrency fraud investigation, OSINT analysis.
 
 We built this because we needed it ourselves. We cannot upload active federal investigation evidence to OpenAI. Neither can you.
 
