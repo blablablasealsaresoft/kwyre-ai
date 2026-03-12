@@ -47,7 +47,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' data:; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://js.stripe.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.stripe.com https://cloudflareinsights.com; img-src 'self' data: https://*.stripe.com; frame-src https://js.stripe.com https://hooks.stripe.com; base-uri 'self'; form-action 'self'">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
 <title>Kwyre AI — Secure Payment</title>
@@ -56,6 +56,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <script nonce="{{CSP_NONCE}}" src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
+<script src="https://js.stripe.com/v3/"></script>
 <style>
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -1048,6 +1049,48 @@ nav {
   .cc-pay-btn { font-size: 11px; padding: 14px; }
 }
 
+/* --- STRIPE PAYMENT ELEMENT --- */
+.stripe-loading {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 40px 20px;
+  font-family: var(--mono); font-size: 12px; color: var(--text3);
+  letter-spacing: 0.5px;
+}
+.stripe-loading-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--accent); opacity: 0.4;
+  animation: stripe-pulse 1.2s ease-in-out infinite;
+}
+.stripe-loading-dot:nth-child(2) { animation-delay: 0.2s; }
+.stripe-loading-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes stripe-pulse { 0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
+
+#stripe-payment-element { min-height: 180px; }
+
+.stripe-error {
+  display: flex; align-items: center; gap: 10px;
+  margin: 12px 0; padding: 14px 16px;
+  background: var(--red-dim); border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 6px;
+  font-family: var(--mono); font-size: 12px; color: var(--red);
+  line-height: 1.5;
+}
+.stripe-error svg { flex-shrink: 0; }
+
+/* Payment success overlay */
+.pay-success {
+  text-align: center; padding: 60px 32px;
+  animation: dl-fade-in 0.5s ease;
+}
+.pay-success-icon {
+  width: 64px; height: 64px; border-radius: 50%;
+  background: var(--green-dim); border: 1px solid rgba(34,197,94,0.25);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 24px;
+}
+.pay-success h2 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+.pay-success p { font-size: 14px; color: var(--text2); line-height: 1.6; }
+
 /* ENHANCED COSMIC LAYERS */
 .m-vignette {
   position: fixed; inset: 0; z-index: 0; pointer-events: none;
@@ -1105,9 +1148,9 @@ nav {
       Pay once, own your inference server forever. <strong>No recurring fees.</strong>
       No usage caps. No data collection. Your machine, your AI.
     </p>
-    <div class="coming-soon-bar reveal reveal-d3">
+    <div class="coming-soon-bar reveal reveal-d3" id="heroNotice">
       <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--amber)" fill="none" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
-      <span>Payments are <strong>not yet active</strong>. Check back soon or <a href="mailto:contact@kwyre.com">contact us</a> for early access.</span>
+      <span>XMR payments active now. Credit card payments via Stripe are live — select a tier and click Credit Card.</span>
     </div>
   </div>
 </div>
@@ -1281,61 +1324,35 @@ nav {
           </button>
         </div>
 
-        <!--
-          STRIPE INTEGRATION PLACEHOLDER (v1.6)
-          TODO: Load Stripe.js via <script src="https://js.stripe.com/v3/"></script>
-          TODO: Initialize with publishable key: const stripe = Stripe('pk_live_...');
-          TODO: Create a PaymentIntent on your server (POST /api/create-payment-intent)
-                and pass the client_secret to stripe.confirmCardPayment().
-          TODO: Replace the cc-input fields below with Stripe Elements for PCI compliance.
-        -->
-        <div class="pay-panel cc-panel cc-form pay-panel-hidden" id="ccPanel" style="max-width:none;">
+        <div class="pay-panel pay-panel-hidden" id="ccPanel" style="max-width:none;">
           <div class="cc-form-header">
             <div class="cc-form-tier" id="ccTierLabel">Professional</div>
-            <div class="cc-card-brands">
-              <svg id="ccBrandVisa" viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="32" rx="4" fill="#1A1F71"/><path d="M19.5 21h-3l1.9-10h3l-1.9 10zm-5.3-10l-2.8 6.8-.3-1.6-1-5.3S10 10 9 10H4.1l-.1.3c1.2.3 2.5.8 3.3 1.3l2.8 9.4H13l4.6-10h-3.4zm27.3 10h2.6l-2.3-10h-2.4c-.7 0-1.3.4-1.5 1l-4.3 9h3l.6-1.6h3.7l.6 1.6zm-3.2-3.8l1.5-4.2.9 4.2h-2.4zm-5.5-3.4l.4-2.4c-.8-.3-1.6-.5-2.5-.5-2.7 0-4.6 1.4-4.6 3.5 0 1.5 1.4 2.4 2.4 2.9 1.1.5 1.4.9 1.4 1.3 0 .7-.9 1-1.7 1-1.1 0-1.7-.2-2.6-.5l-.4 2.3c.6.3 1.7.5 2.9.5 3 0 4.9-1.5 4.9-3.6 0-2.8-3.9-2.9-3.9-4.2 0-.5.5-1 1.5-1 .8 0 1.5.1 2.2.7z" fill="#fff"/></svg>
-              <svg id="ccBrandMC" viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="32" rx="4" fill="#252525"/><circle cx="19" cy="16" r="9" fill="#EB001B"/><circle cx="29" cy="16" r="9" fill="#F79E1B"/><path d="M24 9.3a9 9 0 0 1 3.3 6.7A9 9 0 0 1 24 22.7 9 9 0 0 1 20.7 16 9 9 0 0 1 24 9.3z" fill="#FF5F00"/></svg>
-              <svg id="ccBrandAmex" viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="32" rx="4" fill="#2E77BC"/><path d="M7 13l-3 6h2.2l.4-1h2.3l.4 1H12l-3-6H7zm1 1.5l.7 2.1H7.3L8 14.5zM13 19l2.5-3 -2.5-3h2.3l1.4 1.8L18 13h2.2l-2.5 3 2.5 3h-2.3l-1.4-1.8L15.3 19H13zM22 13v6h2v-2h1.5l1.5 2h2.4l-1.8-2.3c.9-.4 1.4-1.1 1.4-1.9 0-1.4-1-1.8-2.5-1.8H22zm2 1.5h2c.5 0 .8.2.8.6 0 .4-.3.6-.8.6h-2v-1.2z" fill="#fff"/></svg>
-            </div>
+            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.5px;">SECURED BY STRIPE</div>
           </div>
 
-          <div class="cc-field">
-            <label class="cc-label" for="ccName">Name on card</label>
-            <input type="text" id="ccName" class="cc-input" placeholder="John Doe" autocomplete="cc-name" spellcheck="false">
+          <!-- Stripe Payment Element mounts here -->
+          <div id="stripeLoadingEl" class="stripe-loading">
+            <div class="stripe-loading-dot"></div>
+            <div class="stripe-loading-dot"></div>
+            <div class="stripe-loading-dot"></div>
+            <span>Initializing secure payment form…</span>
           </div>
 
-          <div class="cc-field">
-            <label class="cc-label" for="ccNumber">Card number</label>
-            <input type="text" id="ccNumber" class="cc-input" placeholder="1234 5678 9012 3456" inputmode="numeric" autocomplete="cc-number" maxlength="19">
-            <div class="cc-error-msg" id="ccNumberError"></div>
+          <div id="stripe-payment-element"></div>
+
+          <div class="stripe-error" id="stripeError" style="display:none;">
+            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
+            <span id="stripeErrorMsg">An error occurred.</span>
           </div>
 
-          <div class="cc-field-row">
-            <div class="cc-field">
-              <label class="cc-label" for="ccExpiry">Expiry date</label>
-              <input type="text" id="ccExpiry" class="cc-input" placeholder="MM / YY" inputmode="numeric" autocomplete="cc-exp" maxlength="7">
-              <div class="cc-error-msg" id="ccExpiryError"></div>
-            </div>
-            <div class="cc-field">
-              <label class="cc-label" for="ccCvc">CVC</label>
-              <input type="text" id="ccCvc" class="cc-input" placeholder="123" inputmode="numeric" autocomplete="cc-csc" maxlength="4">
-              <div class="cc-error-msg" id="ccCvcError"></div>
-            </div>
-          </div>
-
-          <button class="cc-pay-btn" id="ccPayBtn" onclick="handleCCPayment()">
+          <button class="cc-pay-btn" id="ccPayBtn" onclick="handleStripePayment()" disabled>
             <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
             <span id="ccPayLabel">Pay</span>
           </button>
 
           <div class="cc-secure-note">
             <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            Secured with 256-bit TLS encryption
-          </div>
-
-          <div class="cc-coming-soon-msg" id="ccComingSoonMsg" style="display:none;">
-            <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
-            <span>Credit card payments coming soon. Please use <strong>Monero (XMR)</strong> for now.</span>
+            256-bit TLS · PCI-DSS compliant · Powered by Stripe
           </div>
         </div>
 
@@ -1648,6 +1665,12 @@ function selectTier(tier) {
   document.getElementById('xmrTierLabel').textContent = TIERS[tier].label;
   document.getElementById('ccTierLabel').textContent = TIERS[tier].label;
 
+  // If already on CC tab, reinitialise Stripe for the new tier amount
+  const ccPanel = document.getElementById('ccPanel');
+  if (!ccPanel.classList.contains('pay-panel-hidden')) {
+    initStripePanel(tier);
+  }
+
   document.getElementById('payment').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
@@ -1662,6 +1685,8 @@ function setPayMethod(method) {
 
   const afterPay = document.querySelector('.after-pay');
   if (afterPay) afterPay.style.display = method === 'xmr' ? '' : 'none';
+
+  if (method === 'cc') initStripePanel(selectedTier);
 }
 
 /* ── QR CODE GENERATION ── */
@@ -1813,132 +1838,180 @@ function showSuccess(result) {
   document.getElementById('dlMachines').textContent = result.machines + ' machine' + (result.machines !== 1 ? 's' : '');
 }
 
-/* ── CREDIT CARD FORM ── */
+/* ── STRIPE INTEGRATION ── */
+// Replace pk_live_REPLACE_WITH_YOUR_PUBLISHABLE_KEY with your Stripe publishable key
+// from https://dashboard.stripe.com/apikeys
+const STRIPE_PUBLISHABLE_KEY = 'pk_live_REPLACE_WITH_YOUR_PUBLISHABLE_KEY';
+
+let _stripe = null;
+let _elements = null;
+let _paymentElement = null;
+let _stripeInitTier = null;
+let _stripeInitializing = false;
+
+function _getStripe() {
+  if (!_stripe && typeof Stripe !== 'undefined') {
+    _stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+  }
+  return _stripe;
+}
+
+async function initStripePanel(tier) {
+  // Don't reinitialise if already showing the same tier
+  if (_stripeInitTier === tier && _paymentElement) return;
+  if (_stripeInitializing) return;
+  _stripeInitializing = true;
+  _stripeInitTier = tier;
+
+  const loadingEl = document.getElementById('stripeLoadingEl');
+  const mountEl   = document.getElementById('stripe-payment-element');
+  const errorEl   = document.getElementById('stripeError');
+  const payBtn    = document.getElementById('ccPayBtn');
+  const payLabel  = document.getElementById('ccPayLabel');
+
+  // Reset
+  if (_paymentElement) { try { _paymentElement.unmount(); } catch(e) {} _paymentElement = null; }
+  mountEl.innerHTML = '';
+  loadingEl.style.display = 'flex';
+  errorEl.style.display = 'none';
+  payBtn.disabled = true;
+
+  const tierData = TIERS[tier];
+  payLabel.textContent = 'Pay $' + tierData.price.toLocaleString('en-US', { minimumFractionDigits: 2 });
+
+  const stripe = _getStripe();
+  if (!stripe) {
+    loadingEl.style.display = 'none';
+    document.getElementById('stripeErrorMsg').textContent = 'Stripe.js failed to load. Please refresh.';
+    errorEl.style.display = 'flex';
+    _stripeInitializing = false;
+    return;
+  }
+
+  try {
+    const resp = await fetch('/api/create-payment-intent', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ tier }),
+    });
+    const data = await resp.json();
+
+    if (!resp.ok || !data.client_secret) {
+      throw new Error(data.error || 'Could not initialise payment. Please try again.');
+    }
+
+    _elements = stripe.elements({
+      clientSecret: data.client_secret,
+      appearance: {
+        theme: 'night',
+        variables: {
+          colorPrimary: '#3b82f6',
+          colorBackground: '#0b0d14',
+          colorText: '#e2e4ea',
+          colorTextSecondary: '#6b7294',
+          colorDanger: '#ef4444',
+          fontFamily: '"IBM Plex Mono", monospace',
+          fontSizeBase: '13px',
+          spacingUnit: '5px',
+          borderRadius: '6px',
+        },
+        rules: {
+          '.Input': { border: '1px solid #1c2033', backgroundColor: '#05060a' },
+          '.Input:focus': { border: '1px solid #3b82f6', boxShadow: '0 0 0 3px rgba(59,130,246,0.12)' },
+          '.Label': { fontWeight: '600', letterSpacing: '1.5px', textTransform: 'uppercase', fontSize: '10px' },
+        },
+      },
+    });
+
+    _paymentElement = _elements.create('payment', { layout: 'tabs' });
+    _paymentElement.mount('#stripe-payment-element');
+
+    _paymentElement.on('ready', () => {
+      loadingEl.style.display = 'none';
+      payBtn.disabled = false;
+    });
+
+    _paymentElement.on('loaderror', (e) => {
+      loadingEl.style.display = 'none';
+      document.getElementById('stripeErrorMsg').textContent = e.error?.message || 'Failed to load payment form.';
+      errorEl.style.display = 'flex';
+    });
+
+  } catch (err) {
+    loadingEl.style.display = 'none';
+    document.getElementById('stripeErrorMsg').textContent = err.message;
+    errorEl.style.display = 'flex';
+  }
+
+  _stripeInitializing = false;
+}
+
+async function handleStripePayment() {
+  const stripe = _getStripe();
+  if (!stripe || !_elements) return;
+
+  const payBtn   = document.getElementById('ccPayBtn');
+  const payLabel = document.getElementById('ccPayLabel');
+  const errorEl  = document.getElementById('stripeError');
+
+  payBtn.disabled = true;
+  payLabel.textContent = 'Processing…';
+  errorEl.style.display = 'none';
+
+  const returnUrl = window.location.origin + '/pay.html?payment_success=true&tier=' + encodeURIComponent(selectedTier);
+
+  const { error } = await stripe.confirmPayment({
+    elements: _elements,
+    confirmParams: { return_url: returnUrl },
+  });
+
+  if (error) {
+    document.getElementById('stripeErrorMsg').textContent = error.message;
+    errorEl.style.display = 'flex';
+    payBtn.disabled = false;
+    payLabel.textContent = 'Pay $' + TIERS[selectedTier].price.toLocaleString('en-US', { minimumFractionDigits: 2 });
+  }
+  // On success Stripe redirects to return_url automatically
+}
+
+/* ── PAYMENT SUCCESS PAGE ── */
 (function() {
-  const ccNumber = document.getElementById('ccNumber');
-  const ccExpiry = document.getElementById('ccExpiry');
-  const ccCvc    = document.getElementById('ccCvc');
-  const ccName   = document.getElementById('ccName');
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('payment_success') !== 'true') return;
 
-  function detectBrand(num) {
-    const n = num.replace(/\s/g, '');
-    if (/^4/.test(n))                            return 'visa';
-    if (/^5[1-5]/.test(n) || /^2[2-7]/.test(n))  return 'mastercard';
-    if (/^3[47]/.test(n))                         return 'amex';
-    return null;
-  }
+  const tierKey = params.get('tier') || 'professional';
+  const tierData = {
+    personal: 'Personal', professional: 'Professional', airgapped: 'Air-Gapped Kit',
+    air: 'Air (CPU)', mlx: 'Apple Silicon'
+  }[tierKey] || 'Kwyre';
 
-  function highlightBrand(brand) {
-    document.getElementById('ccBrandVisa').classList.toggle('detected', brand === 'visa');
-    document.getElementById('ccBrandMC').classList.toggle('detected', brand === 'mastercard');
-    document.getElementById('ccBrandAmex').classList.toggle('detected', brand === 'amex');
-  }
-
-  function formatCardNumber(val) {
-    const digits = val.replace(/\D/g, '').slice(0, 16);
-    return digits.replace(/(.{4})/g, '$1 ').trim();
-  }
-
-  function formatExpiry(val) {
-    const digits = val.replace(/\D/g, '').slice(0, 4);
-    if (digits.length >= 3) return digits.slice(0, 2) + ' / ' + digits.slice(2);
-    return digits;
-  }
-
-  ccNumber.addEventListener('input', function() {
-    const pos = this.selectionStart;
-    const prev = this.value;
-    this.value = formatCardNumber(this.value);
-    const diff = this.value.length - prev.length;
-    this.setSelectionRange(pos + diff, pos + diff);
-    highlightBrand(detectBrand(this.value));
-    clearFieldError(this, 'ccNumberError');
-  });
-
-  ccExpiry.addEventListener('input', function() {
-    this.value = formatExpiry(this.value);
-    clearFieldError(this, 'ccExpiryError');
-  });
-
-  ccCvc.addEventListener('input', function() {
-    this.value = this.value.replace(/\D/g, '').slice(0, 4);
-    clearFieldError(this, 'ccCvcError');
-  });
-
-  ccName.addEventListener('input', function() {
-    this.classList.remove('invalid');
-  });
-
-  function clearFieldError(input, errorId) {
-    input.classList.remove('invalid');
-    document.getElementById(errorId).textContent = '';
-  }
-
-  function setFieldError(input, errorId, msg) {
-    input.classList.add('invalid');
-    document.getElementById(errorId).textContent = msg;
-  }
-
-  function validateForm() {
-    let valid = true;
-    const num = ccNumber.value.replace(/\s/g, '');
-    const exp = ccExpiry.value.replace(/\s/g, '');
-    const cvc = ccCvc.value.trim();
-    const name = ccName.value.trim();
-
-    if (!name) {
-      ccName.classList.add('invalid');
-      valid = false;
+  // Hide payment UI, show success
+  document.addEventListener('DOMContentLoaded', () => {
+    const notice = document.getElementById('heroNotice');
+    if (notice) {
+      notice.style.background = 'rgba(34,197,94,0.06)';
+      notice.style.borderColor = 'rgba(34,197,94,0.2)';
+      notice.innerHTML = `
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--green)" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+        <span style="color:var(--green)"><strong>Payment received!</strong> Your ${tierData} license key will be emailed within 24 hours.</span>`;
     }
 
-    if (num.length < 13 || num.length > 16 || !/^\d+$/.test(num)) {
-      setFieldError(ccNumber, 'ccNumberError', 'Enter a valid card number (13-16 digits)');
-      valid = false;
+    const paySection = document.getElementById('products-payment');
+    if (paySection) {
+      paySection.innerHTML = `
+        <div class="wrap">
+          <div class="pay-success">
+            <div class="pay-success-icon">
+              <svg viewBox="0 0 24 24" width="32" height="32" stroke="var(--green)" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+            </div>
+            <h2>Payment confirmed</h2>
+            <p style="margin-bottom:8px;">You purchased <strong style="color:var(--text)">Kwyre ${tierData}</strong>.</p>
+            <p>Your Ed25519 license key will be delivered to your email within 24 hours. Check your inbox (and spam folder).</p>
+            <p style="margin-top:20px;">Questions? <a href="mailto:payments@kwyre.com" style="color:var(--accent);">payments@kwyre.com</a></p>
+          </div>
+        </div>`;
     }
-
-    const expParts = exp.split('/');
-    if (expParts.length !== 2) {
-      setFieldError(ccExpiry, 'ccExpiryError', 'Use MM/YY format');
-      valid = false;
-    } else {
-      const mm = parseInt(expParts[0], 10);
-      const yy = parseInt(expParts[1], 10);
-      if (isNaN(mm) || isNaN(yy) || mm < 1 || mm > 12) {
-        setFieldError(ccExpiry, 'ccExpiryError', 'Invalid month');
-        valid = false;
-      } else {
-        const now = new Date();
-        const expDate = new Date(2000 + yy, mm);
-        if (expDate <= now) {
-          setFieldError(ccExpiry, 'ccExpiryError', 'Card is expired');
-          valid = false;
-        }
-      }
-    }
-
-    if (cvc.length < 3 || cvc.length > 4 || !/^\d+$/.test(cvc)) {
-      setFieldError(ccCvc, 'ccCvcError', 'Enter 3 or 4 digit CVC');
-      valid = false;
-    }
-
-    return valid;
-  }
-
-  window.handleCCPayment = function() {
-    document.getElementById('ccComingSoonMsg').style.display = 'none';
-    if (!validateForm()) return;
-
-    var btn = document.getElementById('ccPayBtn');
-    var label = document.getElementById('ccPayLabel');
-    btn.disabled = true;
-    label.textContent = 'Processing...';
-
-    setTimeout(function() {
-      btn.disabled = false;
-      label.textContent = 'Pay';
-      document.getElementById('ccComingSoonMsg').style.display = 'flex';
-    }, 1200);
-  };
+  });
 })();
 
 /* ── SET INITIAL STATE ── */
