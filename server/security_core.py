@@ -326,7 +326,7 @@ def load_api_keys() -> dict[str, str]:
 
 
 RATE_LIMIT_RPM_DEFAULT = 30  # Default max requests per minute per user
-ALLOWED_PAGES = {"landing.html", "index.html", "main.html", "pay.html", "technology.html", "security.html", "platform.html", "custom.html"}  # Whitelist of servable HTML pages
+ALLOWED_PAGES = {"landing.html", "index.html", "main.html", "pay.html", "products.html", "technology.html", "security.html", "platform.html", "custom.html"}  # Whitelist of servable HTML pages
 
 
 # ---------------------------------------------------------------------------

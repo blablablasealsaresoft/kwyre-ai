@@ -207,6 +207,128 @@ def reasoning_reward(completions, **kwargs):
         rewards.append(min(score, 1.0))
     return rewards
 
+# ── Domain-specific reward functions ─────────────────────────────────────────
+
+def legal_correctness_reward(completions, **kwargs):
+    """Reward citations of specific legal authorities."""
+    rewards = []
+    legal_patterns = [
+        r"(?:Section|§)\s*\d+",
+        r"\d+\s+(?:U\.S\.C\.|C\.F\.R\.)",
+        r"(?:FRE|FRCP|FINRA)\s+\d+",
+        r"v\.\s+\w+",
+    ]
+    for texts in completions:
+        text = texts[0]["content"] if isinstance(texts, list) else texts
+        score = 0.0
+        for pattern in legal_patterns:
+            if re.search(pattern, text):
+                score += 0.3
+        score = min(score, 1.0)
+        rewards.append(score)
+    return rewards
+
+def insurance_correctness_reward(completions, **kwargs):
+    rewards = []
+    terms = ["cedent", "retrocession", "IBNR", "loss development",
+             "chain ladder", "RBC", "solvency", "cession", "layer"]
+    for texts in completions:
+        text = texts[0]["content"] if isinstance(texts, list) else texts
+        score = 0.0
+        term_count = sum(1 for t in terms if t.lower() in text.lower())
+        score += min(term_count * 0.15, 0.6)
+        if re.search(r"\d+\.?\d*%", text):
+            score += 0.2
+        if "<think>" in text and "</think>" in text:
+            score += 0.2
+        rewards.append(min(score, 1.0))
+    return rewards
+
+def healthcare_correctness_reward(completions, **kwargs):
+    rewards = []
+    compliance_terms = ["HIPAA", "21 CFR", "PHI", "BAA", "minimum necessary",
+                        "de-identification", "IRB", "informed consent"]
+    hedge_phrases = ["compliance analysis", "consult with", "verify with",
+                     "subject to", "may require", "recommend reviewing"]
+    for texts in completions:
+        text = texts[0]["content"] if isinstance(texts, list) else texts
+        score = 0.0
+        term_count = sum(1 for t in compliance_terms if t in text)
+        score += min(term_count * 0.15, 0.5)
+        hedge_count = sum(1 for h in hedge_phrases if h.lower() in text.lower())
+        score += min(hedge_count * 0.1, 0.3)
+        if "<think>" in text:
+            score += 0.2
+        rewards.append(min(score, 1.0))
+    return rewards
+
+def defense_correctness_reward(completions, **kwargs):
+    rewards = []
+    structure_markers = ["confidence:", "source:", "assessment:", "alternative",
+                        "assumption", "NIST", "CUI", "MITRE", "TTP"]
+    for texts in completions:
+        text = texts[0]["content"] if isinstance(texts, list) else texts
+        score = 0.0
+        marker_count = sum(1 for m in structure_markers if m.lower() in text.lower())
+        score += min(marker_count * 0.15, 0.6)
+        if "<think>" in text:
+            score += 0.2
+        if any(w in text.lower() for w in ["low confidence", "moderate confidence", "high confidence"]):
+            score += 0.2
+        rewards.append(min(score, 1.0))
+    return rewards
+
+def trading_correctness_reward(completions, **kwargs):
+    rewards = []
+    quant_terms = ["VaR", "CVaR", "Sharpe", "alpha", "beta", "volatility",
+                   "correlation", "cointegration", "mean reversion", "VWAP"]
+    for texts in completions:
+        text = texts[0]["content"] if isinstance(texts, list) else texts
+        score = 0.0
+        term_count = sum(1 for t in quant_terms if t in text)
+        score += min(term_count * 0.15, 0.5)
+        if re.search(r"[\$€]\s*[\d,]+\.?\d*", text):
+            score += 0.15
+        if re.search(r"\d+\.?\d*[%σ]", text):
+            score += 0.15
+        if "<think>" in text:
+            score += 0.2
+        rewards.append(min(score, 1.0))
+    return rewards
+
+def blockchain_correctness_reward(completions, **kwargs):
+    rewards = []
+    forensic_terms = ["wallet", "transaction", "hash", "on-chain", "off-chain",
+                      "mixer", "bridge", "DEX", "CEX", "clustering", "trace"]
+    legal_terms = ["RICO", "BSA", "AML", "SAR", "FinCEN", "wire fraud",
+                   "chain of custody", "evidence"]
+    for texts in completions:
+        text = texts[0]["content"] if isinstance(texts, list) else texts
+        score = 0.0
+        f_count = sum(1 for t in forensic_terms if t.lower() in text.lower())
+        l_count = sum(1 for t in legal_terms if t in text)
+        score += min(f_count * 0.1, 0.4)
+        score += min(l_count * 0.1, 0.3)
+        if re.search(r"0x[a-fA-F0-9]{6,}", text):
+            score += 0.1
+        if "<think>" in text:
+            score += 0.2
+        rewards.append(min(score, 1.0))
+    return rewards
+
+# ── Domain-to-reward mapping ────────────────────────────────────────────────
+DOMAIN_REWARDS = {
+    "legal_compliance": [legal_correctness_reward, reasoning_reward],
+    "insurance_actuarial": [insurance_correctness_reward, reasoning_reward],
+    "healthcare_lifesciences": [healthcare_correctness_reward, reasoning_reward],
+    "defense_intelligence": [defense_correctness_reward, reasoning_reward],
+    "financial_trading": [trading_correctness_reward, reasoning_reward],
+    "blockchain_crypto": [blockchain_correctness_reward, reasoning_reward],
+}
+
+reward_funcs = DOMAIN_REWARDS.get(DOMAIN, [correctness_reward, reasoning_reward])
+print(f"  Reward functions: {[f.__name__ for f in reward_funcs]}")
+
 # ── Step 4: Train ────────────────────────────────────────────────────────────
 print(f"[4/4] Training GRPO — {NUM_STEPS} steps...")
 from trl import GRPOConfig, GRPOTrainer
@@ -236,7 +358,7 @@ trainer = GRPOTrainer(
     processing_class=tokenizer,
     args=grpo_config,
     train_dataset=dataset,
-    reward_funcs=[correctness_reward, reasoning_reward],
+    reward_funcs=reward_funcs,
 )
 
 print(f"  VRAM: {torch.cuda.memory_allocated()/1e9:.1f} GB")

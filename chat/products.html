@@ -202,6 +202,13 @@ nav {
   letter-spacing: 0.5px; margin-bottom: 16px;
 }
 .product-card p { font-size: 13px; color: var(--text2); line-height: 1.7; margin-bottom: 16px; }
+.product-card-price {
+  font-family: var(--mono); font-size: 28px; font-weight: 600;
+  color: var(--accent); letter-spacing: 0.5px;
+  margin-bottom: 16px; line-height: 1.2;
+}
+.product-card-price.contact { font-size: 14px; color: var(--text2); }
+.product-card.green-card .product-card-price.contact { color: var(--green); }
 .product-features { list-style: none; }
 .product-features li {
   font-size: 12px; color: var(--text2); padding: 5px 0;
@@ -393,14 +400,15 @@ nav {
       <div class="product-card">
         <div class="product-card-name">Personal</div>
         <h3>Kwyre Personal</h3>
+        <div class="product-card-price">$299</div>
         <div class="product-sub">GPU &middot; NF4 Quantized &middot; Speculative Decoding</div>
         <p>Fast local inference with speculative decoding. Pre-quantized NF4 weights keep VRAM low while SpikeServe activation encoding maximizes throughput.</p>
         <ul class="product-features">
-          <li>Qwen3-4B + 0.6B draft model (pre-quantized NF4)</li>
+          <li>Qwen3.5-4B + 0.8B draft model (pre-quantized NF4)</li>
           <li>Speculative decoding (2-3x throughput)</li>
           <li>SpikeServe activation encoding</li>
-          <li>3.9 GB VRAM &middot; 7-14 tok/s</li>
-          <li>Download: 3.3 GB</li>
+          <li>4.1 GB VRAM &middot; 7-14 tok/s</li>
+          <li>Download: ~2.5 GB (4B quantized)</li>
           <li>6-layer security stack</li>
           <li>SSE streaming &middot; KV cache &middot; RAG</li>
           <li>1 machine license</li>
@@ -411,14 +419,15 @@ nav {
       <div class="product-card featured">
         <div class="product-card-name">Professional &mdash; Most Popular</div>
         <h3>Kwyre Professional</h3>
+        <div class="product-card-price">$799</div>
         <div class="product-sub">GPU &middot; Custom-Trained 9B &middot; GRPO + Distillation</div>
         <p>Our flagship product. Custom-trained Qwen3.5-9B with chain-of-thought reasoning baked directly into the weights via GRPO reinforcement learning and frontier distillation.</p>
         <ul class="product-features">
-          <li>Custom-trained Qwen3.5-9B (GRPO + distillation)</li>
+          <li>Custom-trained Qwen3.5-9B + 0.8B draft (GRPO + distillation)</li>
           <li>Chain-of-thought reasoning baked into weights</li>
           <li>Domain expertise: forensics, legal, financial</li>
           <li>7.5 GB VRAM &middot; 3-5 tok/s</li>
-          <li>Download: 6.1 GB (Q5_K_M) or 5.3 GB (Q4_K_M)</li>
+          <li>Download: ~7.6 GB (9B quantized)</li>
           <li>Everything in Personal</li>
           <li>Multi-user RBAC &middot; Enterprise audit</li>
           <li>3 machine licenses &middot; Priority support</li>
@@ -429,6 +438,7 @@ nav {
       <div class="product-card">
         <div class="product-card-name">Air</div>
         <h3>Kwyre Air</h3>
+        <div class="product-card-price">$299</div>
         <div class="product-sub">CPU-Only &middot; llama.cpp &middot; Any GGUF</div>
         <p>No GPU required. CPU-only inference via llama.cpp runs on any hardware &mdash; laptops, desktops, servers, embedded systems. Bring any GGUF model.</p>
         <ul class="product-features">
@@ -446,6 +456,7 @@ nav {
       <div class="product-card">
         <div class="product-card-name">Apple Silicon</div>
         <h3>Kwyre Apple Silicon</h3>
+        <div class="product-card-price">$299</div>
         <div class="product-sub">Metal &middot; MLX &middot; M1/M2/M3/M4</div>
         <p>Native Metal acceleration via MLX. Optimized for Apple Silicon unified memory architecture &mdash; fast, quiet, and power-efficient inference on any M-series Mac.</p>
         <ul class="product-features">
@@ -463,6 +474,7 @@ nav {
       <div class="product-card-full product-card green-card">
         <div class="product-card-name green">Custom LLM</div>
         <h3>Custom LLM</h3>
+        <div class="product-card-price contact">Contact</div>
         <div class="product-sub">Your Domain &middot; Claude-Distilled &middot; GRPO &middot; Turnkey</div>
         <p>A custom-trained model built for your specific domain. We distill reasoning from frontier models, apply GRPO reinforcement learning on your tasks, and deliver a turnkey appliance or self-hosted deployment that beats GPT-4o on your benchmarks.</p>
         <ul class="product-features">
@@ -541,7 +553,7 @@ nav {
 <footer class="site-footer">
   <div class="wrap">
     <div class="footer-inner">
-      <div class="footer-brand">KWYRE &middot; APOLLO CyberSentinel LLC</div>
+      <div class="footer-brand">KWYRE &middot; Mint Rail LLC</div>
       <div class="footer-legal">All inference runs 100% locally. No data leaves your machine.</div>
     </div>
   </div>
