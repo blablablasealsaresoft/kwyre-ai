@@ -635,9 +635,9 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] 6 domain adapters trained on H100 80GB — legal, insurance, healthcare, defense, trading, blockchain
 - [x] Model migration: Qwen3-4B → Qwen3.5-4B, Qwen3-0.6B → Qwen3.5-0.8B across all backends
 - [x] Domain benchmark dashboard — `--with-adapter --adapter-domain` comparison mode
-- [ ] GRPO fine-tuning per domain (domain-specific reward functions — legal citations, actuarial terms, etc.)
-- [ ] 9B adapter variants — train all 6 domains on Qwen3.5-9B Professional tier
-- [ ] Adapter CDN distribution — host on kwyre.com alongside base model downloads
+- [x] GRPO fine-tuning per domain (domain-specific reward functions — legal citations, actuarial terms, etc.)
+- [x] 9B adapter variants — train all 6 domains on Qwen3.5-9B Professional tier
+- [x] Adapter CDN distribution — `chat/adapters/manifest.json` at kwyre.com/adapters/manifest.json, SHA-256 verified download
 
 **v1.6 (Planned)**
 - [ ] Credit card payment integration
