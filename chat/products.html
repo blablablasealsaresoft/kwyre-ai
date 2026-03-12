@@ -339,6 +339,7 @@ nav {
 
 
 @media (max-width: 768px) {
+  .product-metrics { grid-template-columns: repeat(2, 1fr) !important; }
   .nav-links a:not(.nav-cta) { display: none; }
   .page-hero { padding: 120px 0 40px; }
   .product-grid { grid-template-columns: 1fr; }
@@ -379,7 +380,7 @@ nav {
 <div class="page-hero">
   <div class="wrap">
     <div class="page-hero-eyebrow reveal">Product Lineup</div>
-    <h1 class="reveal reveal-d1">Five ways to deploy<br><em>air-gapped AI.</em></h1>
+    <h1 class="reveal reveal-d1">Six ways to deploy<br><em>air-gapped AI.</em></h1>
     <p class="reveal reveal-d2">Same 6-layer security stack. Same zero-telemetry architecture. Different hardware targets. Choose the product that fits your workflow.</p>
   </div>
 </div>
@@ -390,7 +391,7 @@ nav {
   <div class="wrap">
     <div class="sh">
       <div class="sh-eyebrow reveal">Choose Your Deployment</div>
-      <h2 class="reveal reveal-d1">One security stack. Five hardware targets.</h2>
+      <h2 class="reveal reveal-d1">One security stack. Six hardware targets.</h2>
       <p class="reveal reveal-d2">Every product ships with the same 6-layer security architecture, zero telemetry, and offline license validation.</p>
     </div>
 
@@ -400,13 +401,13 @@ nav {
       <div class="product-card">
         <div class="product-card-name">Personal</div>
         <h3>Kwyre Personal</h3>
-        <div class="product-card-price">$299</div>
-        <div class="product-sub">GPU &middot; NF4 Quantized &middot; Speculative Decoding</div>
+        <div class="product-card-price">$499</div>
+        <div class="product-sub">1 machine &middot; GPU &middot; NF4 Quantized &middot; Speculative Decoding</div>
         <p>Fast local inference with speculative decoding. Pre-quantized NF4 weights keep VRAM low while SpikeServe activation encoding maximizes throughput.</p>
         <ul class="product-features">
-          <li>Qwen3.5-4B + 0.8B draft model (pre-quantized NF4)</li>
+          <li>Qwen3.5-4B Uncensored + 1 domain adapter</li>
           <li>Speculative decoding (2-3x throughput)</li>
-          <li>SpikeServe activation encoding</li>
+          <li>6-layer security + RAG</li>
           <li>4.1 GB VRAM &middot; 7-14 tok/s</li>
           <li>Download: ~2.5 GB (4B quantized)</li>
           <li>6-layer security stack</li>
@@ -419,18 +420,35 @@ nav {
       <div class="product-card featured">
         <div class="product-card-name">Professional &mdash; Most Popular</div>
         <h3>Kwyre Professional</h3>
-        <div class="product-card-price">$799</div>
-        <div class="product-sub">GPU &middot; Custom-Trained 9B &middot; GRPO + Distillation</div>
-        <p>Our flagship product. Custom-trained Qwen3.5-9B with chain-of-thought reasoning baked directly into the weights via GRPO reinforcement learning and frontier distillation.</p>
+        <div class="product-card-price">$1,499</div>
+        <div class="product-sub">3 machines &middot; GPU &middot; All 6 Domain Adapters</div>
+        <p>Our flagship product. Qwen3.5-4B Uncensored with all six domain adapters — legal, insurance, healthcare, defense, financial trading, blockchain — plus enterprise features.</p>
         <ul class="product-features">
-          <li>Custom-trained Qwen3.5-9B + 0.8B draft (GRPO + distillation)</li>
-          <li>Chain-of-thought reasoning baked into weights</li>
-          <li>Domain expertise: forensics, legal, financial</li>
-          <li>7.5 GB VRAM &middot; 3-5 tok/s</li>
-          <li>Download: ~7.6 GB (9B quantized)</li>
+          <li>Qwen3.5-4B Uncensored + All 6 domain adapters</li>
+          <li>Multi-user RBAC &middot; Enterprise audit + SOC2</li>
+          <li>4.1 GB VRAM &middot; 7-14 tok/s</li>
+          <li>Download: ~2.5 GB (4B quantized)</li>
           <li>Everything in Personal</li>
-          <li>Multi-user RBAC &middot; Enterprise audit</li>
+          <li>6-layer security stack</li>
           <li>3 machine licenses &middot; Priority support</li>
+        </ul>
+      </div>
+
+      <!-- Air-Gapped Kit -->
+      <div class="product-card">
+        <div class="product-card-name">Air-Gapped Kit</div>
+        <h3>Kwyre Air-Gapped Kit</h3>
+        <div class="product-card-price">$3,499</div>
+        <div class="product-sub">5 machines &middot; Offline Installer &middot; White-Glove Setup</div>
+        <p>Full compliance package for air-gapped environments. Offline installer, all 6 domain adapters, and white-glove deployment support.</p>
+        <ul class="product-features">
+          <li>Offline installer</li>
+          <li>All 6 domain adapters</li>
+          <li>White-glove setup</li>
+          <li>Full compliance package</li>
+          <li>5 machine licenses</li>
+          <li>6-layer security stack</li>
+          <li>Priority support</li>
         </ul>
       </div>
 
@@ -438,16 +456,16 @@ nav {
       <div class="product-card">
         <div class="product-card-name">Air</div>
         <h3>Kwyre Air</h3>
-        <div class="product-card-price">$299</div>
+        <div class="product-card-price">$349</div>
         <div class="product-sub">CPU-Only &middot; llama.cpp &middot; Any GGUF</div>
         <p>No GPU required. CPU-only inference via llama.cpp runs on any hardware &mdash; laptops, desktops, servers, embedded systems. Bring any GGUF model.</p>
         <ul class="product-features">
-          <li>CPU-only inference via llama.cpp (any GGUF)</li>
-          <li>No GPU required &middot; runs on any hardware</li>
+          <li>llama.cpp (any GGUF)</li>
+          <li>No GPU required</li>
+          <li>1 domain adapter</li>
+          <li>6-layer security</li>
           <li>8+ GB RAM &middot; 2-8 tok/s</li>
           <li>Download: 2-4 GB (GGUF)</li>
-          <li>6-layer security stack</li>
-          <li>SSE streaming</li>
           <li>1 machine license</li>
         </ul>
       </div>
@@ -474,19 +492,39 @@ nav {
       <div class="product-card-full product-card green-card">
         <div class="product-card-name green">Custom LLM</div>
         <h3>Custom LLM</h3>
-        <div class="product-card-price contact">Contact</div>
-        <div class="product-sub">Your Domain &middot; Claude-Distilled &middot; GRPO &middot; Turnkey</div>
+        <div class="product-card-price">$25K+</div>
+        <div class="product-sub">Turnkey &middot; Your Domain Trained &middot; Benchmarked vs GPT-4o</div>
         <p>A custom-trained model built for your specific domain. We distill reasoning from frontier models, apply GRPO reinforcement learning on your tasks, and deliver a turnkey appliance or self-hosted deployment that beats GPT-4o on your benchmarks.</p>
         <ul class="product-features">
-          <li>Custom-trained model for your domain</li>
-          <li>Claude-distilled reasoning + GRPO reinforcement learning</li>
-          <li>Turnkey appliance or self-hosted deployment</li>
+          <li>Your domain trained</li>
+          <li>Benchmarked vs GPT-4o</li>
+          <li>Appliance or self-hosted</li>
+          <li>Full compliance docs</li>
           <li>Legal, financial, crypto, insurance, defense, healthcare</li>
           <li>Full security stack + compliance documentation</li>
-          <li>Benchmark validation against GPT-4o on YOUR tasks</li>
         </ul>
       </div>
 
+    </div>
+
+    <!-- Premium metrics row -->
+    <div class="product-metrics reveal reveal-d4" style="display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-top:48px;">
+      <div class="product-metric-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center;">
+        <div style="font-family:var(--mono);font-size:24px;font-weight:600;color:var(--green);">~90%</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px;">Gross Margin</div>
+      </div>
+      <div class="product-metric-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center;">
+        <div style="font-family:var(--mono);font-size:24px;font-weight:600;color:var(--green);">ZERO</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px;">Data Leakage</div>
+      </div>
+      <div class="product-metric-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center;">
+        <div style="font-family:var(--mono);font-size:24px;font-weight:600;color:var(--accent);">XMR</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px;">Anonymous Payment</div>
+      </div>
+      <div class="product-metric-card" style="background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:20px;text-align:center;">
+        <div style="font-family:var(--mono);font-size:24px;font-weight:600;color:var(--text);">$1,100</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:4px;">Blended ASP</div>
+      </div>
     </div>
   </div>
 </div>

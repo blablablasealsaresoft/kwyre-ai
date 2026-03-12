@@ -989,9 +989,10 @@ nav {
 }
 
 .product-row-price {
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
-  color: var(--text);
+  color: var(--accent);
+  margin-top: 4px;
 }
 
 .product-row-features {
@@ -1118,7 +1119,7 @@ nav {
       <div>
         <div class="sh" style="text-align: left; margin-bottom: 24px;">
           <div class="sh-eyebrow">Choose Your Product</div>
-          <h2 style="font-size: 24px;">Five ways to deploy Kwyre</h2>
+          <h2 style="font-size: 24px;">Six ways to deploy Kwyre</h2>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 2px;">
@@ -1127,17 +1128,13 @@ nav {
             <div class="product-row-header">
               <div>
                 <div class="product-row-name">Kwyre Personal</div>
+                <div class="product-row-price">$499</div>
               </div>
               <button class="price-select-btn" onclick="event.stopPropagation();selectTier('personal')">Select</button>
             </div>
             <ul class="product-row-features">
-              <li>Qwen3-4B + 0.6B draft model (pre-quantized NF4)</li>
-              <li>Speculative decoding (2-3x throughput)</li>
-              <li>SpikeServe activation encoding</li>
-              <li>3.9 GB VRAM &middot; 7-14 tok/s</li>
-              <li>Download: 3.3 GB</li>
-              <li>6-layer security stack</li>
-              <li>SSE streaming &middot; KV cache &middot; RAG</li>
+              <li>Qwen3.5-4B Uncensored + 1 domain adapter</li>
+              <li>Speculative decoding &middot; 6-layer security + RAG</li>
               <li>1 machine license</li>
             </ul>
           </div>
@@ -1146,18 +1143,29 @@ nav {
             <div class="product-row-header">
               <div>
                 <div class="product-row-name">Kwyre Professional</div>
+                <div class="product-row-price">$1,499</div>
               </div>
               <button class="price-select-btn active" onclick="event.stopPropagation();selectTier('professional')">Select</button>
             </div>
             <ul class="product-row-features">
-              <li>Custom-trained Qwen3.5-9B (GRPO + distillation)</li>
-              <li>Chain-of-thought reasoning baked into weights</li>
-              <li>Domain expertise: forensics, legal, financial</li>
-              <li>7.5 GB VRAM &middot; 3-5 tok/s</li>
-              <li>Download: 6.1 GB (Q5_K_M) or 5.3 GB (Q4_K_M)</li>
-              <li>Everything in Personal</li>
-              <li>Multi-user RBAC &middot; Enterprise audit</li>
-              <li>3 machine licenses &middot; Priority support</li>
+              <li>Qwen3.5-4B Uncensored + All 6 domain adapters</li>
+              <li>Multi-user RBAC &middot; Enterprise audit + SOC2</li>
+              <li>3 machine licenses</li>
+            </ul>
+          </div>
+
+          <div class="product-row" data-tier="airgapped" onclick="selectTier('airgapped')">
+            <div class="product-row-header">
+              <div>
+                <div class="product-row-name">Kwyre Air-Gapped Kit</div>
+                <div class="product-row-price">$3,499</div>
+              </div>
+              <button class="price-select-btn" onclick="event.stopPropagation();selectTier('airgapped')">Select</button>
+            </div>
+            <ul class="product-row-features">
+              <li>Offline installer &middot; All 6 adapters</li>
+              <li>White-glove setup &middot; Full compliance package</li>
+              <li>5 machine licenses</li>
             </ul>
           </div>
 
@@ -1165,16 +1173,13 @@ nav {
             <div class="product-row-header">
               <div>
                 <div class="product-row-name">Kwyre Air</div>
+                <div class="product-row-price">$349</div>
               </div>
               <button class="price-select-btn" onclick="event.stopPropagation();selectTier('air')">Select</button>
             </div>
             <ul class="product-row-features">
-              <li>CPU-only inference via llama.cpp (any GGUF)</li>
-              <li>No GPU required &middot; runs on any hardware</li>
-              <li>8+ GB RAM &middot; 2-8 tok/s</li>
-              <li>Download: 2-4 GB (GGUF)</li>
-              <li>6-layer security stack</li>
-              <li>SSE streaming</li>
+              <li>llama.cpp (any GGUF) &middot; No GPU required</li>
+              <li>1 domain adapter &middot; 6-layer security</li>
               <li>1 machine license</li>
             </ul>
           </div>
@@ -1183,6 +1188,7 @@ nav {
             <div class="product-row-header">
               <div>
                 <div class="product-row-name">Kwyre Apple Silicon</div>
+                <div class="product-row-price">$299</div>
               </div>
               <button class="price-select-btn" onclick="event.stopPropagation();selectTier('mlx')">Select</button>
             </div>
@@ -1201,15 +1207,13 @@ nav {
             <div class="product-row-header">
               <div>
                 <div class="product-row-name" style="color: var(--green);">Custom LLM</div>
+                <div class="product-row-price" style="color: var(--green);">$25K+</div>
               </div>
               <a href="custom.html" class="price-select-btn" style="background:var(--green);border-color:var(--green);" onclick="event.stopPropagation()">Request</a>
             </div>
             <ul class="product-row-features">
-              <li>Custom-trained model for your domain</li>
-              <li>Claude-distilled reasoning + GRPO RL</li>
-              <li>Turnkey appliance or self-hosted</li>
-              <li>Legal, financial, crypto, insurance, defense, healthcare</li>
-              <li>Full security stack + compliance docs</li>
+              <li>Your domain trained &middot; Benchmarked vs GPT-4o</li>
+              <li>Appliance or self-hosted &middot; Full compliance docs</li>
             </ul>
           </div>
 
@@ -1590,10 +1594,11 @@ nav {
 
 /* ── TIER SELECTION ── */
 const TIERS = {
-  personal:     { label: 'Personal' },
-  professional: { label: 'Professional' },
-  air:          { label: 'Air (CPU)' },
-  mlx:          { label: 'Apple Silicon' }
+  personal:     { label: 'Personal', price: 499 },
+  professional: { label: 'Professional', price: 1499 },
+  airgapped:    { label: 'Air-Gapped Kit', price: 3499 },
+  air:          { label: 'Air (CPU)', price: 349 },
+  mlx:          { label: 'Apple Silicon', price: 299 }
 };
 let selectedTier = 'professional';
 
