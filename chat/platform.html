@@ -394,6 +394,7 @@ nav {
 .matrix tbody tr { background: var(--surface); transition: background 0.15s; }
 .matrix tbody tr:hover { background: var(--surface2); }
 .matrix code { font-family: var(--mono); font-size: 11px; background: var(--bg); padding: 2px 6px; border-radius: 4px; border: 1px solid var(--border); }
+.m-y { font-size: 12px; color: var(--green); font-family: var(--mono); }
 
 /* CTA */
 .cta-bar { text-align: center; padding: 80px 0; }
@@ -501,8 +502,7 @@ nav {
     <div class="page-hero-eyebrow reveal">Platform &amp; Deployment</div>
     <h1 class="reveal reveal-d1">Every platform.<br><em>One command.</em></h1>
     <p class="reveal reveal-d2">
-      One-click installers for Windows, Linux, and macOS. Docker compose. Direct Python. Nuitka-compiled binaries.
-      Fine-tuning pipeline and benchmark suite included.
+      One-click installers for Windows, Linux, and macOS. Docker, Helm, vLLM, Direct Python. Every product runs fully air-gapped — no cloud calls, no telemetry, no data leaves your machine. Fine-tuning pipeline and benchmark suite included.
     </p>
   </div>
 </div>
@@ -515,7 +515,7 @@ nav {
     <div class="sh">
       <div class="sh-eyebrow">Choose Your Product</div>
       <h2>Every product. Every platform.</h2>
-      <p>Same security stack. Same API. Different hardware targets.</p>
+      <p>Same security stack. Same API. All products air-gapped by design. Different hardware targets.</p>
     </div>
 
     <div class="matrix-wrap" style="margin-top: 48px;">
@@ -526,44 +526,51 @@ nav {
             <th>Hardware</th>
             <th>Model</th>
             <th>Install Method</th>
+            <th>Air-Gapped</th>
           </tr>
         </thead>
         <tbody>
           <tr>
             <td class="m-label">Kwyre Personal</td>
             <td>NVIDIA GPU (RTX 4060+)</td>
-            <td>Qwen3-4B + 0.6B draft</td>
+            <td>Qwen3.5-4B NF4 + 0.8B draft (3.3 GB)</td>
             <td><code>docker compose up</code> or installer</td>
+            <td><span class="m-y">✓ Always</span></td>
           </tr>
           <tr>
             <td class="m-label">Kwyre Professional</td>
             <td>NVIDIA GPU (RTX 4090/3090)</td>
-            <td>Custom Qwen3.5-9B (GRPO-trained)</td>
+            <td>Qwen3.5-9B GRPO-trained (6.2 GB)</td>
             <td><code>docker compose up</code> or installer</td>
+            <td><span class="m-y">✓ Always</span></td>
           </tr>
           <tr>
             <td class="m-label">Kwyre Air</td>
             <td>Any CPU (8GB+ RAM)</td>
-            <td>Any GGUF model</td>
+            <td>GGUF (KWYRE_GGUF_PATH)</td>
             <td><code>python server/serve_cpu.py</code></td>
+            <td><span class="m-y">✓ Always</span></td>
           </tr>
           <tr>
             <td class="m-label">Kwyre Apple Silicon</td>
             <td>M1/M2/M3/M4 Mac</td>
-            <td>Any MLX model</td>
+            <td>MLX format (KWYRE_MLX_PATH)</td>
             <td><code>python server/serve_mlx.py</code></td>
+            <td><span class="m-y">✓ Always</span></td>
           </tr>
           <tr>
             <td class="m-label">vLLM Backend</td>
             <td>NVIDIA GPU (multi-GPU supported)</td>
-            <td>Any vLLM-compatible model</td>
+            <td>Qwen3.5-4B or custom</td>
             <td><code>KWYRE_BACKEND=vllm python server/serve_vllm.py</code></td>
+            <td><span class="m-y">✓ Always</span></td>
           </tr>
           <tr style="border-top: 2px solid var(--accent);">
             <td class="m-label" style="color: var(--green);">Custom LLM</td>
             <td>Any (we configure)</td>
             <td>Custom-trained for your domain</td>
             <td>Turnkey delivery</td>
+            <td><span class="m-y">✓ Always</span></td>
           </tr>
         </tbody>
       </table>

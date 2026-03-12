@@ -847,6 +847,51 @@ a.incident:hover {
   background: var(--surface);
 }
 
+/* INFERENCE GRID */
+.infer-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+  margin-top: 48px;
+}
+.infer-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 24px;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+.infer-card:hover {
+  border-color: var(--border-hi);
+  box-shadow: 0 0 20px rgba(59,130,246,0.07);
+}
+.infer-icon {
+  font-size: 24px;
+  margin-bottom: 12px;
+}
+.infer-label {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.infer-desc {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+.infer-desc code {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text);
+  background: var(--surface3);
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
 @media (max-width: 768px) {
   .two-col { grid-template-columns: 1fr; }
   .three-col { grid-template-columns: 1fr; }
@@ -925,10 +970,11 @@ a.incident:hover {
         <div class="adv-card-num">01 / Uncensored Model</div>
         <div class="adv-card-title">UNCENSORED + HOT-SWAP</div>
         <ul class="adv-card-list">
-          <li><strong>Qwen3.5-4B Uncensored</strong> — 0/465 refusals, zero capability loss</li>
-          <li><strong>Qwen3.5-0.8B draft</strong> — speculative decoding (2–3× speed)</li>
-          <li>6 domain LoRA adapters hot-swap at runtime via API</li>
-          <li>~100 MB per adapter on ~2.5 GB base</li>
+          <li><strong>Qwen3.5-4B Uncensored</strong> — 0/465 refusals, pre-quantized 4-bit NF4 (2.5 GB)</li>
+          <li><strong>Qwen3.5-0.8B draft</strong> — speculative decoding, 2–3× speed (0.8 GB)</li>
+          <li><strong>3.3 GB total</strong> — clients download pre-quantized weights from kwyre.com</li>
+          <li>6 domain LoRA adapters hot-swap at runtime via API (~100 MB each)</li>
+          <li><strong>Spike QAT</strong> — Straight-Through Estimator spike encoding + k-curriculum annealing</li>
           <li>Your sensitive data never refuses to be analyzed</li>
         </ul>
       </div>
@@ -966,6 +1012,69 @@ a.incident:hover {
     <blockquote class="adv-quote reveal reveal-d4">
       <p>"Every local AI treats 'local' as the security boundary. Kwyre treats the machine itself as potentially compromised. That is the moat."</p>
     </blockquote>
+  </div>
+</div>
+
+<!-- INFERENCE ENGINE -->
+<div class="section">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow reveal">INFERENCE ENGINE</div>
+      <h2 class="reveal reveal-d1">What runs inside the box.</h2>
+      <p class="reveal reveal-d2">Every Kwyre product — GPU, CPU, or Apple Silicon — ships the same air-gapped inference engine. Zero cloud calls. Zero telemetry. Full capability.</p>
+    </div>
+
+    <div class="infer-grid reveal reveal-d3">
+
+      <div class="infer-card">
+        <div class="infer-icon">⚡</div>
+        <div class="infer-label">Spike QAT</div>
+        <div class="infer-desc">Custom fine-tuning pipeline using Straight-Through Estimator spike encoding with k-curriculum annealing. SpikeServe dynamically encodes activations across 84 MLP layers of the draft model — main model runs at full fidelity.</div>
+      </div>
+
+      <div class="infer-card">
+        <div class="infer-icon">🔀</div>
+        <div class="infer-label">Speculative Decoding</div>
+        <div class="infer-desc">Qwen3.5-0.8B draft generates candidate tokens in parallel. Main model validates in batch. Net result: 2–3× tokens/sec improvement with no quality loss on the 4B model's output.</div>
+      </div>
+
+      <div class="infer-card">
+        <div class="infer-icon">📡</div>
+        <div class="infer-label">SSE Streaming</div>
+        <div class="infer-desc">Token-by-token output via Server-Sent Events. Set <code>"stream": true</code> in any OpenAI-compatible request. First token latency &lt; 200ms on RTX 4060.</div>
+      </div>
+
+      <div class="infer-card">
+        <div class="infer-icon">💾</div>
+        <div class="infer-label">KV Cache Persistence</div>
+        <div class="infer-desc">Per-session cache stores <code>past_key_values</code> so follow-up messages skip re-encoding prior conversation. Multi-turn sessions are dramatically faster after the first message.</div>
+      </div>
+
+      <div class="infer-card">
+        <div class="infer-icon">🔒</div>
+        <div class="infer-label">4-bit NF4 + AWQ</div>
+        <div class="infer-desc">Both models fit in ~4.1 GB VRAM combined via bitsandbytes NF4. Set <code>KWYRE_QUANT=awq</code> for 1.4× faster inference when using pre-quantized AWQ weights. No quality degradation vs. FP16.</div>
+      </div>
+
+      <div class="infer-card">
+        <div class="infer-icon">⚙️</div>
+        <div class="infer-label">Flash Attention 2</div>
+        <div class="infer-desc">Auto-detected with graceful fallback. +20–40% throughput on Ampere+ GPUs (RTX 3090, 4090, A100, H100). No configuration required — if your GPU supports it, it activates automatically.</div>
+      </div>
+
+      <div class="infer-card">
+        <div class="infer-icon">🌐</div>
+        <div class="infer-label">OpenAI-Compatible API</div>
+        <div class="infer-desc">POST <code>/v1/chat/completions</code> — drop-in replacement. Any tool that works with OpenAI works with Kwyre. Point your client at <code>http://127.0.0.1:8000</code> and change nothing else.</div>
+      </div>
+
+      <div class="infer-card">
+        <div class="infer-icon">🔄</div>
+        <div class="infer-label">Inference Queue</div>
+        <div class="infer-desc">Serialized GPU access with proper concurrency handling. Multi-user vLLM deployments use continuous batching. Single-user local mode uses a request queue to prevent OOM on concurrent tab requests.</div>
+      </div>
+
+    </div>
   </div>
 </div>
 
