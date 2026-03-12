@@ -1,0 +1,933 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; base-uri 'self'; form-action 'self'">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
+<title>Kwyre AI — Security Architecture</title>
+<meta name="description" content="Kwyre's 6-layer defense-in-depth security model for local LLM inference. Technical architecture document.">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #05060a;
+  --surface: #0b0d14;
+  --surface2: #10131c;
+  --surface3: #161a27;
+  --border: #1c2033;
+  --border-hi: #2a3050;
+  --accent: #3b82f6;
+  --accent-dim: rgba(59,130,246,0.12);
+  --accent-glow: rgba(59,130,246,0.25);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --amber: #f59e0b;
+  --amber-dim: rgba(245,158,11,0.12);
+  --purple: #a855f7;
+  --purple-dim: rgba(168,85,247,0.12);
+  --text: #e2e4ea;
+  --text2: #6b7294;
+  --text3: #3d4466;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Instrument Sans', -apple-system, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: #fff; }
+
+.grid-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.grid-bg::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.05), transparent 70%);
+}
+
+.m-orb {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(120px);
+}
+.m-orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(59,130,246,0.06), transparent 70%);
+  top: -5%; left: -5%;
+  animation: m-orb-a 18s ease-in-out infinite alternate;
+}
+.m-orb-2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(168,85,247,0.04), transparent 70%);
+  bottom: 20%; right: -5%;
+  animation: m-orb-b 22s ease-in-out infinite alternate;
+}
+@keyframes m-orb-a { 0%{transform:translate(0,0)} 100%{transform:translate(60px,-40px)} }
+@keyframes m-orb-b { 0%{transform:translate(0,0)} 100%{transform:translate(-40px,30px)} }
+
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.vis { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: 0.1s; }
+.reveal-d2 { transition-delay: 0.2s; }
+.reveal-d3 { transition-delay: 0.3s; }
+.reveal-d4 { transition-delay: 0.4s; }
+
+.wrap { max-width: 900px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+.section { padding: 64px 0; }
+.section + .section { border-top: 1px solid var(--border); }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(5,6,10,0.88);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between; height: 56px;
+}
+.nav-brand {
+  font-family: var(--mono); font-size: 16px; font-weight: 700;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: #fff; text-decoration: none;
+  text-shadow: 0 0 12px rgba(255,255,255,0.2);
+}
+.nav-brand span { color: #fff; }
+.nav-links { display: flex; gap: 32px; align-items: center; }
+.nav-links a {
+  font-size: 13px; font-weight: 500; color: #fff;
+  text-decoration: none; letter-spacing: 0.3px; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--accent); }
+.nav-links a.active { color: var(--accent); }
+.nav-cta {
+  font-family: var(--mono) !important; font-size: 11px !important;
+  letter-spacing: 1px !important; text-transform: uppercase !important;
+  padding: 8px 20px; background: var(--accent) !important;
+  color: #fff !important; border-radius: 4px;
+  transition: box-shadow 0.2s, transform 0.1s !important;
+}
+.nav-cta:hover { box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-1px) !important; }
+
+/* PAGE HERO */
+.page-hero {
+  padding: 128px 0 48px;
+  text-align: center;
+}
+.page-hero-eyebrow {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+}
+.page-hero-eyebrow::before, .page-hero-eyebrow::after {
+  content: ''; width: 40px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent));
+}
+.page-hero-eyebrow::after { background: linear-gradient(90deg, var(--accent), transparent); }
+.page-hero h1 {
+  font-size: clamp(28px, 4vw, 46px); font-weight: 700;
+  line-height: 1.12; letter-spacing: -1px; margin-bottom: 16px;
+}
+.page-hero h1 em { font-style: normal; color: var(--accent); }
+.page-hero p {
+  font-size: 16px; color: var(--text2); max-width: 540px;
+  margin: 0 auto; line-height: 1.7;
+}
+
+/* BACK LINK */
+.back-link {
+  display: inline-flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text3); text-decoration: none;
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 8px 16px;
+  transition: color 0.2s, border-color 0.2s;
+  margin-bottom: 48px;
+  display: inline-flex;
+}
+.back-link:hover { color: var(--accent); border-color: var(--accent); }
+
+/* DOC META */
+.doc-meta {
+  display: flex; gap: 32px; flex-wrap: wrap;
+  padding: 20px 24px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; margin-bottom: 48px;
+}
+.doc-meta-item { }
+.doc-meta-label {
+  font-family: var(--mono); font-size: 9px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 4px;
+}
+.doc-meta-val {
+  font-family: var(--mono); font-size: 12px; color: var(--text2);
+}
+
+/* SECTION HEADERS */
+.sh { margin-bottom: 40px; }
+.sh-eyebrow {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 12px;
+}
+.sh h2 {
+  font-size: clamp(22px, 3vw, 30px); font-weight: 700;
+  letter-spacing: -0.5px; line-height: 1.2; margin-bottom: 12px;
+}
+.sh p { font-size: 14px; color: var(--text2); line-height: 1.7; max-width: 640px; }
+
+/* ASCII / PRE CODE */
+pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 24px 28px;
+  overflow-x: auto;
+  margin: 24px 0;
+}
+pre code {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text2);
+  line-height: 1.7;
+  white-space: pre;
+}
+
+/* INLINE CODE */
+p code, li code {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  color: var(--text);
+  background: var(--surface3);
+  padding: 2px 6px;
+  border-radius: 3px;
+  border: 1px solid var(--border);
+}
+
+/* LAYER STACK */
+.layer-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  margin: 32px 0;
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+
+.layer-card {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 28px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+  position: relative;
+}
+.layer-card:last-child { border-bottom: none; }
+.layer-card:hover { background: var(--surface2); }
+
+.layer-card::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+}
+
+.layer-amber::before  { background: var(--amber); }
+.layer-purple::before { background: var(--purple); }
+.layer-green::before  { background: var(--green); }
+.layer-blue::before   { background: var(--accent); }
+
+.layer-badge {
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 4px 10px; border-radius: 3px;
+  white-space: nowrap; flex-shrink: 0; min-width: 40px;
+  text-align: center;
+}
+.badge-amber  { background: var(--amber-dim);  color: var(--amber);  border: 1px solid rgba(245,158,11,0.2); }
+.badge-purple { background: var(--purple-dim); color: var(--purple); border: 1px solid rgba(168,85,247,0.2); }
+.badge-green  { background: var(--green-dim);  color: var(--green);  border: 1px solid rgba(34,197,94,0.2); }
+.badge-blue   { background: var(--accent-dim); color: var(--accent); border: 1px solid rgba(59,130,246,0.2); }
+
+.layer-icon {
+  font-size: 20px; flex-shrink: 0; width: 28px; text-align: center;
+}
+
+.layer-info { flex: 1; }
+.layer-name {
+  font-family: var(--mono); font-size: 13px; font-weight: 600;
+  color: var(--text); letter-spacing: 0.3px; margin-bottom: 3px;
+}
+.layer-desc {
+  font-size: 13px; color: var(--text2); line-height: 1.5;
+}
+
+/* LAYER DETAIL SECTIONS */
+.layer-detail {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 32px 36px;
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+.layer-detail::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0; height: 2px;
+  border-radius: 8px 8px 0 0;
+}
+.ld-amber::before  { background: linear-gradient(90deg, var(--amber), rgba(245,158,11,0.1)); }
+.ld-purple::before { background: linear-gradient(90deg, var(--purple), rgba(168,85,247,0.1)); }
+.ld-green::before  { background: linear-gradient(90deg, var(--green), rgba(34,197,94,0.1)); }
+.ld-blue::before   { background: linear-gradient(90deg, var(--accent), rgba(59,130,246,0.1)); }
+
+.layer-detail-header {
+  display: flex; align-items: center; gap: 14px; margin-bottom: 20px;
+}
+.layer-detail-num {
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 5px 12px; border-radius: 3px;
+}
+.layer-detail h3 {
+  font-size: 17px; font-weight: 700; letter-spacing: -0.3px; color: var(--text);
+}
+
+.layer-file {
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text3); margin-bottom: 16px;
+  padding: 8px 14px;
+  background: var(--surface2); border-radius: 4px;
+  border: 1px solid var(--border);
+  display: inline-block;
+}
+.layer-file span { color: var(--text2); }
+
+.layer-detail p {
+  font-size: 14px; color: var(--text2); line-height: 1.75;
+  margin-bottom: 14px;
+}
+.layer-detail p:last-child { margin-bottom: 0; }
+
+.layer-detail ul {
+  list-style: none; display: flex; flex-direction: column; gap: 8px;
+  margin: 12px 0;
+}
+.layer-detail ul li {
+  font-size: 13.5px; color: var(--text2); line-height: 1.6;
+  padding-left: 20px; position: relative;
+}
+.layer-detail ul li::before {
+  content: '›';
+  position: absolute; left: 0; top: 0;
+  font-family: var(--mono); font-size: 15px; font-weight: 700; line-height: 1.4;
+}
+.ld-amber ul li::before  { color: var(--amber); }
+.ld-purple ul li::before { color: var(--purple); }
+.ld-green ul li::before  { color: var(--green); }
+.ld-blue ul li::before   { color: var(--accent); }
+
+.layer-detail strong { color: var(--text); font-weight: 600; }
+
+.verify-box {
+  margin-top: 16px; padding: 12px 16px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 4px;
+  font-family: var(--mono); font-size: 11px; color: var(--text2);
+}
+.verify-box-label {
+  font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 6px;
+}
+.verify-box code { color: var(--green); background: none; border: none; padding: 0; font-size: 11px; }
+
+/* THREAT TABLE */
+.matrix-wrap { overflow-x: auto; border-radius: 8px; border: 1px solid var(--border); }
+.matrix {
+  width: 100%; border-collapse: collapse; font-size: 13px;
+}
+.matrix th, .matrix td {
+  padding: 14px 20px; text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.matrix thead th {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text3); background: var(--surface);
+  border-bottom: 2px solid var(--border);
+}
+.matrix tbody tr { transition: background 0.2s; }
+.matrix tbody tr:last-child td { border-bottom: none; }
+.matrix tbody tr:hover { background: var(--surface2); }
+.matrix td { color: var(--text2); vertical-align: top; }
+.matrix td:first-child { color: var(--text); font-weight: 500; }
+.matrix td .mitigation-tag {
+  display: inline-block;
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 0.8px; text-transform: uppercase;
+  padding: 2px 8px; border-radius: 3px; margin-right: 6px;
+  background: var(--accent-dim); color: var(--accent);
+  border: 1px solid rgba(59,130,246,0.15);
+  white-space: nowrap;
+}
+
+/* WARNING BOX */
+.warning-box {
+  background: var(--surface);
+  border: 1px solid rgba(245,158,11,0.25);
+  border-left: 3px solid var(--amber);
+  border-radius: 0 6px 6px 0;
+  padding: 24px 28px;
+  margin: 24px 0;
+}
+.warning-box-header {
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--amber); margin-bottom: 16px;
+  display: flex; align-items: center; gap: 8px;
+}
+.warning-box ul {
+  list-style: none; display: flex; flex-direction: column; gap: 10px;
+}
+.warning-box ul li {
+  font-size: 13.5px; color: var(--text2); line-height: 1.6;
+  padding-left: 20px; position: relative;
+}
+.warning-box ul li::before {
+  content: '!';
+  position: absolute; left: 0; top: 0;
+  font-family: var(--mono); font-size: 12px; font-weight: 700; line-height: 1.55;
+  color: var(--amber);
+}
+.warning-box p {
+  font-size: 13px; color: var(--text2); line-height: 1.7; margin-top: 16px;
+}
+
+/* CROSS-LINK CARDS */
+.crosslink-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px;
+  margin-top: 24px;
+}
+.crosslink-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; padding: 24px 24px 20px;
+  text-decoration: none; color: inherit;
+  transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+  display: block;
+}
+.crosslink-card:hover {
+  border-color: var(--accent);
+  background: var(--surface2);
+  box-shadow: 0 0 20px rgba(59,130,246,0.06);
+}
+.crosslink-card-eyebrow {
+  font-family: var(--mono); font-size: 9px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 8px;
+}
+.crosslink-card h4 {
+  font-size: 15px; font-weight: 600; color: var(--text);
+  margin-bottom: 8px; line-height: 1.3;
+}
+.crosslink-card p {
+  font-size: 13px; color: var(--text2); line-height: 1.6;
+}
+.crosslink-arrow {
+  font-family: var(--mono); font-size: 12px; color: var(--accent);
+  margin-top: 16px; display: block;
+}
+
+/* OVERVIEW / INTRO TEXT */
+.intro-text {
+  font-size: 15px; color: var(--text2); line-height: 1.8;
+  padding: 24px 28px;
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  margin-bottom: 32px;
+}
+
+/* FOOTER */
+.site-footer { border-top: 1px solid var(--border); padding: 40px 0; }
+.footer-inner {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-brand {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 2px;
+  color: var(--text3); text-transform: uppercase;
+}
+.footer-legal { font-size: 12px; color: var(--text3); max-width: 500px; line-height: 1.5; }
+
+@media (max-width: 768px) {
+  .nav-links a:not(.nav-cta) { display: none; }
+  .page-hero { padding: 110px 0 36px; }
+  .wrap { padding: 0 20px; }
+  .layer-card { padding: 16px 20px; gap: 12px; }
+  .layer-detail { padding: 24px 20px; }
+  .crosslink-grid { grid-template-columns: 1fr; }
+  .doc-meta { gap: 20px; }
+  .footer-inner { flex-direction: column; text-align: center; }
+  pre code { font-size: 11px; }
+  .matrix th, .matrix td { padding: 10px 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="m-orb m-orb-1"></div>
+<div class="m-orb m-orb-2"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="../main.html" class="nav-brand"><span>K</span>WYRE</a>
+    <div class="nav-links">
+      <a href="../technology.html">Data Privacy</a>
+      <a href="../custom.html">Custom</a>
+      <a href="../security.html" class="active">Security &amp; Compliance</a>
+      <a href="../products.html">Products</a>
+      <a href="../platform.html">Platform</a>
+      <a href="../pay.html">Purchase</a>
+      <a href="../../kwyre-demo.html" class="nav-cta">App Demo</a>
+    </div>
+  </div>
+</nav>
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="wrap">
+    <div class="page-hero-eyebrow reveal">Technical Document</div>
+    <h1 class="reveal reveal-d1">6-Layer Security<br><em>Architecture</em></h1>
+    <p class="reveal reveal-d2">Defense-in-depth for local LLM inference</p>
+  </div>
+</div>
+
+<!-- MAIN CONTENT -->
+<div class="section">
+  <div class="wrap">
+
+    <a href="../security.html" class="back-link reveal">← Back to Security &amp; Compliance</a>
+
+    <!-- DOC META -->
+    <div class="doc-meta reveal reveal-d1">
+      <div class="doc-meta-item">
+        <div class="doc-meta-label">Document</div>
+        <div class="doc-meta-val">KW-SEC-001</div>
+      </div>
+      <div class="doc-meta-item">
+        <div class="doc-meta-label">Classification</div>
+        <div class="doc-meta-val">Public Technical Reference</div>
+      </div>
+      <div class="doc-meta-item">
+        <div class="doc-meta-label">Architecture</div>
+        <div class="doc-meta-val">6-Layer Defense-in-Depth</div>
+      </div>
+      <div class="doc-meta-item">
+        <div class="doc-meta-label">Scope</div>
+        <div class="doc-meta-val">Local LLM Inference Engine</div>
+      </div>
+    </div>
+
+    <!-- OVERVIEW -->
+    <div class="sh reveal">
+      <div class="sh-eyebrow">Overview</div>
+      <h2>Architecture Summary</h2>
+    </div>
+
+    <div class="intro-text reveal reveal-d1">
+      Kwyre implements a 6-layer defense-in-depth security model for local LLM inference.
+      Each layer operates independently — compromising one layer does not disable the others.
+      The stack is designed so that even a fully compromised server process cannot exfiltrate data,
+      tamper with model weights, or persist conversation history.
+    </div>
+
+    <!-- ASCII DIAGRAM -->
+    <pre class="reveal reveal-d2"><code>+------------------------------------------------------+
+|  Layer 6: Intrusion Watchdog                         |
+|    Monitors processes + network, auto-wipes on alert |
++------------------------------------------------------+
+|  Layer 5: Secure Conversation Buffer                 |
+|    RAM-only storage, cryptographic wipe on close     |
++------------------------------------------------------+
+|  Layer 4: Model Weight Integrity                     |
+|    SHA256 verification of model files at startup     |
++------------------------------------------------------+
+|  Layer 3: Dependency Integrity                       |
+|    SHA256 manifest of all Python packages at startup |
++------------------------------------------------------+
+|  Layer 2: Process Network Isolation                  |
+|    iptables / Windows Firewall per-process rules     |
++------------------------------------------------------+
+|  Layer 1: Localhost-Only Binding                     |
+|    Server binds to 127.0.0.1, unreachable from LAN  |
++------------------------------------------------------+</code></pre>
+
+  </div>
+</div>
+
+<!-- LAYER STACK VISUAL -->
+<div class="section">
+  <div class="wrap">
+    <div class="sh reveal">
+      <div class="sh-eyebrow">Defense Layers</div>
+      <h2>The 6-Layer Stack</h2>
+      <p>Rendered outermost (L6) to innermost (L1). Each layer operates as an independent control.</p>
+    </div>
+
+    <div class="layer-stack reveal reveal-d1">
+
+      <!-- L6 -->
+      <div class="layer-card layer-amber">
+        <div class="layer-badge badge-amber">L6</div>
+        <div class="layer-icon">🔎</div>
+        <div class="layer-info">
+          <div class="layer-name">Intrusion Watchdog</div>
+          <div class="layer-desc">Background thread scans every 5 seconds for debuggers, traffic analyzers, and unexpected outbound connections — auto-wipes sessions on detection.</div>
+        </div>
+      </div>
+
+      <!-- L5 -->
+      <div class="layer-card layer-purple">
+        <div class="layer-badge badge-purple">L5</div>
+        <div class="layer-icon">🧠</div>
+        <div class="layer-info">
+          <div class="layer-name">Secure Conversation Buffer</div>
+          <div class="layer-desc">Conversations exist only in RAM — never serialized to disk. Cryptographic wipe on session close, idle timeout, and server shutdown.</div>
+        </div>
+      </div>
+
+      <!-- L4 -->
+      <div class="layer-card layer-green">
+        <div class="layer-badge badge-green">L4</div>
+        <div class="layer-icon">🔒</div>
+        <div class="layer-info">
+          <div class="layer-name">Model Weight Integrity</div>
+          <div class="layer-desc">SHA256 hashes of model config files verified at every startup — detects substitution, tampering, or silent corruption of inference weights.</div>
+        </div>
+      </div>
+
+      <!-- L3 -->
+      <div class="layer-card layer-green">
+        <div class="layer-badge badge-green">L3</div>
+        <div class="layer-icon">📦</div>
+        <div class="layer-info">
+          <div class="layer-name">Dependency Integrity</div>
+          <div class="layer-desc">SHA256 manifest of all installed Python packages verified at every startup — detects supply-chain tampering, version drift, and unexpected packages.</div>
+        </div>
+      </div>
+
+      <!-- L2 -->
+      <div class="layer-card layer-blue">
+        <div class="layer-badge badge-blue">L2</div>
+        <div class="layer-icon">🛡</div>
+        <div class="layer-info">
+          <div class="layer-name">Process Network Isolation</div>
+          <div class="layer-desc">OS-level outbound network rules scoped to the Kwyre process — a fully compromised server cannot exfiltrate data over the network.</div>
+        </div>
+      </div>
+
+      <!-- L1 -->
+      <div class="layer-card layer-blue">
+        <div class="layer-badge badge-blue">L1</div>
+        <div class="layer-icon">🌐</div>
+        <div class="layer-info">
+          <div class="layer-name">Localhost-Only Network Binding</div>
+          <div class="layer-desc">Server binds exclusively to <code>127.0.0.1</code> at the OS socket level — unreachable from any other machine on the network, regardless of firewall config.</div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- DETAILED LAYER SECTIONS -->
+<div class="section">
+  <div class="wrap">
+    <div class="sh reveal">
+      <div class="sh-eyebrow">Technical Detail</div>
+      <h2>Layer-by-Layer Breakdown</h2>
+    </div>
+
+    <!-- L1 -->
+    <div class="layer-detail ld-blue reveal">
+      <div class="layer-detail-header">
+        <div class="layer-detail-num layer-badge badge-blue">L1</div>
+        <h3>Localhost-Only Network Binding</h3>
+      </div>
+      <div class="layer-file">FILE: <span>server/serve_local_4bit.py</span> — <span>BIND_HOST = "127.0.0.1"</span></div>
+      <p>
+        The HTTP server binds exclusively to the loopback interface. This is enforced at the OS socket
+        level — no configuration, reverse proxy, or firewall rule can make the server respond to requests
+        from other machines on the network.
+      </p>
+      <div class="verify-box">
+        <div class="verify-box-label">Verification Command</div>
+        <code>netstat -an | findstr 8000</code>&nbsp;&nbsp;→ shows <code>127.0.0.1:8000</code> only
+      </div>
+    </div>
+
+    <!-- L2 -->
+    <div class="layer-detail ld-blue reveal">
+      <div class="layer-detail-header">
+        <div class="layer-detail-num layer-badge badge-blue">L2</div>
+        <h3>Process Network Isolation</h3>
+      </div>
+      <div class="layer-file">FILE: <span>security/setup_isolation.sh</span></div>
+      <p>
+        Even if the server process is fully compromised — for example, via a dependency supply-chain
+        attack — it cannot exfiltrate data because outbound network access is blocked at the OS level.
+      </p>
+      <ul>
+        <li><strong>Linux / WSL2:</strong> <code>iptables</code> OUTPUT rules scoped to a dedicated <code>kwyre</code> system user UID</li>
+        <li><strong>Windows:</strong> <code>New-NetFirewallRule</code> blocking outbound from the specific Python executable</li>
+      </ul>
+      <p>
+        The server runs as the <code>kwyre</code> user, which has no shell, no home directory, and no outbound
+        network capability.
+      </p>
+    </div>
+
+    <!-- L3 -->
+    <div class="layer-detail ld-green reveal">
+      <div class="layer-detail-header">
+        <div class="layer-detail-num layer-badge badge-green">L3</div>
+        <h3>Dependency Integrity</h3>
+      </div>
+      <div class="layer-file">FILE: <span>security/verify_deps.py</span></div>
+      <p>
+        Generates and verifies SHA256 hashes of all installed Python packages' <code>RECORD</code> files.
+        Run once on a clean install to generate the manifest, then verified at every startup.
+      </p>
+      <p>Detects:</p>
+      <ul>
+        <li>Version changes (pip upgrade / downgrade)</li>
+        <li>File tampering (modified package code)</li>
+        <li>Unexpected packages not present in the original manifest</li>
+      </ul>
+    </div>
+
+    <!-- L4 -->
+    <div class="layer-detail ld-green reveal">
+      <div class="layer-detail-header">
+        <div class="layer-detail-num layer-badge badge-green">L4</div>
+        <h3>Model Weight Integrity</h3>
+      </div>
+      <div class="layer-file">FILE: <span>server/serve_local_4bit.py</span> — <span>verify_model_integrity()</span></div>
+      <p>
+        SHA256 hashes of model configuration files are computed on a verified clean install and
+        hardcoded into the server. At every startup, hashes are recomputed and compared.
+      </p>
+      <p>Files covered:</p>
+      <ul>
+        <li><code>config.json</code></li>
+        <li><code>tokenizer_config.json</code></li>
+        <li><code>generation_config.json</code></li>
+        <li><code>tokenizer.json</code></li>
+      </ul>
+      <p>
+        Detects: model substitution, config tampering, and file corruption introduced between installs.
+      </p>
+    </div>
+
+    <!-- L5 -->
+    <div class="layer-detail ld-purple reveal">
+      <div class="layer-detail-header">
+        <div class="layer-detail-num layer-badge badge-purple">L5</div>
+        <h3>Secure Conversation Buffer</h3>
+      </div>
+      <div class="layer-file">FILE: <span>server/serve_local_4bit.py</span> — <span>SecureConversationBuffer</span>, <span>SessionStore</span></div>
+      <ul>
+        <li>Conversations exist only in RAM — never serialized to disk</li>
+        <li>Each session gets a 256-bit random key (for future encryption-at-rest if needed)</li>
+        <li>Idle sessions are reaped after 1 hour</li>
+        <li>On wipe: content overwritten with random bytes before deallocation</li>
+        <li>On server shutdown: all sessions wiped before process exit via <code>SIGTERM</code> handler</li>
+      </ul>
+    </div>
+
+    <!-- L6 -->
+    <div class="layer-detail ld-amber reveal">
+      <div class="layer-detail-header">
+        <div class="layer-detail-num layer-badge badge-amber">L6</div>
+        <h3>Intrusion Watchdog</h3>
+      </div>
+      <div class="layer-file">FILE: <span>server/serve_local_4bit.py</span> — <span>IntrusionWatchdog</span></div>
+      <p>
+        Background thread scanning every 5 seconds for anomalies. Requires 2 consecutive detections
+        to confirm a violation — avoiding false positives from benign system activity.
+      </p>
+      <p>Scans for:</p>
+      <ul>
+        <li><strong>Unexpected outbound connections</strong> from the server process (via <code>psutil</code>)</li>
+        <li><strong>Suspicious processes</strong> running on the system: debuggers, traffic analyzers, memory inspectors</li>
+      </ul>
+      <p>
+        Detected tools include: x64dbg, WinDbg, Ghidra, IDA, Wireshark, Fiddler,
+        mitmproxy, Burp Suite, Process Hacker, Cheat Engine.
+      </p>
+      <p>On confirmed violation:</p>
+      <ul>
+        <li>All active sessions are immediately wiped</li>
+        <li>Event is logged (metadata only — no conversation content)</li>
+        <li>Server process is terminated</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+<!-- THREAT MODEL -->
+<div class="section">
+  <div class="wrap">
+    <div class="sh reveal">
+      <div class="sh-eyebrow">Threat Model</div>
+      <h2>Threats &amp; Mitigations</h2>
+      <p>Each row maps a concrete attack vector to the layers that address it.</p>
+    </div>
+
+    <div class="matrix-wrap reveal reveal-d1">
+      <table class="matrix">
+        <thead>
+          <tr>
+            <th style="width: 40%">Threat</th>
+            <th>Mitigated By</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Network interception (MITM)</td>
+            <td><span class="mitigation-tag">L1</span><span class="mitigation-tag">L2</span>No network traffic exists to intercept</td>
+          </tr>
+          <tr>
+            <td>Remote access to inference</td>
+            <td><span class="mitigation-tag">L1</span>Localhost binding blocks all remote connections</td>
+          </tr>
+          <tr>
+            <td>Data exfiltration via compromised dependency</td>
+            <td><span class="mitigation-tag">L2</span><span class="mitigation-tag">L3</span>Outbound blocked + dependency hashes verified</td>
+          </tr>
+          <tr>
+            <td>Model substitution / poisoning</td>
+            <td><span class="mitigation-tag">L4</span>SHA256 weight verification at startup</td>
+          </tr>
+          <tr>
+            <td>Conversation persistence / disk forensics</td>
+            <td><span class="mitigation-tag">L5</span>RAM-only with cryptographic wipe</td>
+          </tr>
+          <tr>
+            <td>Active debugging / memory inspection</td>
+            <td><span class="mitigation-tag">L6</span>Watchdog detects and terminates</td>
+          </tr>
+          <tr>
+            <td>Server crash without cleanup</td>
+            <td><span class="mitigation-tag">L5</span>OS reclaims RAM on process exit — no disk artifacts</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- WHAT THIS DOES NOT PROTECT AGAINST -->
+<div class="section">
+  <div class="wrap">
+    <div class="sh reveal">
+      <div class="sh-eyebrow">Scope Boundary</div>
+      <h2>What This Architecture Does NOT Protect Against</h2>
+      <p>Application-level security has inherent limits. The following threats require hardware-level controls.</p>
+    </div>
+
+    <div class="warning-box reveal reveal-d1">
+      <div class="warning-box-header">⚠ Out of Scope — Hardware-Level Threats</div>
+      <ul>
+        <li>Physical access to the machine while the server is running (cold boot attacks, DMA)</li>
+        <li>Kernel-level rootkits that hide processes from <code>psutil</code></li>
+        <li>A determined attacker with root / admin access to the host OS</li>
+        <li>Side-channel attacks on GPU memory</li>
+      </ul>
+      <p>
+        These threats require hardware-level controls — TPM, Secure Boot, encrypted RAM —
+        which are outside the scope of application-level security. Kwyre's architecture addresses
+        the software attack surface only.
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- CROSS LINKS -->
+<div class="section">
+  <div class="wrap">
+    <div class="sh reveal">
+      <div class="sh-eyebrow">Related Documents</div>
+      <h2>Compliance &amp; Architecture Docs</h2>
+    </div>
+
+    <div class="crosslink-grid reveal reveal-d1">
+      <a href="soc2.html" class="crosslink-card">
+        <div class="crosslink-card-eyebrow">Compliance Guide</div>
+        <h4>SOC 2 Type II Readiness</h4>
+        <p>How Kwyre's architecture maps to SOC 2 Trust Service Criteria — CC6, CC7, and A1.</p>
+        <span class="crosslink-arrow">→ soc2.html</span>
+      </a>
+      <a href="data-residency.html" class="crosslink-card">
+        <div class="crosslink-card-eyebrow">Data Residency</div>
+        <h4>Data Residency &amp; Air-Gap Guarantees</h4>
+        <p>Technical proof that no data crosses a network boundary under any operating condition.</p>
+        <span class="crosslink-arrow">→ data-residency.html</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-inner">
+      <div class="footer-brand">KWYRE &middot; Mint Rail LLC</div>
+      <div class="footer-legal">All inference runs 100% locally. No data leaves your machine. KW-SEC-001 — Security Architecture Technical Reference.</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+(function(){
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) { e.target.classList.add('vis'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.1, rootMargin: '0px 0px -32px 0px' });
+  document.querySelectorAll('.reveal').forEach(el => obs.observe(el));
+})();
+</script>
+</body>
+</html>

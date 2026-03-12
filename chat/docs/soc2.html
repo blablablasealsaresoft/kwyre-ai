@@ -1,0 +1,1080 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kwyre AI — SOC 2 Deployment Guide</title>
+<meta name="description" content="Kwyre AI SOC 2 Type II Deployment Guide. Maps the 6-layer security architecture to Trust Service Criteria with evidence collection procedures for auditors.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #05060a;
+  --surface: #0b0d14;
+  --surface2: #10131c;
+  --surface3: #161a27;
+  --border: #1c2033;
+  --border-hi: #2a3050;
+  --accent: #3b82f6;
+  --accent-dim: rgba(59,130,246,0.12);
+  --accent-glow: rgba(59,130,246,0.25);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --amber: #f59e0b;
+  --text: #e2e4ea;
+  --text2: #6b7294;
+  --text3: #3d4466;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Instrument Sans', -apple-system, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: #fff; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(5,6,10,0.9);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between; height: 56px;
+}
+.nav-brand {
+  font-family: var(--mono); font-size: 16px; font-weight: 700;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: #fff; text-decoration: none;
+  text-shadow: 0 0 12px rgba(255,255,255,0.25);
+}
+.nav-links { display: flex; gap: 28px; align-items: center; }
+.nav-links a {
+  font-size: 13px; font-weight: 500; color: #fff;
+  text-decoration: none; letter-spacing: 0.3px; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--accent); }
+.nav-links a.active { color: var(--accent); }
+.nav-cta {
+  font-family: var(--mono) !important; font-size: 11px !important;
+  letter-spacing: 1px !important; text-transform: uppercase !important;
+  padding: 8px 20px; background: var(--accent) !important;
+  color: #fff !important; border-radius: 4px;
+  transition: box-shadow 0.2s, transform 0.1s !important;
+}
+.nav-cta:hover { box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-1px) !important; }
+
+/* LAYOUT */
+.doc-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 100px 32px 80px;
+}
+
+/* HERO */
+.doc-hero {
+  padding: 40px 0 48px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+.doc-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 18px;
+}
+.doc-hero h1 {
+  font-size: clamp(26px, 3.5vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+  margin-bottom: 14px;
+}
+.doc-hero-sub {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--text2);
+  letter-spacing: 0.5px;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text2);
+  text-decoration: none;
+  letter-spacing: 1px;
+  margin-bottom: 32px;
+  transition: color 0.2s;
+}
+.back-link:hover { color: var(--accent); }
+.back-link::before { content: '←'; }
+
+.doc-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 8px 16px;
+  margin-bottom: 40px;
+  letter-spacing: 0.5px;
+}
+.doc-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  background: var(--green);
+  border-radius: 50%;
+  box-shadow: 0 0 6px var(--green);
+}
+
+/* SECTIONS */
+.doc-section {
+  margin-bottom: 56px;
+}
+.doc-section h2 {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.doc-section h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 28px 0 16px;
+}
+.doc-section h4 {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text2);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  margin: 20px 0 12px;
+}
+.doc-section p {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.doc-section p:last-child { margin-bottom: 0; }
+
+.criterion-note {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: 0 6px 6px 0;
+  padding: 14px 18px;
+  font-size: 14px;
+  line-height: 1.65;
+  color: var(--text2);
+  margin: 16px 0 24px;
+}
+.criterion-note strong { color: var(--text); }
+
+/* TABLES */
+.table-wrap {
+  overflow-x: auto;
+  margin: 16px 0 24px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+thead th {
+  background: var(--surface2);
+  color: var(--text2);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.6;
+  color: var(--text);
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: rgba(59,130,246,0.04); }
+td strong { color: var(--accent); font-weight: 600; }
+td code {
+  background: var(--surface3);
+  color: var(--green);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-size: 11.5px;
+}
+
+/* ABSENT TABLE */
+.absent-table td:first-child { color: var(--text2); }
+.absent-table td:last-child { color: var(--text2); font-size: 12px; }
+
+/* CHECKLIST */
+.checklist {
+  list-style: none;
+  margin: 0 0 16px;
+}
+.checklist li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(28,32,51,0.5);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.checklist li:last-child { border-bottom: none; }
+.check-box {
+  font-family: var(--mono);
+  font-size: 14px;
+  color: var(--text3);
+  flex-shrink: 0;
+  margin-top: 1px;
+}
+.check-label strong {
+  color: var(--text);
+  font-weight: 600;
+}
+.check-label {
+  color: var(--text2);
+}
+
+.phase-header {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--amber);
+  margin: 28px 0 12px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(245,158,11,0.2);
+}
+
+/* PRE / CODE BLOCKS */
+pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.6;
+  color: var(--text);
+  margin: 16px 0 24px;
+  white-space: pre;
+}
+
+/* DETAILS/SUMMARY FAQ */
+.faq-list { margin: 0; }
+details {
+  border-bottom: 1px solid var(--border);
+}
+details:first-child { border-top: 1px solid var(--border); }
+summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 4px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+  list-style: none;
+  user-select: none;
+  transition: color 0.2s;
+}
+summary::-webkit-details-marker { display: none; }
+summary:hover { color: var(--accent); }
+summary::after {
+  content: '+';
+  font-family: var(--mono);
+  font-size: 18px;
+  color: var(--text3);
+  flex-shrink: 0;
+  transition: transform 0.2s, color 0.2s;
+}
+details[open] summary::after {
+  content: '−';
+  color: var(--accent);
+}
+.faq-body {
+  padding: 0 4px 20px;
+  font-size: 14.5px;
+  line-height: 1.75;
+  color: var(--text2);
+}
+.faq-body p { margin-bottom: 10px; }
+.faq-body p:last-child { margin-bottom: 0; }
+.faq-body code {
+  background: var(--surface3);
+  color: var(--green);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+/* SUPPLEMENTARY TABLE */
+.supp-table a {
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 500;
+}
+.supp-table a:hover { text-decoration: underline; }
+
+/* FOOTER */
+.doc-footer {
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-brand {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--text2);
+}
+.footer-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: 0.5px;
+}
+.footer-disclaimer {
+  width: 100%;
+  font-size: 12px;
+  color: var(--text3);
+  line-height: 1.6;
+  margin-top: 8px;
+}
+
+/* DIVIDER */
+.doc-hr {
+  border: none;
+  border-top: 1px solid var(--border);
+  margin: 40px 0;
+}
+
+@media (max-width: 700px) {
+  .doc-wrap { padding: 88px 20px 60px; }
+  .nav-links { display: none; }
+  .doc-footer { flex-direction: column; gap: 8px; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../main.html" class="nav-brand"><span>K</span>WYRE</a>
+    <div class="nav-links">
+      <a href="../technology.html">Data Privacy</a>
+      <a href="../custom.html">Custom</a>
+      <a href="../security.html" class="active">Security &amp; Compliance</a>
+      <a href="../products.html">Products</a>
+      <a href="../platform.html">Platform</a>
+      <a href="../pay.html">Purchase</a>
+      <a href="../../kwyre-demo.html" class="nav-cta">App Demo</a>
+    </div>
+  </div>
+</nav>
+
+<div class="doc-wrap">
+
+  <a href="../security.html" class="back-link">Back to Security &amp; Compliance</a>
+
+  <div class="doc-hero">
+    <div class="doc-eyebrow">COMPLIANCE DOCUMENT · KWYRE-SOC2-001</div>
+    <h1>SOC 2 Type II Deployment Guide</h1>
+    <div class="doc-hero-sub">Version 1.0 · March 2026 · Apollo CyberSentinel LLC</div>
+  </div>
+
+  <div class="doc-badge">KWYRE-SOC2-001 · Classification: Customer-Facing · For Auditors</div>
+
+  <!-- SECTION 1 -->
+  <div class="doc-section">
+    <h2>1. Purpose</h2>
+    <p>This guide maps Kwyre AI's 6-layer security architecture to SOC 2 Type II Trust Service Criteria, provides a pre-deployment hardening checklist for SOC 2 environments, and documents the evidence artifacts Kwyre produces for auditor review.</p>
+    <p>Kwyre is a locally-deployed, air-gapped AI inference server. Because all processing occurs on the customer's own hardware with zero external data transmission, many traditional SOC 2 controls — cloud access management, vendor risk, data-in-transit encryption — are rendered unnecessary by architectural elimination of the attack surface.</p>
+  </div>
+
+  <!-- SECTION 2 -->
+  <div class="doc-section">
+    <h2>2. Trust Service Criteria Mapping</h2>
+
+    <h3>2.1 CC6 — Logical and Physical Access Controls</h3>
+
+    <h4>CC6.1 — Logical and Physical Access Controls</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Kwyre Layer</th><th>Implementation</th><th>Evidence</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>L1 — Network Binding</strong></td>
+            <td>Server binds exclusively to <code>127.0.0.1</code> at the OS socket level. No configuration, reverse proxy, or firewall rule can expose the server to LAN or internet traffic.</td>
+            <td><code>netstat -an | findstr 8000</code> shows <code>127.0.0.1:8000</code> only. Cross-machine connection attempts fail.</td>
+          </tr>
+          <tr>
+            <td><strong>L2 — Process Isolation</strong></td>
+            <td>OS-level firewall rules (iptables on Linux, Windows Firewall on Windows) block all outbound network connections from the inference process. Even a fully compromised server cannot exfiltrate data.</td>
+            <td><code>Get-NetFirewallRule -DisplayName "Kwyre-*"</code> (Windows) or <code>iptables -L OUTPUT</code> (Linux) shows per-process outbound deny rules.</td>
+          </tr>
+          <tr>
+            <td><strong>API Key Auth</strong></td>
+            <td>All inference and audit endpoints require <code>Authorization: Bearer &lt;key&gt;</code> headers. Keys validated with <code>hmac.compare_digest</code> (timing-safe).</td>
+            <td>Unauthenticated requests return HTTP 401. <code>/health</code> returns limited info without auth.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="criterion-note"><strong>How this satisfies CC6.1:</strong> Access to the inference system is restricted to processes running on the same machine (L1) and authenticated via API key. No remote access path exists. The process itself cannot establish outbound connections (L2), preventing data exfiltration even under full server compromise.</div>
+
+    <h4>CC6.6 — System Boundaries</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Kwyre Layer</th><th>Implementation</th><th>Evidence</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>L1 + L2</strong></td>
+            <td>The system boundary is the loopback interface (<code>127.0.0.1</code>). No data crosses this boundary in either direction. Inbound: server only accepts localhost connections. Outbound: process-level firewall blocks all egress.</td>
+            <td>Wireshark capture during full operational session shows zero non-localhost packets. Zero DNS queries from process.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="criterion-note"><strong>How this satisfies CC6.6:</strong> The system boundary is defined and enforced at two independent layers. L1 prevents inbound access from outside the machine. L2 prevents outbound access from the inference process. Together they create a true air gap at the application and OS level.</div>
+
+    <h4>CC6.7 — Data in Transit</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Kwyre Layer</th><th>Implementation</th><th>Evidence</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>L1 — Localhost Binding</strong></td>
+            <td>All data transit occurs exclusively over the loopback interface (<code>127.0.0.1 → 127.0.0.1</code>). Loopback traffic never touches a physical network interface, NIC, or wire. There is no network path for interception.</td>
+            <td>Wireshark capture on physical interfaces shows zero Kwyre-related traffic. All communication is loopback-only.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="criterion-note"><strong>How this satisfies CC6.7:</strong> Traditional transit encryption (TLS) protects data traversing networks. Kwyre eliminates the need for transit encryption by eliminating transit. Data never leaves the machine's memory space. Loopback traffic is not routable and cannot be intercepted by network-based attackers.</div>
+
+    <h4>CC6.8 — Data at Rest</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Kwyre Layer</th><th>Implementation</th><th>Evidence</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>L5 — Secure RAM Buffer</strong></td>
+            <td>Conversations exist only in volatile RAM. No conversation content is ever written to disk, database, log file, temp file, or any persistent storage. On session end, content is overwritten with <code>secrets.token_hex()</code> random bytes before deallocation.</td>
+            <td>Disk search for conversation content returns zero matches. <code>/audit</code> endpoint confirms <code>"content_logging": "NEVER"</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="criterion-note"><strong>How this satisfies CC6.8:</strong> Kwyre eliminates data at rest by never creating it. Conversations are volatile — they exist only in RAM during active sessions and are cryptographically destroyed on termination. There is no persistent data to encrypt, protect, or manage retention for.</div>
+
+    <hr class="doc-hr">
+
+    <h3>2.2 CC7 — System Operations</h3>
+
+    <h4>CC7.1 — System Monitoring</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Kwyre Layer</th><th>Implementation</th><th>Evidence</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>L6 — Intrusion Watchdog</strong></td>
+            <td>Background thread scans every 5 seconds for: (1) unexpected outbound connections from the inference process, (2) known debugging/traffic analysis tools (Wireshark, x64dbg, Ghidra, IDA, Fiddler, mitmproxy, Burp Suite, Process Hacker, etc.). Two consecutive detections required before triggering to prevent false positives.</td>
+            <td><code>/health</code> endpoint shows <code>"intrusion_watchdog": {"running": true, "triggered": false}</code>. Server logs show scan activity.</td>
+          </tr>
+          <tr>
+            <td><strong>Audit Endpoint</strong></td>
+            <td><code>GET /audit</code> returns metadata-only compliance log: active sessions, security control status, watchdog state. No conversation content is ever included.</td>
+            <td>Audit output is JSON with timestamps, session counts, and control attestation.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="criterion-note"><strong>How this satisfies CC7.1:</strong> The system continuously monitors for both internal anomalies (unexpected outbound connections indicating compromise) and external threats (debugging/analysis tools indicating active attack). Monitoring is automated, continuous, and produces auditable metadata.</div>
+
+    <h4>CC7.2 — Incident Response</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Kwyre Layer</th><th>Implementation</th><th>Evidence</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>L6 — Auto-Wipe</strong></td>
+            <td>On confirmed intrusion: (1) all active sessions enumerated, (2) every message overwritten with random bytes, (3) session keys zeroed, (4) session objects dereferenced, (5) event logged (metadata only), (6) server process terminated. Total time from detection to wipe: &lt; 2 seconds.</td>
+            <td><code>INCIDENT_RESPONSE.md</code> documents classification, automated response, manual follow-up procedures, and reporting templates.</td>
+          </tr>
+          <tr>
+            <td><strong>INCIDENT_RESPONSE.md</strong></td>
+            <td>Documented procedures for all severity levels (Critical/High/Medium/Low). Includes escalation contacts, data breach assessment, and incident log templates.</td>
+            <td>Document is versioned in the compliance package and reviewed quarterly.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="criterion-note"><strong>How this satisfies CC7.2:</strong> Incident response is both automated (immediate cryptographic destruction of sensitive data) and documented (manual follow-up procedures for root cause analysis). The automated component eliminates human latency in the most critical scenarios.</div>
+
+    <hr class="doc-hr">
+
+    <h3>2.3 CC8 — Change Management</h3>
+
+    <h4>CC8.1 — Change Management</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Kwyre Layer</th><th>Implementation</th><th>Evidence</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>L3 — Dependency Integrity</strong></td>
+            <td>SHA256 hash manifest of every installed Python package generated on clean install. Verified at every server startup. Detects: version changes, file tampering, unexpected packages. Any mismatch aborts startup immediately.</td>
+            <td><code>python security/verify_deps.py verify</code> output shows per-package hash verification. Manifest stored at <code>security/kwyre_dep_manifest.json</code>.</td>
+          </tr>
+          <tr>
+            <td><strong>L4 — Model Weight Integrity</strong></td>
+            <td>SHA256 hashes of model configuration files (<code>config.json</code>, <code>tokenizer_config.json</code>, <code>generation_config.json</code>, <code>tokenizer.json</code>) hardcoded in server. Verified at every startup. Any mismatch aborts startup.</td>
+            <td>Server startup log shows <code>[Layer 4] Model integrity check: PASSED</code> or <code>FAILED</code>.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="criterion-note"><strong>How this satisfies CC8.1:</strong> All software components (dependencies and model weights) are cryptographically baselined and verified before every execution. Unauthorized changes — whether from supply-chain attacks, accidental upgrades, or deliberate tampering — are detected and blocked before any inference occurs.</div>
+
+    <hr class="doc-hr">
+
+    <h3>2.4 CC3 — Risk Assessment</h3>
+
+    <h4>CC3.1 — Risk Assessment</h4>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Activity</th><th>Details</th><th>Evidence</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>White-Box Penetration Test</strong></td>
+            <td>Full security audit of Kwyre v0.3 conducted with complete source code access. 47 findings identified across all severity levels.</td>
+            <td>Pentest report with finding details, severity classifications, and remediation verification.</td>
+          </tr>
+          <tr>
+            <td><strong>Finding Resolution</strong></td>
+            <td>All 47 findings resolved: 9 Critical, 12 High, 14 Medium, 12 Low/Informational. Zero open findings.</td>
+            <td>Individual finding remediation documented with code changes and re-test confirmation.</td>
+          </tr>
+          <tr>
+            <td><strong>Security Test Suite</strong></td>
+            <td>107 automated security tests across 3 test files covering authentication, session management, input validation, intrusion detection, and integrity verification.</td>
+            <td><code>pytest tests/</code> — all 107 tests passing. Test coverage documented.</td>
+          </tr>
+          <tr>
+            <td><strong>Threat Model</strong></td>
+            <td>Documented threat model covering network interception, remote access, data exfiltration, model poisoning, disk forensics, active debugging, and crash scenarios.</td>
+            <td><code>SECURITY_ARCHITECTURE.md</code> — Threat Model section with layer-by-layer mitigation mapping.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="criterion-note"><strong>How this satisfies CC3.1:</strong> Risk has been systematically assessed through professional penetration testing with 100% finding remediation, a comprehensive threat model with documented mitigations, and an automated regression test suite that runs on every build.</div>
+  </div>
+
+  <!-- SECTION 3 -->
+  <div class="doc-section">
+    <h2>3. Pre-Deployment Checklist</h2>
+
+    <div class="phase-header">Phase 1 — Environment Preparation</div>
+    <ul class="checklist">
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Dedicated machine identified</strong> — Kwyre runs on a single-purpose machine or VM</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>OS hardened</strong> — latest security patches applied, unnecessary services disabled</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Disk encryption enabled</strong> — BitLocker (Windows) or LUKS (Linux) for model weight protection</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Physical access controls documented</strong> — machine location, access restrictions, visitor logs</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Network segmentation confirmed</strong> — machine on restricted VLAN or fully air-gapped</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Administrative access restricted</strong> — only authorized personnel have OS-level login</span></li>
+    </ul>
+
+    <div class="phase-header">Phase 2 — Kwyre Installation</div>
+    <ul class="checklist">
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Clean Python environment created</strong> — dedicated venv, no shared packages</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Dependencies installed from locked requirements</strong> — <code>pip install -r requirements-inference.txt</code></span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Dependency manifest generated</strong> — <code>python security/verify_deps.py generate</code></span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Manifest committed to version control</strong> with reviewer approval</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Model weights downloaded and verified</strong> — SHA256 hashes recorded</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Pre-quantized models deployed</strong> (if using Kwyre distribution packages)</span></li>
+    </ul>
+
+    <div class="phase-header">Phase 3 — Security Stack Verification</div>
+    <ul class="checklist">
+      <li><span class="check-box">☐</span><span class="check-label"><strong>L1 verified</strong> — <code>netstat</code> confirms <code>127.0.0.1:8000</code> binding only</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>L1 cross-machine test</strong> — connection from another machine fails</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>L2 installed</strong> — firewall rules block process outbound (iptables/Windows Firewall)</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>L2 verified</strong> — <code>Get-NetFirewallRule</code> or <code>iptables -L</code> shows Kwyre rules active</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>L3 verified</strong> — <code>verify_deps.py verify</code> shows all packages <code>[OK]</code></span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>L4 verified</strong> — server startup log shows <code>[Layer 4] Model integrity check: PASSED</code></span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>L5 verified</strong> — disk search for conversation content returns zero results</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>L6 verified</strong> — <code>/health</code> shows <code>"intrusion_watchdog": {"running": true}</code></span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>L6 trigger test</strong> — opening monitored tool causes server shutdown (optional but recommended)</span></li>
+    </ul>
+
+    <div class="phase-header">Phase 4 — Authentication and Access Control</div>
+    <ul class="checklist">
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Production API keys generated</strong> — <code>secrets.token_hex(32)</code> minimum entropy</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Development keys removed</strong> — <code>sk-kwyre-dev-local</code> is not in production config</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Key distribution documented</strong> — who has keys, when issued, revocation procedure</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Unauthenticated access confirmed blocked</strong> — requests without Bearer token return 401</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Eval tier enforcement confirmed</strong> — unlicensed usage is rate-limited</span></li>
+    </ul>
+
+    <div class="phase-header">Phase 5 — Network Verification</div>
+    <ul class="checklist">
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Full Wireshark capture test</strong> — 10+ queries sent, zero non-localhost packets observed</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>DNS monitoring test</strong> — zero DNS queries from Kwyre process during operation</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>CORS restriction confirmed</strong> — <code>Access-Control-Allow-Origin</code> locked to server origin</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Security headers confirmed</strong> — CSP, X-Frame-Options, X-Content-Type-Options present on all responses</span></li>
+    </ul>
+
+    <div class="phase-header">Phase 6 — Compliance Documentation</div>
+    <ul class="checklist">
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Compliance letter reviewed</strong> — <code>COMPLIANCE_LETTER.md</code> current and signed</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Verification guide executed</strong> — all 14 checks in <code>VERIFICATION_GUIDE.md</code> passed</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Incident response plan reviewed</strong> — <code>INCIDENT_RESPONSE.md</code> customized with org contacts</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Data residency confirmed</strong> — <code>DATA_RESIDENCY.md</code> reviewed with legal team</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Deployment metadata recorded</strong> — machine, GPU, date, version, deployer, reviewer</span></li>
+    </ul>
+
+    <div class="phase-header">Phase 7 — Ongoing Operations</div>
+    <ul class="checklist">
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Startup verification</strong> — L3 + L4 checks run automatically at every server start</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Weekly audit log review</strong> — <code>/audit</code> endpoint output reviewed for anomalies</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Post-update verification</strong> — <code>verify_deps.py verify</code> after any system/package update</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Quarterly full verification</strong> — complete <code>VERIFICATION_GUIDE.md</code> execution and documentation</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Annual penetration test</strong> — or when significant changes are made to the codebase</span></li>
+      <li><span class="check-box">☐</span><span class="check-label"><strong>Incident response drill</strong> — tabletop exercise of L6 trigger scenario annually</span></li>
+    </ul>
+  </div>
+
+  <!-- SECTION 4 -->
+  <div class="doc-section">
+    <h2>4. Evidence Collection for Auditors</h2>
+
+    <h3>4.1 Artifacts Kwyre Produces</h3>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Artifact</th><th>Location</th><th>Content</th><th>Retention</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Audit endpoint output</strong></td>
+            <td><code>GET /audit</code> (live)</td>
+            <td>Active sessions, security control status, watchdog state, timestamps. <strong>Never contains conversation content.</strong></td>
+            <td>Live query — reflects current state</td>
+          </tr>
+          <tr>
+            <td><strong>Health endpoint output</strong></td>
+            <td><code>GET /health</code> (live)</td>
+            <td>System status, VRAM usage, model info, speculative decoding status, watchdog state. Detailed info requires authentication.</td>
+            <td>Live query — reflects current state</td>
+          </tr>
+          <tr>
+            <td><strong>Server startup log</strong></td>
+            <td>stdout/stderr</td>
+            <td>Layer 3 verification results, Layer 4 integrity check, model loading, watchdog initialization.</td>
+            <td>Captured by process supervisor (systemd, Docker, etc.)</td>
+          </tr>
+          <tr>
+            <td><strong>Intrusion event log</strong></td>
+            <td>In-memory <code>intrusion_log</code> + stdout</td>
+            <td>Timestamp, trigger type, trigger details, session count at wipe. <strong>Metadata only.</strong></td>
+            <td>In-memory until process exit; stdout captured by supervisor</td>
+          </tr>
+          <tr>
+            <td><strong>Session wipe log</strong></td>
+            <td>stdout</td>
+            <td>Session ID prefix (first 8 chars), message count, wipe reason. <strong>No content.</strong></td>
+            <td>Captured by process supervisor</td>
+          </tr>
+          <tr>
+            <td><strong>Dependency manifest</strong></td>
+            <td><code>security/kwyre_dep_manifest.json</code></td>
+            <td>SHA256 hashes and versions of all installed Python packages at time of baseline.</td>
+            <td>Persisted on disk, version-controlled</td>
+          </tr>
+          <tr>
+            <td><strong>Model weight hashes</strong></td>
+            <td>Hardcoded in <code>serve_local_4bit.py</code></td>
+            <td>SHA256 hashes of model configuration files.</td>
+            <td>Compiled into server binary</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4.2 Artifacts Kwyre Does NOT Produce</h3>
+    <p>These are intentionally absent. Their absence is itself evidence of the data handling architecture:</p>
+    <div class="table-wrap">
+      <table class="absent-table">
+        <thead>
+          <tr><th>Artifact</th><th>Why It Doesn't Exist</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>Conversation logs</td><td>L5: RAM-only storage — content is never written to disk</td></tr>
+          <tr><td>Query logs</td><td>Zero content logging by design — only metadata (timestamps, token counts)</td></tr>
+          <tr><td>Database files</td><td>No database — all state is in-memory</td></tr>
+          <tr><td>Temp files with user data</td><td>No temporary file I/O for inference</td></tr>
+          <tr><td>Network traffic captures showing external comms</td><td>L1 + L2: No external network traffic exists</td></tr>
+          <tr><td>Telemetry or analytics data</td><td>Zero telemetry by design — no phone-home of any kind</td></tr>
+          <tr><td>Error reports with user content</td><td>Error messages contain code paths only, never user input</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h3>4.3 Auditor Verification Procedures</h3>
+    <p>Auditors can independently verify all claims without vendor cooperation. See <code>VERIFICATION_GUIDE.md</code> for 14 step-by-step verification procedures covering all 6 security layers.</p>
+    <p>Key verification methods:</p>
+    <ul style="margin: 12px 0 0 20px; line-height: 2; font-size: 14.5px; color: var(--text2);">
+      <li><strong style="color:var(--text)">Network binding</strong> — <code>netstat</code>/<code>ss</code> confirms localhost-only binding</li>
+      <li><strong style="color:var(--text)">Zero outbound traffic</strong> — Wireshark full capture shows zero non-localhost packets</li>
+      <li><strong style="color:var(--text)">Dependency integrity</strong> — <code>verify_deps.py verify</code> shows cryptographic verification</li>
+      <li><strong style="color:var(--text)">Model integrity</strong> — startup log shows SHA256 verification pass/fail</li>
+      <li><strong style="color:var(--text)">RAM-only storage</strong> — disk forensic search finds zero conversation content</li>
+      <li><strong style="color:var(--text)">Intrusion detection</strong> — <code>/health</code> confirms watchdog running; trigger test optional</li>
+      <li><strong style="color:var(--text)">Authentication</strong> — unauthenticated requests confirmed rejected</li>
+    </ul>
+  </div>
+
+  <!-- SECTION 5 -->
+  <div class="doc-section">
+    <h2>5. Network Architecture Diagram</h2>
+<pre>╔══════════════════════════════════════════════════════════════════════╗
+║                        CUSTOMER MACHINE                              ║
+║                                                                      ║
+║   ┌──────────────────┐                                               ║
+║   │  Browser / API   │                                               ║
+║   │     Client       │                                               ║
+║   └────────┬─────────┘                                               ║
+║            │                                                         ║
+║            │ HTTP (127.0.0.1:8000 ONLY)                              ║
+║            │ ┌─── Auth: Bearer &lt;api-key&gt; ───┐                        ║
+║            ▼ ▼                               │                       ║
+║   ┌────────────────────────────────────────────────────────────────┐ ║
+║   │                    KWYRE INFERENCE SERVER                      │ ║
+║   │                                                                │ ║
+║   │  ┌─────────────┐  ┌──────────────────┐  ┌──────────────────┐  │ ║
+║   │  │  API Router  │  │  Rate Limiter    │  │  CSP Nonce Gen   │  │ ║
+║   │  │  + Auth      │  │  + Eval Tier     │  │  + Sec Headers   │  │ ║
+║   │  └─────────────┘  └──────────────────┘  └──────────────────┘  │ ║
+║   │                                                                │ ║
+║   │  ┌──────────────────────────────────────────────────────────┐  │ ║
+║   │  │              LAYER 5: Secure Session Store               │  │ ║
+║   │  │  ● RAM-only conversation buffers                         │  │ ║
+║   │  │  ● 256-bit per-session keys                              │  │ ║
+║   │  │  ● Cryptographic wipe on close/timeout/intrusion         │  │ ║
+║   │  │  ● 1-hour idle session reaping                           │  │ ║
+║   │  └──────────────────────────────────────────────────────────┘  │ ║
+║   │                                                                │ ║
+║   │  ┌──────────────────────────────────────────────────────────┐  │ ║
+║   │  │              INFERENCE ENGINE                            │  │ ║
+║   │  │  ● Qwen3-4B main model (4-bit NF4)                      │  │ ║
+║   │  │  ● Qwen3-0.6B speculative draft                         │  │ ║
+║   │  │  ● SpikeServe activation encoding                        │  │ ║
+║   │  │  ● GPU VRAM: ~3.9 GB combined                            │  │ ║
+║   │  └──────────────────────────────────────────────────────────┘  │ ║
+║   │                                                                │ ║
+║   │  ┌──────────────────────────────────────────────────────────┐  │ ║
+║   │  │              LAYER 6: Intrusion Watchdog (daemon)        │  │ ║
+║   │  │  ● Scans every 5s for outbound connections               │  │ ║
+║   │  │  ● Monitors for debug/analysis tools                     │  │ ║
+║   │  │  ● 2 consecutive violations → wipe all + terminate       │  │ ║
+║   │  └──────────────────────────────────────────────────────────┘  │ ║
+║   │                                                                │ ║
+║   │  STARTUP GATES (must pass before inference begins):            │ ║
+║   │  [L3] SHA256 dependency manifest verification                  │ ║
+║   │  [L4] SHA256 model weight integrity verification               │ ║
+║   └────────────────────────────────────────────────────────────────┘ ║
+║                                                                      ║
+║   ┌────────────────────────────────────────────────────────────────┐ ║
+║   │                    OS-LEVEL CONTROLS                           │ ║
+║   │  [L1] TCP socket bound to 127.0.0.1 — not routable            │ ║
+║   │  [L2] iptables / Windows Firewall: outbound DENY for process   │ ║
+║   └────────────────────────────────────────────────────────────────┘ ║
+║                                                                      ║
+║   ════════════════════════════════════════════════════════════════   ║
+║                    NO DATA CROSSES THIS LINE                         ║
+╚══════════════════════════════════════════════════════════════════════╝
+                              │
+                         INTERNET / LAN
+                       (blocked at L1 + L2)
+
+Data Flow:
+  User Input → [RAM] → [GPU VRAM] → [RAM] → User Output
+                         │
+              No disk. No network. No logs.</pre>
+  </div>
+
+  <!-- SECTION 6 -->
+  <div class="doc-section">
+    <h2>6. Control Attestation Table</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Control ID</th>
+            <th>SOC 2 Criteria</th>
+            <th>Control Description</th>
+            <th>Kwyre Implementation</th>
+            <th>Evidence Location</th>
+            <th>Test Frequency</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>KW-AC-01</td><td>CC6.1</td><td>Logical access restricted to localhost</td><td><code>BIND_HOST = "127.0.0.1"</code> in server; OS socket-level enforcement</td><td><code>netstat -an</code>, cross-machine test</td><td>Every startup</td></tr>
+          <tr><td>KW-AC-02</td><td>CC6.1</td><td>API authentication required</td><td>HMAC-compared API key on all endpoints; timing-safe comparison</td><td>HTTP 401 on unauth requests</td><td>Every request</td></tr>
+          <tr><td>KW-AC-03</td><td>CC6.1</td><td>Process network isolation</td><td>iptables/Windows Firewall per-process outbound deny</td><td>Firewall rule listing</td><td>Persistent OS rules</td></tr>
+          <tr><td>KW-AC-04</td><td>CC6.1</td><td>Eval tier rate limiting</td><td>Unlicensed: 10 req/min, 512 max tokens, 3 trial requests per IP</td><td>Server logs show enforcement</td><td>Every request</td></tr>
+          <tr><td>KW-BD-01</td><td>CC6.6</td><td>System boundary = loopback</td><td>No network interface other than <code>lo</code> carries Kwyre traffic</td><td>Wireshark capture</td><td>Quarterly verification</td></tr>
+          <tr><td>KW-BD-02</td><td>CC6.6</td><td>Air-gap enforcement</td><td>External tools opt-in (<code>KWYRE_ENABLE_TOOLS=0</code> default); SSRF allowlist</td><td>Config review, code audit</td><td>Every deployment</td></tr>
+          <tr><td>KW-TR-01</td><td>CC6.7</td><td>Data in transit protection</td><td>No transit exists — all communication is loopback-only</td><td>Wireshark shows zero external packets</td><td>Quarterly verification</td></tr>
+          <tr><td>KW-DR-01</td><td>CC6.8</td><td>Data at rest protection</td><td>No data at rest exists — RAM-only with cryptographic wipe</td><td>Disk forensic search; <code>/audit</code> output</td><td>Every session end</td></tr>
+          <tr><td>KW-DR-02</td><td>CC6.8</td><td>Session key management</td><td>256-bit random per-session keys; zeroed on wipe</td><td>Code review of <code>SecureConversationBuffer</code></td><td>Code audit</td></tr>
+          <tr><td>KW-MN-01</td><td>CC7.1</td><td>Continuous system monitoring</td><td>Intrusion watchdog: 5s scan interval, outbound + process monitoring</td><td><code>/health</code> endpoint; watchdog logs</td><td>Continuous (every 5s)</td></tr>
+          <tr><td>KW-MN-02</td><td>CC7.1</td><td>Audit trail</td><td><code>GET /audit</code> endpoint: metadata-only session and security status</td><td>Audit endpoint output</td><td>On demand</td></tr>
+          <tr><td>KW-IR-01</td><td>CC7.2</td><td>Automated incident response</td><td>L6 auto-wipe: all sessions destroyed in &lt;2s on confirmed intrusion</td><td>Intrusion event log; <code>INCIDENT_RESPONSE.md</code></td><td>Continuous monitoring</td></tr>
+          <tr><td>KW-IR-02</td><td>CC7.2</td><td>Documented IR procedures</td><td><code>INCIDENT_RESPONSE.md</code>: severity classification, response procedures, escalation, reporting</td><td>Document review</td><td>Annual review</td></tr>
+          <tr><td>KW-CM-01</td><td>CC8.1</td><td>Dependency change detection</td><td>L3: SHA256 manifest of all Python packages verified at startup</td><td><code>verify_deps.py verify</code> output</td><td>Every startup</td></tr>
+          <tr><td>KW-CM-02</td><td>CC8.1</td><td>Model integrity verification</td><td>L4: SHA256 hashes of model configs verified at startup</td><td>Startup log: <code>[Layer 4] PASSED/FAILED</code></td><td>Every startup</td></tr>
+          <tr><td>KW-CM-03</td><td>CC8.1</td><td>Build integrity</td><td>Nuitka-compiled binary distribution; no source-level tampering possible</td><td>Build pipeline documentation</td><td>Every release</td></tr>
+          <tr><td>KW-RA-01</td><td>CC3.1</td><td>Security risk assessment</td><td>White-box pentest: 47/47 findings resolved (9C/12H/14M/12L)</td><td>Pentest report; remediation evidence</td><td>Annual or on major change</td></tr>
+          <tr><td>KW-RA-02</td><td>CC3.1</td><td>Automated security testing</td><td>107 tests across 3 test suites; all passing</td><td><code>pytest</code> output</td><td>Every build</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 7 -->
+  <div class="doc-section">
+    <h2>7. Auditor FAQ</h2>
+    <div class="faq-list">
+
+      <details>
+        <summary>How does Kwyre protect data in transit without TLS?</summary>
+        <div class="faq-body">
+          <p>Kwyre does not use TLS because there is no transit to protect. The server binds exclusively to <code>127.0.0.1</code> (loopback). Loopback traffic never touches a physical network interface — it is handled entirely within the OS kernel's TCP/IP stack. There is no wire, no NIC, and no network path for an attacker to intercept.</p>
+          <p>This is a stronger guarantee than TLS, which protects data on a wire that exists — Kwyre eliminates the wire entirely.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Where is data stored at rest?</summary>
+        <div class="faq-body">
+          <p>Nowhere. Conversation data exists only in volatile RAM during active sessions. It is never written to disk, database, log file, temporary file, or any persistent storage. On session termination, content is overwritten with cryptographically random bytes before memory deallocation. When the process exits or the machine loses power, all data is irrecoverably destroyed.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>How do we verify the vendor's claims independently?</summary>
+        <div class="faq-body">
+          <p>Every security claim is independently verifiable without vendor cooperation. See <code>VERIFICATION_GUIDE.md</code> for 14 step-by-step procedures. Key methods: <code>netstat</code> for binding verification, Wireshark for zero-traffic confirmation, <code>verify_deps.py</code> for dependency integrity, disk forensics for absence of conversation data. No vendor credentials, special tools, or cooperation required.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What happens during a security incident?</summary>
+        <div class="faq-body">
+          <p>The Layer 6 Intrusion Watchdog provides automated response: on confirmed detection of debugging tools or unexpected outbound connections (2 consecutive detections, 10s apart), all sessions are immediately wiped (content overwritten with random bytes), the event is logged (metadata only), and the server process terminates. Total detection-to-wipe time: &lt; 2 seconds.</p>
+          <p>See <code>INCIDENT_RESPONSE.md</code> for full procedures including manual follow-up and reporting.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Does Kwyre have any external dependencies or cloud services?</summary>
+        <div class="faq-body">
+          <p>No. After initial model download (one-time, ~3.3 GB from kwyre.com or HuggingFace), Kwyre operates completely offline. There is no telemetry, no analytics, no update checking, no license callback, no crash reporting, no phone-home functionality of any kind.</p>
+          <p>The environment variables <code>HF_HUB_OFFLINE=1</code> and <code>TRANSFORMERS_OFFLINE=1</code> are hardcoded to prevent any network access attempts by ML libraries.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>How are API keys managed?</summary>
+        <div class="faq-body">
+          <p>API keys are set via the <code>KWYRE_API_KEYS</code> environment variable as <code>key:role</code> pairs. Keys are validated using <code>hmac.compare_digest</code> (timing-safe comparison). The system supports multiple keys with role-based access. There is no centralized key management service — keys are managed by the customer's IT team as environment configuration.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What audit trail does Kwyre maintain?</summary>
+        <div class="faq-body">
+          <p>The <code>GET /audit</code> endpoint returns a metadata-only compliance log including: active session count, security control status (all 6 layers), watchdog state, and timestamps. It never includes conversation content. Server stdout captures startup verification results, session lifecycle events (creation, wipe), and intrusion detection events — all metadata only.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Can Kwyre be deployed in an air-gapped environment?</summary>
+        <div class="faq-body">
+          <p>Yes. This is a primary deployment scenario. Steps: (1) download models and packages on an internet-connected staging machine, (2) transfer to air-gapped machine via approved media, (3) install with <code>pip install --no-index</code>, (4) <code>HF_HUB_OFFLINE=1</code> is already hardcoded. The server requires no network access for any function after initial setup.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>How does Kwyre handle multi-tenancy?</summary>
+        <div class="faq-body">
+          <p>Kwyre is designed for single-organization deployment on dedicated hardware. Each organization deploys their own instance. There is no shared infrastructure, no multi-tenant data commingling, and no cross-organization access path. Session isolation within a single deployment is enforced by unique session IDs and per-session encryption keys.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What is the Docker security posture?</summary>
+        <div class="faq-body">
+          <p>The Docker container runs as a non-root <code>kwyre</code> user with minimal privileges. The dependency manifest is generated at build time. Port mapping restricts to <code>127.0.0.1:8000</code> on the host. The container image includes CUDA runtime but no unnecessary packages. The <code>Dockerfile</code> is auditable.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>How does Kwyre handle vulnerability management?</summary>
+        <div class="faq-body">
+          <p>Dependencies are pinned in <code>requirements-inference.txt</code> and cryptographically baselined in the L3 manifest. Any change — including security patches — is detected at startup. The process for applying updates: (1) update package, (2) re-run <code>verify_deps.py generate</code> to re-baseline, (3) commit new manifest with reviewer approval. The 107-test security suite is run on every build.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>What is the penetration test coverage?</summary>
+        <div class="faq-body">
+          <p>Kwyre v0.3 underwent a full white-box penetration test with complete source code access. 47 findings were identified (9 Critical, 12 High, 14 Medium, 12 Low/Informational). All 47 were resolved and re-tested. Key categories: CSP hardening, authentication timing attacks, input validation, SSRF prevention, session management, Docker privilege reduction. Details are available under NDA.</p>
+        </div>
+      </details>
+
+      <details>
+        <summary>Does the system write any sensitive data to logs?</summary>
+        <div class="faq-body">
+          <p>No. All logging is metadata-only. Log entries include timestamps, session ID prefixes (first 8 characters), message counts, token counts, wipe reasons, and security event types. Conversation content (user prompts and model responses) is never included in any log at any verbosity level. This is enforced architecturally, not by configuration.</p>
+        </div>
+      </details>
+
+    </div>
+  </div>
+
+  <!-- SECTION 8 -->
+  <div class="doc-section">
+    <h2>8. Supplementary Documents</h2>
+    <div class="table-wrap">
+      <table class="supp-table">
+        <thead>
+          <tr><th>Document</th><th>ID</th><th>Purpose</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><a href="../security.html">Security Overview</a></td>
+            <td>—</td>
+            <td>Public security overview and compliance summary</td>
+          </tr>
+          <tr>
+            <td><a href="data-residency.html">Data Residency Policy</a></td>
+            <td>—</td>
+            <td>Data flow and privacy architecture documentation</td>
+          </tr>
+          <tr>
+            <td><a href="security-architecture.html">Security Architecture</a></td>
+            <td>—</td>
+            <td>Technical description of the 6-layer security model</td>
+          </tr>
+          <tr>
+            <td><a href="../security.html#compliance">Compliance Letter</a></td>
+            <td>KWYRE-COMP-001</td>
+            <td>Formal compliance attestation for legal/regulatory review</td>
+          </tr>
+          <tr>
+            <td><code>VERIFICATION_GUIDE.md</code></td>
+            <td>KWYRE-VER-001</td>
+            <td>14-step independent security verification procedures</td>
+          </tr>
+          <tr>
+            <td><code>INCIDENT_RESPONSE.md</code></td>
+            <td>KWYRE-IR-001</td>
+            <td>Security event classification and response procedures</td>
+          </tr>
+          <tr>
+            <td><code>ENTERPRISE_AUDIT.md</code></td>
+            <td>KWYRE-AUDIT-001</td>
+            <td>Extended audit documentation with regulatory mapping</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p style="margin-top:24px; font-size:13px; color:var(--text3); font-style:italic; line-height:1.7;">
+      This document is provided for SOC 2 Type II audit preparation. It describes verifiable technical controls implemented in the Kwyre AI software. It is not legal advice. Organizations should consult their own auditors and legal counsel for SOC 2 compliance determinations.
+    </p>
+  </div>
+
+  <footer class="doc-footer">
+    <div class="footer-brand">KWYRE</div>
+    <div class="footer-meta">compliance@kwyre.com · Mint Rail LLC</div>
+    <div class="footer-disclaimer">All inference runs 100% locally. No data leaves your machine.</div>
+  </footer>
+
+</div>
+
+</body>
+</html>
