@@ -86,10 +86,9 @@ PORT = int(os.environ.get("KWYRE_MLX_PORT", "8000"))
 
 MODEL_TIERS = {
     "Qwen/Qwen3.5-9B": {"name": "kwyre-9b", "vram_4bit": "~7.5GB", "tier": "professional"},
-    "Qwen/Qwen3-4B": {"name": "kwyre-4b", "vram_4bit": "~3.5GB", "tier": "personal"},
+    "HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive": {"name": "kwyre-4b", "vram_4bit": "~4.1GB", "tier": "personal"},
 }
 ACTIVE_TIER = MODEL_TIERS.get(MODEL_ID, {"name": "kwyre-custom", "vram_4bit": "unknown", "tier": "custom"})
-
 
 # ---------------------------------------------------------------------------
 # LAYER 4: Model weight integrity
@@ -99,11 +98,8 @@ WEIGHT_HASHES_9B: dict[str, str] = {
     "tokenizer_config.json": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
     "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
 }
-WEIGHT_HASHES_4B: dict[str, str] = {
-    "config.json": "2f48fc86f9a91c0c1646a91ad8b2304443404e595ef02dfbeb0fb0ba11c519c0",
-    "tokenizer_config.json": "f9b405ae89598577609208377d0c109f2f03362e60cc011254dca8aa84310850",
-    "tokenizer.json": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
-}
+# NOTE: Regenerate after downloading HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive
+WEIGHT_HASHES_4B: dict[str, str] = {}
 
 KNOWN_WEIGHT_HASHES = WEIGHT_HASHES_9B if "9B" in MODEL_ID else WEIGHT_HASHES_4B
 

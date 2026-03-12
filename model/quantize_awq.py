@@ -22,8 +22,11 @@ from peft import PeftModel, AutoPeftModelForCausalLM  # LoRA adapter loading uti
 _script_dir = os.path.dirname(os.path.abspath(__file__))  # absolute path to this script's directory
 _project_root = os.path.dirname(_script_dir)  # parent directory as project root
 
-DEFAULT_MODEL_ID = os.environ.get("KWYRE_MODEL", "Qwen/Qwen3.5-9B")  # model ID from env or default
-_TIER_NAMES = {"Qwen/Qwen3-4B": "kwyre-4b", "Qwen/Qwen3.5-9B": "kwyre-9b"}  # map model IDs to tier names
+DEFAULT_MODEL_ID = os.environ.get("KWYRE_MODEL", "HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive")
+_TIER_NAMES = {
+    "HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive": "kwyre-4b",
+    "Qwen/Qwen3.5-9B": "kwyre-9b",
+}
 _TIER_NAME = _TIER_NAMES.get(DEFAULT_MODEL_ID, "kwyre-custom")  # resolve tier name for current model
 DEFAULT_OUTPUT_PATH = os.path.join(_project_root, "models", f"{_TIER_NAME}-awq")  # default quantized output path
 DEFAULT_ADAPTER_PATH = os.path.join(_project_root, "qat_output_v1", "final")  # default LoRA adapter location
@@ -40,7 +43,7 @@ def main():  # entry point for AWQ quantization pipeline
     parser = argparse.ArgumentParser(description="Quantize model to AWQ format")  # create CLI argument parser
     parser.add_argument(  # model source argument
         "--model", default=None,
-        help="Model path or HF ID. Default: resolves from KWYRE_MODEL env or Qwen/Qwen3-4B",
+        help="Model path or HF ID. Default: resolves from KWYRE_MODEL env or HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive",
     )
     parser.add_argument(  # output directory argument
         "--output", default=DEFAULT_OUTPUT_PATH,

@@ -35,6 +35,15 @@ SCORING_WEIGHTS = {
     "legal_correctness": 0.25,
 }
 
+DOMAIN_SCORING_WEIGHTS = {
+    "legal_compliance": {"accuracy": 0.35, "completeness": 0.25, "relevance": 0.15, "legal_correctness": 0.25},
+    "insurance_actuarial": {"accuracy": 0.35, "completeness": 0.30, "relevance": 0.15, "legal_correctness": 0.20},
+    "healthcare_lifesciences": {"accuracy": 0.40, "completeness": 0.25, "relevance": 0.15, "legal_correctness": 0.20},
+    "defense_intelligence": {"accuracy": 0.35, "completeness": 0.30, "relevance": 0.20, "legal_correctness": 0.15},
+    "financial_trading": {"accuracy": 0.40, "completeness": 0.25, "relevance": 0.20, "legal_correctness": 0.15},
+    "blockchain_crypto": {"accuracy": 0.40, "completeness": 0.25, "relevance": 0.20, "legal_correctness": 0.15},
+}
+
 JUDGE_SYSTEM_PROMPT = """You are an expert legal, financial, and forensic analyst evaluating AI-generated responses.
 
 You will receive:
@@ -53,6 +62,33 @@ Score the response on four dimensions (1-10 scale each):
 Respond in EXACTLY this JSON format (no other text):
 {"accuracy": N, "completeness": N, "relevance": N, "legal_correctness": N, "reasoning": "Brief explanation of scores"}
 """
+
+
+def load_adapter_for_benchmark(base_url: str, domain: str) -> bool:
+    """Load a domain adapter on the target server before running benchmark."""
+    try:
+        res = requests.post(
+            f"{base_url}/v1/adapter/load",
+            json={"domain": domain},
+            timeout=30,
+        )
+        data = res.json()
+        if "error" in data:
+            print(f"[Adapter] Warning: {data['error']}")
+            return False
+        print(f"[Adapter] Loaded: {data.get('adapter')} (status: {data.get('status')})")
+        return True
+    except Exception as e:
+        print(f"[Adapter] Could not load adapter: {e}")
+        return False
+
+
+def unload_adapter_for_benchmark(base_url: str) -> None:
+    try:
+        requests.post(f"{base_url}/v1/adapter/unload", timeout=10)
+        print("[Adapter] Unloaded.")
+    except Exception:
+        pass
 
 
 def load_datasets(dataset_name: Optional[str] = None) -> list[dict]:
@@ -589,6 +625,87 @@ def generate_report(results: dict, output_dir: Path) -> Path:
     return report_path
 
 
+def generate_domain_performance_card(
+    base_results: list[dict],
+    adapted_results: list[dict],
+    domain: str,
+    output_dir: Path,
+) -> Path:
+    """Generate a markdown domain performance card comparing base vs. adapted model."""
+    weights = DOMAIN_SCORING_WEIGHTS.get(domain, SCORING_WEIGHTS)
+
+    def avg_score(results: list[dict]) -> dict:
+        if not results:
+            return {}
+        dims = ["accuracy", "completeness", "relevance", "legal_correctness"]
+        totals = {d: 0.0 for d in dims}
+        count = 0
+        for r in results:
+            scores = r.get("scores", {})
+            if scores:
+                for d in dims:
+                    totals[d] += scores.get(d, 0)
+                count += 1
+        if count == 0:
+            return {d: 0.0 for d in dims}
+        return {d: round(totals[d] / count, 2) for d in dims}
+
+    def weighted_avg(score_dict: dict) -> float:
+        return round(sum(weights.get(k, 0.25) * v for k, v in score_dict.items()), 3)
+
+    base_avgs = avg_score(base_results)
+    adapted_avgs = avg_score(adapted_results)
+    base_total = weighted_avg(base_avgs)
+    adapted_total = weighted_avg(adapted_avgs)
+    delta = round(adapted_total - base_total, 3)
+    delta_str = f"+{delta}" if delta >= 0 else str(delta)
+
+    now = datetime.now(timezone.utc).strftime("%Y-%m-%d %H:%M UTC")
+    card_lines = [
+        f"# Domain Performance Card: {domain.replace('_', ' ').title()}",
+        f"",
+        f"Generated: {now}",
+        f"",
+        f"## Overall Score",
+        f"",
+        f"| Model | Weighted Score |",
+        f"|-------|---------------|",
+        f"| Base model | {base_total:.3f} |",
+        f"| + {domain} adapter | {adapted_total:.3f} |",
+        f"| Delta | **{delta_str}** |",
+        f"",
+        f"## Dimension Breakdown",
+        f"",
+        f"| Dimension | Weight | Base | Adapted | Delta |",
+        f"|-----------|--------|------|---------|-------|",
+    ]
+    for dim in ["accuracy", "completeness", "relevance", "legal_correctness"]:
+        w = weights.get(dim, 0.25)
+        b = base_avgs.get(dim, 0.0)
+        a = adapted_avgs.get(dim, 0.0)
+        d = round(a - b, 2)
+        d_str = f"+{d}" if d >= 0 else str(d)
+        card_lines.append(f"| {dim} | {w:.0%} | {b:.2f} | {a:.2f} | {d_str} |")
+
+    card_lines += [
+        f"",
+        f"## Sample Count",
+        f"",
+        f"- Base model: {len(base_results)} tasks",
+        f"- Adapted model: {len(adapted_results)} tasks",
+        f"",
+        f"---",
+        f"",
+        f"*Scores are on a 1–10 scale. Weighted score uses domain-specific weights.*",
+    ]
+
+    output_dir.mkdir(parents=True, exist_ok=True)
+    card_path = output_dir / f"domain_card_{domain}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.md"
+    card_path.write_text("\n".join(card_lines), encoding="utf-8")
+    print(f"\n[Domain Card] Saved to: {card_path}")
+    return card_path
+
+
 def main():
     parser = argparse.ArgumentParser(
         description="Kwyre Benchmark Suite — Compliance Task Evaluation"
@@ -639,6 +756,16 @@ def main():
         action="store_true",
         help="Skip LLM-as-judge scoring (latency benchmarks only)",
     )
+    parser.add_argument(
+        "--with-adapter",
+        action="store_true",
+        help="Run benchmark twice: once base model, once with domain adapter loaded",
+    )
+    parser.add_argument(
+        "--adapter-domain",
+        default=None,
+        help="Domain adapter to load for comparison (e.g. legal_compliance)",
+    )
 
     args = parser.parse_args()
 
@@ -652,6 +779,8 @@ def main():
     print(f"  Max Tokens:     {args.max_tokens}")
     print(f"  Dataset:        {args.dataset or 'all'}")
     print(f"  Scoring:        {'disabled' if args.skip_scoring else 'LLM-as-judge'}")
+    if args.with_adapter:
+        print(f"  Adapter Domain: {args.adapter_domain or '(none specified)'}")
     print("=" * 60)
 
     # Verify Kwyre is reachable
@@ -672,6 +801,30 @@ def main():
 
     output_dir = Path(args.output_dir)
     report_path = generate_report(results, output_dir)
+
+    if args.with_adapter and args.adapter_domain:
+        def _flatten_kwyre_results(bench_results: dict) -> list[dict]:
+            flat = []
+            for ds in bench_results.get("datasets", []):
+                for task in ds.get("tasks", []):
+                    kw = task.get("kwyre", {})
+                    flat.append({"scores": kw.get("scores") or {}})
+            return flat
+
+        base_flat = _flatten_kwyre_results(results)
+
+        print(f"\n{'='*60}")
+        print(f"  Running adapted benchmark with domain: {args.adapter_domain}")
+        print(f"{'='*60}")
+        load_adapter_for_benchmark(args.kwyre_url, args.adapter_domain)
+        adapted_results_raw = run_benchmark(args)
+        unload_adapter_for_benchmark(args.kwyre_url)
+
+        adapted_flat = _flatten_kwyre_results(adapted_results_raw)
+
+        generate_domain_performance_card(
+            base_flat, adapted_flat, args.adapter_domain, output_dir
+        )
 
     print(f"\n{'='*60}")
     print(f"  Benchmark complete!")

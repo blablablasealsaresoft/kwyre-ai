@@ -4,14 +4,15 @@
 > The only local AI that protects your data **even if your machine is compromised.**
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Model](https://img.shields.io/badge/model-Custom%20Qwen3.5--9B-orange.svg)](https://huggingface.co/Qwen)
+[![Model](https://img.shields.io/badge/model-Qwen3.5--4B%20%2B%209B-orange.svg)](https://huggingface.co/Qwen)
 [![Quantization](https://img.shields.io/badge/quant-4--bit%20NF4-green.svg)]()
 [![Security](https://img.shields.io/badge/security-6--layer%20stack-red.svg)]()
 [![Docker](https://img.shields.io/badge/deploy-docker--compose%20up-blue.svg)]()
-[![Status](https://img.shields.io/badge/status-v1.3%20production-brightgreen.svg)]()
+[![Status](https://img.shields.io/badge/status-v1.5%20production-brightgreen.svg)]()
 [![Pentest](https://img.shields.io/badge/pentest-47%2F47%20resolved-brightgreen.svg)]()
 [![Streaming](https://img.shields.io/badge/SSE-streaming-blue.svg)]()
 [![GRPO](https://img.shields.io/badge/training-GRPO%20%2B%20distillation-purple.svg)]()
+[![Adapters](https://img.shields.io/badge/adapters-6%20domains-blueviolet.svg)]()
 
 ---
 
@@ -19,7 +20,7 @@
 
 Kwyre is a locally-deployed AI inference system built for professionals who work with data that **cannot leave the room** — active federal investigations, attorney-client privileged documents, regulated financial records, classified-adjacent work product, and sensitive compliance analysis.
 
-It is not a hobbyist local model runner. It is a **certified, auditable, breach-resistant AI appliance** that runs entirely on your hardware, with cryptographic session wiping, intrusion detection, and a compliance documentation package built in.
+It is not a hobbyist local model runner. It is a **certified, auditable, breach-resistant AI appliance** that runs entirely on your hardware, with cryptographic session wiping, intrusion detection, hot-swappable domain adapters, and a compliance documentation package built in.
 
 **Your queries never leave your machine. Not to a cloud. Not to us. Not to anyone.**
 
@@ -27,25 +28,76 @@ It is not a hobbyist local model runner. It is a **certified, auditable, breach-
 
 ## Five Products, One Mission
 
-Every Kwyre product runs 100% locally with zero data leaving your machine. Choose the one that fits your hardware and workflow.
+Every Kwyre product runs 100% locally with zero data leaving your machine.
 
 | Product | Model | Hardware | VRAM / RAM | Speed | Price | Identity |
 |---------|-------|----------|-----------|-------|-------|----------|
-| **Kwyre Personal** | Qwen3-4B + 0.6B draft | NVIDIA GPU (RTX 4060+) | 3.9 GB VRAM | 7-14 tok/s | $299 | Speed-optimized with speculative decoding, SpikeServe, RAG document ingestion |
-| **Kwyre Professional** | Qwen3.5-9B + 0.6B draft | NVIDIA GPU (RTX 4090/3090) | 7.5 GB VRAM | 3-5 tok/s | $799 | Custom-trained domain specialist — Claude-distilled reasoning + GRPO emergent problem-solving for legal, financial, and forensic analysis |
+| **Kwyre Personal** | Qwen3.5-4B + 0.8B draft | NVIDIA GPU (RTX 4060+) | 4.1 GB VRAM | 7-14 tok/s | $299 | Speed-optimized with speculative decoding, SpikeServe, RAG document ingestion, **1 domain adapter** |
+| **Kwyre Professional** | Qwen3.5-9B + 0.8B draft | NVIDIA GPU (RTX 4090/3090) | 7.5 GB VRAM | 3-5 tok/s | $799 | Domain specialist — Claude-distilled reasoning + GRPO emergent problem-solving, **all 6 domain adapters** |
 | **Kwyre Air** | Any GGUF model | Any CPU | 8+ GB RAM | 2-8 tok/s | $299 | Lightweight portable — runs on any hardware, no GPU required |
 | **Kwyre (Apple Silicon)** | Any MLX model | M1/M2/M3/M4 Mac | 8+ GB unified | 5-15 tok/s | $299 | Native Metal acceleration, zero CUDA dependency |
 | **Custom LLM** | Domain-specific (we train) | Any (we configure) | Varies | Varies | Contact | Turnkey appliance or self-hosted — legal, financial, crypto, insurance, defense, healthcare |
 
 **All products share:** 6-layer security stack, OpenAI-compatible API, SSE streaming, cryptographic session wipe, intrusion detection, offline license validation.
 
-**GPU products add:** Speculative decoding, SpikeServe activation encoding, per-session KV cache, RAG document ingestion, multi-user RBAC, Flash Attention 2.
+**GPU products add:** Speculative decoding, SpikeServe activation encoding, per-session KV cache, RAG document ingestion, multi-user RBAC, Flash Attention 2, hot-swap domain adapters.
+
+---
+
+## Domain Adapters — Professional Verticals
+
+Kwyre ships with six hot-swappable LoRA domain adapters, each trained on 1,000 Claude-generated expert reasoning traces. Adapters load onto the base model at runtime with no restart required.
+
+### The Six Domains
+
+| Adapter | Size | Expertise |
+|---------|------|-----------|
+| `legal_compliance` | ~150 MB | NDA analysis, privilege screening, SEC/FINRA compliance, M&A, contract review, Stark Law |
+| `insurance_actuarial` | ~150 MB | Reinsurance treaties, loss development triangles, IBNR reserving, Solvency II/RBC, catastrophe XL |
+| `healthcare_lifesciences` | ~150 MB | HIPAA/PHI, 21 CFR Parts 11/50/312, FDA 510(k), ICD-10 coding, Stark Law, clinical trials |
+| `defense_intelligence` | ~150 MB | CUI handling, NIST 800-171/CMMC, MITRE ATT&CK, OSINT per ICD 203/206, OPSEC, SCRM |
+| `financial_trading` | ~150 MB | Algorithmic trading, VaR/CVaR, options pricing, Reg SCI/MiFID II, HFT microstructure, factor models |
+| `blockchain_crypto` | ~150 MB | On-chain tracing, MEV/sandwich attacks, RICO/BSA/AML, wallet clustering, rug pull detection, Tornado Cash analysis |
+
+### How It Works
+
+```
+Customer installs:
+  Base model (Qwen3.5-4B or Qwen3.5-9B)  →  ~2.5 GB or ~7.6 GB
+  + Domain adapter (LoRA weights)          →  ~150 MB each
+
+Runtime:
+  POST /v1/adapter/load   { "domain": "legal_compliance" }
+  POST /v1/adapter/unload
+  GET  /v1/adapter/list
+  POST /v1/adapter/stack  { "adapters": ["legal_compliance", "blockchain_crypto"], "weights": [0.6, 0.4] }
+```
+
+Adapters use PEFT LoRA — swapping takes ~2 seconds and requires no model reload. Multiple adapters can be merged with weighted combination for hybrid use cases (e.g., a crypto lawyer loading both `legal_compliance` + `blockchain_crypto`).
+
+### Adapter Training Pipeline
+
+Each adapter was trained using a two-phase batch process:
+
+```
+Phase 1 — Prompt expansion (Anthropic Batch API, ~$2)
+  12 seed prompts × 84 expansion calls = 1,000 unique expert prompts per domain
+
+Phase 2 — Trace generation (Anthropic Batch API, ~$30)
+  6,000 trace requests submitted as single batch (50% cheaper than real-time)
+  Claude-sonnet reasoning traces with <think>...</think> chain-of-thought
+
+Phase 3 — Distillation (H100 80GB, ~3h/domain)
+  Unsloth QLoRA on Qwen/Qwen3.5-4B
+  LoRA rank 32, 3 epochs, 1,000 samples, seq 4096
+  Loss: 1.2 → 0.53 per domain
+
+Total cost: ~$286 for all 6 adapters
+```
 
 ---
 
 ## How Kwyre Professional Compares
-
-Kwyre Professional uses a custom-trained Qwen3.5-9B with Claude-distilled reasoning traces and GRPO reinforcement learning. Here's how it stacks up against other local models:
 
 ### Model Quality Benchmarks
 
@@ -58,7 +110,7 @@ Kwyre Professional uses a custom-trained Qwen3.5-9B with Claude-distilled reason
 | Llama 4 Scout | 17B | 79.8 | — | 85.1 | 10M | Yes (no security) |
 | Mistral 3 | 24B | 82.8 | — | — | 128K | Yes (no security) |
 
-*Kwyre Professional inherits Qwen3.5-9B's base benchmark scores. Custom training adds domain-specific capabilities not measured by standard benchmarks.*
+*Kwyre Professional inherits Qwen3.5-9B's base benchmark scores. Custom domain adapters add vertical-specific capabilities not measured by standard benchmarks.*
 
 ### What No Benchmark Measures
 
@@ -72,23 +124,14 @@ Kwyre Professional uses a custom-trained Qwen3.5-9B with Claude-distilled reason
 | **RAM-only storage (never disk)** | Yes | No | No | No | No | No |
 | **Dependency integrity (SHA-256)** | Yes | No | No | No | No | No |
 | **Model weight verification** | Yes | No | No | No | No | No |
+| **Hot-swap domain adapters** | Yes | No | No | No | No | No |
+| **Adapter stacking (weighted merge)** | Yes | No | No | No | No | No |
 | **Compliance documentation** | Yes | No | No | No | No | No |
 | **SOC2 / HIPAA / FINRA ready** | Yes | Partial | No | No | No | No |
 | **Anonymous payment (Monero)** | Yes | No | N/A | N/A | N/A | N/A |
 | **Custom-trained for forensics** | Yes | No | No | No | No | No |
 | **RAG document ingestion** | Yes | Yes | Plugin | Plugin | Plugin | Plugin |
 | **Speculative decoding** | Yes | N/A | Yes | Yes | No | No |
-
-### Why Benchmarks Don't Tell the Full Story
-
-Standard benchmarks (MMLU, GSM8K) measure general knowledge. They don't measure whether your model will:
-
-- Preserve attorney-client privilege by architecture
-- Wipe all evidence of a conversation when a session ends
-- Detect if someone is trying to exfiltrate your data via a compromised dependency
-- Auto-terminate if Wireshark or a debugger appears on the system
-
-**Kwyre's competitive advantage isn't benchmark scores — it's the only local AI that assumes the machine itself might be compromised and defends against it.**
 
 ---
 
@@ -127,6 +170,12 @@ graph TB
                 QUEUE["Inference Queue<br/>Serialized GPU access"]
                 KV["KV Cache Store<br/>Per-session · LRU eviction · VRAM cap"]
 
+                subgraph ADAPTER_SYSTEM["Domain Adapter System"]
+                    AMGR["AdapterManager<br/>Thread-safe hot-swap"]
+                    ADAPTERS["~/.kwyre/adapters/<br/>legal · insurance · healthcare<br/>defense · trading · blockchain"]
+                    STACK["Adapter Stacking<br/>Weighted LoRA merge"]
+                end
+
                 subgraph BACKENDS["Inference Backends"]
                     GPU["GPU Backend<br/>serve_local_4bit.py<br/>NF4 / AWQ quantization"]
                     CPU["CPU Backend<br/>serve_cpu.py<br/>llama.cpp · GGUF"]
@@ -134,8 +183,8 @@ graph TB
                 end
 
                 subgraph MODELS["Model Stack"]
-                    MAIN["Qwen3-4B Main<br/>2.5 GB · NF4"]
-                    DRAFT["Qwen3-0.6B Draft<br/>0.8 GB · NF4"]
+                    MAIN["Qwen3.5-4B Main<br/>2.5 GB · NF4"]
+                    DRAFT["Qwen3.5-0.8B Draft<br/>0.8 GB · NF4"]
                     SPIKE["SpikeServe Hooks<br/>84 MLP layers on draft"]
                 end
             end
@@ -166,6 +215,10 @@ graph TB
     MAIN -->|"speculative validation"| DRAFT
     GPU --> KV
     GPU --> STREAM
+    GPU --> AMGR
+    AMGR --> ADAPTERS
+    AMGR --> STACK
+    ADAPTERS -->|"PEFT LoRA"| MAIN
     WATCHDOG -.->|"5s scan"| SESSION
     WATCHDOG -.->|"intrusion → wipe all"| BUFFER
     BARRIER ~~~~ INTERNET
@@ -176,6 +229,7 @@ graph TB
     style SECURITY_CORE fill:#1a1a2e,stroke:#16213e,color:#e8e8e8
     style SESSION fill:#0f3460,stroke:#1a1a2e,color:#e8e8e8
     style BUFFER fill:#0f3460,stroke:#1a1a2e,color:#e8e8e8
+    style ADAPTER_SYSTEM fill:#1a2e1a,stroke:#2e5e2e,color:#e8e8e8
 ```
 
 ---
@@ -187,9 +241,10 @@ sequenceDiagram
     participant C as Client
     participant A as Auth Layer
     participant S as Session Store
+    participant AM as AdapterManager
     participant Q as Inference Queue
-    participant D as Draft Model (0.6B)
-    participant M as Main Model (4B)
+    participant D as Draft Model (0.8B)
+    participant M as Main Model (4B/9B) + LoRA
     participant K as KV Cache
     participant SS as SSE Stream
 
@@ -198,6 +253,11 @@ sequenceDiagram
     A->>A: Rate limit check (30 RPM)
     A->>S: get_or_create(session_id)
     S-->>A: SecureConversationBuffer
+
+    alt Domain Adapter Active
+        A->>AM: get_active_adapter()
+        AM-->>A: PeftModel wrapper (e.g. legal_compliance)
+    end
 
     alt KV Cache Hit
         A->>K: Check cached past_key_values
@@ -210,7 +270,7 @@ sequenceDiagram
         Q->>D: Draft generates N candidate tokens
         Note over D: SpikeServe hooks active<br/>84 MLP layers · spike encoding
         D->>M: Validate N tokens in 1 forward pass
-        Note over M: Full fidelity (no hooks)<br/>Accurate speculative validation
+        Note over M: Full fidelity + LoRA adapter<br/>Accurate speculative validation
         M-->>SS: Token accepted → SSE event
         SS-->>C: data: {"delta":{"content":"..."}}
         SS-->>C: data: [DONE]
@@ -293,93 +353,60 @@ graph LR
 
 ### Inference Engine
 
-```mermaid
-graph LR
-    subgraph ENGINE["Inference Engine"]
-        NF4["4-bit NF4<br/>bitsandbytes"]
-        AWQ["AWQ 4-bit<br/>1.4x faster"]
-        SPEC["Speculative Decoding<br/>Draft proposes · Main validates"]
-        SPIKE["SpikeServe<br/>Activation encoding on draft"]
-        STREAM["SSE Streaming<br/>Token-by-token"]
-        KVCACHE["KV Cache<br/>Per-session persistence"]
-        IQEUE["Inference Queue<br/>Serialized GPU access"]
-    end
-
-    NF4 --> SPEC
-    AWQ --> SPEC
-    SPEC --> SPIKE
-    SPIKE --> STREAM
-    SPIKE --> KVCACHE
-    STREAM --> IQEUE
-```
-
-- **Qwen3-4B main model** — pre-quantized to 4-bit NF4 (2.5 GB download), fine-tuned for legal/financial/forensic analysis
-- **Qwen3-0.6B draft model** — speculative decoding for 2-3x speed boost (0.8 GB download)
-- **Total model download: 3.3 GB** — clients download pre-quantized weights from kwyre.com, not HuggingFace
-- **Spike QAT (Quantization-Aware Training)** — custom fine-tuning pipeline using Straight-Through Estimator spike encoding with k-curriculum annealing (k=50 to 5)
-- **SpikeServe activation encoding** — dynamic spike encoding on the **draft model** (84 MLP layers), main model runs at full fidelity for accurate speculative validation
-- **Speculative decoding** — Qwen3-0.6B draft model generates candidate tokens, Qwen3-4B main model validates in parallel
+- **Qwen3.5-4B main model** — pre-quantized to 4-bit NF4 (2.5 GB download), trained for professional domain analysis
+- **Qwen3.5-0.8B draft model** — speculative decoding for 2-3x speed boost (0.8 GB download)
+- **Total model download: 3.3 GB** — clients download pre-quantized weights from kwyre.com
+- **Spike QAT** — custom fine-tuning pipeline using Straight-Through Estimator spike encoding with k-curriculum annealing
+- **SpikeServe activation encoding** — dynamic spike encoding on the **draft model** (84 MLP layers), main model runs at full fidelity
+- **Speculative decoding** — Qwen3.5-0.8B draft generates candidate tokens, main model validates in parallel
 - **SSE streaming** — token-by-token output via Server-Sent Events; `"stream": true` in request body
-- **KV cache persistence** — per-session cache stores `past_key_values` so follow-up messages skip re-encoding prior conversation (LRU eviction, configurable VRAM cap)
-- **Inference queue** — serialized GPU access with proper concurrency handling; HTTP threads stay responsive during generation
-- **4-bit NF4 quantization** (bitsandbytes) — both models fit in ~3.9 GB VRAM combined
+- **KV cache persistence** — per-session cache stores `past_key_values` so follow-up messages skip re-encoding prior conversation
+- **Inference queue** — serialized GPU access with proper concurrency handling
+- **4-bit NF4 quantization** (bitsandbytes) — both models fit in ~4.1 GB VRAM combined
 - **AWQ quantization option** — `KWYRE_QUANT=awq` for 1.4x faster inference when pre-quantized
 - **Flash Attention 2** — auto-detected with graceful fallback; +20-40% throughput on Ampere+ GPUs
-- **TF32 matmul** — enabled by default on RTX 30xx/40xx for faster matrix operations
-- **OpenAI-compatible API** — `POST /v1/chat/completions` drop-in replacement, works with any OpenAI SDK
-- **Multi-tier support** — switch between 4B (personal, 3.5 GB VRAM) and 9B (professional, 7.5 GB VRAM) via environment variable
+- **OpenAI-compatible API** — `POST /v1/chat/completions` drop-in replacement
+- **Multi-tier support** — switch between 4B (personal) and 9B (professional) via environment variable
 
 ### Multi-Backend Support
 
-```mermaid
-graph TB
-    subgraph BACKENDS["Three Inference Backends"]
-        GPU["GPU Backend<br/>serve_local_4bit.py<br/>NVIDIA CUDA · NF4/AWQ<br/>Speculative + SpikeServe + Streaming"]
-        CPU["CPU Backend (Kwyre Air)<br/>serve_cpu.py<br/>llama.cpp · GGUF<br/>Any hardware · SSE streaming"]
-        MLX["MLX Backend<br/>serve_mlx.py<br/>Apple Silicon · Metal<br/>Native M1/M2/M3/M4 acceleration"]
-    end
+All three backends share the same `security_core.py` — identical security stack, identical API shape, identical HTML frontend.
 
-    CORE["security_core.py<br/>Shared Security Infrastructure<br/>All 6 layers identical across backends"]
-
-    GPU --> CORE
-    CPU --> CORE
-    MLX --> CORE
-
-    style CORE fill:#0f3460,stroke:#1a1a2e,color:#e8e8e8
-```
-
-All three backends share the same `security_core.py` — identical security stack, identical API shape, identical HTML frontend. Choose your backend based on hardware.
+| Backend | File | Hardware | Notes |
+|---------|------|----------|-------|
+| GPU | `serve_local_4bit.py` | NVIDIA CUDA | NF4/AWQ + speculative + SpikeServe + streaming + adapters |
+| CPU (Kwyre Air) | `serve_cpu.py` | Any CPU | llama.cpp · GGUF · SSE streaming |
+| Apple Silicon | `serve_mlx.py` | M1/M2/M3/M4 | Metal · MLX · SSE streaming |
 
 ### Performance
 
 | Metric | GPU 4B + Speculative | GPU 9B | CPU (Kwyre Air) | MLX (Apple Silicon) |
 |--------|---------------------|--------|-----------------|---------------------|
-| VRAM / RAM | 3.9 GB VRAM | 8.1 GB VRAM | 4-8 GB RAM | 4-8 GB unified |
+| VRAM / RAM | 4.1 GB VRAM | 8.1 GB VRAM | 4-8 GB RAM | 4-8 GB unified |
 | Model load | ~1 second | ~3 seconds | ~5 seconds | ~3 seconds |
 | Inference | 7-14 tok/s | 3-5 tok/s | 2-8 tok/s | 5-15 tok/s |
 | Download | 3.3 GB | 7.6 GB | 2-4 GB (GGUF) | 2-4 GB (MLX) |
 | GPU required | Yes (NVIDIA) | Yes (NVIDIA) | No | No (Apple Silicon) |
 
+### Domain Adapter API
+
+```
+GET  /v1/adapter/list           List available adapters + active adapter
+GET  /v1/adapter/status         Active adapter name + base model info
+POST /v1/adapter/load           Load a domain adapter { "domain": "legal_compliance" }
+POST /v1/adapter/unload         Remove active adapter, revert to base model
+POST /v1/adapter/stack          Merge multiple adapters with weights
+GET  /v1/adapter/check-update   Check CDN for newer adapter versions
+POST /v1/adapter/update/<name>  Download and install updated adapter
+POST /v1/adapter/train          Submit customer fine-tuning job (Enterprise)
+GET  /v1/adapter/train/<job_id> Poll fine-tuning job status
+```
+
+**Adapter selector** is built into the chat UI — dropdown in toolbar, active adapter badge in header, auto-detection from first 2-3 messages.
+
 ### Security Hardening (v0.3 — Pentest Verified)
 
-Kwyre v0.3 underwent a full white-box security audit and penetration test. All 47 findings (9 Critical, 12 High, 14 Medium, 12 Low/Info) were resolved:
-
-- **True air-gap enforcement** — External API tools opt-in via `KWYRE_ENABLE_TOOLS=1` (default OFF)
-- **CSP nonce-based script protection** — Per-request cryptographic nonces; `cdn.jsdelivr.net` restricted to payment page only
-- **Timing-safe authentication** — `hmac.compare_digest` prevents timing side-channel attacks
-- **Input validation** — `max_tokens` 1-8192, `temperature` 0.0-2.0, `top_p` 0.0-1.0, `top_k` 0-100, `repetition_penalty` 1.0-2.0, message arrays max 100
-- **License key injection blocked** — Public key embedded at build time, not loadable from env
-- **Eval tier enforcement** — 10 req/min, 512 max tokens, 3 requests per IP
-- **Security headers on all responses** — `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy`, `Permissions-Policy`, full CSP
-- **mXSS-safe HTML sanitization** — DOMParser-based sanitizer
-- **Non-root Docker container** — Dedicated `kwyre` user with minimal privileges
-- **Session storage hardening** — `sessionStorage` (cleared on tab close), not `localStorage`
-- **Session ID hardening** — Minimum 32-character entropy requirement
-- **Watchdog child process monitoring** — Recursive child process network scanning
-- **Authenticated health endpoint** — Detailed system info requires API key
-- **CORS origin restriction** — Locked to server's own origin
-
-**Test suite: 110 security tests across 3 test files + integration test suite, all passing.**
+Kwyre v0.3 underwent a full white-box security audit and penetration test. All 47 findings (9 Critical, 12 High, 14 Medium, 12 Low/Info) were resolved. **Test suite: 110 security tests across 3 test files + integration test suite, all passing.**
 
 ### Privacy Features
 - **Zero content logging** — metadata only (timestamps, token counts)
@@ -389,67 +416,39 @@ Kwyre v0.3 underwent a full white-box security audit and penetration test. All 4
 - **Self-delete conversation** — user-initiated wipe via API, cryptographically unrecoverable
 - **Open-source server code** — fully auditable; verify zero outbound yourself with Wireshark
 
-### Multi-User Air-Gapped Mode
-
-```mermaid
-graph TB
-    subgraph MULTIUSER["Multi-User Architecture"]
-        ADMIN["Admin<br/>Full access · User management"]
-        ANALYST["Analyst<br/>Inference · Session management"]
-        VIEWER["Viewer<br/>Read-only · No inference"]
-
-        UM["UserManager<br/>Fernet-encrypted JSON store"]
-        RBAC["Role-Based Access Control"]
-        AUDIT["UserAuditLog<br/>RAM-only · Per-user tracking"]
-        ISO["Session Isolation<br/>user_id:session_id namespacing"]
-    end
-
-    ADMIN --> RBAC
-    ANALYST --> RBAC
-    VIEWER --> RBAC
-    RBAC --> UM
-    RBAC --> AUDIT
-    RBAC --> ISO
-```
-
-- **Encrypted user storage** — Fernet-encrypted JSON file with `KWYRE_MASTER_KEY`
-- **RBAC roles** — admin (full access), analyst (inference + sessions), viewer (read-only)
-- **Per-user session isolation** — session IDs namespaced as `user_id:session_id`
-- **Per-user rate limits** — configurable RPM per user
-- **Per-user session limits** — configurable max concurrent sessions
-- **Admin API endpoints** — create/delete users, wipe sessions, view audit logs
-- **RAM-only audit log** — tracks requests, rate limit hits, failed auth, security events
-
-### Compliance & Audit
-- `GET /audit` — metadata-only compliance log with security control attestation
-- `GET /health` — full security stack status including watchdog, KV cache, streaming, and VRAM usage
-- **SOC2 deployment guide** — `docs/SOC2_DEPLOYMENT_GUIDE.md` maps Kwyre layers to Trust Service Criteria
-- **Enterprise audit package** — `docs/ENTERPRISE_AUDIT.md` covers audit specs, data flow, crypto controls, pentest summary
-- **Compliance letter** — formal attestation for GDPR, HIPAA, SOC 2, FINRA, ITAR, FRE, ABA
-- Architecture designed to satisfy HIPAA, FINRA, attorney-client privilege, and SOC2-adjacent requirements
-
 ---
 
 ## API Endpoints
 
 ```
-POST /v1/chat/completions   OpenAI-compatible inference (stream=true for SSE)
-POST /v1/documents/upload   RAG document ingestion (PDF, DOCX, TXT)
-POST /v1/session/end        Cryptographic session + KV cache + document wipe
-POST /v1/license/verify     Offline license key validation
-GET  /health                Status + KV cache + RAG + watchdog + spike stats
-GET  /audit                 Metadata-only compliance log
-GET  /v1/models             Model info + capabilities
-GET  /                      Landing page
-GET  /chat                  Redirects to main page with chat UI
+POST /v1/chat/completions        OpenAI-compatible inference (stream=true for SSE)
+POST /v1/documents/upload        RAG document ingestion (PDF, DOCX, TXT)
+POST /v1/session/end             Cryptographic session + KV cache + document wipe
+POST /v1/license/verify          Offline license key validation
+GET  /health                     Status + KV cache + RAG + watchdog + spike stats
+GET  /audit                      Metadata-only compliance log
+GET  /v1/models                  Model info + capabilities
+GET  /                           Landing page
+GET  /chat                       Redirects to main page with chat UI
+
+Domain Adapter endpoints:
+GET  /v1/adapter/list            Available adapters + active adapter
+GET  /v1/adapter/status          Active adapter + base model + merge mode
+POST /v1/adapter/load            Load adapter { "domain": "legal_compliance" }
+POST /v1/adapter/unload          Revert to base model
+POST /v1/adapter/stack           Weighted merge { "adapters": [...], "weights": [...] }
+GET  /v1/adapter/check-update    Check CDN manifest for newer versions
+POST /v1/adapter/update/<name>   Download + install updated adapter (with backup/restore)
+POST /v1/adapter/train           Submit customer fine-tuning job
+GET  /v1/adapter/train/<job_id>  Poll job status + progress
 
 Admin endpoints (multi-user mode only, admin role required):
-GET    /v1/admin/users          List users
-POST   /v1/admin/users          Create user
-DELETE /v1/admin/users/{name}   Delete user + wipe sessions + evict KV
-GET    /v1/admin/sessions       List sessions
-POST   /v1/admin/sessions/wipe  Wipe user sessions + evict KV
-GET    /v1/admin/audit          Per-user audit stats
+GET    /v1/admin/users           List users
+POST   /v1/admin/users           Create user
+DELETE /v1/admin/users/{name}    Delete user + wipe sessions + evict KV
+GET    /v1/admin/sessions        List sessions
+POST   /v1/admin/sessions/wipe   Wipe user sessions + evict KV
+GET    /v1/admin/audit           Per-user audit stats
 ```
 
 ---
@@ -500,7 +499,6 @@ cd kwyre-ai
 pip install -r requirements-inference.txt
 
 # Kwyre Personal / Professional (GPU)
-# Place pre-quantized models in dist/
 python server/serve_local_4bit.py
 ```
 
@@ -511,7 +509,7 @@ KWYRE_GGUF_PATH=./models/kwyre-4b.gguf python server/serve_cpu.py
 
 ### Option 3c: Kwyre Apple Silicon (MLX)
 ```bash
-python model/convert_mlx.py --model Qwen/Qwen3-4B --output ./models/kwyre-4b-mlx
+python model/convert_mlx.py --model Qwen/Qwen3.5-4B --output ./models/kwyre-4b-mlx
 python server/serve_mlx.py
 ```
 
@@ -521,8 +519,25 @@ python server/users.py init
 KWYRE_MULTI_USER=1 python server/serve_local_4bit.py
 ```
 
-### Test
+### Load a Domain Adapter
+```bash
+# Auto-loads on startup
+KWYRE_DEFAULT_ADAPTER=legal_compliance python server/serve_local_4bit.py
 
+# Or swap at runtime
+curl -X POST http://127.0.0.1:8000/v1/adapter/load \
+  -H "Authorization: Bearer sk-kwyre-dev-local" \
+  -H "Content-Type: application/json" \
+  -d '{"domain": "legal_compliance"}'
+
+# Stack two adapters (e.g. crypto lawyer)
+curl -X POST http://127.0.0.1:8000/v1/adapter/stack \
+  -H "Authorization: Bearer sk-kwyre-dev-local" \
+  -H "Content-Type: application/json" \
+  -d '{"adapters": ["legal_compliance", "blockchain_crypto"], "weights": [0.6, 0.4]}'
+```
+
+### Test
 ```bash
 # Health check
 curl http://127.0.0.1:8000/health
@@ -539,6 +554,10 @@ curl -N -X POST http://127.0.0.1:8000/v1/chat/completions \
   -H "Content-Type: application/json" \
   -d '{"messages": [{"role": "user", "content": "Analyze this contract clause."}], "stream": true}'
 
+# List available adapters
+curl http://127.0.0.1:8000/v1/adapter/list \
+  -H "Authorization: Bearer sk-kwyre-dev-local"
+
 # Wipe session
 curl -X POST http://127.0.0.1:8000/v1/session/end \
   -H "Authorization: Bearer sk-kwyre-dev-local" \
@@ -553,8 +572,9 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `KWYRE_BACKEND` | `gpu` | Inference backend: `gpu`, `cpu`, or `mlx` |
-| `KWYRE_MODEL` | `Qwen/Qwen3-4B` | Model tier: `Qwen/Qwen3-4B` (Personal, 3.9GB) or `Qwen/Qwen3.5-9B` (Professional, 7.5GB) |
+| `KWYRE_MODEL` | `Qwen/Qwen3.5-4B` | Model tier: `Qwen/Qwen3.5-4B` (Personal, 4.1GB) or `Qwen/Qwen3.5-9B` (Professional, 7.5GB) |
 | `KWYRE_MODEL_PATH` | auto-detect | Path to pre-quantized model directory |
+| `KWYRE_DRAFT_MODEL` | `Qwen/Qwen3.5-0.8B` | Draft model for speculative decoding |
 | `KWYRE_DRAFT_PATH` | auto-detect | Path to pre-quantized draft model directory |
 | `KWYRE_GGUF_PATH` | — | Path to GGUF model for CPU mode |
 | `KWYRE_AWQ_MODEL_PATH` | — | Path to pre-quantized AWQ model |
@@ -563,11 +583,15 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 | `KWYRE_QUANT` | `nf4` | Quantization mode (`nf4` or `awq`) |
 | `KWYRE_KV_CACHE_MAX` | `8` | Max sessions with cached KV state |
 | `KWYRE_KV_CACHE_VRAM_GB` | `2.0` | VRAM budget for KV cache (GB) |
+| `KWYRE_ADAPTER_DIR` | `~/.kwyre/adapters` | Directory containing domain adapter checkpoints |
+| `KWYRE_DEFAULT_ADAPTER` | — | Auto-load this adapter on startup |
+| `KWYRE_ALLOW_ADAPTER_SWAP` | `1` | Allow runtime adapter swap via API |
+| `KWYRE_ADAPTER_MANIFEST_URL` | `https://kwyre.com/adapters/manifest.json` | CDN manifest for adapter version checks |
+| `KWYRE_MERGE_LORA` | `0` | Merge LoRA adapter into weights at load (faster inference, no swap) |
 | `KWYRE_API_KEYS` | `sk-kwyre-dev-local:admin` | API key:role pairs |
 | `KWYRE_MULTI_USER` | `0` | Multi-user air-gapped mode |
 | `KWYRE_USERS_FILE` | `users.json` | Encrypted users file path |
 | `KWYRE_MASTER_KEY` | — | Fernet key for users file encryption |
-| `KWYRE_MERGE_LORA` | `0` | Merge LoRA adapters at load |
 | `KWYRE_LICENSE_KEY` | — | Commercial license key |
 | `KWYRE_ENABLE_TOOLS` | `0` | Enable external API tools (**breaks air-gap**) |
 | `KWYRE_BIND_HOST` | `127.0.0.1` | Network bind address |
@@ -578,133 +602,47 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 
 | License | Price | Machines | Includes |
 |---------|-------|----------|----------|
-| **Personal** | $299 one-time | 1 | Model + server + compliance doc |
-| **Professional** | $799 one-time | 3 | Everything + priority support + 9B model |
-| **Air-Gapped Kit** | $1,499 one-time | 5 | Offline installer + full audit package |
+| **Personal** | $299 one-time | 1 | Base model + 1 domain adapter of choice + compliance doc |
+| **Professional** | $799 one-time | 3 | Base model + all 6 domain adapters + priority support + 9B model |
+| **Air-Gapped Kit** | $1,499 one-time | 5 | Everything + offline adapter installer + full audit package |
 
 **Payment:** Credit card or Monero (XMR). No email required for Monero purchases. One-time — no subscription.
+
+**Adapter delivery:** ~150 MB per adapter, downloaded from kwyre.com CDN alongside base model. Versioned updates delivered silently via `GET /v1/adapter/check-update`.
 
 ---
 
 ## Roadmap
 
-**v0.1 (Complete)**
-- [x] Qwen3.5-9B + Spike QAT training pipeline
-- [x] 6-layer security stack
-- [x] OpenAI-compatible API
-- [x] Session encryption + cryptographic wipe
-- [x] Intrusion detection watchdog
-- [x] Compliance documentation package
+**v0.1–v1.4 (Complete)**
+- [x] 6-layer security stack, OpenAI-compatible API, cryptographic session wipe
+- [x] Speculative decoding, SpikeServe, SSE streaming, KV cache, RAG
+- [x] Multi-user RBAC, vLLM backend, Apple Silicon / MLX, CPU / GGUF (Kwyre Air)
+- [x] Nuitka binary builds, Ed25519 code signing, air-gap safe updates
+- [x] SOC2/HIPAA/FINRA compliance documentation package
+- [x] 47/47 pentest findings resolved, 110 security tests passing
+- [x] Custom Kwyre Professional model — Claude-distilled reasoning + GRPO RL on H100
+- [x] Products page, 9-competitor comparison, Monero payment
 
-**v0.2 (Complete)**
-- [x] Pre-quantized NF4 model distribution (3.3 GB total download)
-- [x] Speculative decoding with Qwen3-0.6B draft model (2-3x speed)
-- [x] Qwen3-4B tier (3.9 GB VRAM for both models combined)
-- [x] Docker installer (`docker compose up`)
-- [x] Monero payment integration + Ed25519 offline license keys
-- [x] Multi-tier model support (4B personal / 9B professional)
-- [x] Inference-only dependency set (stripped training deps for lean install)
+**v1.5 (Current — Domain Adapters)**
+- [x] Hot-swap LoRA adapter runtime — `POST /v1/adapter/load|unload|list|status`
+- [x] Adapter stacking — weighted merge of multiple domain adapters (`POST /v1/adapter/stack`)
+- [x] CDN-based adapter versioning — `GET /v1/adapter/check-update`, `POST /v1/adapter/update/<name>`
+- [x] Customer fine-tuning endpoint — `POST /v1/adapter/train` background job system (`server/adapter_trainer.py`)
+- [x] Domain auto-detection — keyword scoring across 6 domains, dismissible suggestion toast in chat UI
+- [x] Adapter selector dropdown in chat toolbar + active adapter badge in header
+- [x] 6,000 Claude reasoning traces generated via Anthropic Batch API (50% cheaper, resumable)
+- [x] 6 domain adapters trained on H100 80GB — legal, insurance, healthcare, defense, trading, blockchain
+- [x] Model migration: Qwen3-4B → Qwen3.5-4B, Qwen3-0.6B → Qwen3.5-0.8B across all backends
+- [x] Domain benchmark dashboard — `--with-adapter --adapter-domain` comparison mode
+- [ ] GRPO fine-tuning per domain (domain-specific reward functions — legal citations, actuarial terms, etc.)
+- [ ] 9B adapter variants — train all 6 domains on Qwen3.5-9B Professional tier
+- [ ] Adapter CDN distribution — host on kwyre.com alongside base model downloads
 
-**v0.3 (Complete — Security Hardened)**
-- [x] Full white-box penetration test — 47/47 findings resolved
-- [x] True air-gap enforcement — tools opt-in, default offline
-- [x] CSP nonce-based script protection (removed `unsafe-inline`)
-- [x] Timing-safe API key authentication (`hmac.compare_digest`)
-- [x] Input validation and eval tier enforcement
-- [x] Non-root Docker container with dependency manifest
-- [x] DOMParser-based HTML sanitization (mXSS-safe)
-- [x] Security headers on all HTTP response paths
-- [x] Watchdog child process monitoring
-- [x] 110 security tests across 3 test suites
-- [x] Windows, Linux, and macOS one-click installers
-- [x] Nuitka build pipeline — compiled binary distribution (source protection)
-
-**v0.4 (Complete)**
-- [x] Apple Silicon / MLX support — `server/serve_mlx.py` with `model/convert_mlx.py`
-- [x] CPU-only mode via llama.cpp — `server/serve_cpu.py` (Kwyre Air) with `model/convert_gguf.py`
-- [x] AWQ quantization option — `KWYRE_AWQ_MODEL_PATH` env var, `KWYRE_QUANT=awq`
-- [x] Multi-user air-gapped server mode — `server/users.py`, `server/audit.py`, `KWYRE_MULTI_USER=1`
-- [x] Domain-specific fine-tune pipeline — `finetune/` directory
-- [x] Benchmark suite vs GPT-4o — `benchmarks/` directory
-- [x] SOC2-friendly deployment guide — `docs/SOC2_DEPLOYMENT_GUIDE.md`
-- [x] Enterprise audit package — `docs/ENTERPRISE_AUDIT.md`
-- [x] Shared security infrastructure — `server/security_core.py`
-
-**v0.5 (Complete — Performance Optimized)**
-- [x] SSE streaming — token-by-token output via `TextIteratorStreamer` and Server-Sent Events
-- [x] SpikeServe relocated to draft model — main model runs at full fidelity for accurate speculative validation
-- [x] Lazy sparsity measurement — no startup deadlock, measured on first real request
-- [x] Per-session KV cache — `past_key_values` persistence with LRU eviction and VRAM cap
-- [x] Inference queue — serialized GPU access, HTTP threads stay responsive during generation
-- [x] Frontend streaming UI — `main.html` renders tokens live as they arrive
-
-**v1.0 (Complete — Production Ready)**
-- [x] Hardware-bound license keys — machine fingerprint binding with `machine_ids` in license payload, `register_machine()` activation flow
-- [x] Code signing for releases — Ed25519-signed `MANIFEST.sig.json` for every build artifact, `python build.py sign`
-- [x] Windows one-click GUI installer — tkinter wizard with dark theme, 5-page flow, threaded installation
-- [x] Auto-update mechanism (air-gap safe) — `.kwyre-update` packages with signed manifests, local-only update scanning, automatic rollback
-
-**v1.1 (Complete — Hardened + Optimized)**
-- [x] Flash Attention 2 — auto-detected with graceful fallback, +20-40% throughput on supported GPUs
-- [x] TF32 matmul + cuDNN benchmark — enabled by default on Ampere+ GPUs
-- [x] `torch.inference_mode()` — replaces `no_grad()` for reduced autograd overhead
-- [x] Speculative decoding tuning — `assistant_early_exit` for faster draft rejection
-- [x] MLX backend refactored to use `security_core.py` — eliminated ~200 lines of duplicated security code
-- [x] MLX SSE streaming — `stream_generate` + `make_sampler` for token-by-token output on Apple Silicon
-- [x] Thread-safe inference locks on MLX and CPU backends
-- [x] Session reaper race condition fixed — atomic wipe under single lock
-- [x] Stream error surfacing — `finish_reason: "error"` sent to client on generation failure
-- [x] Audit log accuracy — `record_session_created` only fires on new sessions, not every request
-- [x] Memory leak prevention — `rate_tracker` cleanup at >1000 keys, `intrusion_log` capped at 100 entries
-- [x] Thread-safe SpikeServe stats — `_spike_lock` protects concurrent hook updates
-- [x] Default system prompt — professional legal/forensic persona when no system message provided
-- [x] `repetition_penalty` parameter — prevents repetitive output (default 1.1, all backends)
-- [x] `top_k` parameter — aligned with model's `generation_config.json` (default 20)
-- [x] Markdown rendering in chat UI — `marked.js` for headers, lists, code blocks, tables
-- [x] Copy-to-clipboard — hover button on every assistant message, copies raw markdown
-- [x] Conversation export — download as `.md` file with timestamp and formatting
-- [x] Dark/light mode toggle — full light theme with `sessionStorage` persistence
-- [x] Session management UI — New Chat + Wipe Session buttons, system prompt editor
-- [x] Integration test suite — HTTP endpoints, SSE conformance, KV cache, session isolation
-- [x] `main.html` auto-detects local vs production API — `window.location.origin` for localhost
-
-**v1.2 (Complete — RAG + vLLM + Enterprise)**
-- [x] RAG document ingestion — PDF, DOCX, TXT upload with FAISS vector search, per-session RAM-only storage
-- [x] Secure document store — `SecureRAGStore` with cryptographic wipe on session end, shutdown, and intrusion
-- [x] Local embeddings — `sentence-transformers/all-MiniLM-L6-v2` on CPU, lazy-loaded on first upload
-- [x] `POST /v1/documents/upload` — multipart file upload with automatic chunking and embedding
-- [x] RAG context injection — retrieved chunks injected alongside tool data in chat completions
-- [x] Frontend file upload — "Upload Docs" button in chat toolbar with drag-and-drop support
-- [x] vLLM backend — `server/serve_vllm.py` with continuous batching, PagedAttention, speculative decoding
-- [x] SIEM audit export — `export_jsonl()` and `export_cef()` for Splunk/QRadar integration
-- [x] Kubernetes Helm chart — `deploy/helm/kwyre/` with GPU scheduling, health probes, PVC, secrets
-- [x] Extended `.env.example` — comprehensive config covering all 30+ environment variables
-
-**v1.3 (Complete — Four Products + Custom-Trained Professional Model)**
-- [x] Four distinct products — Personal (4B speed), Professional (9B domain specialist), Air (CPU portable), Apple Silicon (MLX native)
-- [x] Product-specific system prompts — each backend has its own identity and personality
-- [x] Product identity in API — `/health` and `/v1/models` report product name and capabilities
-- [x] Dynamic tier detection — frontend auto-detects model tier from `/health` endpoint
-- [x] Dual-tier dist path — `serve_local_4bit.py` resolves model path from `ACTIVE_TIER['name']`
-- [x] 4B weight integrity — SHA-256 hashes populated for Qwen3-4B model verification
-- [x] CPU `top_k` + tools — Kwyre Air gets `top_k` parameter and opt-in tools integration
-- [x] MLX `top_k` + streaming fix — Apple Silicon gets `top_k` and corrected SSE delta computation
-- [x] Training scripts 9B-only — `train_qat.py`, `merge_and_export.py`, `quantize_awq.py` locked to Professional tier
-- [x] Custom training pipeline — `training/` directory with Claude-powered reasoning trace generation, Unsloth QLoRA distillation, and GGUF export
-- [x] **Custom Kwyre Professional model trained** — 200 Claude claude-sonnet-4-20250514 reasoning traces (blockchain forensics, legal/financial, physics/math, conversational), distilled into Qwen3.5-9B via Unsloth QLoRA on H100 GPU
-- [x] Deployment GGUFs exported — Q5_K_M (6.1 GB, quality tier) and Q4_K_M (5.3 GB, speed tier)
-- [x] Training loss: 0.99 → 0.51 over 75 steps (3 epochs on 200 samples)
-- [x] Baked-in capabilities: Kwyre personality, chain-of-thought `<think>` reasoning, crypto forensics, legal analysis, financial regulation expertise
-- [x] **Vanilla GRPO reinforcement learning v2** — 500 steps on GSM8K via pure HuggingFace + TRL (no Unsloth), emergent reasoning on H100, LoRA rank 16, 2 generations/prompt
-
-**v1.4 (Current — Website + Products)**
-- [x] Products page — all 5 products with full specs and competitive comparison table
-- [x] Enhanced particle system — 120 nodes, click-to-scatter interaction, ember layer, vignette, sweep line
-- [x] Neon green interactive orbs — company orbs (data privacy), industry orbs (custom), float orbs (main)
-- [x] 9-competitor comparison table — Kwyre vs GPT-4o, Claude, Gemini, DeepSeek, Copilot, Llama 4, Mistral 3, Grok
-- [x] GRPO v2 training — 500 steps on GSM8K with LoRA rank 16, 2 generations/prompt, cosine LR schedule
-- [ ] Custom LLM service launch — turnkey domain-specific model delivery
+**v1.6 (Planned)**
 - [ ] Credit card payment integration
+- [ ] Custom LLM service launch — turnkey domain-specific model delivery
+- [ ] Adapter marketplace — community-trained adapters with verified metadata
 
 ---
 
@@ -730,45 +668,7 @@ python build.py installer --platform linux     # .deb + AppImage script
 python build.py installer --platform macos     # .pkg + launchd plist
 python build.py installer --platform all       # All platforms
 
-python build.py -V               # Print version (1.0.0)
-```
-
-**What gets compiled (protected):**
-
-| Module | Purpose |
-|--------|---------|
-| `server/serve_local_4bit.py` | GPU inference server, SSE streaming, KV cache, security layers |
-| `server/serve_cpu.py` | Kwyre Air CPU-only backend (llama.cpp / GGUF) |
-| `server/serve_mlx.py` | Apple Silicon MLX backend |
-| `server/security_core.py` | Security layer orchestration |
-| `server/tools.py` | External API tool router |
-| `server/users.py` | Multi-user management + RBAC |
-| `server/audit.py` | Enterprise audit logging |
-| `security/verify_deps.py` | Layer 3 dependency integrity |
-| `security/license.py` | Ed25519 license validation + hardware-bound fingerprint |
-| `security/codesign.py` | Ed25519 release signing and verification |
-| `security/updater.py` | Air-gap safe update mechanism |
-| `model/spike_serve.py` | SpikeServe inference encoding |
-
-**Build outputs:**
-
-| Platform | Installer | Format | Service |
-|----------|-----------|--------|---------|
-| Windows | Inno Setup + GUI installer | `.exe` | Windows Service |
-| Linux | Debian package + AppImage | `.deb` / `.AppImage` | systemd |
-| macOS | macOS package | `.pkg` | launchd |
-
-**Package contents (build/kwyre-dist/):**
-```
-kwyre-server[.exe]         # Nuitka-compiled standalone binary
-chat/                      # Frontend (main.html, pay.html, etc.)
-docs/                      # SOC2 guide, audit docs
-security/                  # Dep manifest, isolation scripts, signing modules
-installer/                 # Platform install scripts + GUI installer
-version.json               # Build version + platform metadata
-MANIFEST.sig.json          # Ed25519 signed release manifest (after 'sign')
-.env.example               # Environment configuration template
-LICENSE                    # MIT license
+python build.py -V               # Print version
 ```
 
 ---
@@ -776,45 +676,54 @@ LICENSE                    # MIT license
 ## Technical Specifications
 
 ```
-Main model (Personal):    Qwen3-4B (pre-quantized NF4, 2.5 GB)
-Main model (Professional): Qwen3.5-9B (pre-quantized NF4, 7.6 GB)
-Draft model:              Qwen3-0.6B (pre-quantized NF4, 0.8 GB) — shared by both tiers
-Speculative:              Enabled by default (2-3x throughput)
-SpikeServe:               84 MLP layers on draft model, main at full fidelity
-Quantization:             4-bit NF4 (bitsandbytes) or AWQ (1.4x faster)
-Compute dtype:            bfloat16
-VRAM at inference:        Personal ~3.9 GB | Professional ~7.5 GB (both models + KV cache budget)
-KV cache:                 Per-session, LRU eviction, 2 GB VRAM cap default
-Streaming:                SSE (text/event-stream), token-by-token
-Concurrency:              Inference queue (serialized GPU) + threaded HTTP
-Context length:           32768 tokens
-API compatibility:       OpenAI /v1/chat/completions (blocking + streaming)
-Docker image:             ~10 GB (includes CUDA runtime)
-Model download:           Personal 3.3 GB | Professional 7.6 GB (pre-quantized, from kwyre.com)
+Main model (Personal):      Qwen/Qwen3.5-4B (pre-quantized NF4, 2.5 GB)
+Main model (Professional):  Qwen/Qwen3.5-9B (pre-quantized NF4, 7.6 GB)
+Draft model:                Qwen/Qwen3.5-0.8B (pre-quantized NF4, 0.8 GB) — shared by both tiers
+Speculative:                Enabled by default (2-3x throughput)
+SpikeServe:                 84 MLP layers on draft model, main at full fidelity
+Quantization:               4-bit NF4 (bitsandbytes) or AWQ (1.4x faster)
+Compute dtype:              bfloat16
+VRAM at inference:          Personal ~4.1 GB | Professional ~7.5 GB (models + KV cache budget)
+KV cache:                   Per-session, LRU eviction, 2 GB VRAM cap default
+Streaming:                  SSE (text/event-stream), token-by-token
+Concurrency:                Inference queue (serialized GPU) + threaded HTTP
+Context length:             32768 tokens
+API compatibility:          OpenAI /v1/chat/completions (blocking + streaming)
+Docker image:               ~10 GB (includes CUDA runtime)
+Model download:             Personal 3.3 GB | Professional 7.6 GB (pre-quantized, from kwyre.com)
 
-Available tiers:
-  Personal:     Qwen3-4B   — 3.9 GB VRAM, 7-14 tok/s, $299
-  Professional: Qwen3.5-9B — 7.5 GB VRAM, 3-5 tok/s, $799 (set KWYRE_MODEL=Qwen/Qwen3.5-9B)
+Domain Adapters (v1.5):
+  Format:              PEFT LoRA checkpoint (safetensors)
+  Size per adapter:    ~150 MB
+  Total (6 adapters):  ~900 MB
+  Domains:             legal_compliance, insurance_actuarial, healthcare_lifesciences,
+                       defense_intelligence, financial_trading, blockchain_crypto
+  Base model:          Qwen/Qwen3.5-4B (4B adapters) | Qwen/Qwen3.5-9B (9B adapters)
+  LoRA rank:           32 (distillation)
+  LoRA targets:        q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj
+  Training traces:     1,000 per domain (6,000 total)
+  Trace generation:    Anthropic Batch API — 2-phase (expansion + generation), ~$32 total
+  Distillation:        Unsloth QLoRA on H100 80GB, 3 epochs, 375 steps/domain
+  Loss per domain:     1.2 → 0.53 (consistent convergence across all 6 domains)
+  Training time:       ~2h per domain × 6 = ~12h total on H100 80GB
 
-Custom Training (Professional 9B):
-  Pipeline:          Claude traces → Unsloth QLoRA distillation → GRPO RL → GGUF export
-  Trace generation:  200 Claude claude-sonnet-4-20250514 traces across 4 domains (parallel)
-  Distillation:      Unsloth QLoRA on H100 80GB, 3 epochs, 75 steps, loss 0.99 → 0.51
-  GRPO RL:           Vanilla HuggingFace + TRL, 500 steps on GSM8K (emergent reasoning, v2 training)
-  LoRA rank:         32 (distillation) + 8 (GRPO)
-  LoRA targets:      q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj
-  Domains:           blockchain forensics, legal/financial, physics/math, conversational
-  Personality:       Kwyre persona baked into weights (not just system prompt)
-  Reasoning:         Chain-of-thought via <think>...</think> tags + emergent problem-solving
-  Export:            Q5_K_M (6.1 GB) + Q4_K_M (5.3 GB) GGUFs
-  Hardware used:     DigitalOcean H100 80GB GPU Droplet
+Custom Training Pipeline (Professional 9B):
+  Pipeline:            Claude traces → Unsloth QLoRA distillation → GRPO RL → GGUF export
+  Trace generation:    Anthropic Batch API (resumable, 50% cheaper than real-time)
+  Distillation:        Unsloth QLoRA on H100 80GB, LoRA rank 32
+  GRPO RL:             HuggingFace + TRL, 500 steps, LoRA rank 16
+  Domains:             blockchain forensics, legal/financial, physics/math, conversational
+  Personality:         Kwyre persona baked into weights (not just system prompt)
+  Reasoning:           Chain-of-thought via <think>...</think> tags + emergent problem-solving
+  Export:              Q5_K_M (6.1 GB) + Q4_K_M (5.3 GB) GGUFs
+  Hardware:            DigitalOcean H100 80GB GPU Droplet
 
 Legacy QAT Training (Spike encoding):
-  LoRA rank:         64 (alpha 128)
-  LoRA targets:      gate_proj, up_proj, down_proj (MLP only)
-  Spike hooks:       408 layers (main model training)
-  k-curriculum:      50.0 → 5.0 (step schedule)
-  Dataset:           teknium/OpenHermes-2.5
+  LoRA rank:           64 (alpha 128)
+  LoRA targets:        gate_proj, up_proj, down_proj (MLP only)
+  Spike hooks:         408 layers (main model training)
+  k-curriculum:        50.0 → 5.0 (step schedule)
+  Dataset:             teknium/OpenHermes-2.5
 ```
 
 ---
@@ -838,9 +747,13 @@ flowchart TD
 
     SESSION["Session Store<br/>get_or_create()"] --> TRIAL{"Eval mode?"}
     TRIAL -->|Yes, limit hit| ERR429T["429 Trial limit"]
-    TRIAL -->|OK| TOOLS{"Tools enabled?"}
+    TRIAL -->|OK| ADAPTER{"Adapter active?"}
 
-    TOOLS -->|Yes| ROUTE["route_tools()<br/>Augment prompt"]
+    ADAPTER -->|Yes| PEFT["PeftModel wrapper<br/>LoRA weights applied"]
+    ADAPTER -->|No| TOOLS
+    PEFT --> TOOLS
+
+    TOOLS{"Tools enabled?"} -->|Yes| ROUTE["route_tools()<br/>Augment prompt"]
     TOOLS -->|No| TOKENIZE
     ROUTE --> TOKENIZE
 
@@ -862,6 +775,87 @@ flowchart TD
     style ERR429T fill:#8b0000,color:#fff
     style ERR403 fill:#8b0000,color:#fff
     style DONE fill:#0f5132,color:#fff
+    style PEFT fill:#1a2e1a,color:#fff
+```
+
+---
+
+## Project Structure
+
+```
+kwyre/
+├── server/
+│   ├── serve_local_4bit.py    # GPU inference (streaming, KV cache, RAG, speculative, adapters)
+│   ├── serve_vllm.py          # vLLM backend (continuous batching, PagedAttention)
+│   ├── serve_cpu.py           # CPU inference via llama.cpp (Kwyre Air)
+│   ├── serve_mlx.py           # Apple Silicon inference via MLX
+│   ├── adapter_trainer.py     # Customer fine-tuning background job system
+│   ├── security_core.py       # Shared security infrastructure (all 6 layers)
+│   ├── rag.py                 # RAG document ingestion (FAISS + embeddings)
+│   ├── users.py               # Multi-user management (Fernet-encrypted)
+│   └── audit.py               # Per-user audit logging + SIEM export
+├── model/
+│   ├── spike_serve.py         # SpikeServe activation encoding hooks
+│   ├── quantize_nf4.py        # NF4 pre-quantization (Qwen/Qwen3.5-4B)
+│   ├── quantize_awq.py        # AWQ pre-quantization
+│   ├── convert_gguf.py        # HuggingFace → GGUF converter
+│   ├── convert_mlx.py         # HuggingFace → MLX converter
+│   ├── train_qat.py           # Spike QAT training pipeline
+│   └── merge_and_export.py    # Merge LoRA + export
+├── security/
+│   ├── verify_deps.py         # Layer 3 — dependency integrity
+│   ├── license.py             # Ed25519 license + hardware fingerprint binding
+│   ├── codesign.py            # Ed25519 release signing and verification
+│   └── updater.py             # Air-gap safe update mechanism
+├── training/
+│   ├── run_full_pipeline.sh   # Automated: traces → distillation → GRPO → export
+│   └── scripts/
+│       ├── generate_traces_batch.py    # Batch API trace generation (1,000/domain, resumable)
+│       ├── generate_traces_parallel.py # Real-time parallel trace generation (fallback)
+│       ├── train_distillation.py       # Unsloth QLoRA domain adapter distillation
+│       ├── train_grpo_domain.py        # Domain-specific GRPO with custom reward functions
+│       ├── train_grpo.py               # Base GRPO training
+│       ├── run_domain_training.sh      # Single-domain pipeline runner
+│       └── run_all_domains.sh          # All 6 domains sequentially
+├── benchmarks/
+│   ├── benchmark.py           # Domain benchmark suite (--with-adapter comparison mode)
+│   └── datasets/              # financial_analysis.json, compliance_tasks.json, etc.
+├── deploy/
+│   └── helm/kwyre/            # Kubernetes Helm chart (GPU, probes, PVC)
+├── chat/
+│   ├── index.html             # Cinematic intro sequence
+│   ├── main.html              # Chat UI (adapter dropdown, domain auto-detection)
+│   ├── landing.html           # Alternate landing page
+│   ├── technology.html        # Data privacy — cloud AI incidents
+│   ├── products.html          # Product lineup + competitive comparison
+│   ├── custom.html            # Custom LLM service + request form
+│   ├── security.html          # Penetration testing + compliance
+│   ├── platform.html          # Installation + deployment guides
+│   └── pay.html               # Payment + license download gate
+├── installer/
+│   ├── install_windows.ps1    # Windows CLI installer
+│   ├── install_windows_gui.py # Windows GUI installer (tkinter wizard)
+│   ├── install_linux.sh       # Linux installer (systemd + iptables)
+│   └── install_macos.sh       # macOS installer (launchd + PF)
+├── finetune/                  # Domain-specific fine-tuning pipeline
+├── docs/                      # Compliance documentation package
+├── tests/                     # 110 security tests + integration suite
+├── build.py                   # Nuitka build + installer pipeline
+├── .env.example               # Full config reference (30+ variables)
+└── dist/                      # Pre-quantized model weights
+    ├── kwyre-4b-nf4/          # Main model (2.5 GB)
+    └── kwyre-draft-nf4/       # Draft model (0.8 GB)
+
+~/.kwyre/                      # Runtime data (never in project root)
+├── adapters/
+│   ├── legal-compliance-4b/   # PEFT LoRA checkpoint (~150 MB)
+│   ├── insurance-actuarial-4b/
+│   ├── healthcare-lifesciences-4b/
+│   ├── defense-intelligence-4b/
+│   ├── financial-trading-4b/
+│   └── blockchain-crypto-4b/
+├── training-data/kwyre-traces/ # 6,000 Claude reasoning traces
+└── logs/                       # Training logs
 ```
 
 ---
@@ -898,61 +892,6 @@ Confirm: all traffic is 127.0.0.1 → 127.0.0.1
 
 ---
 
-## Project Structure
-
-```
-kwyre/
-├── server/
-│   ├── serve_local_4bit.py    # GPU inference (streaming, KV cache, RAG, speculative)
-│   ├── serve_vllm.py          # vLLM backend (continuous batching, PagedAttention)
-│   ├── serve_cpu.py           # CPU inference via llama.cpp (Kwyre Air)
-│   ├── serve_mlx.py           # Apple Silicon inference via MLX
-│   ├── security_core.py       # Shared security infrastructure (all 6 layers)
-│   ├── rag.py                 # RAG document ingestion (FAISS + embeddings)
-│   ├── users.py               # Multi-user management (Fernet-encrypted)
-│   └── audit.py               # Per-user audit logging + SIEM export
-├── model/
-│   ├── spike_serve.py         # SpikeServe activation encoding hooks
-│   ├── quantize_nf4.py        # NF4 pre-quantization script
-│   ├── convert_gguf.py        # HuggingFace → GGUF converter
-│   └── convert_mlx.py         # HuggingFace → MLX converter
-├── security/
-│   ├── verify_deps.py         # Layer 3 — dependency integrity
-│   ├── license.py             # Ed25519 license + hardware fingerprint binding
-│   ├── codesign.py            # Ed25519 release signing and verification
-│   └── updater.py             # Air-gap safe update mechanism
-├── training/
-│   ├── run_full_pipeline.sh   # Automated: traces → distillation → GRPO → export
-│   └── scripts/               # generate_traces.py, train_distillation.py, train_grpo.py
-├── deploy/
-│   └── helm/kwyre/            # Kubernetes Helm chart (GPU, probes, PVC)
-├── chat/
-│   ├── index.html             # Cinematic intro sequence
-│   ├── landing.html           # Alternate landing page
-│   ├── main.html              # Product overview + security stack
-│   ├── technology.html        # Data privacy — cloud AI incidents
-│   ├── products.html          # Product lineup + competitive comparison
-│   ├── custom.html            # Custom LLM service + request form
-│   ├── security.html          # Penetration testing + compliance
-│   ├── platform.html          # Installation + deployment guides
-│   └── pay.html               # Payment + license download gate
-├── installer/
-│   ├── install_windows.ps1    # Windows CLI installer
-│   ├── install_windows_gui.py # Windows GUI installer (tkinter wizard)
-│   ├── install_linux.sh       # Linux installer (systemd + iptables)
-│   └── install_macos.sh       # macOS installer (launchd + PF)
-├── finetune/                  # Domain-specific fine-tuning pipeline
-├── benchmarks/                # Benchmark suite vs GPT-4o
-├── docs/                      # Compliance documentation package
-├── tests/                     # 110 security tests + integration suite
-├── build.py                   # Nuitka build + installer pipeline
-└── dist/                      # Pre-quantized model weights
-    ├── kwyre-4b-nf4/          # Main model (2.5 GB)
-    └── kwyre-draft-nf4/       # Draft model (0.8 GB)
-```
-
----
-
 ## Security Disclosure
 
 Found a vulnerability? Email security@kwyre.ai.
@@ -965,7 +904,7 @@ We do not use a bug bounty program. We will acknowledge responsible disclosure p
 
 MIT License. Use it, audit it, fork it.
 
-The model weights (Qwen3-4B, Qwen3-0.6B base) are licensed under Apache 2.0 by Alibaba. LoRA adapters and pre-quantized distributions are original work, MIT licensed.
+The model weights (Qwen3.5-4B, Qwen3.5-9B, Qwen3.5-0.8B base) are licensed under Apache 2.0 by Alibaba. LoRA domain adapters and pre-quantized distributions are original work, MIT licensed.
 
 ---
 
@@ -985,7 +924,7 @@ We built this because we needed it ourselves. We cannot upload active federal in
 |------|-----|-------------|
 | Landing | `/` | Animated intro sequence with neural canvas |
 | Index | `/index.html` | Full-screen cinematic entry |
-| Main | `/main.html` | Product overview, security stack, buyer personas |
+| Main | `/main.html` | Product overview + security stack + chat UI with adapter selector |
 | Data Privacy | `/technology.html` | Cloud AI incident tracker, company orbs |
 | Products | `/products.html` | All 5 products with specs + competitive comparison |
 | Custom | `/custom.html` | Custom LLM service, industry orbs, request form |

@@ -8,13 +8,13 @@ Usage:
     KWYRE_BACKEND=vllm python server/serve_vllm.py
 
 Environment variables:
-    KWYRE_MODEL               HuggingFace model ID (default: Qwen/Qwen3-4B)
+    KWYRE_MODEL               HuggingFace model ID (default: HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive)
     KWYRE_MODEL_PATH          Path to pre-quantized model directory
     KWYRE_VLLM_GPU_MEMORY     GPU memory fraction (default: 0.85)
     KWYRE_VLLM_MAX_MODEL_LEN  Max context length (default: 8192)
     KWYRE_VLLM_TENSOR_PARALLEL  Tensor parallel size (default: 1)
     KWYRE_SPECULATIVE         Enable speculative decoding (default: 1)
-    KWYRE_DRAFT_MODEL         Draft model for speculative (default: Qwen/Qwen3-0.6B)
+    KWYRE_DRAFT_MODEL         Draft model for speculative (default: Qwen/Qwen3.5-0.8B)
     KWYRE_API_KEYS            API key:role pairs
     KWYRE_BIND_HOST           Bind address (default: 127.0.0.1)
     KWYRE_PORT                Port (default: 8000)
@@ -78,17 +78,17 @@ except ImportError:
     print("[vLLM] Install with: pip install vllm")
     sys.exit(1)
 
-MODEL_ID = os.environ.get("KWYRE_MODEL", "Qwen/Qwen3-4B")
+MODEL_ID = os.environ.get("KWYRE_MODEL", "HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive")
 PORT = int(os.environ.get("KWYRE_PORT", "8000"))
 GPU_MEMORY_FRACTION = float(os.environ.get("KWYRE_VLLM_GPU_MEMORY", "0.85"))
 MAX_MODEL_LEN = int(os.environ.get("KWYRE_VLLM_MAX_MODEL_LEN", "8192"))
 TENSOR_PARALLEL = int(os.environ.get("KWYRE_VLLM_TENSOR_PARALLEL", "1"))
 SPECULATIVE_ENABLED = os.environ.get("KWYRE_SPECULATIVE", "1") == "1"
-DRAFT_MODEL_ID = os.environ.get("KWYRE_DRAFT_MODEL", "Qwen/Qwen3-0.6B")
+DRAFT_MODEL_ID = os.environ.get("KWYRE_DRAFT_MODEL", "Qwen/Qwen3.5-0.8B")
 
 MODEL_TIERS = {
     "Qwen/Qwen3.5-9B": {"name": "kwyre-9b", "tier": "professional"},
-    "Qwen/Qwen3-4B": {"name": "kwyre-4b", "tier": "personal"},
+    "HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive": {"name": "kwyre-4b", "tier": "personal"},
 }
 ACTIVE_TIER = MODEL_TIERS.get(MODEL_ID, {"name": "kwyre-custom", "tier": "custom"})
 

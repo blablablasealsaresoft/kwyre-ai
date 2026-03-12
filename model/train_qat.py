@@ -55,7 +55,7 @@ def _resolve_model_path(model_id: str) -> str:
     """Resolve model path from dist/, HuggingFace cache, or use the ID directly."""
     project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     name_map = {
-        "Qwen/Qwen3-4B": "kwyre-4b",
+        "HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive": "kwyre-4b",
         "Qwen/Qwen3.5-9B": "kwyre-9b",
     }
     short_name = name_map.get(model_id, "")

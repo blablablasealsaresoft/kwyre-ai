@@ -10,10 +10,10 @@ shutdown() {
 trap shutdown SIGTERM SIGINT
 
 # Supported tiers:
-#   Personal:     Qwen/Qwen3-4B    (~3.9 GB VRAM, 7-14 tok/s)
-#   Professional: Qwen/Qwen3.5-9B  (~7.5 GB VRAM, 3-5 tok/s)
-MODEL="${KWYRE_MODEL:-Qwen/Qwen3-4B}"
-DRAFT="${KWYRE_DRAFT_MODEL:-Qwen/Qwen3-0.6B}"
+#   Personal:     HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive  (~4.1 GB VRAM, 7-14 tok/s)
+#   Professional: Qwen/Qwen3.5-9B                                      (~7.5 GB VRAM, 3-5 tok/s)
+MODEL="${KWYRE_MODEL:-HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive}"
+DRAFT="${KWYRE_DRAFT_MODEL:-Qwen/Qwen3.5-0.8B}"
 SPEC="${KWYRE_SPECULATIVE:-1}"
 CACHE="${HF_HOME:-/workspace/.cache/huggingface}"
 

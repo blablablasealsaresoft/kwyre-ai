@@ -74,19 +74,19 @@ DEFAULT_SYSTEM_PROMPT = (
     "confidence level explicitly."
 )
 
-MODEL_ID = os.environ.get("KWYRE_MODEL", "Qwen/Qwen3-4B")
+MODEL_ID = os.environ.get("KWYRE_MODEL", "HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive")
 PORT = 8000
 SPIKE_K = 5.0
 SPIKE_MAX = 31
 
 MODEL_TIERS = {
     "Qwen/Qwen3.5-9B": {"name": "kwyre-9b", "vram_4bit": "~7.5GB", "tier": "professional"},
-    "Qwen/Qwen3-4B": {"name": "kwyre-4b", "vram_4bit": "~3.5GB", "tier": "personal"},
+    "HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive": {"name": "kwyre-4b", "vram_4bit": "~4.1GB", "tier": "personal"},
 }
 ACTIVE_TIER = MODEL_TIERS.get(MODEL_ID, {"name": "kwyre-custom", "vram_4bit": "unknown", "tier": "custom"})
 
 SPECULATIVE_ENABLED = os.environ.get("KWYRE_SPECULATIVE", "1") == "1"
-DRAFT_MODEL_ID = os.environ.get("KWYRE_DRAFT_MODEL", "Qwen/Qwen3-0.6B")
+DRAFT_MODEL_ID = os.environ.get("KWYRE_DRAFT_MODEL", "Qwen/Qwen3.5-0.8B")
 
 draft_model = None
 
@@ -112,10 +112,10 @@ WEIGHT_HASHES_9B: dict[str, str] = {
     "tokenizer_config.json": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
     "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
 }
+# NOTE: Regenerate these hashes after downloading HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive
+# Run: python -c "from server.serve_local_4bit import generate_weight_hashes; import json; print(json.dumps(generate_weight_hashes('<path>'), indent=2))"
 WEIGHT_HASHES_4B: dict[str, str] = {
-    "config.json": "2f48fc86f9a91c0c1646a91ad8b2304443404e595ef02dfbeb0fb0ba11c519c0",
-    "tokenizer_config.json": "f9b405ae89598577609208377d0c109f2f03362e60cc011254dca8aa84310850",
-    "tokenizer.json": "be75606093db2094d7cd20f3c2f385c212750648bd6ea4fb2bf507a6a4c55506",
+    # REGENERATE AFTER FIRST DOWNLOAD of HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive
 }
 
 KNOWN_WEIGHT_HASHES = WEIGHT_HASHES_9B if "9B" in MODEL_ID else WEIGHT_HASHES_4B
@@ -399,6 +399,176 @@ else:
     print(f"[SpikeServe] No draft model — skipping (hooks only apply to draft)")
     active_spike_hooks = []
 
+# ---------------------------------------------------------------------------
+# Domain Adapter Manager (Hot-Swap LoRA)
+# Enhancement 1: Adapter stacking via weighted merge
+# Enhancement 4: CDN-based adapter versioning
+# ---------------------------------------------------------------------------
+ADAPTER_DIR = os.environ.get(
+    "KWYRE_ADAPTER_DIR",
+    os.path.join(os.path.expanduser("~"), ".kwyre", "adapters")
+)
+ALLOW_ADAPTER_SWAP = os.environ.get("KWYRE_ALLOW_ADAPTER_SWAP", "1") == "1"
+CDN_MANIFEST_URL = os.environ.get(
+    "KWYRE_ADAPTER_MANIFEST_URL",
+    "https://kwyre.com/adapters/manifest.json"
+)
+
+_adapter_lock = threading.Lock()
+_active_adapter: str | None = None
+_base_model_ref = model
+_adapted_model = None
+
+
+def _list_available_adapters() -> dict:
+    """Scan adapter directory for valid PEFT checkpoints."""
+    adapters = {}
+    if not os.path.isdir(ADAPTER_DIR):
+        return adapters
+    for name in os.listdir(ADAPTER_DIR):
+        adapter_path = os.path.join(ADAPTER_DIR, name)
+        config_path = os.path.join(adapter_path, "adapter_config.json")
+        if os.path.isfile(config_path):
+            meta_path = os.path.join(adapter_path, "metadata.json")
+            meta = {}
+            if os.path.isfile(meta_path):
+                with open(meta_path) as f:
+                    meta = json.load(f)
+            adapters[name] = {"path": adapter_path, "metadata": meta}
+    return adapters
+
+
+def load_adapter(domain_name: str) -> dict:
+    """Load a domain LoRA adapter onto the base model. Thread-safe."""
+    global _active_adapter, _adapted_model, model
+
+    with _adapter_lock:
+        available = _list_available_adapters()
+        if domain_name not in available:
+            return {"error": f"Adapter '{domain_name}' not found",
+                    "available": list(available.keys())}
+
+        if _active_adapter == domain_name:
+            return {"status": "already_loaded", "adapter": domain_name}
+
+        if _adapted_model is not None:
+            try:
+                _adapted_model.unload()
+            except Exception:
+                pass
+            _adapted_model = None
+            _active_adapter = None
+
+        try:
+            adapted = PeftModel.from_pretrained(
+                _base_model_ref, available[domain_name]["path"]
+            )
+            if os.environ.get("KWYRE_MERGE_LORA", "0") == "1":
+                adapted = adapted.merge_and_unload()
+                print(f"[Adapter] Loaded and merged: {domain_name}")
+            else:
+                adapted.eval()
+                print(f"[Adapter] Loaded in-place: {domain_name}")
+
+            model = adapted
+            _adapted_model = adapted
+            _active_adapter = domain_name
+            return {
+                "status": "loaded",
+                "adapter": domain_name,
+                "metadata": available[domain_name].get("metadata", {}),
+            }
+        except Exception as e:
+            model = _base_model_ref
+            _active_adapter = None
+            return {"error": str(e)}
+
+
+def unload_adapter() -> dict:
+    """Remove active adapter, revert to base model."""
+    global _active_adapter, _adapted_model, model
+
+    with _adapter_lock:
+        if _active_adapter is None:
+            return {"status": "no_adapter_loaded"}
+
+        prev = _active_adapter
+        if _adapted_model is not None:
+            try:
+                _adapted_model.unload()
+            except Exception:
+                pass
+            _adapted_model = None
+        model = _base_model_ref
+        _active_adapter = None
+        print(f"[Adapter] Unloaded: {prev}")
+        return {"status": "unloaded", "previous": prev}
+
+
+def stack_adapters(adapters: list, weights: list | None = None, name: str = "stacked") -> dict:
+    """Merge multiple domain adapters with optional weights. Thread-safe."""
+    global _active_adapter, _adapted_model, model
+
+    with _adapter_lock:
+        available = _list_available_adapters()
+        missing = [a for a in adapters if a not in available]
+        if missing:
+            return {"error": f"Adapters not found: {missing}", "available": list(available.keys())}
+
+        if weights is None:
+            weights = [1.0 / len(adapters)] * len(adapters)
+        if len(weights) != len(adapters):
+            return {"error": "weights length must match adapters length"}
+
+        if _adapted_model is not None:
+            try:
+                _adapted_model.unload()
+            except Exception:
+                pass
+            _adapted_model = None
+            _active_adapter = None
+
+        try:
+            peft_model = None
+            for adapter_name in adapters:
+                adapter_path = available[adapter_name]["path"]
+                if peft_model is None:
+                    peft_model = PeftModel.from_pretrained(
+                        _base_model_ref, adapter_path, adapter_name=adapter_name
+                    )
+                else:
+                    peft_model.load_adapter(adapter_path, adapter_name=adapter_name)
+
+            peft_model.add_weighted_adapter(
+                adapters=adapters,
+                weights=weights,
+                adapter_name=name,
+                combination_type="linear",
+            )
+            peft_model.set_adapter(name)
+            peft_model.eval()
+
+            model = peft_model
+            _adapted_model = peft_model
+            _active_adapter = name
+            print(f"[Adapter] Stacked {adapters} -> '{name}' (weights={weights})")
+            return {
+                "status": "stacked",
+                "adapter": name,
+                "source_adapters": adapters,
+                "weights": weights,
+            }
+        except Exception as e:
+            model = _base_model_ref
+            _active_adapter = None
+            return {"error": str(e)}
+
+
+_default_adapter = os.environ.get("KWYRE_DEFAULT_ADAPTER", "")
+if _default_adapter:
+    print(f"[Adapter] Auto-loading default: {_default_adapter}")
+    load_adapter(_default_adapter)
+
 # Lazy sparsity measurement — runs on first real inference request
 _sparsity_measured = False
 _sparsity_lock = threading.Lock()
@@ -671,6 +841,14 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             self._handle_admin_wipe_sessions()
         elif self.path == "/v1/documents/upload":
             self._handle_document_upload()
+        elif self.path == "/v1/adapter/load":
+            self._handle_adapter_load()
+        elif self.path == "/v1/adapter/unload":
+            self._handle_adapter_unload()
+        elif self.path == "/v1/adapter/stack":
+            self._handle_adapter_stack()
+        elif self.path.startswith("/v1/adapter/update/"):
+            self._handle_adapter_update()
         else:
             self._send_json_error(404, "Not found.")
 
@@ -1229,6 +1407,12 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             self._handle_admin_list_sessions()
         elif MULTI_USER and self.path == "/v1/admin/audit":
             self._handle_admin_audit()
+        elif self.path == "/v1/adapter/list":
+            self._handle_adapter_list()
+        elif self.path == "/v1/adapter/status":
+            self._handle_adapter_status()
+        elif self.path == "/v1/adapter/check-update":
+            self._handle_adapter_check_update()
         elif self.path == "/favicon.ico":
             self.send_response(204)
             self._send_security_headers()
@@ -1342,6 +1526,153 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 },
             }],
         })
+
+    # ---- Adapter endpoints ----
+
+    def _handle_adapter_list(self):
+        available = _list_available_adapters()
+        self._send_json(200, {
+            "adapters": {
+                name: info["metadata"] for name, info in available.items()
+            },
+            "active_adapter": _active_adapter,
+            "adapter_dir": ADAPTER_DIR,
+        })
+
+    def _handle_adapter_status(self):
+        self._send_json(200, {
+            "active_adapter": _active_adapter,
+            "base_model": MODEL_ID,
+            "adapter_swap_enabled": ALLOW_ADAPTER_SWAP,
+        })
+
+    def _handle_adapter_load(self):
+        if not ALLOW_ADAPTER_SWAP:
+            self._send_json_error(403, "Adapter hot-swap is disabled (KWYRE_ALLOW_ADAPTER_SWAP=0).")
+            return
+        body, err = self._parse_json_body(required=True)
+        if err is not None:
+            self._send_json_error(400, err)
+            return
+        domain = (body or {}).get("domain", "").strip()
+        if not domain:
+            self._send_json_error(400, "Missing 'domain' field.")
+            return
+        result = load_adapter(domain)
+        status = 200 if "error" not in result else 400
+        self._send_json(status, result)
+
+    def _handle_adapter_unload(self):
+        if not ALLOW_ADAPTER_SWAP:
+            self._send_json_error(403, "Adapter hot-swap is disabled (KWYRE_ALLOW_ADAPTER_SWAP=0).")
+            return
+        result = unload_adapter()
+        self._send_json(200, result)
+
+    def _handle_adapter_stack(self):
+        if not ALLOW_ADAPTER_SWAP:
+            self._send_json_error(403, "Adapter hot-swap is disabled (KWYRE_ALLOW_ADAPTER_SWAP=0).")
+            return
+        body, err = self._parse_json_body(required=True)
+        if err is not None:
+            self._send_json_error(400, err)
+            return
+        adapters = (body or {}).get("adapters")
+        if not isinstance(adapters, list) or len(adapters) < 1:
+            self._send_json_error(400, "Missing or invalid 'adapters' list.")
+            return
+        weights = (body or {}).get("weights")
+        name = (body or {}).get("name", "stacked")
+        result = stack_adapters(adapters, weights=weights, name=name)
+        status = 200 if "error" not in result else 400
+        self._send_json(status, result)
+
+    def _handle_adapter_check_update(self):
+        import urllib.request as _urllib_request
+        try:
+            with _urllib_request.urlopen(CDN_MANIFEST_URL, timeout=5) as resp:
+                manifest = json.loads(resp.read())
+        except Exception as e:
+            self._send_json(503, {"error": f"Failed to fetch manifest: {e}", "url": CDN_MANIFEST_URL})
+            return
+
+        available = _list_available_adapters()
+        updates = {}
+        for domain, info in manifest.items():
+            local_ver = available.get(domain, {}).get("metadata", {}).get("version", "0.0.0")
+            remote_ver = info.get("version", "0.0.0")
+            if remote_ver > local_ver:
+                updates[domain] = {
+                    "local": local_ver,
+                    "remote": remote_ver,
+                    "url": info.get("url"),
+                }
+        self._send_json(200, {"updates_available": updates, "up_to_date": len(updates) == 0})
+
+    def _handle_adapter_update(self):
+        import urllib.request as _urllib_request
+        import zipfile
+        import shutil
+
+        domain = self.path.split("/v1/adapter/update/", 1)[-1].strip("/")
+        if not domain:
+            self._send_json_error(400, "Missing domain in URL path.")
+            return
+
+        try:
+            with _urllib_request.urlopen(CDN_MANIFEST_URL, timeout=5) as resp:
+                manifest = json.loads(resp.read())
+        except Exception as e:
+            self._send_json(503, {"error": f"Failed to fetch manifest: {e}"})
+            return
+
+        if domain not in manifest:
+            self._send_json_error(404, f"Domain '{domain}' not in CDN manifest.")
+            return
+
+        remote_info = manifest[domain]
+        download_url = remote_info.get("url")
+        if not download_url:
+            self._send_json_error(502, f"No download URL in manifest for '{domain}'.")
+            return
+
+        adapter_path = os.path.join(ADAPTER_DIR, domain)
+        backup_path = adapter_path + ".backup"
+
+        if os.path.isdir(adapter_path):
+            if os.path.isdir(backup_path):
+                shutil.rmtree(backup_path)
+            shutil.copytree(adapter_path, backup_path)
+
+        try:
+            os.makedirs(ADAPTER_DIR, exist_ok=True)
+            tmp_zip = os.path.join(ADAPTER_DIR, f"_{domain}_update.zip")
+            _urllib_request.urlretrieve(download_url, tmp_zip)
+
+            if os.path.isdir(adapter_path):
+                shutil.rmtree(adapter_path)
+
+            with zipfile.ZipFile(tmp_zip, "r") as zf:
+                zf.extractall(os.path.join(ADAPTER_DIR, domain))
+            os.remove(tmp_zip)
+
+            if os.path.isdir(backup_path):
+                shutil.rmtree(backup_path)
+
+            print(f"[Adapter] Updated '{domain}' from CDN: {download_url}")
+            self._send_json(200, {
+                "status": "updated",
+                "domain": domain,
+                "version": remote_info.get("version"),
+            })
+        except Exception as e:
+            if os.path.isdir(backup_path):
+                if os.path.isdir(adapter_path):
+                    shutil.rmtree(adapter_path)
+                shutil.copytree(backup_path, adapter_path)
+                shutil.rmtree(backup_path)
+                print(f"[Adapter] Update failed for '{domain}', restored backup: {e}")
+            self._send_json(500, {"error": f"Update failed: {e}", "domain": domain})
 
     # ---- Admin GET endpoints ----
 

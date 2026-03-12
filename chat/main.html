@@ -1869,6 +1869,32 @@ html.light nav { background: rgba(245,246,250,0.9); }
   .hero h1 { letter-spacing: -0.5px; }
   .section { padding: 60px 0; }
 }
+
+/* --- ADAPTER SELECT --- */
+#adapter-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7294' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 28px !important;
+}
+#adapter-select:hover { border-color: var(--border-hi) !important; color: var(--text) !important; }
+#adapter-select:focus { border-color: var(--accent) !important; outline: none; }
+#adapter-select option { background: var(--surface2); color: var(--text); }
+
+/* --- ADAPTER TOAST --- */
+#adapterToast {
+  animation: fadeUp 0.3s ease;
+}
+#adapterToastLoad:hover { box-shadow: 0 0 12px var(--accent-glow); }
+
+/* --- ADAPTER BADGE PULSE --- */
+@keyframes badge-in {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+#adapter-badge[style*="inline-block"] { animation: badge-in 0.25s ease; }
 </style>
 </head>
 <body>
@@ -2129,6 +2155,70 @@ html.light nav { background: rgba(245,246,250,0.9); }
 </div>
 
 <!-- Matthew 10:26 — So do not be afraid of them, for there is nothing concealed that will not be disclosed. -->
+
+<!-- LIVE CHAT -->
+<div class="section" id="chat">
+  <div class="wrap">
+    <div class="sh reveal">
+      <div class="sh-eyebrow" style="color: var(--accent);">Live Inference</div>
+      <h2>Talk to Kwyre</h2>
+      <p>Running on your local GPU &mdash; no cloud, no logging, no exposure.</p>
+    </div>
+
+    <div class="api-key-bar reveal reveal-d1">
+      <div class="status-dot" id="connDot"></div>
+      <span id="modelLabel" style="font-family:var(--mono);font-size:12px;color:var(--text2);letter-spacing:0.5px;">kwyre-4b</span>
+      <span id="adapter-badge" style="display:none;margin-left:8px;padding:2px 8px;border-radius:4px;font-size:0.8em;font-family:var(--mono);background:#2563eb;color:#fff;letter-spacing:0.5px;"></span>
+      <div style="flex:1"></div>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">Local Endpoint</span>
+    </div>
+
+    <div class="system-prompt-section reveal reveal-d1">
+      <div class="system-prompt-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+        &#9654; System Prompt
+      </div>
+      <textarea id="systemPromptInput" class="system-prompt-input" style="display:none;" rows="3" placeholder="Override the default system prompt (optional)..."></textarea>
+    </div>
+
+    <div id="adapterToast" style="display:none;position:relative;margin-bottom:12px;padding:10px 16px;background:var(--surface2);border:1px solid var(--border-hi);border-radius:6px;font-family:var(--mono);font-size:12px;color:var(--text);align-items:center;gap:12px;flex-wrap:wrap;">
+      <span id="adapterToastMsg" style="flex:1;min-width:180px;"></span>
+      <button id="adapterToastLoad" style="background:var(--accent);border:none;border-radius:4px;padding:5px 14px;color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:0.5px;cursor:pointer;">Load</button>
+      <button onclick="dismissAdapterToast()" style="background:none;border:1px solid var(--border);border-radius:4px;padding:5px 10px;color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;">Dismiss</button>
+    </div>
+
+    <div class="upload-badge" id="uploadBadge" style="display:none;">
+      <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      <span id="uploadBadgeText">Docs indexed</span>
+    </div>
+
+    <div class="chat-toolbar reveal reveal-d2">
+      <button class="toolbar-btn" id="themeToggle" onclick="toggleTheme()">Light Mode</button>
+      <button class="toolbar-btn" onclick="newChat()">New Chat</button>
+      <button class="toolbar-btn toolbar-danger" onclick="wipeSession()">Wipe Session</button>
+      <button class="toolbar-btn" onclick="exportConversation()">Export</button>
+      <label class="toolbar-btn" style="cursor:pointer;">
+        <span id="uploadBtn">Upload Docs</span>
+        <input type="file" id="fileUpload" accept=".txt,.md,.pdf,.json,.csv" multiple style="display:none;">
+      </label>
+      <select id="adapter-select" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;letter-spacing:0.5px;outline:none;transition:border-color 0.2s;">
+        <option value="">No adapter</option>
+      </select>
+    </div>
+
+    <div class="chat-container reveal reveal-d3">
+      <div class="chat-messages" id="chatMessages">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Kwyre is ready. Start a conversation.</span>
+        </div>
+      </div>
+      <div class="chat-input">
+        <textarea id="msgInput" placeholder="Ask Kwyre anything..." rows="1"></textarea>
+        <button class="send-btn" id="sendBtn">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- SECURITY STACK -->
 <div class="section" id="security">
@@ -2637,7 +2727,14 @@ async function detectTier() {
     const modelId = data.model || '';
     const tierKey = modelId.replace(/-spikeserve|-vllm|-mlx|-air/g, '');
     KWYRE_MODEL_ID = tierKey || KWYRE_MODEL_ID;
-  } catch {}
+    const lbl = document.getElementById('modelLabel');
+    if (lbl) lbl.textContent = KWYRE_MODEL_ID;
+    const dot = document.getElementById('connDot');
+    if (dot) { dot.classList.add('connected'); }
+  } catch {
+    const dot = document.getElementById('connDot');
+    if (dot) { dot.classList.add('error'); }
+  }
 }
 
 detectTier();
@@ -2702,6 +2799,10 @@ function toggleTheme() {
 
 function newChat() {
   messages = [];
+  detectionBuffer = [];
+  detectionDone = false;
+  sessionStorage.removeItem('kwyre-adapter-suggested');
+  dismissAdapterToast();
   chatMessages.innerHTML = '';
   addMessage('assistant', 'Kwyre AI online. Running live on GPU \u2014 completely uncensored. Ask me anything.');
 }
@@ -2812,6 +2913,7 @@ async function send() {
   if (!content || isGenerating) return;
 
   addMessage('user', content);
+  runDomainDetection(content);
   msgInput.value = '';
   msgInput.style.height = 'auto';
   isGenerating = true;
@@ -2901,6 +3003,141 @@ async function send() {
   isGenerating = false;
   sendBtn.disabled = false;
   msgInput.focus();
+}
+
+/* ── ADAPTER MANAGEMENT ── */
+function updateAdapterBadge(adapterName) {
+  const badge = document.getElementById('adapter-badge');
+  const label = document.getElementById('modelLabel');
+  if (adapterName) {
+    const display = adapterName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    badge.textContent = display;
+    badge.style.display = 'inline-block';
+    if (label) label.title = KWYRE_MODEL_ID + ' + ' + display + ' adapter';
+  } else {
+    badge.style.display = 'none';
+    if (label) label.title = '';
+  }
+}
+
+async function loadAdapters() {
+  try {
+    const res = await fetch(KWYRE_API + '/v1/adapter/list');
+    if (!res.ok) return;
+    const data = await res.json();
+    const sel = document.getElementById('adapter-select');
+    Object.entries(data.available || {}).forEach(([name, meta]) => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = meta.display_name || name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      if (name === data.active) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    updateAdapterBadge(data.active || null);
+  } catch (e) { /* server may not have adapters */ }
+}
+
+document.getElementById('adapter-select').addEventListener('change', async function () {
+  const domain = this.value;
+  try {
+    if (!domain) {
+      await fetch(KWYRE_API + '/v1/adapter/unload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + KWYRE_KEY } });
+      updateAdapterBadge(null);
+    } else {
+      const res = await fetch(KWYRE_API + '/v1/adapter/load', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + KWYRE_KEY },
+        body: JSON.stringify({ domain })
+      });
+      const data = await res.json();
+      updateAdapterBadge(data.adapter || domain);
+    }
+  } catch (e) { /* silent fail */ }
+});
+
+loadAdapters();
+
+/* ── DOMAIN AUTO-DETECTION ── */
+const DOMAIN_KEYWORDS = {
+  legal_compliance:         ['nda', 'contract', 'compliance', 'sec', 'finra', 'attorney', 'privilege', 'clause', 'statute'],
+  insurance_actuarial:      ['reinsurance', 'actuarial', 'ibnr', 'cedent', 'treaty', 'solvency', 'underwriting', 'claims'],
+  healthcare_lifesciences:  ['hipaa', 'phi', 'clinical', 'fda', 'irb', 'patient', 'healthcare', 'medical', 'drug'],
+  defense_intelligence:     ['cui', 'nist', 'classified', 'osint', 'mitre', 'opsec', 'defense', 'contractor'],
+  financial_trading:        ['var', 'alpha', 'portfolio', 'trading', 'algorithm', 'hedge', 'sharpe', 'vwap', 'quantitative'],
+  blockchain_crypto:        ['blockchain', 'wallet', 'defi', 'ethereum', 'solana', 'aml', 'sar', 'on-chain', 'mixer'],
+};
+
+const DOMAIN_LABELS = {
+  legal_compliance:        'Legal',
+  insurance_actuarial:     'Insurance / Actuarial',
+  healthcare_lifesciences: 'Healthcare',
+  defense_intelligence:    'Defense / Intelligence',
+  financial_trading:       'Financial Trading',
+  blockchain_crypto:       'Blockchain / Crypto',
+};
+
+let detectionBuffer = [];
+let detectionDone = false;
+let toastDismissTimer = null;
+
+function detectDomain(text) {
+  const lower = text.toLowerCase();
+  const scores = {};
+  for (const [domain, keywords] of Object.entries(DOMAIN_KEYWORDS)) {
+    scores[domain] = keywords.filter(kw => lower.includes(kw)).length;
+  }
+  const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
+  return best[1] >= 2 ? best[0] : null;
+}
+
+function showAdapterToast(domain) {
+  if (sessionStorage.getItem('kwyre-adapter-suggested')) return;
+  sessionStorage.setItem('kwyre-adapter-suggested', '1');
+
+  const toast = document.getElementById('adapterToast');
+  const msg = document.getElementById('adapterToastMsg');
+  const loadBtn = document.getElementById('adapterToastLoad');
+
+  const label = DOMAIN_LABELS[domain] || domain;
+  msg.textContent = '\u26a1 Detected ' + label + ' content \u2014 load the ' + label + ' adapter?';
+  toast.style.display = 'flex';
+
+  loadBtn.onclick = async function () {
+    try {
+      const res = await fetch(KWYRE_API + '/v1/adapter/load', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + KWYRE_KEY },
+        body: JSON.stringify({ domain })
+      });
+      const data = await res.json();
+      updateAdapterBadge(data.adapter || domain);
+      const sel = document.getElementById('adapter-select');
+      for (const opt of sel.options) { if (opt.value === domain) { opt.selected = true; break; } }
+    } catch (e) { /* silent */ }
+    dismissAdapterToast();
+  };
+
+  if (toastDismissTimer) clearTimeout(toastDismissTimer);
+  toastDismissTimer = setTimeout(dismissAdapterToast, 10000);
+}
+
+function dismissAdapterToast() {
+  document.getElementById('adapterToast').style.display = 'none';
+  if (toastDismissTimer) { clearTimeout(toastDismissTimer); toastDismissTimer = null; }
+}
+
+function runDomainDetection(userText) {
+  if (detectionDone) return;
+  detectionBuffer.push(userText);
+  if (detectionBuffer.length >= 3) detectionDone = true;
+  const combined = detectionBuffer.join(' ');
+  const domain = detectDomain(combined);
+  if (domain) {
+    detectionDone = true;
+    const sel = document.getElementById('adapter-select');
+    const alreadyLoaded = sel && sel.value === domain;
+    if (!alreadyLoaded) showAdapterToast(domain);
+  }
 }
 
 const CASES = [

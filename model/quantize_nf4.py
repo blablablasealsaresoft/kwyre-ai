@@ -5,8 +5,8 @@ Loads the FP16 model from HuggingFace cache, quantizes to NF4,
 and saves the compact version. Clients download ~2 GB instead of ~8 GB.
 
 Usage:
-    python model/quantize_nf4.py --model Qwen/Qwen3-4B --output ./dist/kwyre-4b-nf4
-    python model/quantize_nf4.py --model Qwen/Qwen3-0.6B --output ./dist/kwyre-draft-nf4
+    python model/quantize_nf4.py --model HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive --output ./dist/kwyre-4b-nf4
+    python model/quantize_nf4.py --model Qwen/Qwen3.5-0.8B --output ./dist/kwyre-draft-nf4
 """
 
 import argparse  # command-line argument parsing

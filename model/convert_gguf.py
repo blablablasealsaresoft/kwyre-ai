@@ -4,26 +4,23 @@ Kwyre AI — Convert HuggingFace models to GGUF format for llama.cpp
 Converts transformer models to GGUF with quantization for use with
 Kwyre Air (CPU-only inference via llama-cpp-python).
 
-Requires: llama.cpp repository cloned locally (for convert scripts)
-          OR the llama-cpp-python[server] package with bundled tools.
+NOTE: For the draft model, pre-built GGUFs are available at:
+      https://huggingface.co/unsloth/Qwen3.5-0.8B-GGUF
 
 Supported quantization levels:
-  Q4_K_M  — 4-bit, medium quality (~3.5 GB for 7B model) — recommended
-  Q5_K_M  — 5-bit, higher quality (~4.5 GB for 7B model)
-  Q8_0    — 8-bit, near-lossless (~7 GB for 7B model)
+  Q4_K_M  — 4-bit, medium quality — recommended
+  Q5_K_M  — 5-bit, higher quality
+  Q8_0    — 8-bit, near-lossless
 
 Usage:
-    # Convert with default Q4_K_M quantization
-    python model/convert_gguf.py --model Qwen/Qwen3-4B --output ./models/kwyre-4b.gguf
+    # Personal tier
+    python model/convert_gguf.py --model HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive --output ./models/kwyre-4b.gguf
 
-    # Convert with Q5_K_M for higher quality
-    python model/convert_gguf.py --model Qwen/Qwen3-4B --output ./models/kwyre-4b-q5.gguf --quant Q5_K_M
+    # Higher quality quantization
+    python model/convert_gguf.py --model HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive --output ./models/kwyre-4b-q5.gguf --quant Q5_K_M
 
-    # Convert from a local model directory
+    # From a local model directory
     python model/convert_gguf.py --model ./dist/kwyre-4b-nf4 --output ./models/kwyre-4b.gguf
-
-    # Specify llama.cpp repo path if not auto-detected
-    python model/convert_gguf.py --model Qwen/Qwen3-4B --output ./models/kwyre-4b.gguf --llama-cpp ~/llama.cpp
 """
 
 import argparse
@@ -174,8 +171,8 @@ if __name__ == "__main__":
         formatter_class=argparse.RawDescriptionHelpFormatter,
         epilog="""
 Examples:
-  python model/convert_gguf.py --model Qwen/Qwen3-4B --output ./models/kwyre-4b.gguf
-  python model/convert_gguf.py --model Qwen/Qwen3-4B --output ./models/kwyre-4b-q5.gguf --quant Q5_K_M
+  python model/convert_gguf.py --model HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive --output ./models/kwyre-4b.gguf
+  python model/convert_gguf.py --model HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive --output ./models/kwyre-4b-q5.gguf --quant Q5_K_M
   python model/convert_gguf.py --model ./local-model --output ./models/model.gguf --llama-cpp ~/llama.cpp
 """,
     )
