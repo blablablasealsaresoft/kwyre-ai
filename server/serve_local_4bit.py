@@ -112,10 +112,14 @@ WEIGHT_HASHES_9B: dict[str, str] = {
     "tokenizer_config.json": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
     "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
 }
-# NOTE: Regenerate these hashes after downloading HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive
-# Run: python -c "from server.serve_local_4bit import generate_weight_hashes; import json; print(json.dumps(generate_weight_hashes('<path>'), indent=2))"
+# Hashes are for Qwen/Qwen3.5-4B base (tokenizer is byte-identical in the uncensored fine-tune;
+# config.json matches the unmodified 4B architecture). If you load via local safetensors or a
+# locally converted copy and see a hash mismatch on config.json, regenerate with:
+# python -c "from server.serve_local_4bit import generate_weight_hashes; import json; print(json.dumps(generate_weight_hashes('<model_cache_path>'), indent=2))"
 WEIGHT_HASHES_4B: dict[str, str] = {
-    # REGENERATE AFTER FIRST DOWNLOAD of HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive
+    "config.json": "ddc63e1c717afa86c865bb5e01313d89d72bb53b97ad4a8a03ba8510c0621670",
+    "tokenizer_config.json": "316230d6a809701f4db5ea8f8fc862bc3a6f3229c937c174e674ff3ca0a64ac8",
+    "tokenizer.json": "5f9e4d4901a92b997e463c1f46055088b6cca5ca61a6522d1b9f64c4bb81cb42",
 }
 
 KNOWN_WEIGHT_HASHES = WEIGHT_HASHES_9B if "9B" in MODEL_ID else WEIGHT_HASHES_4B
