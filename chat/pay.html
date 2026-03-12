@@ -555,6 +555,138 @@ nav {
   color: var(--green); font-weight: 500;
 }
 
+/* --- CREDIT CARD FORM --- */
+.cc-form { text-align: left; }
+
+.cc-form-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.cc-form-tier {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--accent);
+}
+
+.cc-card-brands {
+  display: flex; gap: 8px; align-items: center;
+}
+
+.cc-card-brands svg {
+  width: 32px; height: 22px;
+  opacity: 0.35; transition: opacity 0.2s;
+}
+.cc-card-brands svg.detected { opacity: 1; }
+
+.cc-field {
+  margin-bottom: 16px;
+}
+
+.cc-field-row {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.cc-label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 8px;
+}
+
+.cc-input {
+  width: 100%; padding: 14px 16px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 14px; line-height: 1.5;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  -webkit-appearance: none;
+  appearance: none;
+}
+.cc-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-dim);
+}
+.cc-input::placeholder { color: var(--text3); }
+.cc-input.invalid {
+  border-color: var(--red);
+  box-shadow: 0 0 0 3px var(--red-dim);
+}
+.cc-input.valid {
+  border-color: var(--green);
+}
+
+.cc-error-msg {
+  font-family: var(--mono);
+  font-size: 10px; color: var(--red);
+  letter-spacing: 0.5px;
+  margin-top: 6px;
+  min-height: 14px;
+}
+
+.cc-pay-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%;
+  margin-top: 24px; padding: 16px;
+  font-family: var(--mono);
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  background: var(--accent);
+  color: #fff; border: none;
+  border-radius: 6px; cursor: pointer;
+  transition: all 0.2s;
+}
+.cc-pay-btn:hover {
+  box-shadow: 0 4px 24px var(--accent-glow);
+  transform: translateY(-1px);
+}
+.cc-pay-btn:disabled {
+  opacity: 0.5; cursor: not-allowed;
+  transform: none; box-shadow: none;
+}
+
+.cc-pay-btn svg {
+  width: 16px; height: 16px;
+  stroke: currentColor; fill: none; stroke-width: 2;
+}
+
+.cc-secure-note {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 16px;
+  font-family: var(--mono);
+  font-size: 10px; color: var(--text3);
+  letter-spacing: 0.5px;
+}
+
+.cc-secure-note svg {
+  width: 12px; height: 12px;
+  stroke: var(--text3); fill: none; stroke-width: 2;
+}
+
+.cc-coming-soon-msg {
+  display: flex; align-items: center; gap: 12px;
+  margin-top: 20px; padding: 16px 20px;
+  background: rgba(245,158,11,0.06);
+  border: 1px solid rgba(245,158,11,0.18);
+  border-radius: 6px;
+  font-size: 13px; color: var(--text2);
+  line-height: 1.5;
+  animation: dl-fade-in 0.4s ease;
+}
+.cc-coming-soon-msg svg {
+  flex-shrink: 0;
+  width: 18px; height: 18px;
+  stroke: var(--amber); fill: none; stroke-width: 2;
+}
+.cc-coming-soon-msg strong { color: var(--amber); }
+
 /* --- AFTER PAYMENT --- */
 .after-pay {
   max-width: 560px;
@@ -897,12 +1029,18 @@ nav {
   .wrap { padding: 0 20px; }
   .pay-panel { padding: 28px 20px; }
   .footer-inner { flex-direction: column; text-align: center; }
+  .cc-field-row { grid-template-columns: 1fr 1fr; }
+  .cc-form-header { flex-wrap: wrap; gap: 12px; }
+  .cc-card-brands svg { width: 28px; height: 19px; }
 }
 
 @media (max-width: 480px) {
   .hero h1 { letter-spacing: -0.5px; }
   .section { padding: 60px 0; }
   .pay-section { padding: 60px 0; }
+  .cc-field-row { grid-template-columns: 1fr 1fr; }
+  .cc-input { font-size: 16px; padding: 12px 14px; }
+  .cc-pay-btn { font-size: 11px; padding: 14px; }
 }
 
 /* ENHANCED COSMIC LAYERS */
@@ -1110,12 +1248,62 @@ nav {
           </button>
         </div>
 
-        <div class="pay-panel cc-panel pay-panel-hidden" id="ccPanel" style="max-width:none;">
-          <div class="cc-icon">
-            <svg viewBox="0 0 24 24"><rect x="1" y="4" width="22" height="16" rx="2"/><path d="M1 10h22"/></svg>
+        <!--
+          STRIPE INTEGRATION PLACEHOLDER (v1.6)
+          TODO: Load Stripe.js via <script src="https://js.stripe.com/v3/"></script>
+          TODO: Initialize with publishable key: const stripe = Stripe('pk_live_...');
+          TODO: Create a PaymentIntent on your server (POST /api/create-payment-intent)
+                and pass the client_secret to stripe.confirmCardPayment().
+          TODO: Replace the cc-input fields below with Stripe Elements for PCI compliance.
+        -->
+        <div class="pay-panel cc-panel cc-form pay-panel-hidden" id="ccPanel" style="max-width:none;">
+          <div class="cc-form-header">
+            <div class="cc-form-tier" id="ccTierLabel">Professional</div>
+            <div class="cc-card-brands">
+              <svg id="ccBrandVisa" viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="32" rx="4" fill="#1A1F71"/><path d="M19.5 21h-3l1.9-10h3l-1.9 10zm-5.3-10l-2.8 6.8-.3-1.6-1-5.3S10 10 9 10H4.1l-.1.3c1.2.3 2.5.8 3.3 1.3l2.8 9.4H13l4.6-10h-3.4zm27.3 10h2.6l-2.3-10h-2.4c-.7 0-1.3.4-1.5 1l-4.3 9h3l.6-1.6h3.7l.6 1.6zm-3.2-3.8l1.5-4.2.9 4.2h-2.4zm-5.5-3.4l.4-2.4c-.8-.3-1.6-.5-2.5-.5-2.7 0-4.6 1.4-4.6 3.5 0 1.5 1.4 2.4 2.4 2.9 1.1.5 1.4.9 1.4 1.3 0 .7-.9 1-1.7 1-1.1 0-1.7-.2-2.6-.5l-.4 2.3c.6.3 1.7.5 2.9.5 3 0 4.9-1.5 4.9-3.6 0-2.8-3.9-2.9-3.9-4.2 0-.5.5-1 1.5-1 .8 0 1.5.1 2.2.7z" fill="#fff"/></svg>
+              <svg id="ccBrandMC" viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="32" rx="4" fill="#252525"/><circle cx="19" cy="16" r="9" fill="#EB001B"/><circle cx="29" cy="16" r="9" fill="#F79E1B"/><path d="M24 9.3a9 9 0 0 1 3.3 6.7A9 9 0 0 1 24 22.7 9 9 0 0 1 20.7 16 9 9 0 0 1 24 9.3z" fill="#FF5F00"/></svg>
+              <svg id="ccBrandAmex" viewBox="0 0 48 32" fill="none" xmlns="http://www.w3.org/2000/svg"><rect width="48" height="32" rx="4" fill="#2E77BC"/><path d="M7 13l-3 6h2.2l.4-1h2.3l.4 1H12l-3-6H7zm1 1.5l.7 2.1H7.3L8 14.5zM13 19l2.5-3 -2.5-3h2.3l1.4 1.8L18 13h2.2l-2.5 3 2.5 3h-2.3l-1.4-1.8L15.3 19H13zM22 13v6h2v-2h1.5l1.5 2h2.4l-1.8-2.3c.9-.4 1.4-1.1 1.4-1.9 0-1.4-1-1.8-2.5-1.8H22zm2 1.5h2c.5 0 .8.2.8.6 0 .4-.3.6-.8.6h-2v-1.2z" fill="#fff"/></svg>
+            </div>
           </div>
-          <h3>Coming soon</h3>
-          <p>Credit card processing is not yet available.<br>Use <span class="cc-highlight">Monero for immediate access</span> &mdash; no waiting, no intermediaries.</p>
+
+          <div class="cc-field">
+            <label class="cc-label" for="ccName">Name on card</label>
+            <input type="text" id="ccName" class="cc-input" placeholder="John Doe" autocomplete="cc-name" spellcheck="false">
+          </div>
+
+          <div class="cc-field">
+            <label class="cc-label" for="ccNumber">Card number</label>
+            <input type="text" id="ccNumber" class="cc-input" placeholder="1234 5678 9012 3456" inputmode="numeric" autocomplete="cc-number" maxlength="19">
+            <div class="cc-error-msg" id="ccNumberError"></div>
+          </div>
+
+          <div class="cc-field-row">
+            <div class="cc-field">
+              <label class="cc-label" for="ccExpiry">Expiry date</label>
+              <input type="text" id="ccExpiry" class="cc-input" placeholder="MM / YY" inputmode="numeric" autocomplete="cc-exp" maxlength="7">
+              <div class="cc-error-msg" id="ccExpiryError"></div>
+            </div>
+            <div class="cc-field">
+              <label class="cc-label" for="ccCvc">CVC</label>
+              <input type="text" id="ccCvc" class="cc-input" placeholder="123" inputmode="numeric" autocomplete="cc-csc" maxlength="4">
+              <div class="cc-error-msg" id="ccCvcError"></div>
+            </div>
+          </div>
+
+          <button class="cc-pay-btn" id="ccPayBtn" onclick="handleCCPayment()">
+            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            <span id="ccPayLabel">Pay</span>
+          </button>
+
+          <div class="cc-secure-note">
+            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            Secured with 256-bit TLS encryption
+          </div>
+
+          <div class="cc-coming-soon-msg" id="ccComingSoonMsg" style="display:none;">
+            <svg viewBox="0 0 24 24"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+            <span>Credit card payments coming soon. Please use <strong>Monero (XMR)</strong> for now.</span>
+          </div>
         </div>
 
         <div class="after-pay">
@@ -1424,6 +1612,7 @@ function selectTier(tier) {
   btn.textContent = 'Selected';
 
   document.getElementById('xmrTierLabel').textContent = TIERS[tier].label;
+  document.getElementById('ccTierLabel').textContent = TIERS[tier].label;
 
   document.getElementById('payment').scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
@@ -1436,6 +1625,9 @@ function setPayMethod(method) {
 
   document.getElementById('xmrPanel').classList.toggle('pay-panel-hidden', method !== 'xmr');
   document.getElementById('ccPanel').classList.toggle('pay-panel-hidden', method !== 'cc');
+
+  const afterPay = document.querySelector('.after-pay');
+  if (afterPay) afterPay.style.display = method === 'xmr' ? '' : 'none';
 }
 
 /* ── QR CODE GENERATION ── */
@@ -1586,6 +1778,134 @@ function showSuccess(result) {
   document.getElementById('dlTierLabel').textContent = result.label + ' License';
   document.getElementById('dlMachines').textContent = result.machines + ' machine' + (result.machines !== 1 ? 's' : '');
 }
+
+/* ── CREDIT CARD FORM ── */
+(function() {
+  const ccNumber = document.getElementById('ccNumber');
+  const ccExpiry = document.getElementById('ccExpiry');
+  const ccCvc    = document.getElementById('ccCvc');
+  const ccName   = document.getElementById('ccName');
+
+  function detectBrand(num) {
+    const n = num.replace(/\s/g, '');
+    if (/^4/.test(n))                            return 'visa';
+    if (/^5[1-5]/.test(n) || /^2[2-7]/.test(n))  return 'mastercard';
+    if (/^3[47]/.test(n))                         return 'amex';
+    return null;
+  }
+
+  function highlightBrand(brand) {
+    document.getElementById('ccBrandVisa').classList.toggle('detected', brand === 'visa');
+    document.getElementById('ccBrandMC').classList.toggle('detected', brand === 'mastercard');
+    document.getElementById('ccBrandAmex').classList.toggle('detected', brand === 'amex');
+  }
+
+  function formatCardNumber(val) {
+    const digits = val.replace(/\D/g, '').slice(0, 16);
+    return digits.replace(/(.{4})/g, '$1 ').trim();
+  }
+
+  function formatExpiry(val) {
+    const digits = val.replace(/\D/g, '').slice(0, 4);
+    if (digits.length >= 3) return digits.slice(0, 2) + ' / ' + digits.slice(2);
+    return digits;
+  }
+
+  ccNumber.addEventListener('input', function() {
+    const pos = this.selectionStart;
+    const prev = this.value;
+    this.value = formatCardNumber(this.value);
+    const diff = this.value.length - prev.length;
+    this.setSelectionRange(pos + diff, pos + diff);
+    highlightBrand(detectBrand(this.value));
+    clearFieldError(this, 'ccNumberError');
+  });
+
+  ccExpiry.addEventListener('input', function() {
+    this.value = formatExpiry(this.value);
+    clearFieldError(this, 'ccExpiryError');
+  });
+
+  ccCvc.addEventListener('input', function() {
+    this.value = this.value.replace(/\D/g, '').slice(0, 4);
+    clearFieldError(this, 'ccCvcError');
+  });
+
+  ccName.addEventListener('input', function() {
+    this.classList.remove('invalid');
+  });
+
+  function clearFieldError(input, errorId) {
+    input.classList.remove('invalid');
+    document.getElementById(errorId).textContent = '';
+  }
+
+  function setFieldError(input, errorId, msg) {
+    input.classList.add('invalid');
+    document.getElementById(errorId).textContent = msg;
+  }
+
+  function validateForm() {
+    let valid = true;
+    const num = ccNumber.value.replace(/\s/g, '');
+    const exp = ccExpiry.value.replace(/\s/g, '');
+    const cvc = ccCvc.value.trim();
+    const name = ccName.value.trim();
+
+    if (!name) {
+      ccName.classList.add('invalid');
+      valid = false;
+    }
+
+    if (num.length < 13 || num.length > 16 || !/^\d+$/.test(num)) {
+      setFieldError(ccNumber, 'ccNumberError', 'Enter a valid card number (13-16 digits)');
+      valid = false;
+    }
+
+    const expParts = exp.split('/');
+    if (expParts.length !== 2) {
+      setFieldError(ccExpiry, 'ccExpiryError', 'Use MM/YY format');
+      valid = false;
+    } else {
+      const mm = parseInt(expParts[0], 10);
+      const yy = parseInt(expParts[1], 10);
+      if (isNaN(mm) || isNaN(yy) || mm < 1 || mm > 12) {
+        setFieldError(ccExpiry, 'ccExpiryError', 'Invalid month');
+        valid = false;
+      } else {
+        const now = new Date();
+        const expDate = new Date(2000 + yy, mm);
+        if (expDate <= now) {
+          setFieldError(ccExpiry, 'ccExpiryError', 'Card is expired');
+          valid = false;
+        }
+      }
+    }
+
+    if (cvc.length < 3 || cvc.length > 4 || !/^\d+$/.test(cvc)) {
+      setFieldError(ccCvc, 'ccCvcError', 'Enter 3 or 4 digit CVC');
+      valid = false;
+    }
+
+    return valid;
+  }
+
+  window.handleCCPayment = function() {
+    document.getElementById('ccComingSoonMsg').style.display = 'none';
+    if (!validateForm()) return;
+
+    var btn = document.getElementById('ccPayBtn');
+    var label = document.getElementById('ccPayLabel');
+    btn.disabled = true;
+    label.textContent = 'Processing...';
+
+    setTimeout(function() {
+      btn.disabled = false;
+      label.textContent = 'Pay';
+      document.getElementById('ccComingSoonMsg').style.display = 'flex';
+    }, 1200);
+  };
+})();
 
 /* ── SET INITIAL STATE ── */
 selectTier('professional');

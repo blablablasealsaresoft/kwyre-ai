@@ -1888,6 +1888,18 @@ html.light nav { background: rgba(245,246,250,0.9); }
   animation: fadeUp 0.3s ease;
 }
 #adapterToastLoad:hover { box-shadow: 0 0 12px var(--accent-glow); }
+#adapterToastDownload { background: #e67e22; }
+#adapterToastDownload:hover { box-shadow: 0 0 12px rgba(230, 126, 34, 0.5); }
+#adapterToastDownload:disabled { opacity: 0.6; cursor: wait; }
+.adapter-toast-spinner {
+  display: inline-block; width: 12px; height: 12px;
+  border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+  border-radius: 50%; animation: adapter-spin 0.6s linear infinite;
+  vertical-align: middle; margin-right: 4px;
+}
+@keyframes adapter-spin { to { transform: rotate(360deg); } }
+#adapterToast.adapter-toast-error { border-color: #e74c3c; }
+#adapterToast.adapter-toast-error #adapterToastMsg { color: #e74c3c; }
 
 /* --- ADAPTER BADGE PULSE --- */
 @keyframes badge-in {
@@ -1895,6 +1907,249 @@ html.light nav { background: rgba(245,246,250,0.9); }
   to   { opacity: 1; transform: scale(1); }
 }
 #adapter-badge[style*="inline-block"] { animation: badge-in 0.25s ease; }
+
+/* --- ADAPTER MANAGER MODAL --- */
+.adapter-mgr-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(5,6,10,0.85); backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+}
+.adapter-mgr-overlay.open { display: flex; animation: fadeUp 0.25s ease; }
+
+.adapter-mgr {
+  background: var(--surface); border: 1px solid var(--border-hi);
+  border-radius: 10px; width: 560px; max-width: 94vw; max-height: 85vh;
+  overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 40px rgba(59,130,246,0.08);
+}
+
+.adapter-mgr-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
+}
+.adapter-mgr-header h3 {
+  font-family: var(--sans); font-size: 15px; font-weight: 600;
+  color: var(--text); letter-spacing: -0.2px; flex: 1;
+}
+.adapter-mgr-header .close-btn {
+  background: none; border: 1px solid var(--border); border-radius: 4px;
+  color: var(--text2); font-size: 16px; width: 28px; height: 28px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.adapter-mgr-header .close-btn:hover { border-color: var(--red); color: var(--red); }
+
+.adapter-mgr-body {
+  overflow-y: auto; padding: 10px 22px 18px;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+
+.adapter-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 14px; margin: 6px 0; border-radius: 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  transition: border-color 0.2s;
+}
+.adapter-card:hover { border-color: var(--border-hi); }
+
+.adapter-card-icon {
+  width: 34px; height: 34px; border-radius: 6px;
+  background: var(--accent-dim); display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+.adapter-card-icon svg { width: 16px; height: 16px; stroke: var(--accent); fill: none; stroke-width: 1.5; }
+
+.adapter-card-info { flex: 1; min-width: 0; }
+.adapter-card-info .name {
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  color: var(--text); margin-bottom: 2px;
+}
+.adapter-card-info .desc {
+  font-family: var(--mono); font-size: 10px; color: var(--text2);
+  letter-spacing: 0.2px; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adapter-card-info .meta-row {
+  display: flex; gap: 10px; margin-top: 3px; font-family: var(--mono);
+  font-size: 10px; color: var(--text3); letter-spacing: 0.3px;
+}
+
+.adapter-card-actions { flex-shrink: 0; display: flex; gap: 6px; align-items: center; }
+
+.adapter-dl-btn {
+  background: var(--accent); border: none; border-radius: 4px;
+  padding: 5px 12px; color: #fff; font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.5px; cursor: pointer;
+  text-transform: uppercase; transition: all 0.2s;
+}
+.adapter-dl-btn:hover { box-shadow: 0 0 12px var(--accent-glow); }
+.adapter-dl-btn:disabled {
+  opacity: 0.4; cursor: default; box-shadow: none;
+}
+.adapter-dl-btn.update-btn {
+  background: transparent; border: 1px solid var(--amber);
+  color: var(--amber);
+}
+.adapter-dl-btn.update-btn:hover { background: rgba(245,158,11,0.1); }
+
+.adapter-status-pill {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.5px;
+  padding: 3px 8px; border-radius: 3px; text-transform: uppercase;
+  white-space: nowrap;
+}
+.adapter-status-pill.installed {
+  background: var(--green-dim); color: var(--green);
+}
+.adapter-status-pill.not-installed {
+  background: var(--surface3); color: var(--text3);
+}
+
+.adapter-progress-wrap {
+  display: none; width: 100%; margin-top: 6px;
+}
+.adapter-progress-bar {
+  height: 3px; border-radius: 2px; background: var(--border);
+  overflow: hidden;
+}
+.adapter-progress-fill {
+  height: 100%; width: 0%; border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+.adapter-progress-text {
+  font-family: var(--mono); font-size: 9px; color: var(--text2);
+  margin-top: 3px; letter-spacing: 0.3px;
+}
+
+.adapter-mgr-footer {
+  padding: 10px 22px 14px; border-top: 1px solid var(--border);
+  font-family: var(--mono); font-size: 10px; color: var(--text3);
+  letter-spacing: 0.3px; text-align: center;
+}
+
+/* --- ADAPTER MANAGER TABS & MARKETPLACE --- */
+.adapter-mgr-tabs {
+  display: flex; border-bottom: 1px solid var(--border);
+  padding: 0 22px; gap: 0;
+}
+.adapter-mgr-tab {
+  background: none; border: none; border-bottom: 2px solid transparent;
+  padding: 10px 16px 8px; font-family: var(--sans); font-size: 12px;
+  font-weight: 600; color: var(--text2); cursor: pointer;
+  letter-spacing: 0.2px; transition: all 0.2s;
+}
+.adapter-mgr-tab:hover { color: var(--text); }
+.adapter-mgr-tab.active {
+  color: var(--accent); border-bottom-color: var(--accent);
+}
+
+.adapter-mgr-body-marketplace {
+  display: none; overflow-y: auto; padding: 10px 22px 18px;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.adapter-mgr-body-marketplace.active { display: block; }
+.adapter-mgr-body.active { display: block; }
+.adapter-mgr-body:not(.active) { display: none; }
+
+.mktp-search {
+  display: flex; gap: 8px; margin-bottom: 10px;
+}
+.mktp-search input {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 5px; padding: 7px 12px; color: var(--text);
+  font-family: var(--mono); font-size: 11px; outline: none;
+  transition: border-color 0.2s;
+}
+.mktp-search input::placeholder { color: var(--text3); }
+.mktp-search input:focus { border-color: var(--accent); }
+
+.mktp-categories {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px;
+}
+.mktp-chip {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 4px 11px; font-family: var(--mono);
+  font-size: 10px; color: var(--text2); cursor: pointer;
+  letter-spacing: 0.3px; transition: all 0.2s; white-space: nowrap;
+}
+.mktp-chip:hover { border-color: var(--border-hi); color: var(--text); }
+.mktp-chip.active {
+  background: var(--accent-dim); border-color: var(--accent);
+  color: var(--accent);
+}
+
+.mktp-card {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px; margin: 6px 0; border-radius: 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  transition: border-color 0.2s;
+}
+.mktp-card:hover { border-color: var(--border-hi); }
+
+.mktp-card-icon {
+  width: 38px; height: 38px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.mktp-card-icon.official { background: var(--accent-dim); }
+.mktp-card-icon.community { background: rgba(139,92,246,0.12); }
+.mktp-card-icon svg {
+  width: 17px; height: 17px; fill: none; stroke-width: 1.5;
+}
+.mktp-card-icon.official svg { stroke: var(--accent); }
+.mktp-card-icon.community svg { stroke: #8b5cf6; }
+
+.mktp-card-info { flex: 1; min-width: 0; }
+.mktp-card-info .mktp-name-row {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 2px;
+}
+.mktp-card-info .mktp-name {
+  font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--text);
+}
+.mktp-verified {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: var(--accent-dim); border: 1px solid rgba(59,130,246,0.25);
+  border-radius: 3px; padding: 1px 6px;
+  font-family: var(--mono); font-size: 9px; color: var(--accent);
+  letter-spacing: 0.3px; text-transform: uppercase; white-space: nowrap;
+}
+.mktp-verified svg { width: 10px; height: 10px; stroke: var(--accent); fill: none; stroke-width: 2; }
+
+.mktp-author {
+  font-family: var(--mono); font-size: 10px; color: var(--text3);
+  letter-spacing: 0.2px; margin-bottom: 4px;
+}
+.mktp-desc {
+  font-family: var(--mono); font-size: 10px; color: var(--text2);
+  letter-spacing: 0.2px; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.mktp-meta-row {
+  display: flex; gap: 12px; margin-top: 5px; font-family: var(--mono);
+  font-size: 10px; color: var(--text3); letter-spacing: 0.3px;
+  align-items: center;
+}
+.mktp-stars { color: var(--amber); letter-spacing: 1px; }
+
+.mktp-card-actions { flex-shrink: 0; display: flex; align-items: flex-start; padding-top: 2px; }
+.mktp-install-btn {
+  background: var(--accent); border: none; border-radius: 4px;
+  padding: 5px 12px; color: #fff; font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.5px; cursor: pointer;
+  text-transform: uppercase; transition: all 0.2s; white-space: nowrap;
+}
+.mktp-install-btn:hover { box-shadow: 0 0 12px var(--accent-glow); }
+.mktp-install-btn.community-btn {
+  background: transparent; border: 1px solid #8b5cf6; color: #8b5cf6;
+}
+.mktp-install-btn.community-btn:hover { background: rgba(139,92,246,0.1); }
+.mktp-install-btn:disabled { opacity: 0.4; cursor: default; box-shadow: none; }
+
+.mktp-empty {
+  text-align: center; padding: 28px 0; color: var(--text3);
+  font-family: var(--mono); font-size: 11px;
+}
 </style>
 </head>
 <body>
@@ -2183,6 +2438,7 @@ html.light nav { background: rgba(245,246,250,0.9); }
     <div id="adapterToast" style="display:none;position:relative;margin-bottom:12px;padding:10px 16px;background:var(--surface2);border:1px solid var(--border-hi);border-radius:6px;font-family:var(--mono);font-size:12px;color:var(--text);align-items:center;gap:12px;flex-wrap:wrap;">
       <span id="adapterToastMsg" style="flex:1;min-width:180px;"></span>
       <button id="adapterToastLoad" style="background:var(--accent);border:none;border-radius:4px;padding:5px 14px;color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:0.5px;cursor:pointer;">Load</button>
+      <button id="adapterToastDownload" style="display:none;border:none;border-radius:4px;padding:5px 14px;color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:0.5px;cursor:pointer;">Download</button>
       <button onclick="dismissAdapterToast()" style="background:none;border:1px solid var(--border);border-radius:4px;padding:5px 10px;color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;">Dismiss</button>
     </div>
 
@@ -2203,6 +2459,7 @@ html.light nav { background: rgba(245,246,250,0.9); }
       <select id="adapter-select" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;letter-spacing:0.5px;outline:none;transition:border-color 0.2s;">
         <option value="">No adapter</option>
       </select>
+      <button class="toolbar-btn" onclick="openAdapterMgr()" title="Manage & download domain adapters">Adapters</button>
     </div>
 
     <div class="chat-container reveal reveal-d3">
@@ -3039,9 +3296,15 @@ async function loadAdapters() {
 
 document.getElementById('adapter-select').addEventListener('change', async function () {
   const domain = this.value;
+  const sel = this;
   try {
     if (!domain) {
-      await fetch(KWYRE_API + '/v1/adapter/unload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + KWYRE_KEY } });
+      const res = await fetch(KWYRE_API + '/v1/adapter/unload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + KWYRE_KEY } });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        showAdapterError(d.error || 'Failed to unload adapter');
+        return;
+      }
       updateAdapterBadge(null);
     } else {
       const res = await fetch(KWYRE_API + '/v1/adapter/load', {
@@ -3050,12 +3313,428 @@ document.getElementById('adapter-select').addEventListener('change', async funct
         body: JSON.stringify({ domain })
       });
       const data = await res.json();
+      if (!res.ok) {
+        const isNotFound = (data.error || '').toLowerCase().includes('not found');
+        if (isNotFound) {
+          sessionStorage.removeItem('kwyre-adapter-suggested');
+          showAdapterToast(domain);
+        } else {
+          showAdapterError(data.error || 'Failed to load adapter');
+        }
+        sel.value = '';
+        updateAdapterBadge(null);
+        return;
+      }
       updateAdapterBadge(data.adapter || domain);
     }
-  } catch (e) { /* silent fail */ }
+  } catch (e) {
+    showAdapterError('Network error: ' + e.message);
+  }
 });
 
 loadAdapters();
+
+/* ── ADAPTER MANAGER ── */
+const ADAPTER_MANIFEST_URL = 'adapters/manifest.json';
+const ADAPTER_ICONS = {
+  blockchain_crypto:        '<svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
+  legal_compliance:         '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  insurance_actuarial:      '<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  defense_intelligence:     '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+  financial_trading:        '<svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+  healthcare_lifesciences:  '<svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+};
+
+function _adapterLabel(domain) {
+  return (DOMAIN_LABELS && DOMAIN_LABELS[domain]) || domain.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+async function openAdapterMgr() {
+  document.getElementById('adapterMgrOverlay').classList.add('open');
+  switchAdapterTab('my-adapters');
+  await refreshAdapterMgr();
+}
+
+function closeAdapterMgr() {
+  document.getElementById('adapterMgrOverlay').classList.remove('open');
+}
+
+async function refreshAdapterMgr() {
+  const body = document.getElementById('adapterMgrBody');
+  body.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--text3);font-family:var(--mono);font-size:11px;">Loading adapters...</div>';
+
+  let manifest = {};
+  let installed = {};
+  let activeAdapter = null;
+  let updates = {};
+
+  try {
+    const mRes = await fetch(ADAPTER_MANIFEST_URL);
+    if (mRes.ok) {
+      const raw = await mRes.json();
+      for (const [k, v] of Object.entries(raw)) {
+        if (!k.startsWith('_')) manifest[k] = v;
+      }
+    }
+  } catch (e) { /* manifest unavailable */ }
+
+  try {
+    const lRes = await fetch(KWYRE_API + '/v1/adapter/list');
+    if (lRes.ok) {
+      const data = await lRes.json();
+      installed = data.adapters || {};
+      activeAdapter = data.active_adapter || null;
+    }
+  } catch (e) { /* server unavailable */ }
+
+  try {
+    const uRes = await fetch(KWYRE_API + '/v1/adapter/check-update', {
+      headers: { 'Authorization': 'Bearer ' + KWYRE_KEY },
+    });
+    if (uRes.ok) {
+      const data = await uRes.json();
+      updates = data.updates_available || {};
+    }
+  } catch (e) { /* CDN check unavailable */ }
+
+  const allDomains = new Set([...Object.keys(manifest), ...Object.keys(installed)]);
+  if (allDomains.size === 0) {
+    body.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--text3);font-family:var(--mono);font-size:11px;">No adapters found in manifest or on server.</div>';
+    return;
+  }
+
+  body.innerHTML = '';
+  const sorted = [...allDomains].sort();
+  for (const domain of sorted) {
+    const mInfo = manifest[domain] || {};
+    const isInstalled = domain in installed;
+    const hasUpdate = domain in updates;
+    const version = isInstalled
+      ? (installed[domain].version || mInfo.version || '—')
+      : (mInfo.version || '—');
+    const description = mInfo.description || '';
+
+    const card = document.createElement('div');
+    card.className = 'adapter-card';
+    card.id = 'adapter-card-' + domain;
+
+    const iconSvg = ADAPTER_ICONS[domain] || ADAPTER_ICONS.legal_compliance;
+
+    let actionHtml = '';
+    if (!isInstalled) {
+      actionHtml = '<button class="adapter-dl-btn" onclick="downloadAdapter(\'' + domain + '\')">Download</button>';
+    } else if (hasUpdate) {
+      actionHtml = '<span class="adapter-status-pill installed">Installed</span>' +
+        '<button class="adapter-dl-btn update-btn" onclick="downloadAdapter(\'' + domain + '\')">Update</button>';
+    } else {
+      actionHtml = '<span class="adapter-status-pill installed">Installed</span>';
+    }
+    if (!isInstalled) {
+      actionHtml = '<span class="adapter-status-pill not-installed">Not installed</span>' + actionHtml;
+    }
+
+    card.innerHTML =
+      '<div class="adapter-card-icon">' + iconSvg + '</div>' +
+      '<div class="adapter-card-info">' +
+        '<div class="name">' + _adapterLabel(domain) + '</div>' +
+        '<div class="desc">' + description + '</div>' +
+        '<div class="meta-row">' +
+          '<span>v' + version + '</span>' +
+          '<span>' + (mInfo.model_tier || '4b').toUpperCase() + '</span>' +
+          (hasUpdate ? '<span style="color:var(--amber)">Update: v' + updates[domain].remote + '</span>' : '') +
+        '</div>' +
+        '<div class="adapter-progress-wrap" id="adapter-prog-' + domain + '">' +
+          '<div class="adapter-progress-bar"><div class="adapter-progress-fill" id="adapter-fill-' + domain + '"></div></div>' +
+          '<div class="adapter-progress-text" id="adapter-ptxt-' + domain + '">Preparing...</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="adapter-card-actions" id="adapter-actions-' + domain + '">' + actionHtml + '</div>';
+
+    body.appendChild(card);
+  }
+}
+
+async function downloadAdapter(domain) {
+  const actionsEl = document.getElementById('adapter-actions-' + domain);
+  const progWrap = document.getElementById('adapter-prog-' + domain);
+  const progFill = document.getElementById('adapter-fill-' + domain);
+  const progText = document.getElementById('adapter-ptxt-' + domain);
+
+  if (!actionsEl || !progWrap) return;
+
+  actionsEl.innerHTML = '<button class="adapter-dl-btn" disabled>Installing...</button>';
+  progWrap.style.display = 'block';
+  progFill.style.width = '0%';
+  progText.textContent = 'Connecting to CDN...';
+
+  let tickInterval = null;
+  let pct = 0;
+  tickInterval = setInterval(() => {
+    if (pct < 85) {
+      pct += Math.random() * 8 + 2;
+      if (pct > 85) pct = 85;
+      progFill.style.width = pct.toFixed(0) + '%';
+      if (pct < 30) progText.textContent = 'Downloading adapter weights...';
+      else if (pct < 60) progText.textContent = 'Downloading... ' + pct.toFixed(0) + '%';
+      else progText.textContent = 'Verifying SHA-256 integrity...';
+    }
+  }, 400);
+
+  try {
+    const res = await fetch(KWYRE_API + '/v1/adapter/update/' + encodeURIComponent(domain), {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + KWYRE_KEY },
+    });
+    clearInterval(tickInterval);
+    const data = await res.json();
+
+    if (res.ok && data.status === 'updated') {
+      progFill.style.width = '100%';
+      progText.textContent = 'Installed v' + (data.version || '?') + ' — ready';
+      actionsEl.innerHTML = '<span class="adapter-status-pill installed">Installed</span>';
+
+      setTimeout(() => { progWrap.style.display = 'none'; }, 2500);
+
+      await reloadAdapterDropdown();
+    } else {
+      progFill.style.width = '0%';
+      progFill.style.background = 'var(--red)';
+      progText.textContent = 'Error: ' + (data.error || 'Unknown error');
+      actionsEl.innerHTML = '<button class="adapter-dl-btn" onclick="downloadAdapter(\'' + domain + '\')">Retry</button>';
+    }
+  } catch (e) {
+    clearInterval(tickInterval);
+    progFill.style.width = '0%';
+    progFill.style.background = 'var(--red)';
+    progText.textContent = 'Network error: ' + e.message;
+    actionsEl.innerHTML = '<button class="adapter-dl-btn" onclick="downloadAdapter(\'' + domain + '\')">Retry</button>';
+  }
+}
+
+async function reloadAdapterDropdown() {
+  const sel = document.getElementById('adapter-select');
+  const currentVal = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
+  try {
+    const res = await fetch(KWYRE_API + '/v1/adapter/list');
+    if (!res.ok) return;
+    const data = await res.json();
+    Object.entries(data.adapters || {}).forEach(([name, meta]) => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = (meta && meta.display_name) || name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      if (name === currentVal || name === data.active_adapter) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    updateAdapterBadge(data.active_adapter || null);
+  } catch (e) { /* silent */ }
+}
+
+/* ── ADAPTER MANAGER TABS ── */
+function switchAdapterTab(tab) {
+  const tabs = document.querySelectorAll('.adapter-mgr-tab');
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+
+  const myBody = document.getElementById('adapterMgrBody');
+  const mktBody = document.getElementById('adapterMgrMarketplace');
+  const footer = document.getElementById('adapterMgrFooter');
+
+  if (tab === 'marketplace') {
+    myBody.classList.remove('active');
+    mktBody.classList.add('active');
+    footer.textContent = 'v1.6 Marketplace — community adapters require review before installation';
+    renderMarketplace();
+  } else {
+    mktBody.classList.remove('active');
+    myBody.classList.add('active');
+    footer.textContent = 'Adapters are domain-specific LoRA weights downloaded from Kwyre CDN';
+  }
+}
+
+/* ── ADAPTER MARKETPLACE ── */
+
+// Future: replace with GET /v1/marketplace/list
+const MARKETPLACE_LISTINGS = [
+  {
+    id: 'legal_compliance', name: 'Legal & Compliance', domain: 'Legal',
+    category: 'Legal', author: 'Kwyre', official: true,
+    description: 'NDA analysis, contract review, privilege screening, SEC/FINRA compliance, regulatory citations',
+    stars: 4.9, downloads: 2847, version: '1.0.0',
+    icon: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  },
+  {
+    id: 'insurance_actuarial', name: 'Insurance & Actuarial', domain: 'Insurance',
+    category: 'Insurance', author: 'Kwyre', official: true,
+    description: 'Reinsurance treaties, loss development, IBNR reserving, catastrophe modeling, Solvency II/RBC',
+    stars: 4.8, downloads: 1923, version: '1.0.0',
+    icon: '<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  },
+  {
+    id: 'healthcare_lifesciences', name: 'Healthcare & Life Sciences', domain: 'Healthcare',
+    category: 'Healthcare', author: 'Kwyre', official: true,
+    description: 'HIPAA compliance, clinical trials, FDA submissions, medical coding, drug interactions',
+    stars: 4.8, downloads: 2215, version: '1.0.0',
+    icon: '<svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+  },
+  {
+    id: 'defense_intelligence', name: 'Defense & Intelligence', domain: 'Defense',
+    category: 'Defense', author: 'Kwyre', official: true,
+    description: 'CUI handling, OSINT methodology, MITRE ATT&CK, NIST 800-171, intel product formats',
+    stars: 4.9, downloads: 1654, version: '1.0.0',
+    icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+  },
+  {
+    id: 'financial_trading', name: 'Financial Trading & Algorithms', domain: 'Finance',
+    category: 'Finance', author: 'Kwyre', official: true,
+    description: 'Options pricing, statistical arbitrage, risk management, execution algorithms, regulatory compliance',
+    stars: 4.7, downloads: 1891, version: '1.0.0',
+    icon: '<svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+  },
+  {
+    id: 'blockchain_crypto', name: 'Blockchain & Crypto Forensics', domain: 'Blockchain',
+    category: 'Blockchain', author: 'Kwyre', official: true,
+    description: 'On-chain tracing, smart contract analysis, DeFi forensics, RICO/BSA/AML compliance',
+    stars: 4.9, downloads: 3102, version: '1.0.0',
+    icon: '<svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
+  },
+  {
+    id: 'real_estate_property', name: 'Real Estate & Property Law', domain: 'Legal',
+    category: 'Legal', author: 'community_user_1', official: false,
+    description: 'Property law analysis, title search procedures, zoning compliance review, easement evaluation',
+    stars: 4.3, downloads: 412, version: '0.9.1',
+    icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  },
+  {
+    id: 'supply_chain_logistics', name: 'Supply Chain & Logistics', domain: 'Finance',
+    category: 'Other', author: 'scm_analytics', official: false,
+    description: 'Inventory optimization, shipping compliance, customs documentation, tariff classification',
+    stars: 4.1, downloads: 287, version: '0.8.0',
+    icon: '<svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+  },
+  {
+    id: 'environmental_esg', name: 'Environmental & ESG', domain: 'Other',
+    category: 'Other', author: 'green_compliance', official: false,
+    description: 'ESG reporting frameworks, carbon credit verification, EPA compliance, sustainability auditing',
+    stars: 4.2, downloads: 198, version: '0.7.2',
+    icon: '<svg viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M7 12s2-4 5-4 5 4 5 4-2 4-5 4-5-4-5-4z"/></svg>',
+  },
+];
+
+const MARKETPLACE_CATEGORIES = ['All', 'Legal', 'Insurance', 'Healthcare', 'Defense', 'Finance', 'Blockchain', 'Other'];
+let _mktpActiveCategory = 'All';
+let _mktpSearchQuery = '';
+
+function renderMarketplace() {
+  const container = document.getElementById('adapterMgrMarketplace');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  const searchBar = document.createElement('div');
+  searchBar.className = 'mktp-search';
+  searchBar.innerHTML = '<input type="text" id="mktpSearchInput" placeholder="Search adapters by name, domain, or description..." value="' + _mktpSearchQuery.replace(/"/g, '&quot;') + '">';
+  container.appendChild(searchBar);
+
+  const chips = document.createElement('div');
+  chips.className = 'mktp-categories';
+  MARKETPLACE_CATEGORIES.forEach(cat => {
+    const chip = document.createElement('button');
+    chip.className = 'mktp-chip' + (cat === _mktpActiveCategory ? ' active' : '');
+    chip.textContent = cat;
+    chip.onclick = () => { _mktpActiveCategory = cat; renderMarketplace(); };
+    chips.appendChild(chip);
+  });
+  container.appendChild(chips);
+
+  const searchInput = document.getElementById('mktpSearchInput');
+  searchInput.addEventListener('input', (e) => {
+    _mktpSearchQuery = e.target.value;
+    renderMarketplaceCards();
+  });
+
+  const cardsWrap = document.createElement('div');
+  cardsWrap.id = 'mktpCards';
+  container.appendChild(cardsWrap);
+
+  renderMarketplaceCards();
+
+  searchInput.focus();
+}
+
+function renderMarketplaceCards() {
+  const wrap = document.getElementById('mktpCards');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  const query = _mktpSearchQuery.toLowerCase();
+  const filtered = MARKETPLACE_LISTINGS.filter(item => {
+    if (_mktpActiveCategory !== 'All' && item.category !== _mktpActiveCategory) return false;
+    if (query) {
+      const haystack = (item.name + ' ' + item.domain + ' ' + item.description + ' ' + item.author).toLowerCase();
+      return haystack.includes(query);
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    wrap.innerHTML = '<div class="mktp-empty">No adapters match your search.</div>';
+    return;
+  }
+
+  filtered.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'mktp-card';
+
+    const starsFull = Math.floor(item.stars);
+    const starsHalf = item.stars - starsFull >= 0.5;
+    let starsHtml = '★'.repeat(starsFull) + (starsHalf ? '½' : '') + ' ' + item.stars.toFixed(1);
+
+    const verifiedBadge = item.official
+      ? '<span class="mktp-verified"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Verified</span>'
+      : '';
+
+    const installBtnClass = item.official ? 'mktp-install-btn' : 'mktp-install-btn community-btn';
+    const installLabel = item.official ? 'Install' : 'Install';
+    const installOnclick = item.official
+      ? 'marketplaceInstall(\'' + item.id + '\', true)'
+      : 'marketplaceInstall(\'' + item.id + '\', false)';
+
+    card.innerHTML =
+      '<div class="mktp-card-icon ' + (item.official ? 'official' : 'community') + '">' + item.icon + '</div>' +
+      '<div class="mktp-card-info">' +
+        '<div class="mktp-name-row">' +
+          '<span class="mktp-name">' + item.name + '</span>' +
+          verifiedBadge +
+        '</div>' +
+        '<div class="mktp-author">by ' + item.author + ' · ' + item.category + '</div>' +
+        '<div class="mktp-desc">' + item.description + '</div>' +
+        '<div class="mktp-meta-row">' +
+          '<span class="mktp-stars">' + starsHtml + '</span>' +
+          '<span>' + item.downloads.toLocaleString() + ' downloads</span>' +
+          '<span>v' + item.version + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mktp-card-actions">' +
+        '<button class="' + installBtnClass + '" onclick="' + installOnclick + '">' + installLabel + '</button>' +
+      '</div>';
+
+    wrap.appendChild(card);
+  });
+}
+
+function marketplaceInstall(adapterId, isOfficial) {
+  if (!isOfficial) {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = 'Coming soon';
+    btn.title = 'Community adapters coming soon';
+    setTimeout(() => { btn.disabled = false; btn.textContent = 'Install'; }, 2500);
+    return;
+  }
+  // Official adapters: switch to My Adapters tab and trigger download
+  switchAdapterTab('my-adapters');
+  downloadAdapter(adapterId);
+}
 
 /* ── DOMAIN AUTO-DETECTION ── */
 const DOMAIN_KEYWORDS = {
@@ -3090,39 +3769,117 @@ function detectDomain(text) {
   return best[1] >= 2 ? best[0] : null;
 }
 
-function showAdapterToast(domain) {
+async function showAdapterToast(domain) {
   if (sessionStorage.getItem('kwyre-adapter-suggested')) return;
   sessionStorage.setItem('kwyre-adapter-suggested', '1');
 
   const toast = document.getElementById('adapterToast');
   const msg = document.getElementById('adapterToastMsg');
   const loadBtn = document.getElementById('adapterToastLoad');
-
+  const dlBtn = document.getElementById('adapterToastDownload');
   const label = DOMAIN_LABELS[domain] || domain;
-  msg.textContent = '\u26a1 Detected ' + label + ' content \u2014 load the ' + label + ' adapter?';
+
+  toast.classList.remove('adapter-toast-error');
+  loadBtn.style.display = 'none';
+  dlBtn.style.display = 'none';
+
+  let isLocal = false;
+  try {
+    const listRes = await fetch(KWYRE_API + '/v1/adapter/list');
+    if (listRes.ok) {
+      const listData = await listRes.json();
+      const available = listData.adapters || listData.available || {};
+      isLocal = domain in available;
+    }
+  } catch (_) {}
+
+  if (isLocal) {
+    msg.textContent = '\u26a1 Detected ' + label + ' content \u2014 load the ' + label + ' adapter?';
+    loadBtn.style.display = '';
+    loadBtn.onclick = async function () {
+      try {
+        const res = await fetch(KWYRE_API + '/v1/adapter/load', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + KWYRE_KEY },
+          body: JSON.stringify({ domain })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showAdapterError(data.error || 'Failed to load adapter');
+          return;
+        }
+        updateAdapterBadge(data.adapter || domain);
+        const sel = document.getElementById('adapter-select');
+        for (const opt of sel.options) { if (opt.value === domain) { opt.selected = true; break; } }
+      } catch (e) {
+        showAdapterError('Network error loading adapter: ' + e.message);
+        return;
+      }
+      dismissAdapterToast();
+    };
+  } else {
+    msg.textContent = '\u26a1 Detected ' + label + ' content \u2014 download the ' + label + ' adapter for better analysis?';
+    dlBtn.style.display = '';
+    dlBtn.onclick = async function () {
+      dlBtn.disabled = true;
+      dlBtn.innerHTML = '<span class="adapter-toast-spinner"></span>Downloading\u2026';
+      try {
+        const res = await fetch(KWYRE_API + '/v1/adapter/update/' + encodeURIComponent(domain), {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + KWYRE_KEY }
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showAdapterError(data.error || 'Download failed');
+          dlBtn.disabled = false;
+          dlBtn.textContent = 'Download';
+          return;
+        }
+        dlBtn.innerHTML = '\u2713 Downloaded';
+        await reloadAdapterDropdown();
+        try {
+          const loadRes = await fetch(KWYRE_API + '/v1/adapter/load', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + KWYRE_KEY },
+            body: JSON.stringify({ domain })
+          });
+          const loadData = await loadRes.json();
+          if (loadRes.ok) {
+            updateAdapterBadge(loadData.adapter || domain);
+            const sel = document.getElementById('adapter-select');
+            for (const opt of sel.options) { if (opt.value === domain) { opt.selected = true; break; } }
+          }
+        } catch (_) {}
+        setTimeout(dismissAdapterToast, 1500);
+      } catch (e) {
+        showAdapterError('Network error downloading adapter: ' + e.message);
+        dlBtn.disabled = false;
+        dlBtn.textContent = 'Download';
+      }
+    };
+  }
+
   toast.style.display = 'flex';
-
-  loadBtn.onclick = async function () {
-    try {
-      const res = await fetch(KWYRE_API + '/v1/adapter/load', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + KWYRE_KEY },
-        body: JSON.stringify({ domain })
-      });
-      const data = await res.json();
-      updateAdapterBadge(data.adapter || domain);
-      const sel = document.getElementById('adapter-select');
-      for (const opt of sel.options) { if (opt.value === domain) { opt.selected = true; break; } }
-    } catch (e) { /* silent */ }
-    dismissAdapterToast();
-  };
-
   if (toastDismissTimer) clearTimeout(toastDismissTimer);
-  toastDismissTimer = setTimeout(dismissAdapterToast, 10000);
+  toastDismissTimer = setTimeout(dismissAdapterToast, 15000);
+}
+
+function showAdapterError(message) {
+  const toast = document.getElementById('adapterToast');
+  const msg = document.getElementById('adapterToastMsg');
+  document.getElementById('adapterToastLoad').style.display = 'none';
+  document.getElementById('adapterToastDownload').style.display = 'none';
+  toast.classList.add('adapter-toast-error');
+  msg.textContent = '\u26d4 ' + message;
+  toast.style.display = 'flex';
+  if (toastDismissTimer) clearTimeout(toastDismissTimer);
+  toastDismissTimer = setTimeout(dismissAdapterToast, 8000);
 }
 
 function dismissAdapterToast() {
-  document.getElementById('adapterToast').style.display = 'none';
+  const toast = document.getElementById('adapterToast');
+  toast.style.display = 'none';
+  toast.classList.remove('adapter-toast-error');
   if (toastDismissTimer) { clearTimeout(toastDismissTimer); toastDismissTimer = null; }
 }
 
@@ -3467,5 +4224,28 @@ function collectFingerprint() {
   });
 }
 </script>
+
+<!-- ADAPTER MANAGER MODAL -->
+<div class="adapter-mgr-overlay" id="adapterMgrOverlay" onclick="if(event.target===this)closeAdapterMgr()">
+  <div class="adapter-mgr" style="width:640px">
+    <div class="adapter-mgr-header">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      <h3>Adapter Manager</h3>
+      <button class="close-btn" onclick="closeAdapterMgr()">&times;</button>
+    </div>
+    <div class="adapter-mgr-tabs">
+      <button class="adapter-mgr-tab active" data-tab="my-adapters" onclick="switchAdapterTab('my-adapters')">My Adapters</button>
+      <button class="adapter-mgr-tab" data-tab="marketplace" onclick="switchAdapterTab('marketplace')">Marketplace</button>
+    </div>
+    <div class="adapter-mgr-body active" id="adapterMgrBody">
+      <div style="text-align:center;padding:24px 0;color:var(--text3);font-family:var(--mono);font-size:11px;">Loading adapters...</div>
+    </div>
+    <div class="adapter-mgr-body-marketplace" id="adapterMgrMarketplace"></div>
+    <div class="adapter-mgr-footer" id="adapterMgrFooter">
+      Adapters are domain-specific LoRA weights downloaded from Kwyre CDN
+    </div>
+  </div>
+</div>
+
 </body>
 </html>

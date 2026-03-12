@@ -423,9 +423,26 @@ _active_adapter: str | None = None
 _base_model_ref = model
 _adapted_model = None
 
+_DOMAIN_SUFFIX_RE = re.compile(r"-(?:4b|9b)$")
+
+
+def _canonicalize_domain_name(name: str) -> str:
+    """Reduce any domain name variant to a canonical form for matching.
+
+    ``legal_compliance``, ``legal-compliance``, ``legal-compliance-4b``,
+    and ``legal_compliance-9b`` all map to ``legal-compliance``.
+    """
+    canonical = name.strip().lower().replace("_", "-")
+    canonical = _DOMAIN_SUFFIX_RE.sub("", canonical)
+    return canonical
+
 
 def _list_available_adapters() -> dict:
-    """Scan adapter directory for valid PEFT checkpoints."""
+    """Scan adapter directory for valid PEFT checkpoints.
+
+    Returns a dict keyed by *folder name* with an extra ``canonical``
+    field so callers can match by canonical domain name.
+    """
     adapters = {}
     if not os.path.isdir(ADAPTER_DIR):
         return adapters
@@ -438,22 +455,56 @@ def _list_available_adapters() -> dict:
             if os.path.isfile(meta_path):
                 with open(meta_path) as f:
                     meta = json.load(f)
-            adapters[name] = {"path": adapter_path, "metadata": meta}
+            adapters[name] = {
+                "path": adapter_path,
+                "metadata": meta,
+                "canonical": _canonicalize_domain_name(name),
+            }
     return adapters
 
 
+def _resolve_adapter_name(domain_name: str, available: dict) -> str | None:
+    """Find the actual folder name for *domain_name* using canonical matching.
+
+    Tries an exact match first, then falls back to canonical comparison.
+    When multiple folders share a canonical name (e.g. ``legal-compliance``
+    and ``legal-compliance-4b``), prefer the one without a model-tier suffix.
+    """
+    if domain_name in available:
+        return domain_name
+
+    target = _canonicalize_domain_name(domain_name)
+    candidates = [
+        folder for folder, info in available.items()
+        if info["canonical"] == target
+    ]
+    if not candidates:
+        return None
+    if len(candidates) == 1:
+        return candidates[0]
+    # Prefer shorter name (no -4b/-9b suffix)
+    candidates.sort(key=len)
+    return candidates[0]
+
+
 def load_adapter(domain_name: str) -> dict:
-    """Load a domain LoRA adapter onto the base model. Thread-safe."""
+    """Load a domain LoRA adapter onto the base model. Thread-safe.
+
+    *domain_name* is resolved through canonical name matching so that
+    ``legal_compliance``, ``legal-compliance``, or ``legal-compliance-4b``
+    all find whichever folder actually exists on disk.
+    """
     global _active_adapter, _adapted_model, model
 
     with _adapter_lock:
         available = _list_available_adapters()
-        if domain_name not in available:
+        resolved = _resolve_adapter_name(domain_name, available)
+        if resolved is None:
             return {"error": f"Adapter '{domain_name}' not found",
                     "available": list(available.keys())}
 
-        if _active_adapter == domain_name:
-            return {"status": "already_loaded", "adapter": domain_name}
+        if _active_adapter == resolved:
+            return {"status": "already_loaded", "adapter": resolved}
 
         if _adapted_model is not None:
             try:
@@ -465,22 +516,22 @@ def load_adapter(domain_name: str) -> dict:
 
         try:
             adapted = PeftModel.from_pretrained(
-                _base_model_ref, available[domain_name]["path"]
+                _base_model_ref, available[resolved]["path"]
             )
             if os.environ.get("KWYRE_MERGE_LORA", "0") == "1":
                 adapted = adapted.merge_and_unload()
-                print(f"[Adapter] Loaded and merged: {domain_name}")
+                print(f"[Adapter] Loaded and merged: {resolved}")
             else:
                 adapted.eval()
-                print(f"[Adapter] Loaded in-place: {domain_name}")
+                print(f"[Adapter] Loaded in-place: {resolved}")
 
             model = adapted
             _adapted_model = adapted
-            _active_adapter = domain_name
+            _active_adapter = resolved
             return {
                 "status": "loaded",
-                "adapter": domain_name,
-                "metadata": available[domain_name].get("metadata", {}),
+                "adapter": resolved,
+                "metadata": available[resolved].get("metadata", {}),
             }
         except Exception as e:
             model = _base_model_ref
@@ -510,18 +561,28 @@ def unload_adapter() -> dict:
 
 
 def stack_adapters(adapters: list, weights: list | None = None, name: str = "stacked") -> dict:
-    """Merge multiple domain adapters with optional weights. Thread-safe."""
+    """Merge multiple domain adapters with optional weights. Thread-safe.
+
+    Each entry in *adapters* is resolved through canonical name matching.
+    """
     global _active_adapter, _adapted_model, model
 
     with _adapter_lock:
         available = _list_available_adapters()
-        missing = [a for a in adapters if a not in available]
+        resolved_adapters = []
+        missing = []
+        for a in adapters:
+            r = _resolve_adapter_name(a, available)
+            if r is None:
+                missing.append(a)
+            else:
+                resolved_adapters.append(r)
         if missing:
             return {"error": f"Adapters not found: {missing}", "available": list(available.keys())}
 
         if weights is None:
-            weights = [1.0 / len(adapters)] * len(adapters)
-        if len(weights) != len(adapters):
+            weights = [1.0 / len(resolved_adapters)] * len(resolved_adapters)
+        if len(weights) != len(resolved_adapters):
             return {"error": "weights length must match adapters length"}
 
         if _adapted_model is not None:
@@ -534,7 +595,7 @@ def stack_adapters(adapters: list, weights: list | None = None, name: str = "sta
 
         try:
             peft_model = None
-            for adapter_name in adapters:
+            for adapter_name in resolved_adapters:
                 adapter_path = available[adapter_name]["path"]
                 if peft_model is None:
                     peft_model = PeftModel.from_pretrained(
@@ -544,7 +605,7 @@ def stack_adapters(adapters: list, weights: list | None = None, name: str = "sta
                     peft_model.load_adapter(adapter_path, adapter_name=adapter_name)
 
             peft_model.add_weighted_adapter(
-                adapters=adapters,
+                adapters=resolved_adapters,
                 weights=weights,
                 adapter_name=name,
                 combination_type="linear",
@@ -555,11 +616,11 @@ def stack_adapters(adapters: list, weights: list | None = None, name: str = "sta
             model = peft_model
             _adapted_model = peft_model
             _active_adapter = name
-            print(f"[Adapter] Stacked {adapters} -> '{name}' (weights={weights})")
+            print(f"[Adapter] Stacked {resolved_adapters} -> '{name}' (weights={weights})")
             return {
                 "status": "stacked",
                 "adapter": name,
-                "source_adapters": adapters,
+                "source_adapters": resolved_adapters,
                 "weights": weights,
             }
         except Exception as e:
@@ -1535,10 +1596,13 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
 
     def _handle_adapter_list(self):
         available = _list_available_adapters()
+        adapters_out = {}
+        for name, info in available.items():
+            entry = dict(info["metadata"])
+            entry["canonical"] = info["canonical"]
+            adapters_out[name] = entry
         self._send_json(200, {
-            "adapters": {
-                name: info["metadata"] for name, info in available.items()
-            },
+            "adapters": adapters_out,
             "active_adapter": _active_adapter,
             "adapter_dir": ADAPTER_DIR,
         })
@@ -1601,9 +1665,14 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             return
 
         available = _list_available_adapters()
+        canonical_to_local = {
+            info["canonical"]: info for info in available.values()
+        }
         updates = {}
         for domain, info in manifest.items():
-            local_ver = available.get(domain, {}).get("metadata", {}).get("version", "0.0.0")
+            canon = _canonicalize_domain_name(domain)
+            local_info = canonical_to_local.get(canon, {})
+            local_ver = local_info.get("metadata", {}).get("version", "0.0.0")
             remote_ver = info.get("version", "0.0.0")
             if remote_ver > local_ver:
                 updates[domain] = {
@@ -1618,10 +1687,11 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
         import zipfile
         import shutil
 
-        domain = self.path.split("/v1/adapter/update/", 1)[-1].strip("/")
-        if not domain:
+        raw_domain = self.path.split("/v1/adapter/update/", 1)[-1].strip("/")
+        if not raw_domain:
             self._send_json_error(400, "Missing domain in URL path.")
             return
+        domain = _canonicalize_domain_name(raw_domain)
 
         try:
             with _urllib_request.urlopen(CDN_MANIFEST_URL, timeout=5) as resp:
@@ -1630,11 +1700,16 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             self._send_json(503, {"error": f"Failed to fetch manifest: {e}"})
             return
 
-        if domain not in manifest:
-            self._send_json_error(404, f"Domain '{domain}' not in CDN manifest.")
+        manifest_key = None
+        for key in manifest:
+            if _canonicalize_domain_name(key) == domain:
+                manifest_key = key
+                break
+        if manifest_key is None:
+            self._send_json_error(404, f"Domain '{raw_domain}' not in CDN manifest.")
             return
 
-        remote_info = manifest[domain]
+        remote_info = manifest[manifest_key]
         download_url = remote_info.get("url")
         if not download_url:
             self._send_json_error(502, f"No download URL in manifest for '{domain}'.")

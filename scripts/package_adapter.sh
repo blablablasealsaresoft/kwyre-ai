@@ -32,26 +32,52 @@ if [ -z "$DOMAIN" ] || [ -z "$VERSION" ]; then
     echo "Usage: $0 <domain> <version> [model_tier]"
     echo "  domain:     blockchain_crypto | legal_compliance | insurance_actuarial"
     echo "              defense_intelligence | financial_trading | healthcare_lifesciences"
+    echo "              (underscores or hyphens accepted)"
     echo "  version:    e.g. 1.0.0"
     echo "  model_tier: 4b (default) | 9b"
     exit 1
 fi
 
-ADAPTER_DIR="$HOME/.kwyre/adapters/${DOMAIN}-${TIER}"
-if [ ! -d "$ADAPTER_DIR" ]; then
-    echo "ERROR: Adapter directory not found: $ADAPTER_DIR"
+DOMAIN_HYPHENATED="${DOMAIN//_/-}"
+DOMAIN_UNDERSCORED="${DOMAIN//-/_}"
+
+ADAPTER_DIR=""
+ADAPTER_BASE=""
+
+CANDIDATES=(
+    "$HOME/.kwyre/adapters/${DOMAIN_HYPHENATED}"
+    "$HOME/.kwyre/adapters/${DOMAIN_HYPHENATED}-${TIER}"
+    "$HOME/.kwyre/lora-adapters/${DOMAIN_UNDERSCORED}-distilled-${TIER}"
+)
+
+for candidate in "${CANDIDATES[@]}"; do
+    if [ -d "$candidate" ]; then
+        ADAPTER_DIR="$candidate"
+        ADAPTER_BASE="$(basename "$candidate")"
+        break
+    fi
+done
+
+if [ -z "$ADAPTER_DIR" ]; then
+    echo "ERROR: Adapter directory not found. Searched:"
+    for candidate in "${CANDIDATES[@]}"; do
+        echo "  - $candidate"
+    done
+    echo ""
     echo "Run training first: KWYRE_DOMAIN=$DOMAIN bash training/scripts/run_domain_training.sh"
     exit 1
 fi
 
+echo "Found adapter: $ADAPTER_DIR"
+
 OUTPUT_DIR="$HOME/.kwyre/adapter-packages"
 mkdir -p "$OUTPUT_DIR"
-ZIP_NAME="${DOMAIN//_/-}-${TIER}-v${VERSION}.zip"
+ZIP_NAME="${DOMAIN_HYPHENATED}-${TIER}-v${VERSION}.zip"
 ZIP_PATH="$OUTPUT_DIR/$ZIP_NAME"
 
 echo "Packaging $ADAPTER_DIR → $ZIP_PATH ..."
-cd "$HOME/.kwyre/adapters"
-zip -r "$ZIP_PATH" "${DOMAIN}-${TIER}/"
+cd "$(dirname "$ADAPTER_DIR")"
+zip -r "$ZIP_PATH" "$ADAPTER_BASE/"
 echo "Done: $(du -sh "$ZIP_PATH" | cut -f1)"
 
 SHA=$(sha256sum "$ZIP_PATH" | cut -d' ' -f1)
@@ -65,7 +91,7 @@ echo ""
 echo "  Paste into chat/adapters/manifest.json:"
 echo ""
 cat <<MANIFEST
-  "$DOMAIN": {
+  "$DOMAIN_HYPHENATED": {
     "version": "$VERSION",
     "url": "$CDN_URL",
     "sha256": "$SHA",

@@ -660,3 +660,59 @@ Adapters ship as part of the license tier:
 3. Kwyre auto-loads adapter on startup
 4. Customer can swap adapters at runtime via API or UI
 ```
+
+---
+
+## 6. CDN Deployment Workflow
+
+### Prerequisites
+
+- Cloudflare R2 bucket `kwyre-adapters` set up
+- `rclone` or `wrangler` CLI configured
+- Training completed on GPU droplet
+
+### Step 1: Pull adapters from GPU droplet
+
+```bash
+scp -r root@<droplet-ip>:~/.kwyre/adapters/ ~/.kwyre/adapters/
+scp -r root@<droplet-ip>:~/.kwyre/lora-adapters/ ~/.kwyre/lora-adapters/
+```
+
+### Step 2: Package each adapter
+
+```bash
+bash scripts/package_adapter.sh blockchain_crypto 1.0.0 4b
+bash scripts/package_adapter.sh legal_compliance 1.0.0 4b
+bash scripts/package_adapter.sh insurance_actuarial 1.0.0 4b
+bash scripts/package_adapter.sh defense_intelligence 1.0.0 4b
+bash scripts/package_adapter.sh financial_trading 1.0.0 4b
+bash scripts/package_adapter.sh healthcare_lifesciences 1.0.0 4b
+```
+
+### Step 3: Upload to R2
+
+```bash
+rclone copy ~/.kwyre/adapter-packages/ r2:kwyre-adapters/
+# or: for f in ~/.kwyre/adapter-packages/*.zip; do wrangler r2 object put kwyre-adapters/$(basename $f) --file $f; done
+```
+
+### Step 4: Update manifest
+
+- Copy SHA-256 hashes from package_adapter.sh output
+- Update `chat/adapters/manifest.json` with real sha256 values
+- Verify URLs resolve
+
+### Step 5: Deploy
+
+```bash
+npx wrangler pages deploy chat/ --project-name kwyre-ai
+```
+
+### Step 6: Verify
+
+- Check manifest: `curl https://kwyre.com/adapters/manifest.json`
+- Test download: `curl -I https://cdn.kwyre.com/adapters/blockchain-crypto-4b-v1.0.0.zip`
+
+### Version bumps
+
+To release adapter updates: increment the version (e.g. 1.0.0 → 1.0.1), re-package each updated adapter with the new version, re-upload the new zip files to R2, update `chat/adapters/manifest.json` with the new version, url, and sha256 values, then redeploy with `npx wrangler pages deploy chat/ --project-name kwyre-ai`.
