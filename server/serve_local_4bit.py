@@ -1807,7 +1807,7 @@ if __name__ == "__main__":
     _spike_target = "draft model" if draft_model else "disabled"
     print(f"  SpikeServe on {_spike_target} ({n_converted} layers)  |  4-bit {KWYRE_QUANT.upper()}  |  {_spec_status}")
     print(f"  Streaming: SSE enabled  |  Inference queue: active  |  6 security layers active")
-    print(f"  Available tiers: KWYRE_MODEL=Qwen/Qwen3.5-9B (7.5GB) | Qwen/Qwen3-4B (3.5GB)")
+    print(f"  Available tiers: KWYRE_MODEL=Qwen/Qwen3.5-9B (7.5GB) | Qwen/Qwen3.5-4B (3.5GB)")
     print("  POST /v1/chat/completions  — inference (stream=true for SSE)")
     print("  POST /v1/session/end       — wipe session from RAM")
     print("  GET  /health               — status + watchdog state")

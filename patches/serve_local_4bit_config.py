@@ -45,7 +45,7 @@ WEIGHT_HASHES_9B: dict[str, str] = {
 # Run: python -c "from serve_local_4bit import generate_weight_hashes; print(generate_weight_hashes('<path>'))"
 WEIGHT_HASHES_4B: dict[str, str] = {
     # REGENERATE AFTER FIRST DOWNLOAD of HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive
-    # Old Qwen3-4B hashes (DO NOT USE — architecture mismatch):
+    # Old Qwen3.5-4B hashes (DO NOT USE — architecture mismatch):
     # "config.json": "2f48fc86f9a91c0c1646a91ad8b2304443404e595ef02dfbeb0fb0ba11c519c0",
 }
 

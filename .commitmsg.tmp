@@ -1,9 +1,5 @@
-fix: remove remaining NVIDIA/Windows/macOS/MLX references
+fix: upgrade all Qwen3 references to Qwen3.5
 
-- chat/platform.html: remove Windows/macOS installer cards, MLX deploy
-  section, update all GPU refs to AMD ROCm, Linux-only build output
-- chat/pay.html: remove MLX product tier, Windows/macOS download cards,
-  update backend counts
-- chat/security.html: replace Windows verification with Linux commands,
-  update backend count
-- migrate_models.sh: remove serve_mlx.py reference
+Replace Qwen3-4B with Qwen3.5-4B and Qwen3-0.6B with Qwen3.5-0.8B
+across all configs, docs, comments, and HTML files. The model upgrade
+to Qwen3.5 is now reflected consistently everywhere.

@@ -248,8 +248,8 @@ Key verification methods:
 ║   │                                                                │  ║
 ║   │  ┌──────────────────────────────────────────────────────────┐  │  ║
 ║   │  │              INFERENCE ENGINE                             │  │  ║
-║   │  │  ● Qwen3-4B main model (4-bit NF4)                      │  │  ║
-║   │  │  ● Qwen3-0.6B speculative draft                          │  │  ║
+║   │  │  ● Qwen3.5-4B main model (4-bit NF4)                     │  │  ║
+║   │  │  ● Qwen3.5-0.8B speculative draft                        │  │  ║
 ║   │  │  ● SpikeServe activation encoding                        │  │  ║
 ║   │  │  ● GPU VRAM: ~3.9 GB combined                            │  │  ║
 ║   │  └──────────────────────────────────────────────────────────┘  │  ║

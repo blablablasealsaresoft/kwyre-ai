@@ -5,8 +5,8 @@
 
 | Role | Old ID | New ID |
 |------|--------|--------|
-| Base (Personal) | `Qwen/Qwen3-4B` | `HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive` |
-| Draft (speculative) | `Qwen/Qwen3-0.6B` | `Qwen/Qwen3.5-0.8B` |
+| Base (Personal) | `Qwen/Qwen3.5-4B` | `HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive` |
+| Draft (speculative) | `Qwen/Qwen3.5-0.8B` | `Qwen/Qwen3.5-0.8B` |
 | Draft (GGUF/Air) | (self-converted) | `unsloth/Qwen3.5-0.8B-GGUF` (pre-built) |
 | Professional | `Qwen/Qwen3.5-9B` | `Qwen/Qwen3.5-9B` (unchanged) |
 

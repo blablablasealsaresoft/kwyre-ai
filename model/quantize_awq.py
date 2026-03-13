@@ -4,7 +4,7 @@ Offline AWQ quantization for Kwyre AI — Professional tier.
 Quantizes the QAT-trained Qwen3.5-9B model to 4-bit AWQ format for
 1.4x faster inference. Run ONCE after merge_and_export.py.
 
-The Personal tier (Qwen3-4B) uses NF4 quantization via bitsandbytes
+The Personal tier (Qwen3.5-4B) uses NF4 quantization via bitsandbytes
 at load time and does not need offline AWQ pre-quantization.
 
 Usage:

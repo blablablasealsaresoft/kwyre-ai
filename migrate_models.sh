@@ -1,9 +1,9 @@
 #!/bin/bash
 ################################################################################
 # Kwyre AI — Model Migration Script
-# Migrates from Qwen3-4B + Qwen3-0.6B to Qwen3.5-4B + Qwen3.5-0.8B
+# Migration from Qwen3 to Qwen3.5 is COMPLETE. This script is retained for reference.
 #
-# OLD:  Qwen/Qwen3-4B (base) + Qwen/Qwen3-0.6B (draft)
+# OLD:  Qwen/Qwen3-4B (base) + Qwen/Qwen3-0.6B (draft)  [migration complete]
 # NEW:  HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive (base)
 #       Qwen/Qwen3.5-0.8B (draft)
 #

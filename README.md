@@ -635,7 +635,7 @@ curl -X POST http://127.0.0.1:8000/v1/session/end \
 - [x] Adapter selector dropdown in chat toolbar + active adapter badge in header
 - [x] 6,000 Claude reasoning traces generated via Anthropic Batch API (50% cheaper, resumable)
 - [x] 6 domain adapters trained on H100 80GB — legal, insurance, healthcare, defense, trading, blockchain
-- [x] Model migration: Qwen3-4B → Qwen3.5-4B, Qwen3-0.6B → Qwen3.5-0.8B across all backends
+- [x] Model migration: Qwen3.5-4B + Qwen3.5-0.8B across all backends
 - [x] Domain benchmark dashboard — `--with-adapter --adapter-domain` comparison mode
 - [x] GRPO fine-tuning per domain (domain-specific reward functions — legal citations, actuarial terms, etc.)
 - [x] 9B adapter variants — train all 6 domains on Qwen3.5-9B Professional tier
@@ -868,11 +868,11 @@ All products verified on DigitalOcean H100 80GB GPU Droplet (Ubuntu 22.04, CUDA 
 
 | Product | Backend | Model | Install Method | Tests | Result |
 |---------|---------|-------|---------------|-------|--------|
-| **Kwyre Personal** | Docker (GPU) | Qwen3-4B NF4 | `docker compose up` | 29/29 | **PASSED** |
+| **Kwyre Personal** | Docker (GPU) | Qwen3.5-4B NF4 | `docker compose up` | 29/29 | **PASSED** |
 | **Kwyre Professional** | Docker (GPU) | Qwen3.5-9B NF4 | `docker compose up` | 29/29 | **PASSED** |
 | **Kwyre Air** | Direct Python (CPU) | Qwen2.5-3B GGUF | `python server/serve_cpu.py` | 29/29 | **PASSED** |
 | **Kwyre Apple Silicon** | Direct Python (MLX) | — | `python server/serve_mlx.py` | — | **SKIP** (requires macOS + M-series) |
-| **vLLM Backend** | Direct Python (GPU) | Qwen3-4B | `KWYRE_BACKEND=vllm python server/serve_vllm.py` | 29/29 | **PASSED** |
+| **vLLM Backend** | Direct Python (GPU) | Qwen3.5-4B | `KWYRE_BACKEND=vllm python server/serve_vllm.py` | 29/29 | **PASSED** |
 
 **Test suite:** `tests/test_e2e.py` — 29 tests across 9 classes covering health, authentication, inference, input validation, session management, audit, security headers, and routing.
 

@@ -27,4 +27,4 @@ if idx >= 0:
 with open(path, "w") as f:
     f.write(c)
 
-print("Done — WEIGHT_HASHES_4B updated for Qwen/Qwen3-4B")
+print("Done — WEIGHT_HASHES_4B updated for Qwen/Qwen3.5-4B")

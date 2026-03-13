@@ -4,7 +4,7 @@
 
 ```
 Customer installs:
-  Base model (Qwen3-4B or Qwen3.5-9B)  →  ~2.5 GB or ~7.6 GB
+  Base model (Qwen3.5-4B or Qwen3.5-9B)  →  ~2.5 GB or ~7.6 GB
   + Domain adapter (LoRA weights)        →  ~50-200 MB each
 
 Runtime:
@@ -58,7 +58,7 @@ KWYRE_ALLOW_ADAPTER_SWAP=1                # allow runtime swap via API
   "domain": "legal",
   "display_name": "Legal & Compliance",
   "version": "1.0.0",
-  "base_models": ["Qwen/Qwen3-4B", "Qwen/Qwen3.5-9B"],
+  "base_models": ["Qwen/Qwen3.5-4B", "Qwen/Qwen3.5-9B"],
   "lora_rank": 32,
   "training_traces": 300,
   "training_date": "2026-03-15",
@@ -587,7 +587,7 @@ Run sequentially on a single H100, or parallel on 2-3 GPUs:
 
 ```bash
 # For each domain × base model combination:
-KWYRE_DOMAIN=legal KWYRE_BASE=Qwen/Qwen3-4B   bash run_domain_training.sh
+KWYRE_DOMAIN=legal KWYRE_BASE=Qwen/Qwen3.5-4B  bash run_domain_training.sh
 KWYRE_DOMAIN=legal KWYRE_BASE=Qwen/Qwen3.5-9B bash run_domain_training.sh
 # ... repeat for all 6 domains
 
@@ -647,7 +647,7 @@ Adapters ship as part of the license tier:
 
 | Component | Size |
 |-----------|------|
-| Base Qwen3-4B (NF4) | ~2.5 GB |
+| Base Qwen3.5-4B (NF4) | ~2.5 GB |
 | Base Qwen3.5-9B (NF4) | ~7.6 GB |
 | Single domain adapter | ~50-200 MB |
 | All 6 adapters | ~600 MB - 1.2 GB |

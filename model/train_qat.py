@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """QAT fine-tuning: teach Qwen3.5-9B to tolerate spike-encoded activations.
 
-This is a PROFESSIONAL TIER ONLY pipeline. The Personal tier (Qwen3-4B)
+This is a PROFESSIONAL TIER ONLY pipeline. The Personal tier (Qwen3.5-4B)
 ships as a base model without QAT training -- its speed advantage comes
 from speculative decoding and SpikeServe on the draft model instead.
 

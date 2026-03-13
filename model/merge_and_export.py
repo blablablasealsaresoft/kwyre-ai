@@ -1,7 +1,7 @@
 """
 Merge QAT-trained LoRA adapters into the base Qwen3.5-9B model for deployment.
 
-This is a PROFESSIONAL TIER ONLY tool. The Personal tier (Qwen3-4B) ships
+This is a PROFESSIONAL TIER ONLY tool. The Personal tier (Qwen3.5-4B) ships
 as a base model without QAT adapters.
 
 Usage:

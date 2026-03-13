@@ -24,10 +24,10 @@ All original build phases have been completed and shipped.
 - 110 security tests across 3 test suites, all passing
 
 ### Phase 3 — Training + Evaluation (DONE)
-- Qwen3-4B (personal tier) and Qwen3.5-9B (professional tier)
+- Qwen3.5-4B (personal tier) and Qwen3.5-9B (professional tier)
 - Pre-quantized NF4 models in dist/ (~2.5 GB main, ~0.8 GB draft)
 - SpikeServe on draft model (84 MLP layers, measure-only mode)
-- Speculative decoding with Qwen3-0.6B draft model
+- Speculative decoding with Qwen3.5-0.8B draft model
 
 ### Phase 4 — Docker + Installers (DONE)
 - Dockerfile (CUDA 12.4.1, non-root kwyre user, entrypoint with model download)
@@ -72,7 +72,7 @@ All original build phases have been completed and shipped.
 
 ```
 Backends:   serve_local_4bit.py (GPU), serve_vllm.py (vLLM), serve_cpu.py (CPU), serve_mlx.py (MLX)
-Model:      Qwen3-4B main + Qwen3-0.6B draft (pre-quantized NF4 in dist/)
+Model:      Qwen3.5-4B main + Qwen3.5-0.8B draft (pre-quantized NF4 in dist/)
 VRAM:       3.9 GB total (both models + KV cache)
 Speed:      6.7 tok/s warmed up (RTX 4090 Laptop), target 7-14 tok/s
 RAG:        PDF/DOCX/TXT upload, FAISS vector search, RAM-only, crypto-wipe
