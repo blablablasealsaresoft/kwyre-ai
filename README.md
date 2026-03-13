@@ -432,8 +432,8 @@ kwyre/
 │   ├── analytics.py           # Predictive analytics engine (time-series, risk, patterns, documents)
 │   ├── adapter_trainer.py     # Customer fine-tuning background job system
 │   ├── security_core.py       # Shared security infrastructure (all 6 layers)
-│   ├── platform_gpu.py        # Cross-platform GPU detection (ROCm / CUDA)
-│   ├── platform_paths.py      # Cross-platform path resolution (Linux / Windows)
+│   ├── platform_gpu.py        # Cross-platform GPU detection (ROCm / CUDA / MLX / MPS)
+│   ├── platform_paths.py      # Cross-platform path and service resolution
 │   ├── rag.py                 # RAG document ingestion (FAISS + embeddings)
 │   ├── users.py               # Multi-user management (Fernet-encrypted)
 │   └── audit.py               # Per-user audit logging + SIEM export
@@ -484,7 +484,8 @@ kwyre/
 │   ├── platform.html          # Installation + deployment guides
 │   └── pay.html               # Payment + license download gate
 ├── scripts/
-│   └── package_adapter.ps1    # Windows adapter packaging script
+│   ├── package_adapter.sh     # Adapter packaging script (Linux / macOS / FreeBSD)
+│   └── package_adapter.ps1    # Adapter packaging script (Windows)
 ├── installer/
 │   ├── install_linux.sh       # Linux installer (systemd + iptables)
 │   ├── install_macos.sh       # macOS installer (launchd + PF)
