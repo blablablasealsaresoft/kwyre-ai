@@ -58,7 +58,7 @@ else:
     def route_tools(_msg):
         return [], []
 
-from spike_serve import apply_spike_hooks, get_sparsity_stats, reset_sparsity_stats, set_tracking
+from spike_serve import apply_spike_hooks, get_sparsity_stats, reset_sparsity_stats, set_tracking, get_adaptive_k_stats
 from verify_deps import startup_check
 from license import startup_validate as validate_license
 from audit import UserAuditLog
@@ -76,8 +76,8 @@ DEFAULT_SYSTEM_PROMPT = (
 
 MODEL_ID = os.environ.get("KWYRE_MODEL", "HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive")
 PORT = 8000
-SPIKE_K = 5.0
-SPIKE_MAX = 31
+SPIKE_K = 3.0
+SPIKE_MAX = 15
 
 MODEL_TIERS = {
     "Qwen/Qwen3.5-9B": {"name": "kwyre-9b", "vram_4bit": "~7.5GB", "tier": "professional"},
@@ -1657,6 +1657,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                     "measured_sparsity_pct": STARTUP_SPARSITY["avg_sparsity"],
                     "spike_encoded_layers": n_converted,
                     "measured": _sparsity_measured,
+                    "adaptive_k": get_adaptive_k_stats(),
                 },
                 "streaming": True,
                 "inference_queue": True,

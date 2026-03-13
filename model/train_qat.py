@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
-"""QAT fine-tuning: teach Qwen3.5-9B to tolerate spike-encoded activations.
+"""QAT fine-tuning: teach Qwen3.5-4B/9B to tolerate spike-encoded activations.
 
-This is a PROFESSIONAL TIER ONLY pipeline. The Personal tier (Qwen3.5-4B)
-ships as a base model without QAT training -- its speed advantage comes
-from speculative decoding and SpikeServe on the draft model instead.
+Supports both Personal (4B) and Professional (9B) tiers. The 4B model
+benefits from QAT when running with SpikeServe on the main model
+(not just the draft model), enabling higher sparsity inference.
 
 Usage:
     python model/train_qat.py --model_id Qwen/Qwen3.5-9B --output_dir ./qat_output_9b
 
 Training config (9B):
-    LoRA rank: 64 (alpha 128), targets: gate_proj, up_proj, down_proj
-    Spike hooks: 408 MLP layers, k-curriculum: 50.0 -> 5.0
+    LoRA rank: 128 (alpha 256), targets: gate_proj, up_proj, down_proj
+    Spike hooks: 408 MLP layers, k-curriculum: 50.0 -> 3.0
     Dataset: teknium/OpenHermes-2.5
 
 Loads model from local HF cache, trains with STE spike encoding hooks
@@ -77,7 +77,7 @@ def _resolve_model_path(model_id: str) -> str:
 def parse_args():
     p = argparse.ArgumentParser(description="QLoRA + Spike QAT Training")
     p.add_argument("--model_id", type=str, default="Qwen/Qwen3.5-9B",
-                    help="Model ID or path. QAT is designed for the 9B professional model.")
+                    help="Model ID or path. Supports both 4B (Personal) and 9B (Professional).")
     p.add_argument("--dataset", type=str, default="teknium/OpenHermes-2.5")
     p.add_argument("--max_samples", type=int, default=100_000)
     p.add_argument("--output_dir", type=str, default="./qat_output")
@@ -86,12 +86,12 @@ def parse_args():
     p.add_argument("--grad_accum", type=int, default=16)
     p.add_argument("--lr", type=float, default=2e-5)
     p.add_argument("--max_seq_len", type=int, default=2048)
-    p.add_argument("--lora_rank", type=int, default=64)
-    p.add_argument("--lora_alpha", type=int, default=128)
+    p.add_argument("--lora_rank", type=int, default=128)
+    p.add_argument("--lora_alpha", type=int, default=256)
     p.add_argument("--k_start", type=float, default=50.0)
-    p.add_argument("--k_end", type=float, default=5.0)
+    p.add_argument("--k_end", type=float, default=3.0)
     p.add_argument("--k_schedule", type=str, default="step", choices=["step", "linear"])
-    p.add_argument("--max_spike", type=int, default=31)
+    p.add_argument("--max_spike", type=int, default=15)
     p.add_argument("--layer_stride", type=int, default=1,
                     help="Only hook every Nth eligible MLP layer (1=all, 4=every 4th)")
     p.add_argument("--warmup_steps", type=int, default=500)
@@ -206,7 +206,7 @@ class SpikeKSchedulerCallback(TrainerCallback):
 
 def build_k_schedule(args, total_steps):
     if args.k_schedule == "step":
-        k_values = [50.0, 25.0, 12.0, 8.0, 5.0]
+        k_values = [50.0, 20.0, 10.0, 5.0, 3.0]
         n_phases = len(k_values)
         phase_len = max(total_steps // n_phases, 1)
         schedule = [(i * phase_len, kv) for i, kv in enumerate(k_values)]

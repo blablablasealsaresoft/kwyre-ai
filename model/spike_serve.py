@@ -25,7 +25,122 @@ _track_stats = True  # global toggle for statistics collection
 _spike_lock = threading.Lock()  # mutex protecting concurrent stats updates
 
 
-def dynamic_spikes(x, k=3.0, max_spike=7):
+class AdaptiveKController:
+    """Dynamically adjusts spike threshold k per-layer based on activation statistics.
+
+    Layers with higher activation variance benefit from a larger k (finer grid),
+    while layers with concentrated activations can use a smaller k (more aggressive
+    sparsity) without quality loss.
+
+    The controller profiles each layer's activation distribution during the first
+    N forward passes (calibration phase), then locks in per-layer k values.
+    """
+
+    def __init__(self, base_k: float = 3.0, min_k: float = 2.0, max_k: float = 8.0,
+                 calibration_passes: int = 10, target_sparsity: float = 0.55):
+        self._base_k = base_k
+        self._min_k = min_k
+        self._max_k = max_k
+        self._calibration_passes = calibration_passes
+        self._target_sparsity = target_sparsity
+        self._layer_stats: dict[str, dict] = {}
+        self._layer_k: dict[str, float] = {}
+        self._calibrated = False
+        self._pass_count = 0
+        self._lock = threading.Lock()
+
+    def record(self, layer_name: str, x: torch.Tensor):
+        """Record activation statistics during calibration."""
+        with self._lock:
+            if self._calibrated:
+                return
+            if layer_name not in self._layer_stats:
+                self._layer_stats[layer_name] = {
+                    "mean_abs_sum": 0.0,
+                    "var_sum": 0.0,
+                    "kurtosis_sum": 0.0,
+                    "count": 0,
+                }
+            stats = self._layer_stats[layer_name]
+            with torch.no_grad():
+                flat = x.float().flatten()
+                stats["mean_abs_sum"] += flat.abs().mean().item()
+                stats["var_sum"] += flat.var().item()
+                mu = flat.mean()
+                std = flat.std().clamp(min=1e-8)
+                stats["kurtosis_sum"] += ((flat - mu) / std).pow(4).mean().item() - 3.0
+                stats["count"] += 1
+
+    def maybe_calibrate(self):
+        """After enough passes, compute per-layer k values."""
+        with self._lock:
+            if self._calibrated:
+                return
+            self._pass_count += 1
+            if self._pass_count < self._calibration_passes:
+                return
+
+            if not self._layer_stats:
+                self._calibrated = True
+                return
+
+            var_values = {}
+            for name, stats in self._layer_stats.items():
+                n = max(stats["count"], 1)
+                avg_var = stats["var_sum"] / n
+                avg_kurtosis = stats["kurtosis_sum"] / n
+                var_values[name] = avg_var
+
+                # High variance -> larger k (finer quantization grid)
+                # Low variance -> smaller k (more sparsity)
+                # Leptokurtic (high kurtosis) -> heavy tails need more range
+                if avg_var < 0.01:
+                    layer_k = self._min_k
+                elif avg_kurtosis > 5.0:
+                    layer_k = min(self._base_k * 1.5, self._max_k)
+                elif avg_var > 1.0:
+                    layer_k = min(self._base_k * (1.0 + avg_var * 0.3), self._max_k)
+                else:
+                    layer_k = self._base_k
+
+                self._layer_k[name] = round(layer_k, 2)
+
+            self._calibrated = True
+            avg_k = sum(self._layer_k.values()) / max(len(self._layer_k), 1)
+            print(f"[AdaptiveK] Calibrated {len(self._layer_k)} layers | "
+                  f"avg k={avg_k:.2f} | range=[{min(self._layer_k.values()):.2f}, "
+                  f"{max(self._layer_k.values()):.2f}]")
+
+    def get_k(self, layer_name: str) -> float:
+        """Get the k value for a specific layer."""
+        with self._lock:
+            return self._layer_k.get(layer_name, self._base_k)
+
+    @property
+    def is_calibrated(self) -> bool:
+        with self._lock:
+            return self._calibrated
+
+    def stats(self) -> dict:
+        with self._lock:
+            if not self._calibrated:
+                return {"calibrated": False, "passes": self._pass_count,
+                        "target": self._calibration_passes}
+            k_values = list(self._layer_k.values())
+            return {
+                "calibrated": True,
+                "layers": len(k_values),
+                "avg_k": round(sum(k_values) / max(len(k_values), 1), 2),
+                "min_k": round(min(k_values), 2) if k_values else 0,
+                "max_k": round(max(k_values), 2) if k_values else 0,
+                "target_sparsity": self._target_sparsity,
+            }
+
+
+adaptive_k = AdaptiveKController()
+
+
+def dynamic_spikes(x, k=3.0, max_spike=15):
     """Convert floating-point activations to integer spike counts.
 
     Algorithm (from SpikingBrain W8ASpike/quant_linear.py):
@@ -43,7 +158,7 @@ def dynamic_spikes(x, k=3.0, max_spike=7):
     return spikes_int, vth  # return spike counts and threshold for reconstruction
 
 
-def apply_spike_hooks(model, k=3.0, max_spike=7, skip_patterns=None,
+def apply_spike_hooks(model, k=3.0, max_spike=15, skip_patterns=None,
                       measure_only=True):
     """Attach spike-analysis hooks to eligible linear layers.
 
@@ -84,23 +199,30 @@ def apply_spike_hooks(model, k=3.0, max_spike=7, skip_patterns=None,
                 if not x.is_floating_point() or x.dim() < 2:  # skip non-float or 1D tensors
                     return None if passive else args
 
-                spikes_int, vth = dynamic_spikes(x, k=k_val, max_spike=max_s)  # encode activations to spikes
+                if adaptive_k.is_calibrated:
+                    effective_k = adaptive_k.get_k(layer_name)
+                else:
+                    effective_k = k_val
+                    adaptive_k.record(layer_name, x)
+                    adaptive_k.maybe_calibrate()
+
+                spikes_int, vth = dynamic_spikes(x, k=effective_k, max_spike=max_s)
 
                 if _track_stats:  # accumulate sparsity statistics if enabled
-                    total = spikes_int.numel()  # total number of elements in spike tensor
-                    zeros = (spikes_int == 0).sum().item()  # count zero-valued spikes
+                    total = spikes_int.numel()
+                    zeros = (spikes_int == 0).sum().item()
                     with _spike_lock:  # thread-safe stats update
-                        st = _spike_stats[layer_name]  # get or create layer stats entry
-                        st["total"] += total  # accumulate total element count
-                        st["zeros"] += zeros  # accumulate zero spike count
-                        st["calls"] += 1  # increment hook invocation counter
+                        st = _spike_stats[layer_name]
+                        st["total"] += total
+                        st["zeros"] += zeros
+                        st["calls"] += 1
 
                 if passive:  # measure-only mode
-                    return None  # don't modify activations (measure-only mode)
+                    return None
 
-                x_approx = (spikes_int * vth).to(x.dtype)  # reconstruct activations from spikes
-                return (x_approx,) + args[1:] if len(args) > 1 else (x_approx,)  # replace input with spike-encoded version
-            return _hook  # return the configured hook function
+                x_approx = (spikes_int * vth).to(x.dtype)
+                return (x_approx,) + args[1:] if len(args) > 1 else (x_approx,)
+            return _hook
 
         h = module.register_forward_pre_hook(  # attach hook to run before forward pass
             _make_hook(name, k, max_spike, measure_only)
@@ -141,3 +263,7 @@ def set_tracking(enabled: bool):  # toggle statistics collection on/off
 def reset_sparsity_stats():  # clear all accumulated statistics
     with _spike_lock:  # acquire lock for thread-safe mutation
         _spike_stats.clear()  # remove all per-layer stats entries
+
+
+def get_adaptive_k_stats() -> dict:
+    return adaptive_k.stats()
