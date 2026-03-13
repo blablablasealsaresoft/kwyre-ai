@@ -1,13 +1,15 @@
-feat: predictive analytics engine, adaptive speculative decoding, MLX restored
+feat: aggressive sparsity + adaptive per-layer k inference
 
-- New server/analytics.py: production-grade analytics with TimeSeriesPredictor
-  (Holt-Winters, linear regression, anomaly detection), PatternAnalyzer
-  (autocorrelation, regime detection, distribution fitting), RiskEngine
-  (VaR, CVaR, Sharpe, Sortino, Monte Carlo), DocumentAnalytics (TF-IDF,
-  sentiment, entity frequency, cross-reference detection)
-- Adaptive speculative decoding: dynamically adjusts early_exit threshold
-  based on rolling acceptance rate (2-8 range, 80%/40% thresholds)
-- Speculative decoding stats tracker in health endpoint
-- Analytics API endpoints: POST /v1/analytics/predict, /v1/analytics/risk
-- Restored MLX as 4th backend across all docs, HTML, and configs
-- Updated platform.html, pay.html, security.html for 4 backends
+Sparsity push:
+- SPIKE_K: 5.0 -> 3.0 (40% more aggressive quantization grid)
+- SPIKE_MAX: 31 -> 15 (tighter clamp = more compression)
+- QAT k-curriculum: 50 -> 25 -> 12 -> 8 -> 5 now 50 -> 20 -> 10 -> 5 -> 3
+- LoRA rank: 64 -> 128, alpha: 128 -> 256 (compensate for harder sparsity)
+- QAT now supports both 4B and 9B models (was 9B-only)
+
+Adaptive k:
+- AdaptiveKController profiles per-layer activation distribution (variance,
+  kurtosis) during first 10 forward passes, then locks optimal k per layer
+- Low-variance layers get aggressive k (min 2.0), heavy-tail layers get
+  conservative k (up to 8.0), typical layers use base k (3.0)
+- Exposed in /health endpoint under spike_analysis.adaptive_k
