@@ -633,6 +633,18 @@ nav {
             <div class="verify-expect">Confirm: only 127.0.0.1</div>
           </div>
           <div class="verify-card">
+            <h3>macOS: PF Firewall</h3>
+            <div class="verify-code">sudo pfctl -a com.kwyre -sr
+lsof -i -n -P | grep python</div>
+            <div class="verify-expect">Confirm: PF rules active, no outbound</div>
+          </div>
+          <div class="verify-card">
+            <h3>FreeBSD: PF Firewall</h3>
+            <div class="verify-code">sudo pfctl -a kwyre -sr
+sockstat -4 | grep python</div>
+            <div class="verify-expect">Confirm: PF rules active, no outbound</div>
+          </div>
+          <div class="verify-card">
             <h3>Wireshark (Any OS)</h3>
             <div class="verify-code">Interface: loopback (lo) | Filter: tcp.port == 8000</div>
             <div class="verify-expect">Confirm: zero external traffic</div>
@@ -699,7 +711,7 @@ nav {
       <a href="docs/security-architecture.html" class="compliance-card linked">
         <h3>Security Architecture</h3>
         <div class="cc-path">Technical Reference · 6-Layer Defense Model</div>
-        <p>Layer-by-layer technical breakdown: localhost binding, process isolation (iptables on Linux, Windows Firewall on Windows), dependency integrity, model weight verification, secure session buffer, and intrusion watchdog.</p>
+        <p>Layer-by-layer technical breakdown: localhost binding, process isolation (iptables on Linux, Windows Firewall on Windows, PF firewall on macOS/FreeBSD), dependency integrity, model weight verification, secure session buffer, and intrusion watchdog.</p>
       </a>
       <a href="docs/data-residency.html" class="compliance-card linked">
         <h3>Data Residency &amp; Privacy</h3>

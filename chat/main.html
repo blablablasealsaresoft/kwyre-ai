@@ -2498,7 +2498,7 @@ html.light nav { background: rgba(245,246,250,0.9); }
         <div class="sec-layer-num"><div class="lnum">L2</div></div>
         <div class="sec-layer-body">
           <h3>Process-Level Network Lockdown</h3>
-          <p>iptables / Windows Firewall rules scoped to the inference process. All outbound traffic blocked except localhost.</p>
+          <p>iptables / Windows Firewall / PF (macOS/FreeBSD) rules scoped to the inference process. All outbound traffic blocked except localhost.</p>
           <span class="sec-tag">Kernel-Level Enforcement</span>
         </div>
       </div>
@@ -2684,7 +2684,7 @@ html.light nav { background: rgba(245,246,250,0.9); }
         <div class="sec-layer-num"><div class="lnum">L2</div></div>
         <div class="sec-layer-body">
           <h3>Process-Level Network Lockdown</h3>
-          <p>iptables rules scoped to the inference process. All outbound traffic blocked except localhost. Even a fully compromised server process cannot make outbound connections.</p>
+          <p>iptables / Windows Firewall / PF (macOS/FreeBSD) rules scoped to the inference process. All outbound traffic blocked except localhost. Even a fully compromised server process cannot make outbound connections.</p>
           <span class="sec-tag">Kernel-Level Enforcement</span>
         </div>
       </div>

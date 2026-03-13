@@ -42,7 +42,7 @@
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
 <title>Kwyre AI — Platform &amp; Deployment</title>
-<meta name="description" content="Kwyre platform support: Linux &amp; Windows installers, Docker, Nuitka build pipeline, AMD ROCm &amp; NVIDIA CUDA GPU acceleration, domain-specific fine-tuning, benchmark suite.">
+<meta name="description" content="Kwyre platform support: Linux, Windows, macOS &amp; FreeBSD installers, Docker, Nuitka build pipeline, AMD ROCm, NVIDIA CUDA &amp; Apple Silicon MLX GPU acceleration, domain-specific fine-tuning, benchmark suite.">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -425,10 +425,14 @@ nav {
 }
 .footer-legal { font-size: 12px; color: var(--text3); max-width: 500px; line-height: 1.5; }
 
+@media (max-width: 1024px) {
+  .platform-grid { grid-template-columns: 1fr 1fr !important; }
+}
+
 @media (max-width: 768px) {
   .nav-links a:not(.nav-cta) { display: none; }
   .page-hero { padding: 120px 0 40px; }
-  .platform-grid { grid-template-columns: 1fr; }
+  .platform-grid { grid-template-columns: 1fr !important; }
   .deploy-grid { grid-template-columns: 1fr; }
   .extra-grid { grid-template-columns: 1fr; }
   .build-grid { grid-template-columns: 1fr; }
@@ -500,9 +504,9 @@ nav {
 <div class="page-hero">
   <div class="wrap">
     <div class="page-hero-eyebrow reveal">Platform &amp; Deployment</div>
-    <h1 class="reveal reveal-d1">Linux. Windows.<br><em>One command.</em></h1>
+    <h1 class="reveal reveal-d1">Linux. Windows. macOS. FreeBSD.<br><em>One command.</em></h1>
     <p class="reveal reveal-d2">
-      Native installers for Linux (AMD ROCm) and Windows (NVIDIA CUDA). Docker, Helm, vLLM, Direct Python. Every product runs fully air-gapped &mdash; no cloud calls, no telemetry, no data leaves your machine. Fine-tuning pipeline and benchmark suite included.
+      Native installers for Linux (AMD ROCm), Windows (NVIDIA CUDA), macOS (Apple Silicon MLX), and FreeBSD (NVIDIA CUDA). Docker, Helm, vLLM, Direct Python. Every product runs fully air-gapped &mdash; no cloud calls, no telemetry, no data leaves your machine. Fine-tuning pipeline and benchmark suite included.
     </p>
   </div>
 </div>
@@ -514,7 +518,7 @@ nav {
   <div class="wrap">
     <div class="sh">
       <div class="sh-eyebrow">Choose Your Product</div>
-      <h2>Every product. Linux &amp; Windows.</h2>
+      <h2>Every product. Every platform.</h2>
       <p>Same security stack. Same API. All products air-gapped by design. Different hardware targets.</p>
     </div>
 
@@ -560,9 +564,16 @@ nav {
           </tr>
           <tr>
             <td class="m-label">Kwyre Apple Silicon</td>
-            <td>Apple M1/M2/M3/M4</td>
+            <td>Apple M1/M2/M3/M4 (macOS 12+)</td>
             <td>Any MLX model &mdash; Metal-optimized, unified memory</td>
             <td><code>python server/serve_mlx.py</code></td>
+            <td><span class="m-y">✓ Always</span></td>
+          </tr>
+          <tr>
+            <td class="m-label">FreeBSD</td>
+            <td>NVIDIA GPU (FreeBSD 13+)</td>
+            <td>Qwen3.5-4B Uncensored NF4 + GGUF &mdash; CUDA or CPU</td>
+            <td><code>sudo ./install_freebsd.sh</code></td>
             <td><span class="m-y">✓ Always</span></td>
           </tr>
           <tr style="border-top: 2px solid var(--accent);">
@@ -598,13 +609,13 @@ nav {
   <div class="wrap">
     <div class="sh">
       <div class="sh-eyebrow reveal">Installation &amp; Deployment</div>
-      <h2 class="reveal reveal-d1">Linux native. One command.</h2>
+      <h2 class="reveal reveal-d1">Every platform. One command.</h2>
       <p class="reveal reveal-d2">Choose your platform. We handle the rest.</p>
     </div>
 
     <h3 style="font-size: 16px; font-weight: 600; color: var(--text); margin: 32px 0 16px;">One-Click Installers</h3>
 
-    <div class="platform-grid reveal reveal-d3" style="grid-template-columns: 1fr 1fr;">
+    <div class="platform-grid reveal reveal-d3" style="grid-template-columns: 1fr 1fr 1fr 1fr;">
       <div class="platform-card">
         <div class="platform-icon">&#x1F427;</div>
         <h3>Linux</h3>
@@ -631,6 +642,34 @@ Start-Service kwyre</div>
           <li>Windows Service management</li>
           <li>NVIDIA CUDA 12.4+ auto-detection</li>
           <li>Docker Desktop + WSL2 supported</li>
+        </ul>
+      </div>
+      <div class="platform-card">
+        <div class="platform-icon">&#x1F34E;</div>
+        <h3>macOS (Apple Silicon)</h3>
+        <div class="plat-sub">macOS 12+ &middot; Python 3.10+ &middot; .pkg + Tarball</div>
+        <p>Native installer for Apple Silicon Macs. Configures PF firewall isolation, registers launchd service, and auto-detects M-series chips for MLX acceleration. Unified memory means no VRAM limits.</p>
+        <div class="plat-cmd">sudo ./install_macos.sh
+sudo launchctl load /Library/LaunchDaemons/com.kwyre.plist</div>
+        <ul class="plat-features">
+          <li>MLX native Metal acceleration</li>
+          <li>PF firewall isolation (L2 enforcement)</li>
+          <li>launchd service management</li>
+          <li>.pkg installer + tarball</li>
+        </ul>
+      </div>
+      <div class="platform-card">
+        <div class="platform-icon">&#x1F608;</div>
+        <h3>FreeBSD</h3>
+        <div class="plat-sub">FreeBSD 13+ &middot; Python 3.10+ &middot; .txz + Tarball</div>
+        <p>FreeBSD installer configures PF firewall rules for process-level network lockdown, registers rc.d service, and auto-detects NVIDIA GPUs via CUDA. Native FreeBSD package for clean system integration.</p>
+        <div class="plat-cmd">sudo ./install_freebsd.sh
+sudo service kwyre start</div>
+        <ul class="plat-features">
+          <li>PF firewall isolation (L2 enforcement)</li>
+          <li>rc.d service management</li>
+          <li>NVIDIA CUDA auto-detection</li>
+          <li>.txz package + tarball</li>
         </ul>
       </div>
     </div>
@@ -746,6 +785,8 @@ python build.py clean        # Clean artifacts</div>
         <tbody>
           <tr><td>Linux</td><td>.deb / .AppImage</td><td>Debian package + AppImage</td></tr>
           <tr><td>Windows</td><td>.exe / .zip</td><td>Installer + Portable ZIP</td></tr>
+          <tr><td>macOS</td><td>.pkg / .tar.gz</td><td>Package installer + Tarball</td></tr>
+          <tr><td>FreeBSD</td><td>.txz / .tar.gz</td><td>FreeBSD package + Tarball</td></tr>
         </tbody>
       </table>
     </div>
@@ -758,7 +799,7 @@ python build.py clean        # Clean artifacts</div>
 <div class="cta-bar">
   <div class="wrap">
     <h2>Ready to deploy.</h2>
-    <p>3.3 GB download. One command. Linux &amp; Windows native. Six layers of security.</p>
+    <p>3.3 GB download. One command. Linux, Windows, macOS &amp; FreeBSD native. Six layers of security.</p>
     <div class="cta-actions">
       <a href="pay.html" class="btn btn-primary">Purchase Kwyre</a>
       <a href="security.html" class="btn btn-ghost">View Security</a>

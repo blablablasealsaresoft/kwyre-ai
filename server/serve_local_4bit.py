@@ -41,13 +41,17 @@ try:
 except ImportError:
     _AWQ_AVAILABLE = False
 
-try:
-    import flash_attn
-    _FLASH_ATTN_KWARGS = {"attn_implementation": "flash_attention_2"}
-    print("[Optimization] Flash Attention 2 available — enabled")
-except ImportError:
+if platform_gpu.IS_MACOS or platform_gpu.IS_FREEBSD:
     _FLASH_ATTN_KWARGS = {}
-    print("[Optimization] Flash Attention 2 not installed — using default attention")
+    print("[Optimization] Flash Attention 2 not supported on this platform — using default attention")
+else:
+    try:
+        import flash_attn
+        _FLASH_ATTN_KWARGS = {"attn_implementation": "flash_attention_2"}
+        print("[Optimization] Flash Attention 2 available — enabled")
+    except ImportError:
+        _FLASH_ATTN_KWARGS = {}
+        print("[Optimization] Flash Attention 2 not installed — using default attention")
 
 _server_dir = os.path.dirname(os.path.abspath(__file__))
 _project_root = os.path.dirname(_server_dir)
@@ -284,7 +288,8 @@ if KWYRE_QUANT == "awq":
         tokenizer.save_pretrained(AWQ_MODEL_PATH)
         print(f"AWQ model saved to {AWQ_MODEL_PATH}")
         del awq_model
-        torch.cuda.empty_cache()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
         model = AutoModelForCausalLM.from_pretrained(
             AWQ_MODEL_PATH, trust_remote_code=True,
             device_map="auto", torch_dtype=torch.bfloat16,
@@ -301,20 +306,29 @@ else:
         )
         print(f"[Quantization] Pre-quantized NF4 loaded (fastest startup)")
     else:
-        quant_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_compute_dtype=torch.bfloat16,
-            bnb_4bit_quant_type="nf4",
-            bnb_4bit_use_double_quant=True,
-        )
-        print(f"Loading {MODEL_ID} with 4-bit NF4 quantization (local weights)...")
-        model = AutoModelForCausalLM.from_pretrained(
-            LOCAL_MODEL_PATH, trust_remote_code=True,
-            quantization_config=quant_config,
-            device_map="auto", dtype=torch.bfloat16,
-            **_FLASH_ATTN_KWARGS,
-        )
-        print(f"[Quantization] NF4 on-the-fly quantization active")
+        if platform_gpu.IS_MACOS and platform_gpu.GPU_RUNTIME == "mlx":
+            print(f"Loading {MODEL_ID} with float16 (macOS MLX — bitsandbytes not supported)...")
+            model = AutoModelForCausalLM.from_pretrained(
+                LOCAL_MODEL_PATH, trust_remote_code=True,
+                device_map="auto", torch_dtype=torch.float16,
+                **_FLASH_ATTN_KWARGS,
+            )
+            print(f"[Quantization] macOS MLX path — float16 (use MLX for native quantization)")
+        else:
+            quant_config = BitsAndBytesConfig(
+                load_in_4bit=True,
+                bnb_4bit_compute_dtype=torch.bfloat16,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_use_double_quant=True,
+            )
+            print(f"Loading {MODEL_ID} with 4-bit NF4 quantization (local weights)...")
+            model = AutoModelForCausalLM.from_pretrained(
+                LOCAL_MODEL_PATH, trust_remote_code=True,
+                quantization_config=quant_config,
+                device_map="auto", dtype=torch.bfloat16,
+                **_FLASH_ATTN_KWARGS,
+            )
+            print(f"[Quantization] NF4 on-the-fly quantization active")
 # ---------------------------------------------------------------------------
 # Load QAT-trained LoRA adapters
 # ---------------------------------------------------------------------------
@@ -362,22 +376,33 @@ if SPECULATIVE_ENABLED:
                 **_FLASH_ATTN_KWARGS,
             )
         else:
-            print(f"[Speculative] Loading draft model {DRAFT_MODEL_ID} (4-bit NF4)...")
-            _draft_quant = BitsAndBytesConfig(
-                load_in_4bit=True,
-                bnb_4bit_compute_dtype=torch.bfloat16,
-                bnb_4bit_quant_type="nf4",
-                bnb_4bit_use_double_quant=True,
-            )
-            draft_model = AutoModelForCausalLM.from_pretrained(
-                DRAFT_MODEL_ID, trust_remote_code=True,
-                quantization_config=_draft_quant,
-                device_map="auto", dtype=torch.bfloat16,
-                **_FLASH_ATTN_KWARGS,
-            )
+            if platform_gpu.IS_MACOS and platform_gpu.GPU_RUNTIME == "mlx":
+                print(f"[Speculative] Loading draft model {DRAFT_MODEL_ID} (float16, macOS MLX)...")
+                draft_model = AutoModelForCausalLM.from_pretrained(
+                    DRAFT_MODEL_ID, trust_remote_code=True,
+                    device_map="auto", torch_dtype=torch.float16,
+                    **_FLASH_ATTN_KWARGS,
+                )
+            else:
+                print(f"[Speculative] Loading draft model {DRAFT_MODEL_ID} (4-bit NF4)...")
+                _draft_quant = BitsAndBytesConfig(
+                    load_in_4bit=True,
+                    bnb_4bit_compute_dtype=torch.bfloat16,
+                    bnb_4bit_quant_type="nf4",
+                    bnb_4bit_use_double_quant=True,
+                )
+                draft_model = AutoModelForCausalLM.from_pretrained(
+                    DRAFT_MODEL_ID, trust_remote_code=True,
+                    quantization_config=_draft_quant,
+                    device_map="auto", dtype=torch.bfloat16,
+                    **_FLASH_ATTN_KWARGS,
+                )
         draft_model.eval()
-        _draft_vram = torch.cuda.memory_allocated() / 1e9
-        print(f"[Speculative] Draft model loaded — total VRAM now {_draft_vram:.1f} GB")
+        if torch.cuda.is_available():
+            _draft_vram = torch.cuda.memory_allocated() / 1e9
+            print(f"[Speculative] Draft model loaded — total VRAM now {_draft_vram:.1f} GB")
+        else:
+            print(f"[Speculative] Draft model loaded")
     except Exception as e:
         print(f"[Speculative] Failed to load draft model: {e}")
         print("[Speculative] Falling back to standard generation.")
@@ -654,9 +679,14 @@ def _measure_sparsity_lazy():
         print(f"[SpikeServe] Measured sparsity: {stats['avg_sparsity']}% "
               f"across {stats['layers']} layers ({stats['total_calls']} calls)")
 
-gpu_mem = torch.cuda.memory_allocated() / 1e9
-gpu_total = torch.cuda.get_device_properties(0).total_memory / 1e9
-print(f"GPU VRAM: {gpu_mem:.1f} / {gpu_total:.1f} GB")
+if torch.cuda.is_available():
+    gpu_mem = torch.cuda.memory_allocated() / 1e9
+    gpu_total = torch.cuda.get_device_properties(0).total_memory / 1e9
+    print(f"GPU VRAM: {gpu_mem:.1f} / {gpu_total:.1f} GB")
+elif platform_gpu.IS_MACOS:
+    print(f"[GPU] macOS {platform_gpu.GPU_RUNTIME.upper()} — unified memory (use Activity Monitor for usage)")
+else:
+    print(f"[GPU] VRAM info unavailable")
 
 # ---------------------------------------------------------------------------
 # KV cache store — per-session cache for multi-turn conversations
@@ -1640,7 +1670,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
         auth_user = self._check_auth_optional()
         health_data = {"status": "ok"}
         if auth_user:
-            gpu_used = torch.cuda.memory_allocated() / 1e9
+            gpu_used = (torch.cuda.memory_allocated() / 1e9) if torch.cuda.is_available() else 0.0
             health_data.update({
                 "model": f"{ACTIVE_TIER['name']}-spikeserve",
                 "product": f"Kwyre {ACTIVE_TIER['tier'].title()}",
@@ -1650,7 +1680,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 "multi_user": MULTI_USER,
                 "security": {
                     "l1_network_binding": f"{BIND_HOST}:{PORT} (localhost only)",
-                    "l2_process_lockdown": f"os-configured ({'Windows Firewall' if platform_gpu.IS_WINDOWS else 'iptables/firewall'}, not verified by server)",
+                    "l2_process_lockdown": f"os-configured ({platform_paths.get_firewall_name()}, not verified by server)",
                     "l3_dependency_integrity": "verified",
                     "l4_weight_integrity": "configured" if KNOWN_WEIGHT_HASHES else "first-run",
                     "l5_conversation_storage": "RAM-only",
@@ -1698,7 +1728,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             "active_sessions": session_store.active_count(),
             "security_controls": {
                 "l1_network_binding": f"{BIND_HOST}:{PORT} (localhost only)",
-                "l2_process_lockdown": f"os-configured ({'Windows Firewall' if platform_gpu.IS_WINDOWS else 'iptables/firewall'})",
+                "l2_process_lockdown": f"os-configured ({platform_paths.get_firewall_name()})",
                 "l3_dependency_integrity": "verified at startup",
                 "l4_weight_integrity": "enabled" if KNOWN_WEIGHT_HASHES else "unconfigured",
                 "l5_conversation_storage": "RAM-only",

@@ -8,15 +8,23 @@
 #   chmod +x install_macos.sh
 #   sudo ./install_macos.sh                # Install to /opt/kwyre (default)
 #   sudo ./install_macos.sh /custom/path   # Install to custom path
+#   sudo ./install_macos.sh uninstall      # Uninstall from default path
+#   sudo ./install_macos.sh -u             # Uninstall (short flag)
 #
 # Requires: macOS 12+ with Apple Silicon or NVIDIA eGPU
 # =============================================================================
 
 set -euo pipefail
 
-INSTALL_DIR="${1:-/opt/kwyre}"
+if [[ "${1:-}" == "uninstall" || "${1:-}" == "-u" ]]; then
+    UNINSTALL_MODE=true
+    INSTALL_DIR="/opt/kwyre"
+else
+    UNINSTALL_MODE=false
+    INSTALL_DIR="${1:-/opt/kwyre}"
+fi
 KWYRE_USER="_kwyre"
-VERSION="1.0.0"
+VERSION="1.1.0"
 SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 RED='\033[0;31m'
@@ -29,6 +37,63 @@ info()  { echo -e "${CYAN}[INFO]${NC} $*"; }
 ok()    { echo -e "${GREEN}[OK]${NC}   $*"; }
 warn()  { echo -e "${YELLOW}[WARN]${NC} $*"; }
 fail()  { echo -e "${RED}[FAIL]${NC} $*"; exit 1; }
+
+# ── Uninstall ──────────────────────────────────────────────────────────────
+
+do_uninstall() {
+    echo ""
+    echo -e "${CYAN}=============================================${NC}"
+    echo -e "${CYAN}     Kwyre AI — macOS Uninstaller v${VERSION}    ${NC}"
+    echo -e "${CYAN}=============================================${NC}"
+    echo ""
+
+    if [ "$EUID" -ne 0 ]; then
+        fail "Run with sudo: sudo ./install_macos.sh uninstall"
+    fi
+
+    info "Stopping launchd service..."
+    launchctl unload /Library/LaunchDaemons/com.kwyre.ai.server.plist 2>/dev/null || true
+    ok "Service stopped"
+
+    info "Removing launchd plist..."
+    rm -f /Library/LaunchDaemons/com.kwyre.ai.server.plist
+    ok "Plist removed"
+
+    info "Removing PF firewall rules..."
+    rm -f /etc/pf.anchors/com.kwyre
+    if [ -f /etc/pf.conf ]; then
+        sed -i '' '/com\.kwyre/d' /etc/pf.conf
+        pfctl -f /etc/pf.conf 2>/dev/null || true
+    fi
+    ok "PF rules removed"
+
+    info "Removing service user..."
+    dscl . -delete /Users/_kwyre 2>/dev/null || true
+    ok "Service user removed"
+
+    info "Removing install directory ($INSTALL_DIR)..."
+    rm -rf "$INSTALL_DIR"
+    ok "Install directory removed"
+
+    info "Removing CLI launcher..."
+    rm -f /usr/local/bin/kwyre
+    ok "CLI launcher removed"
+
+    info "Removing log directory..."
+    rm -rf /var/log/kwyre
+    ok "Log directory removed"
+
+    echo ""
+    echo -e "${GREEN}=============================================${NC}"
+    echo -e "${GREEN}        Uninstall Complete                   ${NC}"
+    echo -e "${GREEN}=============================================${NC}"
+    echo ""
+    exit 0
+}
+
+if $UNINSTALL_MODE; then
+    do_uninstall
+fi
 
 echo ""
 echo -e "${CYAN}=============================================${NC}"
@@ -47,8 +112,20 @@ fi
 arch=$(uname -m)
 if [ "$arch" = "arm64" ]; then
     ok "Apple Silicon detected — MLX/MPS acceleration available"
+    if python3 -c "import mlx; print(mlx.__version__)" &>/dev/null; then
+        mlx_ver=$(python3 -c "import mlx; print(mlx.__version__)" 2>/dev/null)
+        ok "MLX available: v${mlx_ver}"
+    else
+        warn "MLX not installed — install with: pip install mlx"
+    fi
 elif [ "$arch" = "x86_64" ]; then
     info "Intel Mac detected — CUDA eGPU or CPU mode required"
+    if command -v nvidia-smi &>/dev/null; then
+        gpu_info=$(nvidia-smi --query-gpu=name,memory.total,driver_version --format=csv,noheader 2>/dev/null | head -1)
+        ok "eGPU detected: $gpu_info"
+    else
+        warn "No NVIDIA eGPU detected — CPU-only mode will be used"
+    fi
 else
     warn "Unknown architecture: $arch"
 fi
@@ -103,11 +180,17 @@ else
         fi
     done
     cp "$SCRIPT_DIR/requirements-inference.txt" "$INSTALL_DIR/" 2>/dev/null || true
+    cp "$SCRIPT_DIR/requirements-macos.txt" "$INSTALL_DIR/" 2>/dev/null || true
 
     info "Creating Python virtual environment..."
     python3 -m venv "$INSTALL_DIR/venv"
     "$INSTALL_DIR/venv/bin/pip" install --upgrade pip -q
-    "$INSTALL_DIR/venv/bin/pip" install -r "$INSTALL_DIR/requirements-inference.txt"
+    if [ -f "$INSTALL_DIR/requirements-macos.txt" ]; then
+        info "Using macOS-specific requirements"
+        "$INSTALL_DIR/venv/bin/pip" install -r "$INSTALL_DIR/requirements-macos.txt"
+    else
+        "$INSTALL_DIR/venv/bin/pip" install -r "$INSTALL_DIR/requirements-inference.txt"
+    fi
     ok "Python dependencies installed"
 
     info "Generating dependency manifest (Layer 3)..."
@@ -277,3 +360,11 @@ echo "  Health check:   http://127.0.0.1:8000/health"
 echo ""
 echo -e "  ${CYAN}Security: All 6 layers active. No data leaves this machine.${NC}"
 echo ""
+
+# ── Health Check Hint ──────────────────────────────────────────────────────
+
+if command -v curl &>/dev/null; then
+    info "Health check available after starting the server:"
+    echo "  curl http://127.0.0.1:8000/health"
+    echo ""
+fi

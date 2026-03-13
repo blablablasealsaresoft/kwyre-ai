@@ -1,12 +1,14 @@
 """
 Kwyre AI — Platform GPU Abstraction
 =====================================
-Unified GPU detection and configuration for AMD ROCm (Linux)
-and NVIDIA CUDA (Windows). The rest of the codebase should import
-from this module instead of hard-coding platform checks.
+Unified GPU detection and configuration across Windows (CUDA),
+Linux (ROCm), macOS (MLX / Metal on ARM64, CUDA on x86_64),
+FreeBSD (CUDA), and generic Unix (ROCm). The rest of the codebase
+should import from this module instead of hard-coding platform checks.
 """
 
 import logging
+import platform as _platform
 import subprocess
 import sys
 
@@ -14,8 +16,18 @@ logger = logging.getLogger("kwyre.platform.gpu")
 
 IS_WINDOWS: bool = sys.platform == "win32"
 IS_LINUX: bool = sys.platform.startswith("linux")
+IS_MACOS: bool = sys.platform == "darwin"
+IS_FREEBSD: bool = sys.platform.startswith("freebsd")
+IS_UNIX: bool = not IS_WINDOWS
 
-GPU_RUNTIME: str = "cuda" if IS_WINDOWS else "rocm"
+if IS_WINDOWS:
+    GPU_RUNTIME = "cuda"
+elif IS_MACOS:
+    GPU_RUNTIME = "mlx" if _platform.machine() == "arm64" else "cuda"
+elif IS_FREEBSD:
+    GPU_RUNTIME = "cuda"
+else:
+    GPU_RUNTIME = "rocm"
 
 
 def detect_gpu() -> dict:
@@ -25,6 +37,12 @@ def detect_gpu() -> dict:
     """
     if IS_WINDOWS:
         return _detect_nvidia()
+    if IS_MACOS:
+        if _platform.machine() == "arm64":
+            return _detect_mlx()
+        return _detect_nvidia()
+    if IS_FREEBSD:
+        return _detect_freebsd_gpu()
     return _detect_rocm()
 
 
@@ -99,6 +117,38 @@ def _detect_rocm() -> dict:
     return info
 
 
+def _detect_mlx() -> dict:
+    info = {"name": "Apple Silicon", "vram_mb": 0, "driver_version": "Metal", "runtime": "mlx"}
+    try:
+        out = subprocess.check_output(["sysctl", "-n", "hw.memsize"], text=True, timeout=5).strip()
+        info["vram_mb"] = int(out) // (1024 * 1024)
+    except (FileNotFoundError, subprocess.SubprocessError, ValueError):
+        pass
+    try:
+        out = subprocess.check_output(["sysctl", "-n", "machdep.cpu.brand_string"], text=True, timeout=5).strip()
+        info["name"] = out
+    except (FileNotFoundError, subprocess.SubprocessError):
+        pass
+    return info
+
+
+def _detect_freebsd_gpu() -> dict:
+    info = {"name": "unknown", "vram_mb": 0, "driver_version": "unknown", "runtime": "cuda"}
+    try:
+        return _detect_nvidia()
+    except Exception:
+        pass
+    try:
+        out = subprocess.check_output(["pciconf", "-lv"], text=True, timeout=10)
+        for line in out.splitlines():
+            if "VGA" in line or "3D" in line or "Display" in line:
+                info["name"] = line.strip()
+                break
+    except (FileNotFoundError, subprocess.SubprocessError):
+        info = _detect_via_torch(info)
+    return info
+
+
 def _detect_via_torch(info: dict) -> dict:
     try:
         import torch
@@ -112,10 +162,18 @@ def _detect_via_torch(info: dict) -> dict:
 
 
 def get_gpu_env_var() -> str:
-    return "CUDA_VISIBLE_DEVICES" if IS_WINDOWS else "HIP_VISIBLE_DEVICES"
+    if IS_WINDOWS:
+        return "CUDA_VISIBLE_DEVICES"
+    if IS_MACOS:
+        return "METAL_DEVICE_ID"
+    if IS_FREEBSD:
+        return "CUDA_VISIBLE_DEVICES"
+    return "HIP_VISIBLE_DEVICES"
 
 
 def get_device_string() -> str:
+    if IS_MACOS and _platform.machine() == "arm64":
+        return "mps"
     return "cuda"
 
 
@@ -133,6 +191,8 @@ def get_gpu_memory_mb() -> int:
 def check_gpu_available() -> bool:
     try:
         import torch
+        if IS_MACOS and _platform.machine() == "arm64":
+            return torch.backends.mps.is_available()
         return torch.cuda.is_available() and torch.cuda.device_count() > 0
     except ImportError:
         return False

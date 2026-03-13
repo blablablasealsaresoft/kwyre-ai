@@ -27,6 +27,10 @@ is_wsl() {
     grep -qi microsoft /proc/version 2>/dev/null
 }
 
+is_macos() {
+    [ "$(uname)" = "Darwin" ]
+}
+
 # ---------------------------------------------------------------------------
 # APPROACH A: WSL2 / Linux iptables isolation
 # ---------------------------------------------------------------------------
@@ -108,6 +112,81 @@ status_linux() {
 }
 
 # ---------------------------------------------------------------------------
+# APPROACH D: macOS PF (Packet Filter) isolation
+# ---------------------------------------------------------------------------
+install_macos() {
+    echo "[Layer 2] Installing macOS PF network isolation..."
+    
+    KWYRE_USER="_kwyre"
+    
+    # Create restricted user if not exists
+    if ! dscl . -read /Users/$KWYRE_USER &>/dev/null 2>&1; then
+        MAX_UID=$(dscl . -list /Users UniqueID | awk '{print $2}' | sort -n | tail -1)
+        NEW_UID=$((MAX_UID + 1))
+        dscl . -create /Users/$KWYRE_USER
+        dscl . -create /Users/$KWYRE_USER UserShell /usr/bin/false
+        dscl . -create /Users/$KWYRE_USER UniqueID "$NEW_UID"
+        dscl . -create /Users/$KWYRE_USER PrimaryGroupID 20
+        dscl . -create /Users/$KWYRE_USER RealName "Kwyre AI Service"
+        dscl . -create /Users/$KWYRE_USER NFSHomeDirectory /var/empty
+        echo "[Layer 2] Created service user: $KWYRE_USER (UID $NEW_UID)"
+    else
+        echo "[Layer 2] User $KWYRE_USER already exists."
+    fi
+    
+    # Write PF anchor
+    PF_ANCHOR="/etc/pf.anchors/com.kwyre"
+    cat > "$PF_ANCHOR" << 'PFEOF'
+block out quick proto {tcp, udp} user _kwyre
+pass out quick proto {tcp, udp} from any to 127.0.0.1 user _kwyre
+pass out quick proto {tcp, udp} from any to ::1 user _kwyre
+PFEOF
+    
+    # Add anchor to pf.conf if not present
+    if ! grep -q "com.kwyre" /etc/pf.conf 2>/dev/null; then
+        echo "" >> /etc/pf.conf
+        echo 'anchor "com.kwyre"' >> /etc/pf.conf
+        echo 'load anchor "com.kwyre" from "/etc/pf.anchors/com.kwyre"' >> /etc/pf.conf
+        echo "[Layer 2] PF anchor added to /etc/pf.conf"
+    fi
+    
+    pfctl -f /etc/pf.conf 2>/dev/null || echo "[Layer 2] Warning: Could not reload PF (may need SIP adjustment)"
+    echo "[Layer 2] macOS PF rules installed — outbound blocked for $KWYRE_USER"
+}
+
+remove_macos() {
+    echo "[Layer 2] Removing macOS PF isolation..."
+    KWYRE_USER="_kwyre"
+    
+    # Remove anchor file
+    rm -f /etc/pf.anchors/com.kwyre
+    
+    # Remove from pf.conf
+    if grep -q "com.kwyre" /etc/pf.conf 2>/dev/null; then
+        sed -i '' '/com\.kwyre/d' /etc/pf.conf
+        pfctl -f /etc/pf.conf 2>/dev/null || true
+        echo "[Layer 2] PF anchor removed from /etc/pf.conf"
+    fi
+    
+    echo "[Layer 2] macOS PF rules removed."
+}
+
+status_macos() {
+    echo "[Layer 2] macOS PF status:"
+    if [ -f /etc/pf.anchors/com.kwyre ]; then
+        echo "  Anchor file: /etc/pf.anchors/com.kwyre (exists)"
+        cat /etc/pf.anchors/com.kwyre | sed 's/^/    /'
+    else
+        echo "  Anchor file: not found"
+    fi
+    if grep -q "com.kwyre" /etc/pf.conf 2>/dev/null; then
+        echo "  pf.conf: anchor loaded"
+    else
+        echo "  pf.conf: anchor NOT loaded"
+    fi
+}
+
+# ---------------------------------------------------------------------------
 # APPROACH B: Windows Firewall rules
 # Print PowerShell commands the user runs once in an elevated prompt.
 # ---------------------------------------------------------------------------
@@ -181,6 +260,10 @@ case "${1:-help}" in
             echo "Error: Run with sudo"
             exit 1
         fi
+        if is_macos; then
+            install_macos
+            exit 0
+        fi
         if is_wsl; then
             echo "[Layer 2] WSL2 detected."
             install_linux
@@ -195,9 +278,11 @@ case "${1:-help}" in
         ;;
     remove)
         if [ "$EUID" -ne 0 ]; then echo "Error: Run with sudo"; exit 1; fi
+        if is_macos; then remove_macos; exit 0; fi
         remove_linux
         ;;
     status)
+        if is_macos; then status_macos; exit 0; fi
         status_linux
         ;;
     windows)
@@ -209,7 +294,7 @@ case "${1:-help}" in
     help|*)
         echo "Usage: sudo ./setup_isolation.sh [install|remove|status|windows|wsl2]"
         echo ""
-        echo "  install  — Install iptables isolation rules (Linux/WSL2)"
+        echo "  install  — Install isolation rules (Linux/WSL2/macOS)"
         echo "  remove   — Remove isolation rules"
         echo "  status   — Show current rules"
         echo "  windows  — Print Windows Firewall PowerShell commands"

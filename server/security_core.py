@@ -29,6 +29,9 @@ from http.server import BaseHTTPRequestHandler  # Base class for HTTP request ha
 import psutil  # Cross-platform process and network monitoring
 
 import platform_gpu
+from server import platform_paths
+
+_FIREWALL_NAME = platform_paths.get_firewall_name()
 
 
 # ---------------------------------------------------------------------------

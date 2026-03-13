@@ -1,0 +1,43 @@
+# Kwyre AI — FreeBSD dependencies
+# Standard PyPI packages. CUDA support requires NVIDIA drivers installed via pkg.
+# Some packages may need to be built from source on FreeBSD.
+
+# --- PyTorch (CPU by default, CUDA if drivers present) ---
+torch>=2.6.0
+torchaudio
+torchvision
+
+# --- Core inference ---
+transformers>=5.3.0
+bitsandbytes>=0.49.0  # may require building from source on FreeBSD
+accelerate>=1.11.0
+safetensors>=0.6.0
+tokenizers>=0.22.0
+autoawq>=0.2.0
+
+# flash-attn: CUDA-only, build from source if needed.
+# triton is Linux-only.
+# mlx is macOS-only.
+
+# --- Hugging Face ecosystem ---
+huggingface_hub>=1.6.0
+peft>=0.18.0
+sentence-transformers>=3.0.0
+
+# --- QAT training (not required for inference only) ---
+datasets>=4.6.0
+trl>=0.29.0
+
+# --- Retrieval / document loading ---
+faiss-cpu>=1.8.0
+pypdf>=4.0.0
+python-docx>=1.0.0
+
+# --- Numerics / utilities ---
+numpy>=1.24.0
+scipy>=1.14.0,<1.16.0
+psutil>=7.1.0
+cryptography>=44.0.0
+pyyaml>=6.0.0
+
+# Some packages may require: pkg install py311-numpy py311-scipy

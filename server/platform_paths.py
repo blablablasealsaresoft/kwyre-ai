@@ -1,8 +1,8 @@
 """
 Kwyre AI — Platform Path Abstraction
 ======================================
-Provides platform-aware default paths for Linux and Windows.
-All path functions return pathlib.Path objects.
+Provides platform-aware default paths for Windows, Linux, macOS,
+FreeBSD, and generic Unix. All path functions return pathlib.Path objects.
 """
 
 import os
@@ -10,11 +10,15 @@ import sys
 from pathlib import Path
 
 _IS_WINDOWS: bool = sys.platform == "win32"
+_IS_MACOS: bool = sys.platform == "darwin"
+_IS_FREEBSD: bool = sys.platform.startswith("freebsd")
 
 
 def get_install_dir() -> Path:
     if _IS_WINDOWS:
         return Path(os.environ.get("LOCALAPPDATA", Path.home() / "AppData" / "Local")) / "Kwyre"
+    if _IS_FREEBSD:
+        return Path("/usr/local/kwyre")
     return Path("/opt/kwyre")
 
 
@@ -62,7 +66,19 @@ def get_null_device() -> str:
 def get_service_name() -> str:
     if _IS_WINDOWS:
         return "KwyreAI"
+    if _IS_MACOS:
+        return "com.kwyre.ai.server"
+    if _IS_FREEBSD:
+        return "kwyre"
     return "kwyre.service"
+
+
+def get_firewall_name() -> str:
+    if _IS_WINDOWS:
+        return "Windows Firewall"
+    if _IS_MACOS or _IS_FREEBSD:
+        return "PF firewall"
+    return "iptables"
 
 
 def ensure_dirs() -> None:

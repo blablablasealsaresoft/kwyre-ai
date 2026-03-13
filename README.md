@@ -18,6 +18,8 @@
 [![AMD ROCm](https://img.shields.io/badge/GPU-AMD%20ROCm-ed1c24.svg)]()
 [![NVIDIA CUDA](https://img.shields.io/badge/GPU-NVIDIA%20CUDA-76b900.svg)]()
 [![Windows](https://img.shields.io/badge/OS-Windows%20x86__64-blue.svg)]()
+[![macOS](https://img.shields.io/badge/OS-macOS%20Apple%20Silicon-999999.svg)]()
+[![FreeBSD](https://img.shields.io/badge/OS-FreeBSD-AB2B28.svg)]()
 [![AdaptiveK](https://img.shields.io/badge/sparsity-AdaptiveK%20per--layer-00bcd4.svg)]()
 
 ---
@@ -26,7 +28,7 @@
 
 Kwyre is a locally-deployed AI inference system built for professionals who work with data that **cannot leave the room** — active federal investigations, attorney-client privileged documents, regulated financial records, classified-adjacent work product, and sensitive compliance analysis.
 
-It runs on **Linux x86_64** (AMD ROCm) and **Windows x86_64** (NVIDIA CUDA), shipping a full predictive analytics engine (VaR, CVaR, time series forecasting, pattern analysis), adaptive speculative decoding, six hot-swappable domain adapters, and a cryptographic security stack — all executing entirely on your hardware with zero network egress.
+It runs on **Linux x86_64** (AMD ROCm), **Windows x86_64** (NVIDIA CUDA), **macOS** (Apple Silicon MLX / Metal MPS), and **FreeBSD** (NVIDIA CUDA), shipping a full predictive analytics engine (VaR, CVaR, time series forecasting, pattern analysis), adaptive speculative decoding, six hot-swappable domain adapters, and a cryptographic security stack — all executing entirely on your hardware with zero network egress.
 
 It is not a hobbyist local model runner. It is a **certified, auditable, breach-resistant AI appliance** with cryptographic session wiping, intrusion detection, and a compliance documentation package built in.
 
@@ -36,7 +38,7 @@ It is not a hobbyist local model runner. It is a **certified, auditable, breach-
 
 ## Platform
 
-Kwyre targets **Linux x86_64** and **Windows x86_64**. GPU inference requires an AMD discrete GPU with ROCm support (Linux) or an NVIDIA GPU with CUDA support (Windows).
+Kwyre targets **Linux x86_64**, **Windows x86_64**, **macOS** (Apple Silicon and Intel), and **FreeBSD** (amd64). GPU inference requires an AMD discrete GPU with ROCm support (Linux), an NVIDIA GPU with CUDA support (Windows / FreeBSD), or Apple Silicon with Metal MPS / MLX (macOS).
 
 ### Hardware Requirements
 
@@ -70,6 +72,27 @@ Kwyre targets **Linux x86_64** and **Windows x86_64**. GPU inference requires an
 | **GPU visibility** | `CUDA_VISIBLE_DEVICES` |
 | **Docker base** | `nvidia/cuda` (via Docker Desktop + WSL2) |
 | **Build artifacts** | `.exe` installer + portable ZIP |
+
+#### macOS Requirements
+
+| Requirement | Value |
+|-------------|-------|
+| **OS** | macOS 12+ (Monterey or later) |
+| **Hardware** | Apple M1/M2/M3/M4 (recommended) or Intel x86_64 |
+| **GPU acceleration** | Metal MPS (Apple Silicon) or NVIDIA eGPU (Intel Mac) |
+| **ML framework** | MLX (Apple Silicon native) |
+| **Build artifacts** | `.pkg` installer + portable tarball |
+
+#### FreeBSD Requirements
+
+| Requirement | Value |
+|-------------|-------|
+| **OS** | FreeBSD 13+ (amd64) |
+| **GPU driver** | NVIDIA (optional, for GPU inference) |
+| **GPU visibility** | `CUDA_VISIBLE_DEVICES` |
+| **Firewall** | PF (Packet Filter) |
+| **Service management** | rc.d |
+| **Build artifacts** | `.txz` package + portable tarball |
 
 ---
 
@@ -242,7 +265,7 @@ Adapters use PEFT LoRA — swapping takes ~2 seconds and requires no model reloa
 | Layer | Name | What It Does | Implementation |
 |-------|------|-------------|----------------|
 | **1** | Network Isolation | Server binds to `127.0.0.1` only — physically unreachable from any network at the OS level | `KWYRE_BIND_HOST=127.0.0.1`; Docker binds `127.0.0.1:8000:8000` on host |
-| **2** | Process-Level Network Lockdown | All outbound traffic blocked for the Kwyre process except loopback | `iptables` (Linux) / Windows Firewall (Windows) rules scoped to dedicated `kwyre` system user — even a compromised server process cannot phone home |
+| **2** | Process-Level Network Lockdown | All outbound traffic blocked for the Kwyre process except loopback | `iptables` (Linux) / Windows Firewall (Windows) / PF (macOS / FreeBSD) rules scoped to dedicated `kwyre` system user — even a compromised server process cannot phone home |
 | **3** | Dependency Integrity | SHA-256 hash manifest of every installed Python package, verified at startup | Tampered `torch`, `transformers`, or any dependency → immediate abort before a single token is generated |
 | **4** | Model Weight Integrity | SHA-256 hashes of all model config files verified at every startup | Tampered or replaced model weights → immediate process abort |
 | **5** | Secure RAM Session Storage | Conversations exist only in RAM — never written to disk under any circumstance | 256-bit random session key; `secure_wipe()` overwrites all content with random bytes on session end; 1-hour idle expiry |
@@ -252,7 +275,7 @@ Adapters use PEFT LoRA — swapping takes ~2 seconds and requires no model reloa
 
 ## Building from Source
 
-Kwyre builds on Linux x86_64 and Windows x86_64.
+Kwyre builds on Linux x86_64, Windows x86_64, macOS, and FreeBSD.
 
 ```bash
 # Linux: Prerequisites: Ubuntu 22.04+, Python 3.10+, AMD ROCm 6.x
@@ -278,6 +301,18 @@ pip install nuitka ordered-set zstandard
 python build.py all              # Full pipeline: compile + package + installer + sign
 ```
 
+```bash
+# macOS: Prerequisites: macOS 12+, Python 3.10+, Xcode CLI tools
+pip install nuitka ordered-set zstandard
+python build.py all    # .pkg + tarball
+```
+
+```bash
+# FreeBSD: Prerequisites: FreeBSD 13+, Python 3.10+
+pip install nuitka ordered-set zstandard
+python build.py all    # .txz + tarball
+```
+
 The installer step produces platform-specific artifacts:
 
 | Format | Target | Notes |
@@ -286,13 +321,17 @@ The installer step produces platform-specific artifacts:
 | AppImage | Any Linux x86_64 | Single-file portable, no install required |
 | `.exe` installer | Windows x86_64 | Standard Windows installer, registers Windows Service |
 | Portable ZIP | Windows x86_64 | No install required, extract and run |
+| `.pkg` | macOS | Standard macOS installer package |
+| Portable tarball | macOS | No install required, extract and run |
+| `.txz` | FreeBSD amd64 | `pkg add kwyre-server_*.txz`, registers rc.d service |
+| Portable tarball | FreeBSD amd64 | No install required, extract and run |
 
 ---
 
 ## Technical Specifications
 
 ```
-Platform:                   Linux x86_64 + AMD ROCm 6.x | Windows x86_64 + NVIDIA CUDA 12.x
+Platform:                   Linux x86_64 + AMD ROCm 6.x | Windows x86_64 + NVIDIA CUDA 12.x | macOS Apple Silicon (MLX / Metal MPS) | FreeBSD amd64 + NVIDIA CUDA
 Main model (Personal):     Qwen/Qwen3.5-4B (pre-quantized NF4, 2.5 GB)
 Main model (Professional): Qwen/Qwen3.5-9B (pre-quantized NF4, 7.6 GB)
 Draft model:               Qwen/Qwen3.5-0.8B (pre-quantized NF4, 0.8 GB) — shared by both tiers
@@ -411,7 +450,9 @@ kwyre/
 │   ├── license.py             # Ed25519 license + hardware fingerprint binding
 │   ├── codesign.py            # Ed25519 release signing and verification
 │   ├── updater.py             # Air-gap safe update mechanism
-│   └── setup_isolation.ps1    # Windows Firewall + process isolation setup
+│   ├── setup_isolation.ps1    # Windows Firewall + process isolation setup
+│   ├── setup_isolation.sh     # Linux iptables + process isolation setup
+│   └── setup_isolation_freebsd.sh  # FreeBSD PF + process isolation setup
 ├── training/
 │   ├── run_full_pipeline.sh   # Automated: traces → distillation → GRPO → export
 │   ├── run_full_pipeline.ps1  # Windows: same pipeline via PowerShell
@@ -445,13 +486,17 @@ kwyre/
 ├── scripts/
 │   └── package_adapter.ps1    # Windows adapter packaging script
 ├── installer/
-│   └── install_linux.sh       # Linux installer (systemd + iptables)
+│   ├── install_linux.sh       # Linux installer (systemd + iptables)
+│   ├── install_macos.sh       # macOS installer (launchd + PF)
+│   └── install_freebsd.sh     # FreeBSD installer (rc.d + PF)
 ├── finetune/                  # Domain-specific fine-tuning pipeline
 ├── docs/                      # Compliance documentation package
 ├── tests/                     # 110 security tests + integration suite
 ├── build.py                   # Nuitka build + installer pipeline
 ├── .env.example               # Full config reference (30+ variables)
 ├── requirements-windows.txt   # Windows-specific Python dependencies (CUDA)
+├── requirements-macos.txt     # macOS-specific Python dependencies (MLX / Metal)
+├── requirements-freebsd.txt   # FreeBSD-specific Python dependencies
 └── dist/                      # Pre-quantized model weights
     ├── kwyre-4b-nf4/          # Main model (2.5 GB)
     └── kwyre-draft-nf4/       # Draft model (0.8 GB)
@@ -486,6 +531,8 @@ kwyre/
 - [x] QAT LoRA rank 128 (alpha 256), k-curriculum 50→3, supports both Qwen3.5-4B and Qwen3.5-9B
 - [x] Linux x86_64 + AMD ROCm migration — single-platform build (.deb + AppImage), Docker image ~12 GB with ROCm runtime
 - [x] Windows x86_64 + NVIDIA CUDA support — .exe installer + portable ZIP, Docker Desktop + WSL2, PowerShell training scripts
+- [x] macOS Apple Silicon + MLX support — `.pkg` installer + portable tarball, Metal MPS acceleration, native MLX inference
+- [x] FreeBSD amd64 + NVIDIA CUDA support — `.txz` package + portable tarball, PF firewall isolation, rc.d service management
 
 **v1.7 (Planned)**
 - [ ] Credit card payment integration
@@ -508,6 +555,22 @@ watch -n 1 "ss -tp | grep python"
 ```powershell
 # Watch for any outbound connections from the inference process
 Get-NetTCPConnection | Where-Object { $_.OwningProcess -eq (Get-Process kwyre-server).Id }
+
+# Confirm: only 127.0.0.1 connections appear. Any external IP = compromised environment.
+```
+
+**macOS:**
+```bash
+# Watch for any outbound connections from the inference process
+lsof -i -n -P | grep python
+
+# Confirm: only 127.0.0.1 connections appear. Any external IP = compromised environment.
+```
+
+**FreeBSD:**
+```bash
+# Watch for any outbound connections from the inference process
+sockstat -4 | grep python
 
 # Confirm: only 127.0.0.1 connections appear. Any external IP = compromised environment.
 ```

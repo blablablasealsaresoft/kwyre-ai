@@ -19,6 +19,16 @@
 #   4. Restart Docker Desktop
 #   5. Verify: docker run --rm --gpus all nvidia/cuda:12.4.0-base-ubuntu22.04 nvidia-smi
 # ─────────────────────────────────────────────────────────────────────────────
+#
+# === macOS Docker ===
+# Docker Desktop for Mac does NOT support GPU passthrough.
+# Use native installation (install_macos.sh) for MLX/Metal acceleration.
+# Docker on macOS runs Linux containers via a VM — suitable for CPU inference only.
+#
+# === FreeBSD Docker ===
+# FreeBSD does not support Docker natively. Options:
+#   1. Use native installation (install_freebsd.sh) — recommended
+#   2. Run Linux containers via bhyve or jail-based container runtimes
 
 services:
   kwyre:

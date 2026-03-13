@@ -1,0 +1,46 @@
+# Kwyre AI — macOS (Apple Silicon) dependencies
+# Targets M1/M2/M3/M4 with MLX acceleration and MPS backend.
+
+# --- MLX (Apple Silicon native) ---
+mlx>=0.22.0
+mlx-lm>=0.22.0
+
+# --- PyTorch (includes MPS backend on macOS) ---
+torch>=2.6.0
+torchaudio
+torchvision
+
+# --- Core inference ---
+transformers>=5.3.0
+accelerate>=1.11.0
+safetensors>=0.6.0
+tokenizers>=0.22.0
+autoawq>=0.2.0
+
+# bitsandbytes is not supported on macOS (not needed with MLX quantization).
+# flash-attn is CUDA-only and not available on macOS.
+# triton is Linux-only.
+
+# --- Hugging Face ecosystem ---
+huggingface_hub>=1.6.0
+peft>=0.18.0
+sentence-transformers>=3.0.0
+
+# --- QAT training (not required for inference only) ---
+datasets>=4.6.0
+trl>=0.29.0
+
+# --- Retrieval / document loading ---
+faiss-cpu>=1.8.0
+pypdf>=4.0.0
+python-docx>=1.0.0
+
+# --- Numerics / utilities ---
+numpy>=1.24.0
+scipy>=1.14.0,<1.16.0
+psutil>=7.1.0
+cryptography>=44.0.0
+pyyaml>=6.0.0
+
+# --- macOS-specific extras ---
+pyobjc-core

@@ -230,6 +230,24 @@ def get_machine_fingerprint() -> str:  # generate unique hardware identifier
             except Exception:
                 pass  # ioreg command failed
 
+        elif sys.platform.startswith("freebsd"):
+            try:
+                result = subprocess.run(
+                    ["sysctl", "-n", "kern.hostuuid"],
+                    capture_output=True, text=True, timeout=5
+                )
+                hostuuid = result.stdout.strip()
+                if hostuuid:
+                    parts.append(hostuuid)
+            except Exception:
+                pass
+            hostid_path = Path("/etc/hostid")
+            if hostid_path.exists():
+                try:
+                    parts.append(hostid_path.read_text().strip())
+                except Exception:
+                    pass
+
         elif sys.platform == "linux":  # Linux-specific hardware identifiers
             mid_path = Path("/etc/machine-id")  # systemd machine-id file
             if mid_path.exists():  # machine-id file present
@@ -240,6 +258,16 @@ def get_machine_fingerprint() -> str:  # generate unique hardware identifier
                     parts.append(product_uuid.read_text().strip())  # add product UUID to fingerprint
             except Exception:
                 pass  # permission denied or read failure
+
+        else:
+            # Generic Unix fallback — try /etc/machine-id (works on many distros)
+            mid_path = Path("/etc/machine-id")
+            if mid_path.exists():
+                try:
+                    parts.append(mid_path.read_text().strip())
+                except Exception:
+                    pass
+
     except Exception:
         pass  # subprocess import or platform detection failed
 

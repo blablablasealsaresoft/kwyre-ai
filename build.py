@@ -64,6 +64,8 @@ DATA_FILES = [
 PLAT = platform.system().lower()
 IS_WINDOWS = sys.platform == "win32"
 IS_LINUX = sys.platform == "linux"
+IS_FREEBSD = sys.platform.startswith("freebsd")
+IS_MACOS = sys.platform == "darwin"
 
 
 def run(cmd, **kwargs):
@@ -316,6 +318,7 @@ def package_dist():
         "installer/install_windows.ps1",
         "installer/install_linux.sh",
         "installer/install_macos.sh",
+        "installer/install_freebsd.sh",
         "installer/install_windows_gui.py",
     ]
     for rel in installer_scripts:
@@ -860,6 +863,26 @@ launchctl unload /Library/LaunchDaemons/com.kwyre.ai.server.plist 2>/dev/null ||
         f.write(preinstall)
     os.chmod(os.path.join(scripts_dir, "preinstall"), 0o755)
 
+    dist_xml = f"""<?xml version="1.0" encoding="utf-8"?>
+<installer-gui-script minSpecVersion="2">
+    <title>Kwyre AI {VERSION}</title>
+    <options customize="never" require-scripts="false"/>
+    <choices-outline>
+        <line choice="default">
+            <line choice="com.kwyre.ai"/>
+        </line>
+    </choices-outline>
+    <choice id="default"/>
+    <choice id="com.kwyre.ai" visible="false">
+        <pkg-ref id="com.kwyre.ai"/>
+    </choice>
+    <pkg-ref id="com.kwyre.ai" version="{VERSION}" onConclusion="none">kwyre-ai-{VERSION}-component.pkg</pkg-ref>
+</installer-gui-script>
+"""
+    with open(os.path.join(mac_dir, "Distribution.xml"), "w") as f:
+        f.write(dist_xml)
+    print(f"  [OK] Distribution.xml (component plist)")
+
     build_pkg_script = os.path.join(BUILD_DIR, "build-macos-pkg.sh")
     with open(build_pkg_script, "w") as f:
         f.write(f"""#!/bin/bash
@@ -878,10 +901,26 @@ pkgbuild \\
     --identifier com.kwyre.ai \\
     --version {VERSION} \\
     --install-location / \\
-    "$INSTALLERS/kwyre-ai-{VERSION}-macos.pkg"
+    "$INSTALLERS/kwyre-ai-{VERSION}-component.pkg"
 
-echo ""
-echo "[OK] macOS installer: $INSTALLERS/kwyre-ai-{VERSION}-macos.pkg"
+echo "[OK] Component package built"
+
+if command -v productbuild &>/dev/null; then
+    echo "=== Building distribution .pkg via productbuild ==="
+    productbuild \\
+        --distribution "$PKG_ROOT/Distribution.xml" \\
+        --package-path "$INSTALLERS" \\
+        "$INSTALLERS/kwyre-ai-{VERSION}-macos.pkg"
+    rm -f "$INSTALLERS/kwyre-ai-{VERSION}-component.pkg"
+    echo ""
+    echo "[OK] macOS distribution installer: $INSTALLERS/kwyre-ai-{VERSION}-macos.pkg"
+else
+    echo "[INFO] productbuild not found — using component package as final installer"
+    mv "$INSTALLERS/kwyre-ai-{VERSION}-component.pkg" "$INSTALLERS/kwyre-ai-{VERSION}-macos.pkg"
+    echo ""
+    echo "[OK] macOS installer: $INSTALLERS/kwyre-ai-{VERSION}-macos.pkg"
+fi
+
 echo ""
 echo "To sign for distribution:"
 echo "  productsign --sign 'Developer ID Installer: YOUR NAME' \\\\"
@@ -904,6 +943,73 @@ echo "    -ov $INSTALLERS/kwyre-ai-{VERSION}-macos.dmg"
         print("  [INFO] Run build-macos-pkg.sh on macOS to generate the .pkg")
 
 
+def installer_freebsd():
+    """Generate FreeBSD .txz package and portable tarball."""
+    print("\n=== FreeBSD Installer (.txz + .tar.gz) ===")
+
+    installer_out = os.path.join(BUILD_DIR, "installers")
+    os.makedirs(installer_out, exist_ok=True)
+
+    pkg_stage = os.path.join(BUILD_DIR, "freebsd-pkg")
+    pkg_root = os.path.join(pkg_stage, "opt", "kwyre")
+    os.makedirs(pkg_root, exist_ok=True)
+
+    binary_name = "kwyre-server"
+    src_binary = os.path.join(DIST_BUILD_DIR, binary_name)
+    if os.path.exists(src_binary):
+        shutil.copy2(src_binary, os.path.join(pkg_root, binary_name))
+        os.chmod(os.path.join(pkg_root, binary_name), 0o755)
+
+    for d in ["chat", "docs", "security"]:
+        src = os.path.join(DIST_BUILD_DIR, d)
+        if os.path.isdir(src):
+            shutil.copytree(src, os.path.join(pkg_root, d), dirs_exist_ok=True)
+
+    for f in [".env.example"]:
+        src = os.path.join(DIST_BUILD_DIR, f)
+        if os.path.exists(src):
+            shutil.copy2(src, os.path.join(pkg_root, f))
+
+    import json
+    manifest = {
+        "name": "kwyre-ai",
+        "version": VERSION,
+        "origin": "local/kwyre-ai",
+        "comment": "Kwyre AI — Air-Gapped Inference Server",
+        "desc": (
+            "Locally-deployed AI inference with 6-layer security stack, "
+            "cryptographic session wiping, and intrusion detection. "
+            "Your queries never leave your machine."
+        ),
+        "maintainer": "security@kwyre.ai",
+        "www": "https://kwyre.com",
+        "prefix": "/opt/kwyre",
+        "arch": platform.machine(),
+    }
+    with open(os.path.join(pkg_stage, "+MANIFEST"), "w") as f:
+        json.dump(manifest, f, indent=2)
+    print("  [OK] +MANIFEST for pkg(8)")
+
+    txz_path = os.path.join(installer_out, f"kwyre-ai-{VERSION}-freebsd.txz")
+    if shutil.which("tar"):
+        run(["tar", "-cJf", txz_path, "-C", pkg_stage, "."])
+        size_mb = os.path.getsize(txz_path) / (1024 * 1024)
+        print(f"  [OK] FreeBSD .txz: {txz_path} ({size_mb:.1f} MB)")
+    else:
+        print("  [WARN] tar not found — cannot create .txz package")
+
+    tarball_path = os.path.join(installer_out, f"kwyre-ai-{VERSION}-freebsd-portable.tar.gz")
+    if shutil.which("tar"):
+        run(["tar", "-czf", tarball_path, "-C", BUILD_DIR, "freebsd-pkg"])
+        size_mb = os.path.getsize(tarball_path) / (1024 * 1024)
+        print(f"  [OK] Portable tarball: {tarball_path} ({size_mb:.1f} MB)")
+    else:
+        print("  [WARN] tar not found — cannot create portable tarball")
+
+    print(f"\n  FreeBSD install: pkg add {txz_path}")
+    print(f"  Portable unpack: tar xzf {tarball_path}")
+
+
 def installer(target=None):
     """Build platform-specific installer(s)."""
     target = target or PLAT
@@ -913,6 +1019,8 @@ def installer(target=None):
         installer_linux()
     if target in ("darwin", "macos", "all"):
         installer_macos()
+    if IS_FREEBSD or target in ("freebsd", "all"):
+        installer_freebsd()
 
 
 def sign_release():
@@ -992,7 +1100,7 @@ def main():
         help=(
             "compile=Nuitka standalone binary, "
             "package=stage data files, "
-            "installer=platform pkg (.exe/.deb/.pkg), "
+            "installer=platform pkg (.exe/.deb/.pkg/.txz), "
             "sign=Ed25519 sign artifacts, "
             "verify=verify signed release, "
             "update-package=create .kwyre-update, "
@@ -1003,7 +1111,7 @@ def main():
     )
     parser.add_argument(
         "--platform",
-        choices=["windows", "linux", "macos", "all"],
+        choices=["windows", "linux", "macos", "freebsd", "all"],
         default=None,
         help="Target platform for installer (default: auto-detect)"
     )
