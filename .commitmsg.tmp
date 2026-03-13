@@ -1,15 +1,11 @@
-feat: aggressive sparsity + adaptive per-layer k inference
+docs: complete README overhaul for v1.6
 
-Sparsity push:
-- SPIKE_K: 5.0 -> 3.0 (40% more aggressive quantization grid)
-- SPIKE_MAX: 31 -> 15 (tighter clamp = more compression)
-- QAT k-curriculum: 50 -> 25 -> 12 -> 8 -> 5 now 50 -> 20 -> 10 -> 5 -> 3
-- LoRA rank: 64 -> 128, alpha: 128 -> 256 (compensate for harder sparsity)
-- QAT now supports both 4B and 9B models (was 9B-only)
-
-Adaptive k:
-- AdaptiveKController profiles per-layer activation distribution (variance,
-  kurtosis) during first 10 forward passes, then locks optimal k per layer
-- Low-variance layers get aggressive k (min 2.0), heavy-tail layers get
-  conservative k (up to 8.0), typical layers use base k (3.0)
-- Exposed in /health endpoint under spike_analysis.adaptive_k
+Rewritten from scratch to announce all v1.6 features:
+- Predictive analytics engine (VaR, CVaR, time series, Monte Carlo)
+- Adaptive speculative decoding (dynamic exit threshold 2-8)
+- Adaptive per-layer k (10-pass calibration, per-layer sparsity)
+- Harder sparsity targets (k=3.0, max_spike=15)
+- QAT for both 4B and 9B models (LoRA rank 128)
+- Linux x86_64 + AMD ROCm platform focus
+- New analytics API endpoints documented
+- Updated technical specs, project structure, roadmap
