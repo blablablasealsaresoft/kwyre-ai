@@ -1190,7 +1190,7 @@ nav {
       <div>
         <div class="sh" style="text-align: left; margin-bottom: 24px;">
           <div class="sh-eyebrow">Choose Your Product</div>
-          <h2 style="font-size: 22px; font-weight: 700; letter-spacing: -0.3px;">Five ways to deploy Kwyre</h2>
+          <h2 style="font-size: 22px; font-weight: 700; letter-spacing: -0.3px;">Six ways to deploy Kwyre</h2>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -1221,7 +1221,7 @@ nav {
             </div>
             <ul class="product-row-features">
               <li>Qwen3.5-4B Uncensored (0/465 refusals) &middot; 6 LoRA adapters hot-swap</li>
-              <li>Pipeline: Claude &#8594; QLoRA &#8594; GRPO &middot; All 3 backends</li>
+              <li>Pipeline: Claude &#8594; QLoRA &#8594; GRPO &middot; All 4 backends</li>
               <li>Offline installer &middot; SOC2/HIPAA/FINRA &middot; White-glove setup</li>
               <li>3 machine licenses &middot; Priority support &lt;24hr</li>
             </ul>
@@ -1237,7 +1237,7 @@ nav {
             </div>
             <ul class="product-row-features">
               <li>Uncensored (0/465 refusals) &middot; All 6 LoRA adapters hot-swap</li>
-              <li>Offline installer &middot; All 3 backends &middot; Full compliance</li>
+              <li>Offline installer &middot; All 4 backends &middot; Full compliance</li>
               <li>White-glove setup &middot; 5 machine licenses</li>
             </ul>
           </div>
@@ -1257,6 +1257,21 @@ nav {
             </ul>
           </div>
 
+          <div class="product-row" data-tier="mlx" onclick="selectTier('mlx')">
+            <div class="product-row-header">
+              <div>
+                <div class="product-row-name">Kwyre Apple Silicon</div>
+                <div class="product-row-price">$299</div>
+              </div>
+              <button class="price-select-btn" onclick="event.stopPropagation();selectTier('mlx')">Select</button>
+            </div>
+            <ul class="product-row-features">
+              <li>Native Metal acceleration &middot; mlx-lm</li>
+              <li>M1/M2/M3/M4 support &middot; Unified memory</li>
+              <li>1 domain adapter &middot; 6-layer security &middot; 1 machine license</li>
+            </ul>
+          </div>
+
           <div class="product-row" style="border-color: var(--green-dim);" onclick="window.location='custom.html'">
             <div class="product-row-header">
               <div>
@@ -1267,7 +1282,7 @@ nav {
             </div>
             <ul class="product-row-features">
               <li>Uncensored base &middot; Claude &#8594; QLoRA &#8594; GRPO pipeline</li>
-              <li>All 3 backends &middot; Hot-swap adapters &middot; Full compliance</li>
+              <li>All 4 backends &middot; Hot-swap adapters &middot; Full compliance</li>
             </ul>
           </div>
 
@@ -1600,7 +1615,8 @@ const TIERS = {
   personal:     { label: 'Personal', price: 499 },
   professional: { label: 'Professional', price: 1499 },
   airgapped:    { label: 'Air-Gapped Kit', price: 3499 },
-  air:          { label: 'Air (CPU)', price: 349 }
+  air:          { label: 'Air (CPU)', price: 349 },
+  mlx:          { label: 'Apple Silicon', price: 299 }
 };
 let selectedTier = 'professional';
 
@@ -1938,7 +1954,7 @@ async function handleStripePayment() {
   const tierKey = params.get('tier') || 'professional';
   const tierData = {
     personal: 'Personal', professional: 'Professional', airgapped: 'Air-Gapped Kit',
-    air: 'Air (CPU)'
+    air: 'Air (CPU)', mlx: 'Apple Silicon'
   }[tierKey] || 'Kwyre';
 
   // Hide payment UI, show success

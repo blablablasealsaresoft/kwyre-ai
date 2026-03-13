@@ -1,5 +1,13 @@
-fix: upgrade all Qwen3 references to Qwen3.5
+feat: predictive analytics engine, adaptive speculative decoding, MLX restored
 
-Replace Qwen3-4B with Qwen3.5-4B and Qwen3-0.6B with Qwen3.5-0.8B
-across all configs, docs, comments, and HTML files. The model upgrade
-to Qwen3.5 is now reflected consistently everywhere.
+- New server/analytics.py: production-grade analytics with TimeSeriesPredictor
+  (Holt-Winters, linear regression, anomaly detection), PatternAnalyzer
+  (autocorrelation, regime detection, distribution fitting), RiskEngine
+  (VaR, CVaR, Sharpe, Sortino, Monte Carlo), DocumentAnalytics (TF-IDF,
+  sentiment, entity frequency, cross-reference detection)
+- Adaptive speculative decoding: dynamically adjusts early_exit threshold
+  based on rolling acceptance rate (2-8 range, 80%/40% thresholds)
+- Speculative decoding stats tracker in health endpoint
+- Analytics API endpoints: POST /v1/analytics/predict, /v1/analytics/risk
+- Restored MLX as 4th backend across all docs, HTML, and configs
+- Updated platform.html, pay.html, security.html for 4 backends

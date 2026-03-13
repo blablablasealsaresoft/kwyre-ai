@@ -41,6 +41,7 @@ COMPILE_MODULES = [
     "server/tools.py",
     "server/users.py",
     "server/audit.py",
+    "server/analytics.py",
     "security/verify_deps.py",
     "security/license.py",
     "security/codesign.py",

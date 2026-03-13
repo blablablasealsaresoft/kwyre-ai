@@ -558,6 +558,13 @@ nav {
             <td><code>KWYRE_BACKEND=vllm python server/serve_vllm.py</code></td>
             <td><span class="m-y">✓ Always</span></td>
           </tr>
+          <tr>
+            <td class="m-label">Kwyre Apple Silicon</td>
+            <td>Apple M1/M2/M3/M4</td>
+            <td>Any MLX model &mdash; Metal-optimized, unified memory</td>
+            <td><code>python server/serve_mlx.py</code></td>
+            <td><span class="m-y">✓ Always</span></td>
+          </tr>
           <tr style="border-top: 2px solid var(--accent);">
             <td class="m-label" style="color: var(--green);">Custom LLM</td>
             <td>Any (we configure)</td>
@@ -640,6 +647,19 @@ python server/serve_local_4bit.py</div>
         <p>Uses llama.cpp via llama-cpp-python. Convert models to GGUF format or use pre-built GGUF from kwyre.com. Same API, same security stack.</p>
         <div class="deploy-cmd">KWYRE_GGUF_PATH=./models/kwyre-4b.gguf \
   python server/serve_cpu.py</div>
+      </div>
+
+      <div class="deploy-card">
+        <h3>MLX (Apple Silicon)</h3>
+        <div class="deploy-sub">Metal-optimized &middot; M1/M2/M3/M4</div>
+        <p>Uses mlx-lm for native Metal inference on Apple Silicon Macs. Unified memory architecture means no VRAM limits — the model uses system RAM directly. Same API, same security stack.</p>
+        <div class="deploy-cmd">python server/serve_mlx.py</div>
+        <ul class="plat-features">
+          <li>Native Metal acceleration</li>
+          <li>M1/M2/M3/M4 unified memory</li>
+          <li>No CUDA dependency</li>
+          <li>Same 6-layer security stack</li>
+        </ul>
       </div>
 
       <div class="deploy-card">

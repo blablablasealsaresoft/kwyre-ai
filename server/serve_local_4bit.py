@@ -801,6 +801,97 @@ print(f"[Security] Session store active — RAM only, wiped on close")
 
 
 # ---------------------------------------------------------------------------
+# Adaptive speculative decoding
+# ---------------------------------------------------------------------------
+class AdaptiveSpeculator:
+    """Thread-safe tracker that adjusts assistant_early_exit based on acceptance rates."""
+
+    _MIN_EXIT = 2
+    _MAX_EXIT = 8
+    _DEFAULT_EXIT = 4
+
+    def __init__(self, window_size: int = 20):
+        self._lock = threading.Lock()
+        self._window_size = window_size
+        self._acceptance_rates: list[float] = []
+        self._early_exit = self._DEFAULT_EXIT
+
+    def record(self, accepted: int, proposed: int):
+        if proposed <= 0:
+            return
+        rate = accepted / proposed
+        with self._lock:
+            self._acceptance_rates.append(rate)
+            if len(self._acceptance_rates) > self._window_size:
+                self._acceptance_rates = self._acceptance_rates[-self._window_size:]
+            avg = sum(self._acceptance_rates) / len(self._acceptance_rates)
+            if avg > 0.80:
+                self._early_exit = min(self._early_exit + 1, self._MAX_EXIT)
+            elif avg < 0.40:
+                self._early_exit = max(self._early_exit - 1, self._MIN_EXIT)
+
+    def get_exit_threshold(self) -> int:
+        with self._lock:
+            return self._early_exit
+
+    def stats(self) -> dict:
+        with self._lock:
+            rates = list(self._acceptance_rates)
+        avg = sum(rates) / len(rates) if rates else 0.0
+        return {
+            "current_exit_threshold": self._early_exit,
+            "avg_acceptance_rate": round(avg, 4),
+            "window_size": self._window_size,
+            "samples": len(rates),
+        }
+
+
+class SpecDecodingStats:
+    """Tracks aggregate speculative decoding performance metrics."""
+
+    def __init__(self):
+        self._lock = threading.Lock()
+        self._speculative_tokens = 0
+        self._standard_tokens = 0
+        self._speculative_time = 0.0
+        self._standard_time = 0.0
+        self._speculative_requests = 0
+        self._standard_requests = 0
+
+    def record_speculative(self, tokens: int, elapsed: float):
+        with self._lock:
+            self._speculative_tokens += tokens
+            self._speculative_time += elapsed
+            self._speculative_requests += 1
+
+    def record_standard(self, tokens: int, elapsed: float):
+        with self._lock:
+            self._standard_tokens += tokens
+            self._standard_time += elapsed
+            self._standard_requests += 1
+
+    def stats(self) -> dict:
+        with self._lock:
+            spec_tps = (self._speculative_tokens / self._speculative_time
+                        if self._speculative_time > 0 else 0.0)
+            std_tps = (self._standard_tokens / self._standard_time
+                       if self._standard_time > 0 else 0.0)
+            speedup = spec_tps / std_tps if std_tps > 0 else 0.0
+            return {
+                "speculative_tokens": self._speculative_tokens,
+                "standard_tokens": self._standard_tokens,
+                "speculative_requests": self._speculative_requests,
+                "standard_requests": self._standard_requests,
+                "speculative_avg_tps": round(spec_tps, 1),
+                "standard_avg_tps": round(std_tps, 1),
+                "speed_improvement_factor": round(speedup, 2),
+            }
+
+
+adaptive_speculator = AdaptiveSpeculator()
+spec_decoding_stats = SpecDecodingStats()
+
+# ---------------------------------------------------------------------------
 # Request handler
 # ---------------------------------------------------------------------------
 class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
@@ -914,6 +1005,10 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             self._handle_adapter_stack()
         elif self.path.startswith("/v1/adapter/update/"):
             self._handle_adapter_update()
+        elif self.path == "/v1/analytics/predict":
+            self._handle_analytics_predict()
+        elif self.path == "/v1/analytics/risk":
+            self._handle_analytics_risk()
         else:
             self._send_json_error(404, "Not found.")
 
@@ -1043,7 +1138,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
         }
         if draft_model is not None:
             gen_kwargs["assistant_model"] = draft_model
-            gen_kwargs["assistant_early_exit"] = 4
+            gen_kwargs["assistant_early_exit"] = adaptive_speculator.get_exit_threshold()
 
         if stream:
             self._handle_stream_gpu(
@@ -1071,6 +1166,8 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             else:
                 kv_cache_store.evict(session_id)
 
+        _used_speculation = "assistant_model" in gen_kwargs
+
         def _run_inference():
             t0 = time.time()
             with torch.inference_mode():
@@ -1080,6 +1177,18 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             new_ids = gen_ids[0][input_len:]
             result_holder["new_ids"] = new_ids
             result_holder["elapsed"] = elapsed
+
+            n_out = len(new_ids)
+            if _used_speculation:
+                spec_decoding_stats.record_speculative(n_out, elapsed)
+                assistant_toks = getattr(outputs, "num_assistant_tokens", None)
+                if assistant_toks is not None:
+                    proposed = int(assistant_toks.sum()) if hasattr(assistant_toks, "sum") else int(assistant_toks)
+                    if proposed > 0:
+                        adaptive_speculator.record(accepted=n_out, proposed=proposed)
+            else:
+                spec_decoding_stats.record_standard(n_out, elapsed)
+
             if hasattr(outputs, "past_key_values") and outputs.past_key_values:
                 total_seq = gen_ids.shape[1]
                 try:
@@ -1451,6 +1560,36 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             "sessions_wiped": count,
         })
 
+    def _handle_analytics_predict(self):
+        user = self._check_auth() if not MULTI_USER else self._mu_check_auth()
+        if user is None:
+            return
+        body, err = self._parse_json_body(required=True)
+        if err is not None:
+            self._send_json_error(400, err)
+            return
+        try:
+            from analytics import route_analytics
+            result = route_analytics("predict", body)
+            self._send_json(200, result)
+        except Exception as e:
+            self._send_json_error(500, f"Analytics error: {e}")
+
+    def _handle_analytics_risk(self):
+        user = self._check_auth() if not MULTI_USER else self._mu_check_auth()
+        if user is None:
+            return
+        body, err = self._parse_json_body(required=True)
+        if err is not None:
+            self._send_json_error(400, err)
+            return
+        try:
+            from analytics import route_analytics
+            result = route_analytics("risk", body)
+            self._send_json(200, result)
+        except Exception as e:
+            self._send_json_error(500, f"Analytics error: {e}")
+
     # ---- GET routing ----
 
     def do_GET(self):
@@ -1509,6 +1648,8 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 "speculative_decoding": {
                     "enabled": draft_model is not None,
                     "draft_model": DRAFT_MODEL_ID if draft_model is not None else None,
+                    "adaptive": adaptive_speculator.stats(),
+                    "session_stats": spec_decoding_stats.stats(),
                 },
                 "spike_analysis": {
                     "target": "draft_model" if draft_model is not None else "disabled",
