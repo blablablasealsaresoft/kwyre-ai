@@ -218,9 +218,9 @@ python model/train_qat.py --model_id Qwen/Qwen3.5-9B --output_dir ./qat_output_9
 
 ## Domain Adapters — Professional Verticals
 
-Kwyre ships with six hot-swappable LoRA domain adapters, each trained on 1,000 Claude-generated expert reasoning traces. Adapters load onto the base model at runtime with no restart required.
+Kwyre ships with eight hot-swappable LoRA domain adapters, each trained on 1,000 Claude-generated expert reasoning traces. Adapters load onto the base model at runtime with no restart required.
 
-### The Six Domains
+### The Eight Domains
 
 | Adapter | Size | Expertise |
 |---------|------|-----------|
@@ -230,6 +230,8 @@ Kwyre ships with six hot-swappable LoRA domain adapters, each trained on 1,000 C
 | `defense_intelligence` | ~150 MB | CUI handling, NIST 800-171/CMMC, MITRE ATT&CK, OSINT per ICD 203/206, OPSEC, SCRM |
 | `financial_trading` | ~150 MB | Algorithmic trading, VaR/CVaR, options pricing, Reg SCI/MiFID II, HFT microstructure, factor models |
 | `blockchain_crypto` | ~150 MB | On-chain tracing, MEV/sandwich attacks, RICO/BSA/AML, wallet clustering, rug pull detection, Tornado Cash analysis |
+| `sports_analytics` | ~150 MB | NFL play calling, blitz/coverage prediction, scouting reports, player movement profiling, playbook reverse engineering, situational game theory |
+| `relationship_matching` | ~150 MB | Big Five personality analysis, attachment style detection, love language identification, compatibility scoring, conversation generation, relationship coaching |
 
 ### How It Works
 
@@ -284,7 +286,7 @@ Adapters use PEFT LoRA — swapping takes ~2 seconds and requires no model reloa
 | **Per-layer adaptive sparsity** | Yes | Yes | Yes | N/A | No |
 | **32B / 72B model access** | — | — | Yes | Yes | Yes |
 | **RAG document ingestion** | Yes | Yes | Yes | Yes | Plugin |
-| **Anonymous payment (Monero)** | Yes | Yes | — | No | N/A |
+| **Speculative decoding** | Yes | Yes | Yes | N/A | Yes |
 | **Custom-trained models** | — | — | Yes | No | No |
 
 ---
@@ -299,7 +301,7 @@ Adapters use PEFT LoRA — swapping takes ~2 seconds and requires no model reloa
 | **Criminal defense attorneys** | Attorney-client privilege prohibits cloud AI on case materials | Local by default, air-gapped with upgrade |
 | **M&A law firms** | Associates uploading NDA-protected deal docs to ChatGPT is malpractice liability | Local inference with optional air-gap for auditable zero-outbound |
 | **Cleared defense contractors** | Sensitive unclassified data — can't use classified AI, can't use ChatGPT | Local, offline, no cleared facility required |
-| **Investigative journalists** | Source protection — subscription records are subpoenable | Monero payments, no account required, no email required |
+| **Investigative journalists** | Source protection — subscription records are subpoenable | Local inference, no account required, no telemetry |
 
 ### Cloud Products
 
@@ -488,7 +490,7 @@ QAT Training (v1.6 — Spike encoding):
 | **Cloud Pro** | Contact | 72B + all domain adapters, priority GPU, dedicated capacity |
 | **Custom Cloud LLM** | Contact | Domain-specific model training + dedicated hosted inference |
 
-**Local payment:** Credit card or Monero (XMR). No email required for Monero purchases. One-time — no subscription.
+**Local payment:** Credit card. One-time — no subscription.
 
 **Cloud payment:** Credit card. Monthly or annual billing.
 
@@ -724,7 +726,7 @@ We built Kwyre because we needed it ourselves. We cannot upload active federal i
 | Custom | `/custom.html` | Custom LLM service, industry orbs, request form |
 | Security | `/security.html` | Penetration testing, privacy guarantees, compliance |
 | Platform | `/platform.html` | Installation guides, deployment options, build pipeline |
-| Purchase | `/pay.html` | Monero payment, license verification, downloads |
+| Purchase | `/pay.html` | Payment, license verification, downloads |
 
 ---
 
