@@ -1190,7 +1190,7 @@ nav {
       <div>
         <div class="sh" style="text-align: left; margin-bottom: 24px;">
           <div class="sh-eyebrow">Choose Your Product</div>
-          <h2 style="font-size: 22px; font-weight: 700; letter-spacing: -0.3px;">Six ways to deploy Kwyre</h2>
+          <h2 style="font-size: 22px; font-weight: 700; letter-spacing: -0.3px;">Five ways to deploy Kwyre</h2>
         </div>
 
         <div style="display: flex; flex-direction: column; gap: 12px;">
@@ -1221,7 +1221,7 @@ nav {
             </div>
             <ul class="product-row-features">
               <li>Qwen3.5-4B Uncensored (0/465 refusals) &middot; 6 LoRA adapters hot-swap</li>
-              <li>Pipeline: Claude &#8594; QLoRA &#8594; GRPO &middot; All 4 backends</li>
+              <li>Pipeline: Claude &#8594; QLoRA &#8594; GRPO &middot; All 3 backends</li>
               <li>Offline installer &middot; SOC2/HIPAA/FINRA &middot; White-glove setup</li>
               <li>3 machine licenses &middot; Priority support &lt;24hr</li>
             </ul>
@@ -1237,7 +1237,7 @@ nav {
             </div>
             <ul class="product-row-features">
               <li>Uncensored (0/465 refusals) &middot; All 6 LoRA adapters hot-swap</li>
-              <li>Offline installer &middot; All 4 backends &middot; Full compliance</li>
+              <li>Offline installer &middot; All 3 backends &middot; Full compliance</li>
               <li>White-glove setup &middot; 5 machine licenses</li>
             </ul>
           </div>
@@ -1257,25 +1257,6 @@ nav {
             </ul>
           </div>
 
-          <div class="product-row" data-tier="mlx" onclick="selectTier('mlx')">
-            <div class="product-row-header">
-              <div>
-                <div class="product-row-name">Kwyre Apple Silicon</div>
-                <div class="product-row-price">$299</div>
-              </div>
-              <button class="price-select-btn" onclick="event.stopPropagation();selectTier('mlx')">Select</button>
-            </div>
-            <ul class="product-row-features">
-              <li>Native Metal acceleration (MLX)</li>
-              <li>M1/M2/M3/M4 optimized</li>
-              <li>8+ GB unified memory &middot; 5-15 tok/s</li>
-              <li>Download: 2-4 GB (MLX)</li>
-              <li>6-layer security stack</li>
-              <li>SSE streaming</li>
-              <li>1 machine license</li>
-            </ul>
-          </div>
-
           <div class="product-row" style="border-color: var(--green-dim);" onclick="window.location='custom.html'">
             <div class="product-row-header">
               <div>
@@ -1286,7 +1267,7 @@ nav {
             </div>
             <ul class="product-row-features">
               <li>Uncensored base &middot; Claude &#8594; QLoRA &#8594; GRPO pipeline</li>
-              <li>All 4 backends &middot; Hot-swap adapters &middot; Full compliance</li>
+              <li>All 3 backends &middot; Hot-swap adapters &middot; Full compliance</li>
             </ul>
           </div>
 
@@ -1427,19 +1408,6 @@ nav {
         </div>
 
         <div class="dl-grid">
-          <a class="dl-card" href="https://github.com/blablablasealsaresoft/kwyre-ai/releases/latest/download/kwyre-ai-setup-win64.exe" id="dlWindows">
-            <div class="dl-card-icon">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M0 3.449L9.75 2.1v9.451H0m10.949-9.602L24 0v11.4H10.949M0 12.6h9.75v9.451L0 20.699M10.949 12.6H24V24l-12.9-1.801"/></svg>
-            </div>
-            <div class="dl-card-info">
-              <div class="dl-card-platform">Windows</div>
-              <div class="dl-card-file">kwyre-ai-setup-win64.exe</div>
-            </div>
-            <div class="dl-card-arrow">
-              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            </div>
-          </a>
-
           <a class="dl-card" href="https://github.com/blablablasealsaresoft/kwyre-ai/releases/latest/download/kwyre-ai_amd64.deb" id="dlLinux">
             <div class="dl-card-icon">
               <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 0 0-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.368 1.884 1.564.585.151 1.22.107 1.766-.14 1.07-.469 1.466-1.467 1.473-2.593.014-.133.03-.267.012-.4.602-.869.838-1.867.568-2.935-.136-.535-.36-1.036-.601-1.467-.24-.468-.5-.869-.66-1.27-.12-.27-.18-.53-.27-.801a2.386 2.386 0 0 0-.253-.534c-.12-.198-.254-.267-.38-.399-.116-.135-.122-.267-.223-.467-.09-.199-.2-.399-.467-.535-.267-.135-.51-.062-.59.068-.08.132.05.335.18.469.1.065.18.2.27.4.07.135.13.27.13.467 0 .198-.092.398-.259.534-.264.135-.464.065-.662-.199-.2-.266-.397-.668-.598-1.068-.201-.398-.398-.864-.4-1.202 0-.2.015-.399.063-.598.079-.2.217-.398.407-.535.199-.135.399-.202.531-.202.204.003.381.135.559.202.154.07.31.135.46.202.12.07.24.132.36.199.12.068.24.135.36.132.12 0 .24-.068.36-.202l.12-.135c.1-.199.12-.398.11-.598-.06-.599-.33-1.069-.72-1.399-.39-.267-.848-.398-1.284-.332l.004-.003c.073-.401.054-.802-.068-1.135-.127-.335-.351-.535-.596-.668-.49-.267-.994-.333-1.489-.668-.493-.333-1.035-.869-1.694-1.4-.654-.468-1.355-.87-2.122-.802-1.193.104-1.724.786-2.102 1.468-.378.68-.612 1.334-.86 1.933-.246.601-.48 1.2-.94 1.533-.458.335-1.116.4-1.737.4-.12 0-.244 0-.368.001-.232.002-.47.006-.704.069l-.123.032c-.025-.534.078-1.469.502-3.069.466-1.202 1.202-2.535 2.12-3.669.68-.87.997-1.936 1.122-3.069.09-.798.05-1.6-.093-2.335-.123-.666-.284-1.334-.535-1.867-.259-.534-.586-.935-1.012-1.068-.027-.008-.054-.01-.082-.016z"/></svg>
@@ -1453,18 +1421,6 @@ nav {
             </div>
           </a>
 
-          <a class="dl-card" href="https://github.com/blablablasealsaresoft/kwyre-ai/releases/latest/download/kwyre-ai-macos.pkg" id="dlMacos">
-            <div class="dl-card-icon">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.8-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M13 3.5c.73-.83 1.94-1.46 2.94-1.5.13 1.17-.34 2.35-1.04 3.19-.69.85-1.83 1.51-2.95 1.42-.15-1.15.41-2.35 1.05-3.11z"/></svg>
-            </div>
-            <div class="dl-card-info">
-              <div class="dl-card-platform">macOS</div>
-              <div class="dl-card-file">kwyre-ai-macos.pkg</div>
-            </div>
-            <div class="dl-card-arrow">
-              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            </div>
-          </a>
         </div>
 
         <div class="dl-note">
@@ -1644,8 +1600,7 @@ const TIERS = {
   personal:     { label: 'Personal', price: 499 },
   professional: { label: 'Professional', price: 1499 },
   airgapped:    { label: 'Air-Gapped Kit', price: 3499 },
-  air:          { label: 'Air (CPU)', price: 349 },
-  mlx:          { label: 'Apple Silicon', price: 299 }
+  air:          { label: 'Air (CPU)', price: 349 }
 };
 let selectedTier = 'professional';
 
@@ -1983,7 +1938,7 @@ async function handleStripePayment() {
   const tierKey = params.get('tier') || 'professional';
   const tierData = {
     personal: 'Personal', professional: 'Professional', airgapped: 'Air-Gapped Kit',
-    air: 'Air (CPU)', mlx: 'Apple Silicon'
+    air: 'Air (CPU)'
   }[tierKey] || 'Kwyre';
 
   // Hide payment UI, show success

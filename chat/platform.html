@@ -42,7 +42,7 @@
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
 <title>Kwyre AI — Platform &amp; Deployment</title>
-<meta name="description" content="Kwyre platform support: Windows, Linux, macOS installers, Docker, Nuitka build pipeline, domain-specific fine-tuning, benchmark suite.">
+<meta name="description" content="Kwyre platform support: Linux installer, Docker, Nuitka build pipeline, AMD ROCm GPU acceleration, domain-specific fine-tuning, benchmark suite.">
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -500,9 +500,9 @@ nav {
 <div class="page-hero">
   <div class="wrap">
     <div class="page-hero-eyebrow reveal">Platform &amp; Deployment</div>
-    <h1 class="reveal reveal-d1">Every platform.<br><em>One command.</em></h1>
+    <h1 class="reveal reveal-d1">Linux. AMD ROCm.<br><em>One command.</em></h1>
     <p class="reveal reveal-d2">
-      One-click installers for Windows, Linux, and macOS. Docker, Helm, vLLM, Direct Python. Every product runs fully air-gapped — no cloud calls, no telemetry, no data leaves your machine. Fine-tuning pipeline and benchmark suite included.
+      Native Linux installer. Docker, Helm, vLLM, Direct Python. Every product runs fully air-gapped — no cloud calls, no telemetry, no data leaves your machine. Fine-tuning pipeline and benchmark suite included.
     </p>
   </div>
 </div>
@@ -514,7 +514,7 @@ nav {
   <div class="wrap">
     <div class="sh">
       <div class="sh-eyebrow">Choose Your Product</div>
-      <h2>Every product. Every platform.</h2>
+      <h2>Every product. Linux &amp; AMD ROCm.</h2>
       <p>Same security stack. Same API. All products air-gapped by design. Different hardware targets.</p>
     </div>
 
@@ -532,14 +532,14 @@ nav {
         <tbody>
           <tr>
             <td class="m-label">Kwyre Personal</td>
-            <td>NVIDIA GPU (RTX 4060+)</td>
+            <td>AMD GPU (RX 7900 XT+)</td>
             <td>Qwen3.5-4B Uncensored NF4 + 0.8B draft (3.3 GB) &mdash; 0/465 refusals</td>
             <td><code>docker compose up</code> or installer</td>
             <td><span class="m-y">✓ Always</span></td>
           </tr>
           <tr>
             <td class="m-label">Kwyre Professional</td>
-            <td>NVIDIA GPU (RTX 4090/3090)</td>
+            <td>AMD GPU (RX 7900 XTX / MI210)</td>
             <td>Qwen3.5-4B Uncensored + 6 LoRA hot-swap adapters + GRPO (3.3 GB)</td>
             <td><code>docker compose up</code> or installer</td>
             <td><span class="m-y">✓ Always</span></td>
@@ -552,15 +552,8 @@ nav {
             <td><span class="m-y">✓ Always</span></td>
           </tr>
           <tr>
-            <td class="m-label">Kwyre Apple Silicon</td>
-            <td>M1/M2/M3/M4 Mac</td>
-            <td>MLX format (KWYRE_MLX_PATH)</td>
-            <td><code>python server/serve_mlx.py</code></td>
-            <td><span class="m-y">✓ Always</span></td>
-          </tr>
-          <tr>
             <td class="m-label">vLLM Backend</td>
-            <td>NVIDIA GPU (multi-GPU supported)</td>
+            <td>AMD GPU (multi-GPU supported)</td>
             <td>Qwen3.5-4B Uncensored or custom &mdash; PagedAttention + continuous batching</td>
             <td><code>KWYRE_BACKEND=vllm python server/serve_vllm.py</code></td>
             <td><span class="m-y">✓ Always</span></td>
@@ -583,7 +576,7 @@ nav {
       </div>
       <div style="padding:16px;border:1px solid var(--border);border-radius:8px;background:var(--surface);">
         <div style="font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:2px;color:rgba(34,197,94,0.6);margin-bottom:8px;">PIPELINE + 4 BACKENDS</div>
-        <p style="font-size:12px;color:var(--text2);line-height:1.5;margin:0;">Claude &#8594; QLoRA &#8594; domain GRPO &#8594; LoRA export. 300 traces/domain. GPU: NF4/AWQ + Flash Attn 2 + speculative. vLLM: PagedAttention. CPU: llama.cpp. MLX: Apple Silicon.</p>
+        <p style="font-size:12px;color:var(--text2);line-height:1.5;margin:0;">Claude &#8594; QLoRA &#8594; domain GRPO &#8594; LoRA export. 300 traces/domain. GPU: NF4/AWQ + Flash Attn 2 + speculative (AMD ROCm). vLLM: PagedAttention. CPU: llama.cpp.</p>
       </div>
       <div style="padding:16px;border:1px solid var(--border);border-radius:8px;background:var(--surface);">
         <div style="font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:2px;color:rgba(245,158,11,0.6);margin-bottom:8px;">SPIKE QAT + RAG</div>
@@ -598,52 +591,25 @@ nav {
   <div class="wrap">
     <div class="sh">
       <div class="sh-eyebrow reveal">Installation &amp; Deployment</div>
-      <h2 class="reveal reveal-d1">Every platform. One command.</h2>
+      <h2 class="reveal reveal-d1">Linux native. One command.</h2>
       <p class="reveal reveal-d2">Choose your platform. We handle the rest.</p>
     </div>
 
     <h3 style="font-size: 16px; font-weight: 600; color: var(--text); margin: 32px 0 16px;">One-Click Installers</h3>
 
-    <div class="platform-grid reveal reveal-d3">
-      <div class="platform-card">
-        <div class="platform-icon">&#x1F5A5;</div>
-        <h3>Windows</h3>
-        <div class="plat-sub">Inno Setup &middot; .exe installer</div>
-        <p>PowerShell installer configures Windows Firewall, creates Start Menu shortcut, and sets up the inference server as a background service.</p>
-        <div class="plat-cmd">powershell -ExecutionPolicy Bypass `
-  -File installer\install_windows.ps1</div>
-        <ul class="plat-features">
-          <li>Windows Firewall rules (L2 enforcement)</li>
-          <li>Start Menu shortcut</li>
-          <li>Auto-detect NVIDIA GPU</li>
-        </ul>
-      </div>
-
+    <div class="platform-grid reveal reveal-d3" style="grid-template-columns: 1fr;">
       <div class="platform-card">
         <div class="platform-icon">&#x1F427;</div>
         <h3>Linux</h3>
-        <div class="plat-sub">Ubuntu/Debian &middot; .deb + AppImage</div>
-        <p>Installs to /opt/kwyre, configures systemd service, sets up iptables rules for process-level network lockdown, creates dedicated kwyre user.</p>
+        <div class="plat-sub">Ubuntu/Debian &middot; .deb + AppImage &middot; AMD ROCm</div>
+        <p>Installs to /opt/kwyre, configures systemd service, sets up iptables rules for process-level network lockdown, creates dedicated kwyre user. Auto-detects AMD GPUs via ROCm.</p>
         <div class="plat-cmd">sudo bash installer/install_linux.sh
 sudo systemctl start kwyre</div>
         <ul class="plat-features">
           <li>iptables rules (L2 kernel enforcement)</li>
           <li>systemd service management</li>
           <li>Dedicated kwyre system user</li>
-        </ul>
-      </div>
-
-      <div class="platform-card">
-        <div class="platform-icon">&#x1F34E;</div>
-        <h3>macOS</h3>
-        <div class="plat-sub">.pkg installer &middot; Apple Silicon native</div>
-        <p>Installs to /opt/kwyre, configures launchd service, sets up PF firewall rules. Native MLX backend support for M1/M2/M3/M4 chips.</p>
-        <div class="plat-cmd">sudo bash installer/install_macos.sh
-sudo launchctl start com.kwyre.ai.server</div>
-        <ul class="plat-features">
-          <li>PF firewall rules (L2 enforcement)</li>
-          <li>launchd service management</li>
-          <li>Apple Silicon / MLX auto-detect</li>
+          <li>Auto-detect AMD GPU (ROCm)</li>
         </ul>
       </div>
     </div>
@@ -674,16 +640,6 @@ python server/serve_local_4bit.py</div>
         <p>Uses llama.cpp via llama-cpp-python. Convert models to GGUF format or use pre-built GGUF from kwyre.com. Same API, same security stack.</p>
         <div class="deploy-cmd">KWYRE_GGUF_PATH=./models/kwyre-4b.gguf \
   python server/serve_cpu.py</div>
-      </div>
-
-      <div class="deploy-card">
-        <h3>MLX (Apple Silicon)</h3>
-        <div class="deploy-sub">Native M1/M2/M3/M4 acceleration</div>
-        <p>Uses mlx-lm for Metal-optimized inference. Convert models to MLX format with included converter. Unified memory architecture.</p>
-        <div class="deploy-cmd">python model/convert_mlx.py \
-  --model Qwen/Qwen3-4B \
-  --output ./models/kwyre-4b-mlx
-python server/serve_mlx.py</div>
       </div>
 
       <div class="deploy-card">
@@ -744,9 +700,9 @@ python server/serve_mlx.py</div>
       <div class="build-cmd">pip install nuitka ordered-set zstandard
 
 python build.py all          # Compile + package + installer
-python build.py compile      # Nuitka &rarr; kwyre-server[.exe]
+python build.py compile      # Nuitka &rarr; kwyre-server
 python build.py package      # Stage data files
-python build.py installer    # Platform installer
+python build.py installer    # Linux installer
 python build.py clean        # Clean artifacts</div>
 
       <table class="output-table" style="margin-top:24px;">
@@ -754,9 +710,7 @@ python build.py clean        # Clean artifacts</div>
           <tr><th>Platform</th><th>Format</th><th>Installer Type</th></tr>
         </thead>
         <tbody>
-          <tr><td>Windows</td><td>.exe</td><td>Inno Setup</td></tr>
           <tr><td>Linux</td><td>.deb / .AppImage</td><td>Debian package + AppImage</td></tr>
-          <tr><td>macOS</td><td>.pkg</td><td>pkgbuild (Xcode CLI)</td></tr>
         </tbody>
       </table>
     </div>
@@ -769,7 +723,7 @@ python build.py clean        # Clean artifacts</div>
 <div class="cta-bar">
   <div class="wrap">
     <h2>Ready to deploy.</h2>
-    <p>3.3 GB download. One command. Every platform. Six layers of security.</p>
+    <p>3.3 GB download. One command. Linux native. Six layers of security.</p>
     <div class="cta-actions">
       <a href="pay.html" class="btn btn-primary">Purchase Kwyre</a>
       <a href="security.html" class="btn btn-ghost">View Security</a>
