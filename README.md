@@ -47,10 +47,10 @@ Kwyre targets **Linux x86_64**, **Windows x86_64**, **macOS** (Apple Silicon and
 
 | Config | GPU | VRAM | RAM | Speed | Download |
 |--------|-----|------|-----|-------|----------|
-| **Personal (4B GPU)** | AMD RX 7900 XT / RX 7900 XTX | 8 GB+ | 16 GB | 7–14 tok/s | 3.3 GB |
-| **Professional (9B GPU)** | AMD MI210 / MI250 / MI300 | 16 GB+ | 32 GB | 3–5 tok/s | 7.6 GB |
+| **Personal (4B GPU)** | AMD RX 7900 XT+ / NVIDIA RTX 3060+ / Apple M1+ | 8 GB+ | 16 GB | 7–14 tok/s | 3.3 GB |
+| **Professional (9B GPU)** | AMD MI210+ / NVIDIA RTX 4090 / A100 / H100 / Apple M2 Pro+ | 16 GB+ | 32 GB | 3–8 tok/s | 7.6 GB |
 | **Kwyre Air (CPU)** | None | — | 8 GB+ | 2–8 tok/s | 2–4 GB |
-| **Apple Silicon (MLX)** | None (M1/M2/M3/M4) | — | 8 GB+ unified | 5–15 tok/s | 2–4 GB |
+| **Apple Silicon (MLX)** | Apple M1/M2/M3/M4 (Metal MPS + MLX) | — | 8 GB+ unified | 5–15 tok/s | 2–4 GB |
 
 #### Linux Requirements
 
