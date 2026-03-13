@@ -255,7 +255,7 @@ Adapters use PEFT LoRA — swapping takes ~2 seconds and requires no model reloa
 
 | Model | Size | MMLU-Pro | GPQA Diamond | GSM8K | Context | Runs Locally |
 |-------|------|----------|-------------|-------|---------|-------------|
-| **Kwyre Professional** | 9B (custom-trained) | ~82.5 | ~81.7 | 95.0 | 32K | Yes (air-gapped) |
+| **Kwyre Professional** | 9B (custom-trained) | ~82.5 | ~81.7 | 95.0 | 32K | Yes (local) |
 | GPT-4o | ~200B+ | ~85 | ~80 | ~95 | 128K | No (cloud only) |
 | Claude Sonnet | ~70B+ | ~84 | ~78 | ~93 | 200K | No (cloud only) |
 | DeepSeek R1 7B | 7B | 82.4 | — | 91.2 | 128K | Yes (no security) |
@@ -690,9 +690,24 @@ The model weights (Qwen3.5-4B, Qwen3.5-9B, Qwen3.5-0.8B base) are licensed under
 
 ## Built By
 
-Mint Rail LLC — blockchain forensics, cryptocurrency fraud investigation, OSINT analysis.
+**Mint Rail LLC** — AI infrastructure, blockchain forensics, and applied machine learning.
 
-We built this because we needed it ourselves. We cannot upload active federal investigation evidence to OpenAI. Neither can you.
+Kwyre is one product in the Mint Rail family. Each product is a standalone platform with its own brand, built on shared ML infrastructure:
+
+| Product | Domain | Description |
+|---------|--------|-------------|
+| **Kwyre** | Secure local AI | Air-gappable inference for regulated industries (this repo) |
+| **QuantEdge** | Quantitative finance | AI-powered factor modeling, options pricing, and portfolio optimization for quant desks |
+| **LabMind** | Scientific research | Literature synthesis, experiment design, and hypothesis generation for researchers |
+| **DentAI** | Dental practice | Treatment planning, radiograph analysis, and insurance coding for dental professionals |
+| **CodeForge** | Software engineering | Codebase-aware AI with architecture analysis, code review, and refactoring for engineering teams |
+| **TaxShield** | Tax strategy | Tax planning optimization, deduction analysis, and compliance for accountants and firms |
+| **LaunchPad** | Job placement | AI-powered resume optimization, interview coaching, and job-candidate matching platform |
+| **SoulSync** | Dating & relationships | AI-driven compatibility scoring, personality analysis, and soulmate matching platform |
+
+Each product has its own repository, website, and documentation. Visit [mintrail.com](https://mintrail.com) for the full portfolio.
+
+We built Kwyre because we needed it ourselves. We cannot upload active federal investigation evidence to OpenAI. Neither can you.
 
 ---
 
