@@ -9,6 +9,7 @@
 [![Security](https://img.shields.io/badge/security-6--layer%20stack-red.svg)]()
 [![Docker](https://img.shields.io/badge/deploy-docker--compose%20up-blue.svg)]()
 [![Status](https://img.shields.io/badge/status-v1.5%20production-brightgreen.svg)]()
+[![E2E](https://img.shields.io/badge/e2e-29%2F29%20×%204%20backends-brightgreen.svg)]()
 [![Pentest](https://img.shields.io/badge/pentest-47%2F47%20resolved-brightgreen.svg)]()
 [![Streaming](https://img.shields.io/badge/SSE-streaming-blue.svg)]()
 [![GRPO](https://img.shields.io/badge/training-GRPO%20%2B%20distillation-purple.svg)]()
@@ -370,11 +371,12 @@ graph LR
 
 ### Multi-Backend Support
 
-All three backends share the same `security_core.py` — identical security stack, identical API shape, identical HTML frontend.
+All four backends share the same `security_core.py` — identical security stack, identical API shape, identical HTML frontend.
 
 | Backend | File | Hardware | Notes |
 |---------|------|----------|-------|
 | GPU | `serve_local_4bit.py` | NVIDIA CUDA | NF4/AWQ + speculative + SpikeServe + streaming + adapters |
+| vLLM | `serve_vllm.py` | NVIDIA CUDA | PagedAttention · continuous batching · multi-GPU · SSE streaming |
 | CPU (Kwyre Air) | `serve_cpu.py` | Any CPU | llama.cpp · GGUF · SSE streaming |
 | Apple Silicon | `serve_mlx.py` | M1/M2/M3/M4 | Metal · MLX · SSE streaming |
 
@@ -856,6 +858,26 @@ kwyre/
 │   └── blockchain-crypto-4b/
 ├── training-data/kwyre-traces/ # 6,000 Claude reasoning traces
 └── logs/                       # Training logs
+```
+
+---
+
+## E2E Test Results
+
+All products verified on DigitalOcean H100 80GB GPU Droplet (Ubuntu 22.04, CUDA 12.4, Docker Compose v5).
+
+| Product | Backend | Model | Install Method | Tests | Result |
+|---------|---------|-------|---------------|-------|--------|
+| **Kwyre Personal** | Docker (GPU) | Qwen3-4B NF4 | `docker compose up` | 29/29 | **PASSED** |
+| **Kwyre Professional** | Docker (GPU) | Qwen3.5-9B NF4 | `docker compose up` | 29/29 | **PASSED** |
+| **Kwyre Air** | Direct Python (CPU) | Qwen2.5-3B GGUF | `python server/serve_cpu.py` | 29/29 | **PASSED** |
+| **Kwyre Apple Silicon** | Direct Python (MLX) | — | `python server/serve_mlx.py` | — | **SKIP** (requires macOS + M-series) |
+| **vLLM Backend** | Direct Python (GPU) | Qwen3-4B | `KWYRE_BACKEND=vllm python server/serve_vllm.py` | 29/29 | **PASSED** |
+
+**Test suite:** `tests/test_e2e.py` — 29 tests across 9 classes covering health, authentication, inference, input validation, session management, audit, security headers, and routing.
+
+```bash
+python -m unittest tests.test_e2e -v
 ```
 
 ---

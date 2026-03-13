@@ -266,7 +266,8 @@ class VllmChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
 
         if hasattr(tokenizer, "apply_chat_template"):
             prompt = tokenizer.apply_chat_template(
-                augmented, tokenize=False, add_generation_prompt=True
+                augmented, tokenize=False, add_generation_prompt=True,
+                enable_thinking=False,
             )
         else:
             prompt = "\n".join(f"<|{m['role']}|>\n{m['content']}" for m in augmented)
@@ -442,6 +443,7 @@ class VllmChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             health = {"status": "ok"}
             if auth_user:
                 health.update({
+                    "product": f"{ACTIVE_TIER['name']}-vllm",
                     "model": f"{ACTIVE_TIER['name']}-vllm",
                     "base": MODEL_ID.split("/")[-1],
                     "backend": "vllm",
