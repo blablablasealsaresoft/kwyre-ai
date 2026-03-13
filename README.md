@@ -1,7 +1,7 @@
 # Kwyre AI
-### Air-Gapped Inference for Analysts Who Cannot Afford a Breach
+### Local-First AI for Analysts Who Cannot Afford a Breach
 
-> The only local AI that protects your data **even if your machine is compromised.**
+> The only local AI that keeps your data on your hardware — with optional air-gapping for zero-compromise environments.
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Model](https://img.shields.io/badge/model-Qwen3.5--4B%20%2B%209B-orange.svg)](https://huggingface.co/Qwen)
@@ -26,13 +26,16 @@
 
 ## What Is Kwyre
 
-Kwyre is a locally-deployed AI inference system built for professionals who work with data that **cannot leave the room** — active federal investigations, attorney-client privileged documents, regulated financial records, classified-adjacent work product, and sensitive compliance analysis.
+Kwyre is a local-first AI inference system built for professionals who work with sensitive data — active federal investigations, attorney-client privileged documents, regulated financial records, classified-adjacent work product, and compliance analysis.
 
-It runs on **Linux x86_64** (AMD ROCm), **Windows x86_64** (NVIDIA CUDA), **macOS** (Apple Silicon MLX / Metal MPS), and **FreeBSD** (NVIDIA CUDA), shipping a full predictive analytics engine (VaR, CVaR, time series forecasting, pattern analysis), adaptive speculative decoding, six hot-swappable domain adapters, and a cryptographic security stack — all executing entirely on your hardware with zero network egress.
+It runs on **Linux x86_64** (AMD ROCm), **Windows x86_64** (NVIDIA CUDA), **macOS** (Apple Silicon MLX / Metal MPS), and **FreeBSD** (NVIDIA CUDA), shipping a full predictive analytics engine (VaR, CVaR, time series forecasting, pattern analysis), adaptive speculative decoding, and six hot-swappable domain adapters — all executing on your hardware.
 
-It is not a hobbyist local model runner. It is a **certified, auditable, breach-resistant AI appliance** with cryptographic session wiping, intrusion detection, and a compliance documentation package built in.
+For teams that need cloud-scale models, **Kwyre Cloud** provides access to 32B and 72B parameter models running on our GPU clusters (Lambda, DigitalOcean H100s) with dramatically improved reasoning quality and longer context windows.
 
-**Your queries never leave your machine. Not to a cloud. Not to us. Not to anyone.**
+For the highest security environments, the optional **Air-Gapped Kit** upgrade adds process-level network lockdown, intrusion detection with auto-wipe, dependency and model integrity verification, and a full compliance documentation package — turning any local Kwyre installation into a certified, auditable, breach-resistant appliance.
+
+**Local products:** Your queries never leave your machine.
+**Cloud products:** Your queries stay on our infrastructure — no third-party AI providers.
 
 ---
 
@@ -96,21 +99,62 @@ Kwyre targets **Linux x86_64**, **Windows x86_64**, **macOS** (Apple Silicon and
 
 ---
 
-## Five Products, One Mission
+## Products
 
-Every Kwyre product runs 100% locally with zero data leaving your machine.
+### Local Inference
 
-| Product | Model | Hardware | VRAM / RAM | Speed | Price | Identity |
-|---------|-------|----------|-----------|-------|-------|----------|
-| **Kwyre Personal** | Qwen3.5-4B + 0.8B draft | AMD ROCm GPU (RX 7900 XT+) | 4.1 GB VRAM | 7–14 tok/s | $299 | Speed-optimized with speculative decoding, SpikeServe, RAG, predictive analytics, **1 domain adapter** |
-| **Kwyre Professional** | Qwen3.5-9B + 0.8B draft | AMD ROCm GPU (MI210/MI250/MI300) | 7.5 GB VRAM | 3–5 tok/s | $799 | Domain specialist — Claude-distilled reasoning + GRPO emergent problem-solving, full analytics engine, **all 6 domain adapters** |
-| **Kwyre Air** | Any GGUF model | Any CPU | 8+ GB RAM | 2–8 tok/s | $299 | Lightweight portable — runs on any hardware, no GPU required |
-| **Kwyre (Apple Silicon)** | Any MLX model | M1/M2/M3/M4 Mac | 8+ GB unified | 5–15 tok/s | $299 | Native Metal acceleration on Apple Silicon, zero ROCm dependency |
-| **Custom LLM** | Domain-specific (we train) | Any (we configure) | Varies | Varies | Contact | Turnkey appliance or self-hosted — legal, financial, crypto, insurance, defense, healthcare |
+Every local product runs 100% on your hardware. No data leaves your machine.
 
-**All products share:** 6-layer security stack, OpenAI-compatible API, SSE streaming, cryptographic session wipe, intrusion detection, offline license validation, predictive analytics engine.
+| Product | Model | Hardware | VRAM / RAM | Speed | Price |
+|---------|-------|----------|-----------|-------|-------|
+| **Kwyre Personal** | Qwen3.5-4B + 0.8B draft | Any supported GPU (AMD ROCm, NVIDIA CUDA, Apple MLX) | 4–8 GB VRAM | 7–14 tok/s | $299 |
+| **Kwyre Professional** | Qwen3.5-9B + 0.8B draft | Any supported GPU (AMD ROCm, NVIDIA CUDA, Apple MLX) | 8–16 GB VRAM | 3–8 tok/s | $799 |
+| **Kwyre Air** | Any GGUF model | Any CPU | 8+ GB RAM | 2–8 tok/s | $299 |
+| **Kwyre (Apple Silicon)** | Any MLX model | M1/M2/M3/M4 Mac | 8+ GB unified | 5–15 tok/s | $299 |
 
-**GPU products add:** Adaptive speculative decoding, SpikeServe with AdaptiveK per-layer optimization, per-session KV cache, RAG document ingestion, multi-user RBAC, Flash Attention 2, hot-swap domain adapters.
+**Personal** — Speed-optimized with speculative decoding, SpikeServe, RAG, predictive analytics, and **1 domain adapter** of choice.
+
+**Professional** — Domain specialist with Claude-distilled reasoning, GRPO emergent problem-solving, full analytics engine, and **all 6 domain adapters**.
+
+**Air** — Lightweight portable CPU inference. Runs on any hardware, no GPU required.
+
+**Apple Silicon** — Native Metal MPS / MLX acceleration on M-series Macs.
+
+### Cloud Inference
+
+Kwyre Cloud runs on our GPU clusters (Lambda, DigitalOcean H100s) with significantly larger models than local deployment supports. Your data stays on our infrastructure — no third-party cloud AI providers involved.
+
+| Product | Model | Infrastructure | Context | Speed | Price |
+|---------|-------|---------------|---------|-------|-------|
+| **Kwyre Cloud** | Qwen3.5-32B / 72B | H100 80GB GPU cluster | 128K tokens | 20–40 tok/s | Subscription |
+| **Kwyre Cloud Pro** | Qwen3.5-72B + domain adapters | Multi-H100 cluster | 128K tokens | 15–30 tok/s | Subscription |
+| **Custom Cloud LLM** | Domain-specific (we train + host) | Dedicated GPU allocation | Configurable | Varies | Contact |
+
+**Cloud** — Access to 32B and 72B parameter models with dramatically improved reasoning, longer context, and higher throughput. Same OpenAI-compatible API as local products.
+
+**Cloud Pro** — Full 72B model with all 6 domain adapters, priority GPU allocation, and dedicated inference capacity.
+
+**Custom Cloud LLM** — We train a domain-specific model on your data and host it on dedicated GPU infrastructure. Turnkey solution for legal, financial, crypto, insurance, defense, and healthcare.
+
+### Air-Gapped Upgrade
+
+Air-gapping is an **optional security upgrade** available for any local product. It is not included by default.
+
+| Upgrade | Price | What It Adds |
+|---------|-------|-------------|
+| **Air-Gapped Kit** | $1,499 one-time | Process-level network lockdown (iptables / Windows Firewall / PF), intrusion detection + auto-wipe, dependency integrity verification, model weight integrity, full compliance documentation package |
+
+Without the Air-Gapped Kit, local products run on `127.0.0.1` with RAM-only sessions and cryptographic session wipe, but do **not** include process-level outbound blocking, intrusion detection, or automated wipe-on-compromise.
+
+### Shared Features
+
+**All local products:** OpenAI-compatible API, SSE streaming, RAM-only session storage, cryptographic session wipe, offline license validation, predictive analytics engine.
+
+**GPU local products add:** Adaptive speculative decoding, SpikeServe with AdaptiveK per-layer optimization, per-session KV cache, RAG document ingestion, multi-user RBAC, Flash Attention 2, hot-swap domain adapters.
+
+**Cloud products:** OpenAI-compatible API, SSE streaming, predictive analytics engine, domain adapters, multi-user access, SLA-backed uptime.
+
+**Air-Gapped Kit adds:** Process-level network lockdown, dependency integrity (SHA-256 manifest), model weight verification, intrusion detection + auto-wipe, full compliance documentation (SOC2, HIPAA, FINRA, ITAR).
 
 ---
 
@@ -222,54 +266,72 @@ Adapters use PEFT LoRA — swapping takes ~2 seconds and requires no model reloa
 
 ### Competitive Feature Matrix
 
-| Capability | Kwyre | ChatGPT | Ollama | LM Studio | Jan.ai | LocalAI |
-|-----------|-------|---------|--------|-----------|--------|---------|
-| **Fully local (zero network)** | Yes | No | Yes | Yes | Yes | Yes |
-| **6-layer active security** | Yes | No | No | No | No | No |
-| **Predictive analytics (VaR/CVaR)** | Yes | No | No | No | No | No |
-| **Process-level outbound block** | Yes | No | No | No | No | No |
-| **Intrusion detection + auto-wipe** | Yes | No | No | No | No | No |
-| **Cryptographic session wipe** | Yes | No | No | No | No | No |
-| **RAM-only storage (never disk)** | Yes | No | No | No | No | No |
-| **Dependency integrity (SHA-256)** | Yes | No | No | No | No | No |
-| **Model weight verification** | Yes | No | No | No | No | No |
-| **Hot-swap domain adapters** | Yes | No | No | No | No | No |
-| **Adapter stacking (weighted merge)** | Yes | No | No | No | No | No |
-| **Adaptive speculative decoding** | Yes | N/A | No | No | No | No |
-| **Per-layer adaptive sparsity** | Yes | N/A | No | No | No | No |
-| **Compliance documentation** | Yes | No | No | No | No | No |
-| **SOC2 / HIPAA / FINRA ready** | Yes | Partial | No | No | No | No |
-| **Anonymous payment (Monero)** | Yes | No | N/A | N/A | N/A | N/A |
-| **Custom-trained for forensics** | Yes | No | No | No | No | No |
-| **RAG document ingestion** | Yes | Yes | Plugin | Plugin | Plugin | Plugin |
-| **Speculative decoding** | Yes | N/A | Yes | Yes | No | No |
+| Capability | Kwyre (Base) | Kwyre (Air-Gapped) | Kwyre Cloud | ChatGPT | Ollama |
+|-----------|-------------|-------------------|-------------|---------|--------|
+| **Fully local (zero network)** | Yes | Yes | No (our infra) | No | Yes |
+| **RAM-only storage (never disk)** | Yes | Yes | N/A | No | No |
+| **Cryptographic session wipe** | Yes | Yes | N/A | No | No |
+| **Process-level outbound block** | — | Yes | N/A | No | No |
+| **Intrusion detection + auto-wipe** | — | Yes | N/A | No | No |
+| **Dependency integrity (SHA-256)** | — | Yes | N/A | No | No |
+| **Model weight verification** | — | Yes | N/A | No | No |
+| **Compliance documentation** | — | Yes | Yes | No | No |
+| **SOC2 / HIPAA / FINRA ready** | — | Yes | Partial | Partial | No |
+| **Predictive analytics (VaR/CVaR)** | Yes | Yes | Yes | No | No |
+| **Hot-swap domain adapters** | Yes | Yes | Yes | No | No |
+| **Adapter stacking (weighted merge)** | Yes | Yes | Yes | No | No |
+| **Adaptive speculative decoding** | Yes | Yes | Yes | N/A | No |
+| **Per-layer adaptive sparsity** | Yes | Yes | Yes | N/A | No |
+| **32B / 72B model access** | — | — | Yes | Yes | Yes |
+| **RAG document ingestion** | Yes | Yes | Yes | Yes | Plugin |
+| **Anonymous payment (Monero)** | Yes | Yes | — | No | N/A |
+| **Custom-trained models** | — | — | Yes | No | No |
 
 ---
 
 ## Who It's For
 
+### Local Products
+
 | Buyer | Pain Point | Why Kwyre |
 |-------|-----------|-----------|
-| **Forensic investigators** | Cannot upload $3B fraud evidence to ChatGPT during an active federal case | Full local inference, zero telemetry, no chain-of-custody risk |
-| **Criminal defense attorneys** | Attorney-client privilege prohibits cloud AI on case materials | Air-gapped by architecture, not policy |
-| **M&A law firms** | Associates uploading NDA-protected deal docs to ChatGPT is malpractice liability | Verified zero outbound connections, auditable |
-| **Reinsurance / insurance underwriters** | Actuarial models, treaty structures, cedent PII cannot touch cloud APIs | Compliance documentation package + built-in VaR/CVaR analytics |
+| **Forensic investigators** | Cannot upload $3B fraud evidence to ChatGPT during an active federal case | Local inference, zero telemetry, no chain-of-custody risk |
+| **Criminal defense attorneys** | Attorney-client privilege prohibits cloud AI on case materials | Local by default, air-gapped with upgrade |
+| **M&A law firms** | Associates uploading NDA-protected deal docs to ChatGPT is malpractice liability | Local inference with optional air-gap for auditable zero-outbound |
 | **Cleared defense contractors** | Sensitive unclassified data — can't use classified AI, can't use ChatGPT | Local, offline, no cleared facility required |
-| **Forensic accountants** | SEC whistleblower cases, active DOJ investigations — evidence integrity is paramount | RAM-only storage, cryptographic wipe on session end |
 | **Investigative journalists** | Source protection — subscription records are subpoenable | Monero payments, no account required, no email required |
+
+### Cloud Products
+
+| Buyer | Pain Point | Why Kwyre Cloud |
+|-------|-----------|----------------|
+| **Reinsurance / insurance underwriters** | Need 72B-class reasoning for actuarial models but can't use OpenAI | Kwyre Cloud with VaR/CVaR analytics, no third-party AI |
+| **Forensic accountants** | SEC whistleblower cases need better-than-9B reasoning quality | 32B/72B models on dedicated GPU clusters |
+| **Law firms (non-classified)** | Want AI-assisted contract review with better quality than 4B/9B local models | Cloud Pro with legal domain adapter on 72B |
+| **Financial trading desks** | Need fast, high-quality inference for real-time analysis | Cloud with priority GPU allocation, low-latency API |
+
+### Air-Gapped Kit (Security Upgrade)
+
+| Buyer | Pain Point | Why Air-Gap |
+|-------|-----------|------------|
+| **Active federal investigations** | Evidence integrity — any outbound connection contaminates chain of custody | Process-level network lockdown, intrusion detection, auto-wipe |
+| **HIPAA-regulated healthcare** | PHI exposure is a federal violation | Dependency integrity, model verification, SOC2/HIPAA compliance docs |
+| **Defense / ITAR-adjacent work** | CUI handling requires documented zero-egress | Full 6-layer security stack with audit package |
 
 ---
 
-## Security Stack — 6 Layers
+## Security Stack
 
-| Layer | Name | What It Does | Implementation |
-|-------|------|-------------|----------------|
-| **1** | Network Isolation | Server binds to `127.0.0.1` only — physically unreachable from any network at the OS level | `KWYRE_BIND_HOST=127.0.0.1`; Docker binds `127.0.0.1:8000:8000` on host |
-| **2** | Process-Level Network Lockdown | All outbound traffic blocked for the Kwyre process except loopback | `iptables` (Linux) / Windows Firewall (Windows) / PF (macOS / FreeBSD) rules scoped to dedicated `kwyre` system user — even a compromised server process cannot phone home |
-| **3** | Dependency Integrity | SHA-256 hash manifest of every installed Python package, verified at startup | Tampered `torch`, `transformers`, or any dependency → immediate abort before a single token is generated |
-| **4** | Model Weight Integrity | SHA-256 hashes of all model config files verified at every startup | Tampered or replaced model weights → immediate process abort |
-| **5** | Secure RAM Session Storage | Conversations exist only in RAM — never written to disk under any circumstance | 256-bit random session key; `secure_wipe()` overwrites all content with random bytes on session end; 1-hour idle expiry |
-| **6** | Intrusion Detection + Auto-Wipe | Background watchdog scans every 5 seconds for unexpected outbound connections and analysis/injection tools | Two consecutive violations → all sessions wiped, KV cache destroyed, server process terminated |
+All local products ship with baseline security (Layers 1 and 5). The **Air-Gapped Kit** upgrade activates the full 6-layer stack (Layers 2–4, 6).
+
+| Layer | Name | Included In | What It Does |
+|-------|------|------------|-------------|
+| **1** | Network Isolation | All local products | Server binds to `127.0.0.1` only — physically unreachable from any network at the OS level |
+| **2** | Process-Level Network Lockdown | Air-Gapped Kit | All outbound traffic blocked for the Kwyre process except loopback — `iptables` (Linux) / Windows Firewall / PF (macOS / FreeBSD) |
+| **3** | Dependency Integrity | Air-Gapped Kit | SHA-256 hash manifest of every installed Python package, verified at startup — tampered dependency → immediate abort |
+| **4** | Model Weight Integrity | Air-Gapped Kit | SHA-256 hashes of all model config files verified at every startup — tampered weights → immediate abort |
+| **5** | Secure RAM Session Storage | All local products | Conversations exist only in RAM — 256-bit random session key, `secure_wipe()` on session end, 1-hour idle expiry |
+| **6** | Intrusion Detection + Auto-Wipe | Air-Gapped Kit | Background watchdog scans every 5s for unexpected outbound connections — two violations → all sessions wiped, process terminated |
 
 ---
 
@@ -408,13 +470,27 @@ QAT Training (v1.6 — Spike encoding):
 
 ## Pricing
 
+### Local Licenses (One-Time)
+
 | License | Price | Machines | Includes |
 |---------|-------|----------|----------|
-| **Personal** | $299 one-time | 1 | Base model + 1 domain adapter of choice + compliance doc |
-| **Professional** | $799 one-time | 3 | Base model + all 6 domain adapters + priority support + 9B model |
-| **Air-Gapped Kit** | $1,499 one-time | 5 | Everything + offline adapter installer + full audit package |
+| **Personal** | $299 | 1 | Qwen3.5-4B model + 1 domain adapter of choice |
+| **Professional** | $799 | 3 | Qwen3.5-9B model + all 6 domain adapters + priority support |
+| **Air** | $299 | 1 | GGUF CPU inference engine |
+| **Apple Silicon** | $299 | 1 | MLX inference engine |
+| **Air-Gapped Kit** | $1,499 | 5 | Security upgrade for any local product — network lockdown, intrusion detection, compliance docs, offline adapter installer |
 
-**Payment:** Credit card or Monero (XMR). No email required for Monero purchases. One-time — no subscription.
+### Cloud Subscriptions
+
+| Plan | Price | Includes |
+|------|-------|----------|
+| **Cloud** | Contact | 32B/72B model access, API key, usage-based billing |
+| **Cloud Pro** | Contact | 72B + all domain adapters, priority GPU, dedicated capacity |
+| **Custom Cloud LLM** | Contact | Domain-specific model training + dedicated hosted inference |
+
+**Local payment:** Credit card or Monero (XMR). No email required for Monero purchases. One-time — no subscription.
+
+**Cloud payment:** Credit card. Monthly or annual billing.
 
 **Adapter delivery:** ~150 MB per adapter, downloaded from kwyre.com CDN alongside base model. Versioned updates delivered silently via `GET /v1/adapter/check-update`.
 
@@ -536,9 +612,10 @@ kwyre/
 - [x] FreeBSD amd64 + NVIDIA CUDA support — `.txz` package + portable tarball, PF firewall isolation, rc.d service management
 
 **v1.7 (Planned)**
-- [ ] Credit card payment integration
+- [ ] Kwyre Cloud launch — 32B/72B models on Lambda/DO H100 GPU clusters, API access, subscription billing
+- [ ] Credit card payment integration (local + cloud)
 - [ ] Adapter marketplace — community-trained adapters with verified metadata + revenue sharing
-- [ ] Custom LLM service launch — turnkey domain-specific model delivery
+- [ ] Custom Cloud LLM service — domain-specific model training + dedicated hosted inference
 
 ---
 
