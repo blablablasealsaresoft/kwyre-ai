@@ -3,335 +3,562 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaxShield — AI-Powered Tax Strategy</title>
+<title>TaxShield — AI Tax Strategy</title>
 <style>
-  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#080c12;--bg2:#0d1420;--bg3:#111827;--surface:#151d2e;
+  --border:rgba(148,163,184,.1);--border-h:rgba(148,163,184,.2);
+  --green:#22c55e;--green-d:#16a34a;--green-glow:rgba(34,197,94,.12);
+  --red:#ef4444;--amber:#f59e0b;--white:#f1f5f9;--gray:#94a3b8;--gray-d:#64748b;
+}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--white);line-height:1.5;min-height:100vh}
+a{color:var(--green);text-decoration:none}
 
-  :root {
-    --navy: #0b1a2e;
-    --navy-light: #122240;
-    --green: #22c55e;
-    --green-dark: #16a34a;
-    --green-glow: rgba(34,197,94,.15);
-    --white: #f8fafc;
-    --gray: #94a3b8;
-    --gray-dark: #475569;
-    --card-bg: #0f2035;
-    --border: rgba(148,163,184,.12);
-  }
+/* Header */
+header{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2)}
+.logo{display:flex;align-items:center;gap:.5rem;font-size:1.2rem;font-weight:700}
+.logo svg{flex-shrink:0}
+.conn{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--gray-d)}
+.conn-dot{width:7px;height:7px;border-radius:50%;background:var(--red)}
+.conn-dot.ok{background:var(--green)}
 
-  body {
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-    background: var(--navy);
-    color: var(--white);
-    line-height: 1.6;
-    overflow-x: hidden;
-  }
+/* Tabs */
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg2);overflow-x:auto}
+.tab{padding:.7rem 1.2rem;font-size:.85rem;font-weight:600;color:var(--gray-d);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s}
+.tab:hover{color:var(--gray)}
+.tab.active{color:var(--green);border-bottom-color:var(--green)}
 
-  a { color: var(--green); text-decoration: none; }
+/* Layout */
+.panels{max-width:1100px;margin:0 auto;padding:1.5rem}
+.panel{display:none}
+.panel.active{display:block}
+.panel-title{font-size:1.3rem;font-weight:700;margin-bottom:.3rem}
+.panel-desc{color:var(--gray-d);font-size:.88rem;margin-bottom:1.5rem}
 
-  /* ── Nav ─────────────────────────────────────── */
-  nav {
-    display: flex; align-items: center; justify-content: space-between;
-    max-width: 1200px; margin: 0 auto; padding: 1.5rem 2rem;
-  }
-  .logo {
-    display: flex; align-items: center; gap: .6rem;
-    font-size: 1.35rem; font-weight: 700; letter-spacing: -.02em;
-  }
-  .logo svg { flex-shrink: 0; }
-  .nav-links { display: flex; gap: 2rem; list-style: none; }
-  .nav-links a { color: var(--gray); font-size: .95rem; transition: color .2s; }
-  .nav-links a:hover { color: var(--white); }
-  .btn {
-    display: inline-flex; align-items: center; gap: .4rem;
-    padding: .65rem 1.4rem; border-radius: 8px; font-weight: 600;
-    font-size: .95rem; border: none; cursor: pointer; transition: all .2s;
-  }
-  .btn-primary { background: var(--green); color: var(--navy); }
-  .btn-primary:hover { background: var(--green-dark); }
-  .btn-outline { background: transparent; color: var(--green); border: 1px solid var(--green); }
-  .btn-outline:hover { background: var(--green-glow); }
+/* Forms */
+.form-row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
+.form-group{display:flex;flex-direction:column;gap:.3rem;flex:1;min-width:180px}
+.form-group label{font-size:.78rem;color:var(--gray);text-transform:uppercase;letter-spacing:.04em}
+input,select,textarea{padding:.55rem .8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--white);font-size:.9rem;outline:none;transition:border-color .15s}
+input:focus,select:focus,textarea:focus{border-color:var(--green)}
+select{cursor:pointer}
+option{background:var(--bg2)}
 
-  /* ── Hero ────────────────────────────────────── */
-  .hero {
-    text-align: center; max-width: 820px; margin: 5rem auto 4rem; padding: 0 2rem;
-  }
-  .hero-badge {
-    display: inline-block; padding: .35rem 1rem; border-radius: 99px;
-    background: var(--green-glow); color: var(--green);
-    font-size: .8rem; font-weight: 600; letter-spacing: .04em; text-transform: uppercase;
-    margin-bottom: 1.5rem;
-  }
-  .hero h1 {
-    font-size: clamp(2.4rem, 5vw, 3.8rem); font-weight: 800;
-    letter-spacing: -.03em; line-height: 1.1; margin-bottom: 1.2rem;
-  }
-  .hero h1 span { color: var(--green); }
-  .hero p { font-size: 1.15rem; color: var(--gray); max-width: 600px; margin: 0 auto 2.2rem; }
-  .hero-cta { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+.btn{padding:.55rem 1.3rem;border-radius:6px;border:none;font-weight:600;font-size:.88rem;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:.4rem}
+.btn-primary{background:var(--green);color:var(--bg)}
+.btn-primary:hover{background:var(--green-d)}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-sm{padding:.4rem .9rem;font-size:.8rem}
+.btn-danger{background:var(--red);color:#fff}
+.btn-danger:hover{opacity:.85}
 
-  /* ── Features ────────────────────────────────── */
-  .section { max-width: 1200px; margin: 0 auto; padding: 5rem 2rem; }
-  .section-label {
-    color: var(--green); font-size: .8rem; font-weight: 700;
-    text-transform: uppercase; letter-spacing: .08em; margin-bottom: .6rem;
-  }
-  .section-title {
-    font-size: 2rem; font-weight: 700; letter-spacing: -.02em; margin-bottom: 3rem;
-  }
-  .features-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;
-  }
-  .feature-card {
-    background: var(--card-bg); border: 1px solid var(--border);
-    border-radius: 14px; padding: 2rem;
-    transition: border-color .3s, transform .3s;
-  }
-  .feature-card:hover { border-color: var(--green); transform: translateY(-3px); }
-  .feature-icon {
-    width: 44px; height: 44px; border-radius: 10px;
-    background: var(--green-glow); display: grid; place-items: center;
-    margin-bottom: 1.2rem; color: var(--green); font-size: 1.3rem;
-  }
-  .feature-card h3 { font-size: 1.1rem; margin-bottom: .5rem; }
-  .feature-card p { color: var(--gray); font-size: .92rem; }
+/* Tables */
+.tbl-wrap{overflow-x:auto;margin:1rem 0}
+table{width:100%;border-collapse:collapse;font-size:.85rem}
+th{text-align:left;padding:.5rem .7rem;background:var(--bg2);color:var(--gray);font-weight:600;text-transform:uppercase;font-size:.72rem;letter-spacing:.04em;border-bottom:1px solid var(--border)}
+td{padding:.5rem .7rem;border-bottom:1px solid var(--border)}
+tr:hover td{background:rgba(255,255,255,.02)}
+.text-right{text-align:right}
+.text-center{text-align:center}
 
-  /* ── Entity Comparison ──────────────────────── */
-  .comparison {
-    background: var(--navy-light); border: 1px solid var(--border);
-    border-radius: 16px; overflow: hidden;
-  }
-  .comparison-header {
-    padding: 2rem 2rem 1rem; border-bottom: 1px solid var(--border);
-  }
-  .comparison-header h3 { font-size: 1.2rem; margin-bottom: .3rem; }
-  .comparison-header p { color: var(--gray); font-size: .9rem; }
-  .comparison-grid {
-    display: grid; grid-template-columns: repeat(4, 1fr);
-    text-align: center; gap: 0;
-  }
-  .entity-col { padding: 1.5rem 1rem; border-right: 1px solid var(--border); }
-  .entity-col:last-child { border-right: none; }
-  .entity-col.best { background: var(--green-glow); }
-  .entity-col h4 { font-size: .85rem; color: var(--gray); margin-bottom: .8rem; text-transform: uppercase; letter-spacing: .05em; }
-  .entity-col .tax { font-size: 1.6rem; font-weight: 800; margin-bottom: .3rem; }
-  .entity-col.best .tax { color: var(--green); }
-  .entity-col .rate { font-size: .85rem; color: var(--gray); }
-  .entity-col .savings { font-size: .85rem; color: var(--green); font-weight: 600; margin-top: .5rem; }
+/* Cards */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem}
+.card-title{font-size:.95rem;font-weight:700;margin-bottom:.6rem}
+.cards-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1rem 0}
 
-  /* ── Calculator ─────────────────────────────── */
-  .calc-card {
-    background: var(--card-bg); border: 1px solid var(--border);
-    border-radius: 16px; padding: 2.5rem; max-width: 540px; margin: 0 auto;
-  }
-  .calc-card h3 { font-size: 1.3rem; margin-bottom: .4rem; }
-  .calc-card > p { color: var(--gray); font-size: .9rem; margin-bottom: 1.8rem; }
-  .form-group { margin-bottom: 1.2rem; }
-  .form-group label { display: block; font-size: .85rem; color: var(--gray); margin-bottom: .4rem; }
-  .form-group input, .form-group select {
-    width: 100%; padding: .7rem 1rem; border-radius: 8px;
-    border: 1px solid var(--border); background: var(--navy);
-    color: var(--white); font-size: 1rem; outline: none;
-    transition: border-color .2s;
-  }
-  .form-group input:focus, .form-group select:focus { border-color: var(--green); }
-  .calc-result {
-    margin-top: 1.5rem; padding: 1.2rem; border-radius: 10px;
-    background: var(--green-glow); display: none;
-  }
-  .calc-result .label { font-size: .8rem; color: var(--gray); text-transform: uppercase; letter-spacing: .06em; }
-  .calc-result .value { font-size: 2rem; font-weight: 800; color: var(--green); }
-  .calc-result .detail { font-size: .85rem; color: var(--gray); margin-top: .3rem; }
+/* Results */
+.results{margin-top:1.5rem}
+.result-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:1rem}
+.result-label{font-size:.72rem;color:var(--gray-d);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem}
+.result-value{font-size:1.6rem;font-weight:800;color:var(--green)}
+.result-detail{font-size:.82rem;color:var(--gray);margin-top:.2rem}
 
-  /* ── Footer ─────────────────────────────────── */
-  footer {
-    text-align: center; padding: 3rem 2rem; border-top: 1px solid var(--border);
-    color: var(--gray-dark); font-size: .85rem; margin-top: 4rem;
-  }
+/* Gauge */
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;margin:1.5rem 0}
+.gauge{position:relative;width:160px;height:80px;overflow:hidden}
+.gauge-bg,.gauge-fill{position:absolute;top:0;left:0;width:160px;height:160px;border-radius:50%;border:14px solid var(--border)}
+.gauge-bg{clip-path:polygon(0 0,100% 0,100% 50%,0 50%)}
+.gauge-fill{clip-path:polygon(0 0,100% 0,100% 50%,0 50%);border-color:var(--green);transform:rotate(var(--deg));transform-origin:center center;transition:transform .6s ease-out}
+.gauge-val{position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-size:1.8rem;font-weight:800}
+.gauge-label{font-size:.78rem;color:var(--gray-d);margin-top:.3rem}
 
-  @media (max-width: 768px) {
-    .nav-links { display: none; }
-    .comparison-grid { grid-template-columns: repeat(2, 1fr); }
-    .entity-col { border-bottom: 1px solid var(--border); }
-  }
+/* Tags */
+.tag{display:inline-block;padding:.2rem .6rem;border-radius:4px;font-size:.75rem;font-weight:600;margin:.15rem}
+.tag-green{background:var(--green-glow);color:var(--green)}
+.tag-amber{background:rgba(245,158,11,.12);color:var(--amber)}
+.tag-red{background:rgba(239,68,68,.12);color:var(--red)}
+
+/* Recommendation */
+.rec{padding:.8rem 1rem;border-left:3px solid var(--green);background:var(--green-glow);border-radius:0 6px 6px 0;margin:1rem 0;font-size:.88rem}
+.rec.warn{border-left-color:var(--amber);background:rgba(245,158,11,.08)}
+
+/* Loading */
+.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-msg{display:flex;align-items:center;gap:.5rem;color:var(--gray);font-size:.88rem;margin:1rem 0}
+
+/* Error */
+.error-box{padding:.8rem 1rem;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:6px;color:var(--red);font-size:.85rem;margin:1rem 0}
+.server-hint{margin-top:1.5rem;padding:1rem;background:var(--bg2);border:1px dashed var(--border-h);border-radius:8px;font-size:.82rem;color:var(--gray-d)}
+.server-hint code{background:var(--bg);padding:.15rem .4rem;border-radius:3px;font-size:.8rem;color:var(--green)}
+
+/* Footer */
+footer{text-align:center;padding:2rem;border-top:1px solid var(--border);color:var(--gray-d);font-size:.78rem;margin-top:3rem}
+
+@media(max-width:640px){
+  .tabs{gap:0}.tab{padding:.6rem .8rem;font-size:.78rem}
+  .form-row{flex-direction:column}.form-group{min-width:0}
+  .cards-row{grid-template-columns:1fr}
+}
 </style>
 </head>
 <body>
 
-<nav>
+<header>
   <div class="logo">
-    <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-      <rect width="32" height="32" rx="8" fill="#22c55e" fill-opacity=".15"/>
-      <path d="M16 4 L26 10 L26 22 L16 28 L6 22 L6 10 Z" stroke="#22c55e" stroke-width="2" fill="none"/>
-      <path d="M16 10 L20 12.5 L20 17.5 L16 20 L12 17.5 L12 12.5 Z" fill="#22c55e" fill-opacity=".4"/>
-      <path d="M14 15 L15.5 16.5 L19 13" stroke="#22c55e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
-    </svg>
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#22c55e" fill-opacity=".15"/><path d="M16 4L26 10V22L16 28L6 22V10Z" stroke="#22c55e" stroke-width="2" fill="none"/><path d="M14 15L15.5 16.5L19 13" stroke="#22c55e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
     TaxShield
   </div>
-  <ul class="nav-links">
-    <li><a href="#features">Features</a></li>
-    <li><a href="#compare">Entity Compare</a></li>
-    <li><a href="#calculator">Calculator</a></li>
-  </ul>
-  <a href="#calculator" class="btn btn-primary">Try Calculator</a>
-</nav>
+  <div class="conn"><div class="conn-dot" id="connDot"></div><span id="connText">Checking...</span></div>
+</header>
 
-<section class="hero">
-  <div class="hero-badge">AI-Powered Tax Strategy</div>
-  <h1>Stop overpaying.<br><span>Shield</span> your income.</h1>
-  <p>TaxShield analyzes your deductions, compares entity structures, and builds depreciation plans — so you keep more of what you earn.</p>
-  <div class="hero-cta">
-    <a href="#calculator" class="btn btn-primary">Estimate Your Savings</a>
-    <a href="#features" class="btn btn-outline">See Features</a>
-  </div>
-</section>
+<div class="tabs" id="tabBar">
+  <div class="tab active" data-tab="deductions">Deductions</div>
+  <div class="tab" data-tab="entity">Entity Compare</div>
+  <div class="tab" data-tab="depreciation">Depreciation</div>
+  <div class="tab" data-tab="audit">Audit Risk</div>
+  <div class="tab" data-tab="quarterly">Quarterly Est.</div>
+</div>
 
-<section class="section" id="features">
-  <p class="section-label">Capabilities</p>
-  <h2 class="section-title">Everything you need for smarter tax planning</h2>
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">📋</div>
-      <h3>Deduction Analysis</h3>
-      <p>Categorize expenses into IRS-recognized categories and surface deductions you may have missed.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🏢</div>
-      <h3>Entity Comparison</h3>
-      <p>Side-by-side tax liability for Sole Prop, LLC, S-Corp, and C-Corp with self-employment savings.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📉</div>
-      <h3>Depreciation Planning</h3>
-      <p>MACRS schedules, Section 179, and bonus depreciation with year-by-year breakdowns.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">📅</div>
-      <h3>Quarterly Estimates</h3>
-      <p>Calculate estimated quarterly tax payments and due dates based on your projected income.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🔍</div>
-      <h3>Audit Risk Scoring</h3>
-      <p>Score your return profile from 1–100 based on IRS red-flag indicators and DIF scoring factors.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">🗺️</div>
-      <h3>Multi-State Optimization</h3>
-      <p>Identify nexus obligations and allocation strategies for businesses operating across state lines.</p>
-    </div>
-  </div>
-</section>
+<!-- ═══ DEDUCTIONS ═══ -->
+<div class="panels">
+<div class="panel active" id="p-deductions">
+  <h2 class="panel-title">Deduction Analyzer</h2>
+  <p class="panel-desc">Add business expenses, then analyze for categorization and missed deduction opportunities.</p>
 
-<section class="section" id="compare">
-  <p class="section-label">Entity Analysis</p>
-  <h2 class="section-title">Which structure saves you the most?</h2>
-  <div class="comparison">
-    <div class="comparison-header">
-      <h3>Example: $200,000 gross income / $40,000 expenses / $80,000 salary</h3>
-      <p>Federal tax comparison (estimates — consult a professional)</p>
-    </div>
-    <div class="comparison-grid">
-      <div class="entity-col">
-        <h4>Sole Prop</h4>
-        <div class="tax">$43,526</div>
-        <div class="rate">27.2% effective</div>
-      </div>
-      <div class="entity-col">
-        <h4>LLC</h4>
-        <div class="tax">$40,126</div>
-        <div class="rate">25.1% effective</div>
-        <div class="savings">Save $3,400</div>
-      </div>
-      <div class="entity-col best">
-        <h4>S-Corp ★</h4>
-        <div class="tax">$33,290</div>
-        <div class="rate">20.8% effective</div>
-        <div class="savings">Save $10,236</div>
-      </div>
-      <div class="entity-col">
-        <h4>C-Corp</h4>
-        <div class="tax">$38,044</div>
-        <div class="rate">23.8% effective</div>
-        <div class="savings">Save $5,482</div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<section class="section" id="calculator">
-  <p class="section-label">Quick Calculator</p>
-  <h2 class="section-title">Estimate your quarterly payment</h2>
-  <div class="calc-card">
-    <h3>Quarterly Tax Estimator</h3>
-    <p>Get a rough estimate of your quarterly estimated tax payment.</p>
-    <div class="form-group">
-      <label for="income">Annual Gross Income ($)</label>
-      <input type="number" id="income" placeholder="150000" value="150000">
-    </div>
-    <div class="form-group">
-      <label for="expenses">Business Expenses ($)</label>
-      <input type="number" id="expenses" placeholder="30000" value="30000">
-    </div>
-    <div class="form-group">
-      <label for="filing">Filing Status</label>
-      <select id="filing">
-        <option value="single">Single</option>
-        <option value="married">Married Filing Jointly</option>
+  <div class="form-row">
+    <div class="form-group" style="flex:2"><label>Description</label><input id="ded-desc" placeholder="Office supplies, software subscription..."></div>
+    <div class="form-group" style="flex:1"><label>Amount ($)</label><input type="number" id="ded-amt" placeholder="0.00"></div>
+    <div class="form-group" style="flex:1"><label>Category</label>
+      <select id="ded-cat">
+        <option>Office & Supplies</option><option>Software & Tech</option><option>Travel</option>
+        <option>Meals & Entertainment</option><option>Vehicle</option><option>Home Office</option>
+        <option>Marketing</option><option>Professional Services</option><option>Insurance</option>
+        <option>Education</option><option>Utilities</option><option>Other</option>
       </select>
     </div>
-    <button class="btn btn-primary" style="width:100%" onclick="calculate()">Calculate</button>
-    <div class="calc-result" id="result">
-      <div class="label">Estimated Quarterly Payment</div>
-      <div class="value" id="quarterly-amount">$0</div>
-      <div class="detail" id="annual-detail"></div>
+    <div class="form-group" style="flex:0;align-self:flex-end"><button class="btn btn-primary" onclick="addDeduction()">Add</button></div>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Description</th><th>Category</th><th class="text-right">Amount</th><th style="width:50px"></th></tr></thead>
+      <tbody id="ded-tbody"></tbody>
+      <tfoot><tr><td colspan="2" style="font-weight:700">Total</td><td class="text-right" style="font-weight:700" id="ded-total">$0</td><td></td></tr></tfoot>
+    </table>
+  </div>
+
+  <button class="btn btn-primary" onclick="analyzeDeductions()" id="btn-analyze-ded">Analyze Deductions</button>
+  <div id="ded-results"></div>
+</div>
+
+<!-- ═══ ENTITY COMPARE ═══ -->
+<div class="panel" id="p-entity">
+  <h2 class="panel-title">Entity Structure Comparison</h2>
+  <p class="panel-desc">Compare tax liability across business entity types for your income profile.</p>
+
+  <div class="form-row">
+    <div class="form-group"><label>Gross Income ($)</label><input type="number" id="ent-income" placeholder="200000" value="200000"></div>
+    <div class="form-group"><label>Business Expenses ($)</label><input type="number" id="ent-expenses" placeholder="40000" value="40000"></div>
+    <div class="form-group"><label>Owner Salary (S/C-Corp) ($)</label><input type="number" id="ent-salary" placeholder="80000" value="80000"></div>
+  </div>
+  <button class="btn btn-primary" onclick="compareEntities()" id="btn-entity">Compare Entities</button>
+  <div id="entity-results"></div>
+</div>
+
+<!-- ═══ DEPRECIATION ═══ -->
+<div class="panel" id="p-depreciation">
+  <h2 class="panel-title">Depreciation Planner</h2>
+  <p class="panel-desc">Add assets and calculate MACRS, Section 179, and bonus depreciation schedules.</p>
+
+  <div class="form-row">
+    <div class="form-group" style="flex:2"><label>Asset Name</label><input id="dep-name" placeholder="Laptop, Vehicle, Equipment..."></div>
+    <div class="form-group"><label>Cost ($)</label><input type="number" id="dep-cost" placeholder="0"></div>
+    <div class="form-group"><label>Date In Service</label><input type="date" id="dep-date"></div>
+    <div class="form-group"><label>Recovery Period</label>
+      <select id="dep-class"><option value="3">3-Year</option><option value="5" selected>5-Year</option><option value="7">7-Year</option><option value="10">10-Year</option><option value="15">15-Year</option><option value="20">20-Year</option></select>
+    </div>
+    <div class="form-group" style="flex:0;align-self:flex-end"><button class="btn btn-primary" onclick="addAsset()">Add</button></div>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr><th>Asset</th><th>Cost</th><th>Date</th><th>Period</th><th style="width:50px"></th></tr></thead>
+      <tbody id="dep-tbody"></tbody>
+    </table>
+  </div>
+
+  <button class="btn btn-primary" onclick="calcDepreciation()" id="btn-dep">Calculate Depreciation</button>
+  <div id="dep-results"></div>
+</div>
+
+<!-- ═══ AUDIT RISK ═══ -->
+<div class="panel" id="p-audit">
+  <h2 class="panel-title">Audit Risk Scorer</h2>
+  <p class="panel-desc">Estimate your IRS audit risk based on return profile factors.</p>
+
+  <div class="form-row">
+    <div class="form-group"><label>Gross Income ($)</label><input type="number" id="aud-income" placeholder="150000" value="150000"></div>
+    <div class="form-group"><label>Total Deductions ($)</label><input type="number" id="aud-deductions" placeholder="45000" value="45000"></div>
+    <div class="form-group"><label>Business Type</label>
+      <select id="aud-biz"><option>Sole Proprietor</option><option>LLC</option><option>S-Corp</option><option>C-Corp</option><option>W-2 Employee</option></select>
     </div>
   </div>
-</section>
+  <div class="form-row">
+    <div class="form-group"><label>Cash-heavy Business?</label><select id="aud-cash"><option value="false">No</option><option value="true">Yes</option></select></div>
+    <div class="form-group"><label>Crypto Transactions?</label><select id="aud-crypto"><option value="false">No</option><option value="true">Yes</option></select></div>
+    <div class="form-group"><label>Foreign Accounts?</label><select id="aud-foreign"><option value="false">No</option><option value="true">Yes</option></select></div>
+    <div class="form-group"><label>Home Office Deduction?</label><select id="aud-home"><option value="false">No</option><option value="true">Yes</option></select></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>Charitable Donations ($)</label><input type="number" id="aud-charity" placeholder="5000" value="5000"></div>
+    <div class="form-group"><label>Vehicle Deduction ($)</label><input type="number" id="aud-vehicle" placeholder="0" value="0"></div>
+    <div class="form-group"><label>Meals Deduction ($)</label><input type="number" id="aud-meals" placeholder="3000" value="3000"></div>
+  </div>
 
-<footer>
-  <p>&copy; 2026 Mint Rail LLC. All rights reserved. TaxShield is for informational purposes only — not tax advice.</p>
-</footer>
+  <button class="btn btn-primary" onclick="scoreAuditRisk()" id="btn-audit">Score Risk</button>
+  <div id="audit-results"></div>
+</div>
+
+<!-- ═══ QUARTERLY EST ═══ -->
+<div class="panel" id="p-quarterly">
+  <h2 class="panel-title">Quarterly Tax Estimator</h2>
+  <p class="panel-desc">Calculate estimated quarterly payments with upcoming due dates.</p>
+
+  <div class="form-row">
+    <div class="form-group"><label>Annual Gross Income ($)</label><input type="number" id="qtr-income" placeholder="150000" value="150000"></div>
+    <div class="form-group"><label>Business Expenses ($)</label><input type="number" id="qtr-expenses" placeholder="30000" value="30000"></div>
+    <div class="form-group"><label>Filing Status</label>
+      <select id="qtr-filing"><option value="single">Single</option><option value="married_joint">Married Filing Jointly</option><option value="married_separate">Married Filing Separately</option><option value="head_household">Head of Household</option></select>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>Additional Deductions ($)</label><input type="number" id="qtr-deductions" placeholder="0" value="0"></div>
+    <div class="form-group"><label>Self-Employment?</label><select id="qtr-se"><option value="true">Yes</option><option value="false">No</option></select></div>
+    <div class="form-group"><label>State</label>
+      <select id="qtr-state"><option value="none">No State Tax</option><option value="CA">California</option><option value="NY">New York</option><option value="TX">Texas</option><option value="FL">Florida</option><option value="IL">Illinois</option><option value="WA">Washington</option><option value="other">Other</option></select>
+    </div>
+  </div>
+
+  <button class="btn btn-primary" onclick="calcQuarterly()" id="btn-qtr">Calculate Quarterly Payments</button>
+  <div id="qtr-results"></div>
+</div>
+</div>
+
+<footer>&copy; 2026 Mint Rail LLC. TaxShield is for informational purposes only — not tax advice.</footer>
 
 <script>
-const BRACKETS_SINGLE = [[11600,.10],[47150,.12],[100525,.22],[191950,.24],[243725,.32],[609350,.35],[Infinity,.37]];
+const API = window.location.origin;
+const deductions = [];
+const assets = [];
 
-function incomeTax(taxable) {
-  if (taxable <= 0) return 0;
-  let tax = 0, prev = 0;
-  for (const [ceil, rate] of BRACKETS_SINGLE) {
+/* ── Connection ── */
+async function checkConn() {
+  const dot = document.getElementById('connDot');
+  const txt = document.getElementById('connText');
+  try {
+    const r = await fetch(API + '/health', { signal: AbortSignal.timeout(3000) });
+    if (r.ok) { dot.classList.add('ok'); txt.textContent = 'API Connected'; return; }
+  } catch {}
+  dot.classList.remove('ok');
+  txt.textContent = 'API Offline';
+}
+checkConn(); setInterval(checkConn, 15000);
+
+/* ── Tabs ── */
+document.getElementById('tabBar').addEventListener('click', e => {
+  const t = e.target.closest('.tab');
+  if (!t) return;
+  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+  t.classList.add('active');
+  document.getElementById('p-' + t.dataset.tab).classList.add('active');
+});
+
+/* ── Helpers ── */
+const $ = id => document.getElementById(id);
+const fmt = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+const pct = n => (n * 100).toFixed(1) + '%';
+
+function showLoading(el) { el.innerHTML = '<div class="loading-msg"><span class="spinner"></span>Calling API...</div>'; }
+function showError(el, err) { el.innerHTML = `<div class="error-box">${err}</div><div class="server-hint">Make sure the API server is running:<br><code>cd products/taxshield && uvicorn server.app:app --reload --port 8000</code></div>`; }
+
+async function apiPost(endpoint, body) {
+  const r = await fetch(API + endpoint, {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || `HTTP ${r.status}`); }
+  return r.json();
+}
+
+/* ═══ DEDUCTIONS ═══ */
+function renderDeductions() {
+  const tb = $('ded-tbody');
+  tb.innerHTML = '';
+  let total = 0;
+  deductions.forEach((d, i) => {
+    total += d.amount;
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${esc(d.description)}</td><td><span class="tag tag-green">${esc(d.category)}</span></td><td class="text-right">${fmt(d.amount)}</td><td><button class="btn btn-danger btn-sm" onclick="rmDed(${i})">×</button></td>`;
+    tb.appendChild(tr);
+  });
+  $('ded-total').textContent = fmt(total);
+}
+
+function addDeduction() {
+  const desc = $('ded-desc').value.trim();
+  const amt = parseFloat($('ded-amt').value) || 0;
+  const cat = $('ded-cat').value;
+  if (!desc || amt <= 0) return;
+  deductions.push({ description: desc, amount: amt, category: cat });
+  $('ded-desc').value = ''; $('ded-amt').value = '';
+  renderDeductions();
+}
+
+function rmDed(i) { deductions.splice(i, 1); renderDeductions(); }
+
+async function analyzeDeductions() {
+  if (!deductions.length) return;
+  const el = $('ded-results');
+  showLoading(el);
+  try {
+    const data = await apiPost('/v1/deductions/analyze', { expenses: deductions });
+    let html = '<div class="results">';
+    if (data.categorized) {
+      html += '<div class="result-box"><div class="result-label">Categorized Expenses</div><div class="tbl-wrap"><table><thead><tr><th>Category</th><th class="text-right">Total</th><th class="text-right">Count</th></tr></thead><tbody>';
+      for (const [cat, info] of Object.entries(data.categorized)) {
+        html += `<tr><td>${esc(cat)}</td><td class="text-right">${fmt(info.total || info)}</td><td class="text-right">${info.count || ''}</td></tr>`;
+      }
+      html += '</tbody></table></div></div>';
+    }
+    if (data.savings_by_bracket) {
+      html += '<div class="result-box"><div class="result-label">Potential Savings by Tax Bracket</div><div class="cards-row">';
+      for (const [bracket, savings] of Object.entries(data.savings_by_bracket)) {
+        html += `<div class="card"><div class="card-title">${bracket}</div><div class="result-value">${fmt(savings)}</div></div>`;
+      }
+      html += '</div></div>';
+    }
+    if (data.missed_deductions && data.missed_deductions.length) {
+      html += '<div class="result-box"><div class="result-label">Missed Deduction Suggestions</div>';
+      data.missed_deductions.forEach(m => { html += `<div class="rec">${esc(typeof m === 'string' ? m : m.description || m.name)}</div>`; });
+      html += '</div>';
+    }
+    if (data.total_deductions != null) {
+      html += `<div class="result-box"><div class="result-label">Total Deductions</div><div class="result-value">${fmt(data.total_deductions)}</div></div>`;
+    }
+    html += '</div>';
+    el.innerHTML = html;
+  } catch (err) { showError(el, err.message); }
+}
+
+/* ═══ ENTITY COMPARE ═══ */
+async function compareEntities() {
+  const el = $('entity-results');
+  showLoading(el);
+  try {
+    const data = await apiPost('/v1/entity/compare', {
+      gross_income: num('ent-income'), business_expenses: num('ent-expenses'), owner_salary: num('ent-salary')
+    });
+    const entities = data.entities || data.comparison || data;
+    const list = Array.isArray(entities) ? entities : Object.values(entities);
+    let best = list[0], html = '<div class="cards-row" style="margin-top:1.5rem">';
+    list.forEach(e => { if ((e.total_tax || 0) < (best.total_tax || Infinity)) best = e; });
+    list.forEach(e => {
+      const isBest = e === best;
+      html += `<div class="card" style="${isBest ? 'border-color:var(--green);box-shadow:0 0 20px var(--green-glow)' : ''}">
+        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">${esc(e.entity || e.name || e.type)}${isBest ? '<span class="tag tag-green">BEST</span>' : ''}</div>
+        <div style="margin:.8rem 0"><div class="result-label">Total Tax</div><div class="result-value" style="${isBest ? '' : 'color:var(--white)'}">${fmt(e.total_tax)}</div></div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.82rem">
+          <div><span style="color:var(--gray-d)">Effective Rate</span><br><strong>${pct(e.effective_rate || 0)}</strong></div>
+          <div><span style="color:var(--gray-d)">SE Tax</span><br><strong>${fmt(e.se_tax || 0)}</strong></div>
+          <div><span style="color:var(--gray-d)">QBI Deduction</span><br><strong>${fmt(e.qbi_deduction || 0)}</strong></div>
+          <div><span style="color:var(--gray-d)">Income Tax</span><br><strong>${fmt(e.income_tax || e.federal_tax || 0)}</strong></div>
+        </div>
+      </div>`;
+    });
+    html += '</div>';
+    if (data.recommendation) html += `<div class="rec">${esc(data.recommendation)}</div>`;
+    el.innerHTML = html;
+  } catch (err) { showError(el, err.message); }
+}
+
+/* ═══ DEPRECIATION ═══ */
+function renderAssets() {
+  const tb = $('dep-tbody');
+  tb.innerHTML = '';
+  assets.forEach((a, i) => {
+    const tr = document.createElement('tr');
+    tr.innerHTML = `<td>${esc(a.name)}</td><td>${fmt(a.cost)}</td><td>${a.date_placed || '—'}</td><td>${a.recovery_period}-Year</td><td><button class="btn btn-danger btn-sm" onclick="rmAsset(${i})">×</button></td>`;
+    tb.appendChild(tr);
+  });
+}
+
+function addAsset() {
+  const name = $('dep-name').value.trim();
+  const cost = parseFloat($('dep-cost').value) || 0;
+  const date = $('dep-date').value;
+  const cls = parseInt($('dep-class').value);
+  if (!name || cost <= 0) return;
+  assets.push({ name, cost, date_placed: date, recovery_period: cls });
+  $('dep-name').value = ''; $('dep-cost').value = '';
+  renderAssets();
+}
+
+function rmAsset(i) { assets.splice(i, 1); renderAssets(); }
+
+async function calcDepreciation() {
+  if (!assets.length) return;
+  const el = $('dep-results');
+  showLoading(el);
+  try {
+    const data = await apiPost('/v1/depreciation/plan', { assets });
+    let html = '<div class="results">';
+    const schedule = data.schedule || data.yearly_schedule || data;
+    if (data.summary) {
+      html += '<div class="cards-row">';
+      const s = data.summary;
+      html += `<div class="card"><div class="result-label">Total Cost</div><div class="result-value">${fmt(s.total_cost || 0)}</div></div>`;
+      html += `<div class="card"><div class="result-label">Section 179</div><div class="result-value">${fmt(s.section_179 || 0)}</div></div>`;
+      html += `<div class="card"><div class="result-label">Bonus Depreciation</div><div class="result-value">${fmt(s.bonus_depreciation || 0)}</div></div>`;
+      html += `<div class="card"><div class="result-label">Year 1 Total</div><div class="result-value">${fmt(s.year_1_total || s.first_year || 0)}</div></div>`;
+      html += '</div>';
+    }
+    if (Array.isArray(schedule) && schedule.length) {
+      html += '<div class="result-box"><div class="result-label">Year-by-Year Schedule</div><div class="tbl-wrap"><table><thead><tr><th>Year</th><th class="text-right">MACRS</th><th class="text-right">Sec. 179</th><th class="text-right">Bonus</th><th class="text-right">Total</th></tr></thead><tbody>';
+      schedule.forEach(y => {
+        html += `<tr><td>${y.year}</td><td class="text-right">${fmt(y.macrs || 0)}</td><td class="text-right">${fmt(y.section_179 || 0)}</td><td class="text-right">${fmt(y.bonus || 0)}</td><td class="text-right" style="font-weight:700">${fmt(y.total || 0)}</td></tr>`;
+      });
+      html += '</tbody></table></div></div>';
+    }
+    html += '</div>';
+    el.innerHTML = html;
+  } catch (err) { showError(el, err.message); }
+}
+
+/* ═══ AUDIT RISK ═══ */
+async function scoreAuditRisk() {
+  const el = $('audit-results');
+  showLoading(el);
+  try {
+    const data = await apiPost('/v1/audit/risk', {
+      gross_income: num('aud-income'), total_deductions: num('aud-deductions'),
+      business_type: $('aud-biz').value, cash_business: $('aud-cash').value === 'true',
+      crypto: $('aud-crypto').value === 'true', foreign_accounts: $('aud-foreign').value === 'true',
+      home_office: $('aud-home').value === 'true', charitable: num('aud-charity'),
+      vehicle_deduction: num('aud-vehicle'), meals_deduction: num('aud-meals')
+    });
+    const score = data.risk_score ?? data.score ?? 0;
+    const color = score >= 70 ? 'var(--red)' : score >= 40 ? 'var(--amber)' : 'var(--green)';
+    const deg = (score / 100) * 180;
+    let html = `<div class="gauge-wrap">
+      <div class="gauge"><div class="gauge-bg"></div><div class="gauge-fill" style="--deg:${deg - 180}deg;border-color:${color}"></div><div class="gauge-val" style="color:${color}">${score}</div></div>
+      <div class="gauge-label">${score >= 70 ? 'High Risk' : score >= 40 ? 'Moderate Risk' : 'Low Risk'}</div>
+    </div>`;
+    if (data.factors && data.factors.length) {
+      html += '<div class="result-box"><div class="result-label">Risk Factors</div>';
+      data.factors.forEach(f => {
+        const lvl = (f.impact || f.level || '').toLowerCase();
+        const cls = lvl === 'high' ? 'tag-red' : lvl === 'medium' ? 'tag-amber' : 'tag-green';
+        html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--border)"><span>${esc(f.name || f.factor)}</span><span class="tag ${cls}">${esc(f.impact || f.level || '')}</span></div>`;
+      });
+      html += '</div>';
+    }
+    if (data.recommendations && data.recommendations.length) {
+      html += '<div class="result-box"><div class="result-label">Recommendations</div>';
+      data.recommendations.forEach(r => { html += `<div class="rec">${esc(r)}</div>`; });
+      html += '</div>';
+    }
+    el.innerHTML = html;
+  } catch (err) { showError(el, err.message); }
+}
+
+/* ═══ QUARTERLY EST ═══ */
+async function calcQuarterly() {
+  const el = $('qtr-results');
+  showLoading(el);
+  try {
+    const data = await apiPost('/v1/quarterly/estimate', {
+      gross_income: num('qtr-income'), business_expenses: num('qtr-expenses'),
+      filing_status: $('qtr-filing').value, additional_deductions: num('qtr-deductions'),
+      self_employed: $('qtr-se').value === 'true', state: $('qtr-state').value
+    });
+    let html = '<div class="results">';
+    if (data.annual_tax != null || data.quarterly_payment != null) {
+      html += '<div class="cards-row">';
+      if (data.annual_tax != null) html += `<div class="card"><div class="result-label">Annual Tax</div><div class="result-value">${fmt(data.annual_tax)}</div></div>`;
+      if (data.quarterly_payment != null) html += `<div class="card"><div class="result-label">Quarterly Payment</div><div class="result-value">${fmt(data.quarterly_payment)}</div></div>`;
+      if (data.effective_rate != null) html += `<div class="card"><div class="result-label">Effective Rate</div><div class="result-value" style="font-size:1.4rem">${pct(data.effective_rate)}</div></div>`;
+      html += '</div>';
+    }
+    const quarters = data.quarters || data.schedule || [];
+    if (quarters.length) {
+      html += '<div class="result-box"><div class="result-label">Payment Schedule</div><div class="tbl-wrap"><table><thead><tr><th>Quarter</th><th>Due Date</th><th class="text-right">Amount</th><th>Status</th></tr></thead><tbody>';
+      quarters.forEach(q => {
+        const isPast = q.due_date && new Date(q.due_date) < new Date();
+        html += `<tr><td>${q.quarter || q.period}</td><td>${q.due_date || '—'}</td><td class="text-right" style="font-weight:700">${fmt(q.amount || data.quarterly_payment || 0)}</td><td>${isPast ? '<span class="tag tag-amber">Past Due</span>' : '<span class="tag tag-green">Upcoming</span>'}</td></tr>`;
+      });
+      html += '</tbody></table></div></div>';
+    }
+    if (data.breakdown) {
+      html += '<div class="result-box"><div class="result-label">Tax Breakdown</div>';
+      for (const [k, v] of Object.entries(data.breakdown)) {
+        html += `<div style="display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--gray)">${esc(k.replace(/_/g, ' '))}</span><span style="font-weight:600">${fmt(v)}</span></div>`;
+      }
+      html += '</div>';
+    }
+    html += '</div>';
+    el.innerHTML = html;
+  } catch (err) {
+    showError(el, err.message);
+    fallbackQuarterly(el);
+  }
+}
+
+/* Client-side fallback when API is unavailable */
+function fallbackQuarterly(el) {
+  const BRACKETS = [[11600,.10],[47150,.12],[100525,.22],[191950,.24],[243725,.32],[609350,.35],[Infinity,.37]];
+  const gross = num('qtr-income'), exp = num('qtr-expenses'), addl = num('qtr-deductions');
+  const isSE = $('qtr-se').value === 'true';
+  const filing = $('qtr-filing').value;
+  const net = gross - exp;
+  const se = isSE ? (Math.min(net * .9235, 168600) * .124 + net * .9235 * .029) : 0;
+  const stdDed = filing === 'married_joint' ? 29200 : filing === 'head_household' ? 21900 : 14600;
+  const taxable = Math.max(0, net - se / 2 - stdDed - addl);
+  let fedTax = 0, prev = 0;
+  for (const [ceil, rate] of BRACKETS) {
     const portion = Math.min(taxable, ceil) - prev;
     if (portion <= 0) break;
-    tax += portion * rate;
+    fedTax += portion * rate;
     prev = ceil;
   }
-  return tax;
-}
-
-function seTax(net) {
-  const taxable = net * 0.9235;
-  return Math.min(taxable, 168600) * 0.124 + taxable * 0.029;
-}
-
-function calculate() {
-  const gross = parseFloat(document.getElementById('income').value) || 0;
-  const exp = parseFloat(document.getElementById('expenses').value) || 0;
-  const filing = document.getElementById('filing').value;
-  const net = gross - exp;
-  const se = seTax(net);
-  const stdDed = filing === 'single' ? 14600 : 29200;
-  const taxable = Math.max(0, net - se / 2 - stdDed);
-  const fedTax = incomeTax(taxable);
   const total = fedTax + se;
-  const quarterly = Math.round(total / 4);
-
-  document.getElementById('quarterly-amount').textContent = '$' + quarterly.toLocaleString();
-  document.getElementById('annual-detail').textContent =
-    `Total annual estimate: $${Math.round(total).toLocaleString()} (Federal $${Math.round(fedTax).toLocaleString()} + SE $${Math.round(se).toLocaleString()})`;
-  document.getElementById('result').style.display = 'block';
+  const qtr = Math.round(total / 4);
+  const dates = ['Apr 15, 2026', 'Jun 15, 2026', 'Sep 15, 2026', 'Jan 15, 2027'];
+  let html = '<div class="results" style="margin-top:1rem"><div class="result-box"><div class="result-label">Client-Side Estimate (API offline)</div>';
+  html += '<div class="cards-row">';
+  html += `<div class="card"><div class="result-label">Annual Tax</div><div class="result-value">${fmt(total)}</div></div>`;
+  html += `<div class="card"><div class="result-label">Quarterly Payment</div><div class="result-value">${fmt(qtr)}</div></div>`;
+  html += '</div>';
+  html += '<div class="tbl-wrap"><table><thead><tr><th>Quarter</th><th>Due Date</th><th class="text-right">Amount</th></tr></thead><tbody>';
+  dates.forEach((d, i) => { html += `<tr><td>Q${i + 1}</td><td>${d}</td><td class="text-right" style="font-weight:700">${fmt(qtr)}</td></tr>`; });
+  html += '</tbody></table></div></div></div>';
+  el.innerHTML += html;
 }
-</script>
 
+function num(id) { return parseFloat($(id).value) || 0; }
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+</script>
 </body>
 </html>

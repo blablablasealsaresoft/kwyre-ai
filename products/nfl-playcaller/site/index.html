@@ -3,413 +3,345 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NFL PlayCaller AI — AI Offensive Coordinator Intelligence</title>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <title>NFL PlayCaller AI — Apollo CyberSentinel</title>
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
-    :root {
-      --gold: #d4c896;
-      --gold-dim: #a89860;
-      --bg: #111110;
-      --bg-alt: #1a1a16;
-      --text: #e8e8d8;
-      --text-dim: #8a8a7a;
-      --red: #c44;
-      --green: #6a9955;
-      --border: rgba(255,255,255,0.06);
-    }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'IBM Plex Sans', -apple-system, sans-serif;
-      overflow-x: hidden;
-    }
-
-    .scanlines {
-      position: fixed; inset: 0; z-index: 9999; pointer-events: none;
-      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px);
-    }
-
-    .corner { position: fixed; width: 30px; height: 30px; z-index: 100; }
-    .corner--tl { top: 12px; left: 12px; border-top: 2px solid rgba(212,200,150,0.25); border-left: 2px solid rgba(212,200,150,0.25); }
-    .corner--tr { top: 12px; right: 12px; border-top: 2px solid rgba(212,200,150,0.25); border-right: 2px solid rgba(212,200,150,0.25); }
-    .corner--bl { bottom: 12px; left: 12px; border-bottom: 2px solid rgba(212,200,150,0.25); border-left: 2px solid rgba(212,200,150,0.25); }
-    .corner--br { bottom: 12px; right: 12px; border-bottom: 2px solid rgba(212,200,150,0.25); border-right: 2px solid rgba(212,200,150,0.25); }
-
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
-      padding: 16px 32px;
-      background: linear-gradient(180deg, rgba(17,17,16,0.95), rgba(17,17,16,0.7));
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    nav .brand {
-      font-family: 'JetBrains Mono', monospace; font-size: 11px;
-      letter-spacing: 3px; color: var(--gold); text-transform: uppercase;
-    }
-    nav .links { display: flex; gap: 24px; }
-    nav .links a {
-      color: var(--text-dim); text-decoration: none; font-size: 12px;
-      font-family: 'JetBrains Mono', monospace; letter-spacing: 1px;
-      transition: color 0.2s;
-    }
-    nav .links a:hover { color: var(--gold); }
-
-    .hero {
-      min-height: 100vh; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; text-align: center;
-      padding: 120px 32px 80px; position: relative;
-    }
-    .hero::before {
-      content: ''; position: absolute; inset: 0;
-      background: radial-gradient(ellipse 800px 600px at 50% 40%, rgba(212,200,150,0.04), transparent 70%);
-    }
-    .hero .codename {
-      font-family: 'JetBrains Mono', monospace; font-size: 11px;
-      letter-spacing: 4px; color: var(--text-dim); margin-bottom: 16px;
-      text-transform: uppercase; position: relative;
-    }
-    .hero h1 {
-      font-size: clamp(40px, 7vw, 72px); font-weight: 700;
-      letter-spacing: -1px; line-height: 1.1; margin-bottom: 20px;
-      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-      position: relative;
-    }
-    .hero .subtitle {
-      font-size: 18px; color: #999; font-weight: 300;
-      max-width: 560px; line-height: 1.6; margin-bottom: 40px; position: relative;
-    }
-
-    .field-viz {
-      width: 100%; max-width: 700px; height: 200px; position: relative;
-      margin-bottom: 48px; border-radius: 12px; overflow: hidden;
-      background: linear-gradient(135deg, #1a3a1a, #0a200a);
-      border: 1px solid rgba(100,200,100,0.15);
-    }
-    .field-viz .yard-line {
-      position: absolute; top: 0; bottom: 0; width: 1px;
-      background: rgba(255,255,255,0.08);
-    }
-    .field-viz .hash { position: absolute; width: 2px; height: 6px; background: rgba(255,255,255,0.12); }
-    .field-viz .player-dot {
-      position: absolute; width: 10px; height: 10px; border-radius: 50%;
-      animation: pulse-dot 2s ease-in-out infinite;
-    }
-    .field-viz .route-line {
-      position: absolute; height: 2px; transform-origin: left center;
-      background: linear-gradient(90deg, rgba(212,200,150,0.5), transparent);
-    }
-    .field-viz .label {
-      position: absolute; font-family: 'JetBrains Mono', monospace;
-      font-size: 9px; color: rgba(255,255,255,0.2); letter-spacing: 1px;
-    }
-
-    .cta-row { display: flex; gap: 16px; position: relative; flex-wrap: wrap; justify-content: center; }
-    .btn-primary {
-      padding: 14px 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-      border: none; border-radius: 8px; color: #111; font-size: 14px; font-weight: 700;
-      font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; letter-spacing: 0.5px;
-      transition: transform 0.2s, box-shadow 0.2s;
-      box-shadow: 0 4px 24px rgba(200,180,120,0.2);
-    }
-    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(200,180,120,0.3); }
-    .btn-secondary {
-      padding: 14px 32px; background: transparent;
-      border: 1px solid rgba(212,200,150,0.3); border-radius: 8px;
-      color: var(--gold); font-size: 14px; font-weight: 600;
-      font-family: 'IBM Plex Sans', sans-serif; cursor: pointer;
-      transition: background 0.2s, border-color 0.2s;
-    }
-    .btn-secondary:hover { background: rgba(212,200,150,0.05); border-color: rgba(212,200,150,0.5); }
-
-    .section { padding: 100px 32px; max-width: 1000px; margin: 0 auto; }
-    .section-label {
-      font-family: 'JetBrains Mono', monospace; font-size: 10px;
-      letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase;
-      margin-bottom: 12px;
-    }
-    .section h2 {
-      font-size: 32px; font-weight: 700; margin-bottom: 16px;
-      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .section .desc { color: #888; font-size: 15px; line-height: 1.7; max-width: 600px; margin-bottom: 48px; }
-
-    .feature-grid {
-      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 16px;
-    }
-    .feature-card {
-      padding: 24px; border-radius: 12px;
-      background: rgba(255,255,255,0.015); border: 1px solid var(--border);
-      transition: border-color 0.3s, background 0.3s;
-    }
-    .feature-card:hover {
-      border-color: rgba(212,200,150,0.2);
-      background: rgba(200,180,120,0.03);
-    }
-    .feature-card .icon { font-size: 28px; margin-bottom: 12px; }
-    .feature-card h3 {
-      font-size: 16px; font-weight: 600; color: var(--text);
-      margin-bottom: 8px;
-    }
-    .feature-card p { font-size: 13px; color: #777; line-height: 1.6; }
-
-    .live-callout {
-      margin: 80px auto; max-width: 900px; padding: 48px;
-      border-radius: 16px; position: relative; overflow: hidden;
-      background: linear-gradient(135deg, rgba(42,157,42,0.08), rgba(200,180,120,0.04));
-      border: 1px solid rgba(42,157,42,0.2);
-    }
-    .live-callout::before {
-      content: ''; position: absolute; top: 12px; right: 16px;
-      width: 10px; height: 10px; border-radius: 50%;
-      background: #2a9d2a; box-shadow: 0 0 12px #2a9d2a;
-      animation: pulse-dot 1.5s ease-in-out infinite;
-    }
-    .live-callout h3 {
-      font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 12px;
-    }
-    .live-callout p { color: #888; font-size: 14px; line-height: 1.7; max-width: 600px; }
-    .live-features {
-      display: flex; gap: 32px; margin-top: 24px; flex-wrap: wrap;
-    }
-    .live-features .lf {
-      font-family: 'JetBrains Mono', monospace; font-size: 11px;
-      color: var(--green); display: flex; align-items: center; gap: 6px;
-    }
-    .live-features .lf::before {
-      content: ''; width: 4px; height: 4px; border-radius: 50%;
-      background: var(--green); box-shadow: 0 0 6px var(--green);
-    }
-
-    .integration-bar {
-      padding: 60px 32px; text-align: center;
-      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-    }
-    .integration-bar .label {
-      font-family: 'JetBrains Mono', monospace; font-size: 10px;
-      letter-spacing: 3px; color: var(--text-dim); margin-bottom: 16px;
-    }
-    .integration-bar .items {
-      display: flex; gap: 48px; justify-content: center; align-items: center; flex-wrap: wrap;
-    }
-    .integration-bar .item {
-      font-family: 'JetBrains Mono', monospace; font-size: 13px;
-      color: #555; letter-spacing: 1px;
-    }
-
-    footer {
-      padding: 48px 32px; text-align: center;
-      border-top: 1px solid var(--border);
-    }
-    footer .brand {
-      font-family: 'JetBrains Mono', monospace; font-size: 11px;
-      letter-spacing: 2px; color: var(--gold-dim); margin-bottom: 8px;
-    }
-    footer p { font-size: 12px; color: #555; }
-
-    @keyframes pulse-dot {
-      0%, 100% { opacity: 1; transform: scale(1); }
-      50% { opacity: 0.5; transform: scale(0.85); }
-    }
-
-    @media (max-width: 640px) {
-      .feature-grid { grid-template-columns: 1fr; }
-      .live-features { flex-direction: column; gap: 12px; }
-      nav .links { display: none; }
-    }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--gold:#d4c896;--gold-dim:#a89860;--bg:#0a0a08;--surface:#12120e;--border:rgba(212,200,150,.1);--text:#e8e8d8;--text-dim:#8a8a7a;--red:#c44;--green:#6a9955}
+    body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh}
+    .scanlines{position:fixed;inset:0;z-index:9999;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.012) 2px,rgba(255,255,255,.012) 4px)}
+    .app-shell{max-width:900px;margin:0 auto;padding:0 20px}
+    header{padding:20px 0 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+    .brand{display:flex;flex-direction:column}
+    .brand-sub{font-size:.6rem;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim)}
+    .brand-main{font-size:1.2rem;font-weight:700;background:linear-gradient(135deg,var(--gold),var(--gold-dim));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .conn-status{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--text-dim)}
+    .conn-dot{width:7px;height:7px;border-radius:50%;background:#ef4444;flex-shrink:0}
+    .conn-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s ease-in-out infinite}
+    nav{display:flex;gap:0;margin:14px 0 18px;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--surface)}
+    nav button{flex:1;padding:10px 0;background:none;border:none;color:var(--text-dim);font-size:.74rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;letter-spacing:.3px}
+    nav button.active{background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#0a0a08}
+    nav button:hover:not(.active){background:rgba(212,200,150,.05);color:var(--text)}
+    .tab{display:none}.tab.active{display:block}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px}
+    .card h3{font-size:.95rem;font-weight:700;margin-bottom:10px;color:var(--gold)}
+    select,input[type=text],input[type=number]{width:100%;padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.85rem;font-family:inherit;outline:none;appearance:none}
+    select:focus,input:focus{border-color:var(--gold)}
+    select option{background:#12120e;color:var(--text)}
+    .sel-label{font-size:.68rem;letter-spacing:1.5px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px;display:block}
+    .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+    .row>*{flex:1;min-width:140px}
+    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:8px;font-weight:700;font-size:.85rem;border:none;cursor:pointer;transition:all .25s;font-family:inherit}
+    .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#0a0a08;box-shadow:0 4px 20px rgba(200,180,120,.2)}
+    .btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(200,180,120,.3)}
+    .btn-gold:disabled{opacity:.4;cursor:not-allowed;transform:none}
+    .btn-outline{background:none;border:1px solid var(--border);color:var(--gold)}
+    .btn-outline:hover{background:rgba(212,200,150,.06)}
+    .team-sel{position:relative}
+    .team-btn{width:100%;padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:8px;text-align:left;font-family:inherit}
+    .team-btn:focus{border-color:var(--gold)}
+    .team-dot{width:14px;height:14px;border-radius:4px;flex-shrink:0;display:inline-flex;align-items:center;justify-content:center;font-size:6px;font-weight:700;color:#fff}
+    .team-dd{position:absolute;top:100%;left:0;right:0;z-index:100;margin-top:4px;background:#1a1a14;border:1px solid rgba(255,255,255,.1);border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,.7);max-height:320px;overflow:hidden;display:flex;flex-direction:column}
+    .team-dd input{margin:8px;width:calc(100% - 16px);padding:8px 12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);border-radius:6px;color:var(--text);font-size:.8rem;outline:none;font-family:inherit}
+    .team-dd-list{overflow-y:auto;padding:4px 0}
+    .team-dd-item{width:100%;padding:7px 14px;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;color:#ccc;font-size:.82rem;font-family:inherit;transition:background .15s}
+    .team-dd-item:hover{background:rgba(255,255,255,.05)}
+    .team-dd-div{padding:5px 14px;font-size:.6rem;letter-spacing:1.5px;color:#666;text-transform:uppercase}
+    .result-box{margin-top:16px;padding:20px;border-radius:10px;background:linear-gradient(180deg,rgba(200,180,120,.04),rgba(255,255,255,.01));border:1px solid rgba(200,180,120,.12);animation:fadeIn .4s ease-out}
+    .result-box h4{font-size:.9rem;font-weight:700;color:var(--gold);margin-bottom:4px}
+    .result-text{font-size:.85rem;line-height:1.7;color:#ccc;white-space:pre-wrap;word-break:break-word}
+    .result-text h2{font-size:1.1rem;font-weight:700;color:var(--text);margin:18px 0 8px;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:6px}
+    .result-text h3{font-size:.95rem;font-weight:600;color:var(--gold);margin:14px 0 6px}
+    .error-box{padding:12px 16px;border-radius:8px;background:rgba(220,50,50,.08);border:1px solid rgba(220,50,50,.2);color:#e88;font-size:.82rem;margin-top:12px}
+    .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite}
+    .field-viz{width:100%;height:60px;background:linear-gradient(90deg,#1a3a1a,#0a200a);border:1px solid rgba(100,200,100,.12);border-radius:8px;position:relative;overflow:hidden;margin:8px 0}
+    .field-marker{position:absolute;top:0;bottom:0;width:3px;background:var(--gold);box-shadow:0 0 8px rgba(212,200,150,.4);transition:left .4s}
+    .field-yl{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.06)}
+    .field-label{position:absolute;bottom:2px;font-size:7px;color:rgba(255,255,255,.2);transform:translateX(-50%)}
+    .scoreboard{display:flex;gap:0;border-radius:10px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px}
+    .sb-team{flex:1;padding:14px;text-align:center;position:relative}
+    .sb-team .sb-abbr{font-size:.9rem;font-weight:700;letter-spacing:1px}
+    .sb-team .sb-score{font-size:2rem;font-weight:800;margin-top:2px}
+    .sb-mid{padding:10px 16px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--surface);font-size:.7rem;color:var(--text-dim);letter-spacing:1px;gap:2px}
+    .play-feed{max-height:240px;overflow-y:auto;border:1px solid var(--border);border-radius:8px;background:rgba(0,0,0,.2)}
+    .play-feed-item{padding:8px 12px;border-bottom:1px solid rgba(255,255,255,.03);font-size:.78rem;color:#aaa;line-height:1.4}
+    .play-feed-item:last-child{border-bottom:none}
+    .play-feed-item .pf-type{font-weight:700;color:var(--gold);font-size:.7rem;text-transform:uppercase;letter-spacing:.5px}
+    .ws-live{display:flex;align-items:center;gap:6px;font-size:.72rem;font-weight:600;color:var(--green)}
+    .ws-live .ld{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.5s ease-in-out infinite}
+    .sugg-card{padding:10px 14px;background:rgba(200,180,120,.04);border:1px solid rgba(200,180,120,.1);border-radius:8px;margin-top:8px;font-size:.82rem;color:var(--text)}
+    .help-box{margin:20px 0;padding:14px 18px;border-radius:10px;background:rgba(200,180,120,.03);border:1px solid var(--border);font-size:.75rem;color:var(--text-dim);line-height:1.6}
+    .help-box code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;font-size:.72rem}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+    @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+    @media(max-width:640px){nav button{font-size:.64rem;padding:8px 2px;letter-spacing:0}.row>*{min-width:120px}}
   </style>
 </head>
 <body>
-  <div class="scanlines"></div>
-  <div class="corner corner--tl"></div>
-  <div class="corner corner--tr"></div>
-  <div class="corner corner--bl"></div>
-  <div class="corner corner--br"></div>
-
-  <nav>
-    <div class="brand">NFL PlayCaller</div>
-    <div class="links">
-      <a href="#features">Features</a>
-      <a href="#live">Live Mode</a>
-      <a href="#integration">Integration</a>
-      <a href="https://kwyre.com">Kwyre</a>
-    </div>
-  </nav>
-
-  <section class="hero">
-    <div class="codename">Apollo CyberSentinel</div>
-    <h1>NFL PlayCaller AI</h1>
-    <p class="subtitle">
-      AI Offensive Coordinator Intelligence. Blitz prediction, play optimization,
-      scouting reports, and live game analysis — all running on Kwyre's local inference engine.
-    </p>
-
-    <div class="field-viz" id="fieldViz">
-      <div class="label" style="top:8px;left:12px;">LOS</div>
-      <div class="label" style="bottom:8px;right:12px;">ENDZONE</div>
-    </div>
-
-    <div class="cta-row">
-      <button class="btn-primary" onclick="window.location.href='/app'">Launch PlayCaller</button>
-      <button class="btn-secondary" onclick="window.location.href='#features'">View Features</button>
-    </div>
-  </section>
-
-  <section class="section" id="features">
-    <div class="section-label">Analysis Capabilities</div>
-    <h2>Six Analysis Modes</h2>
-    <p class="desc">
-      Each mode is purpose-built for a specific phase of game preparation and execution.
-      Every analysis runs through Kwyre's local AI — your data never leaves your machine.
-    </p>
-    <div class="feature-grid">
-      <div class="feature-card">
-        <div class="icon">&#x1F4CB;</div>
-        <h3>Pre-Game Scouting Report</h3>
-        <p>Full matchup breakdown with offensive tendencies, defensive scheme analysis, head-to-head advantages, and situational strategy for red zone, 3rd down, and 2-minute drills.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon">&#x1F3AF;</div>
-        <h3>Situational Play Call</h3>
-        <p>Input down, distance, field position, score, and defensive alignment. Get the optimal play call with primary read, hot read, EV estimate, and two alternatives.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon">&#x1F50D;</div>
-        <h3>Blitz & Coverage Read</h3>
-        <p>Predict blitz probability, coverage shell, pressure type, individual matchup assignments, and where the vulnerability lies for the offense to exploit.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon">&#x1F3C3;</div>
-        <h3>Player Movement Profile</h3>
-        <p>Deep dive on any player's route tree, tendencies by down and distance, red zone behavior, injury impact on movement, and defensive containment strategy.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon">&#x1F4D6;</div>
-        <h3>Playbook Reverse Engineer</h3>
-        <p>Reconstruct a team's offensive scheme from formation frequencies, motion patterns, tendency-breakers, and how the playbook has evolved over 5 seasons.</p>
-      </div>
-      <div class="feature-card">
-        <div class="icon">&#x1F4CA;</div>
-        <h3>Post-Game Breakdown</h3>
-        <p>Analyze completed games with drive-by-drive critical sequence analysis, scheme evaluation, key matchups, and what each team should adjust.</p>
-      </div>
-    </div>
-  </section>
-
-  <div id="live">
-    <div class="live-callout">
-      <h3>&#x1F3C8; Live Game Mode</h3>
-      <p>
-        Connect to a real-time game feed via WebSocket. The AI tracks score, clock, down, distance,
-        field position, and possession — automatically generating play suggestions as the game unfolds.
-        Demo mode simulates a full game for testing.
-      </p>
-      <div class="live-features">
-        <div class="lf">Real-time scoreboard</div>
-        <div class="lf">Play-by-play feed</div>
-        <div class="lf">Auto play suggestions</div>
-        <div class="lf">WebSocket streaming</div>
-        <div class="lf">All 32 NFL teams</div>
-      </div>
-    </div>
+<div class="scanlines"></div>
+<div class="app-shell">
+  <header>
+    <div class="brand"><span class="brand-sub">Apollo CyberSentinel</span><span class="brand-main">NFL PlayCaller AI</span></div>
+    <div class="conn-status"><div class="conn-dot" id="connDot"></div><span id="connText">Offline</span></div>
+  </header>
+  <nav id="nav"></nav>
+  <div id="tabContent"></div>
+  <div class="help-box">
+    <strong>Server:</strong> <code>cd products/nfl-playcaller && python -m uvicorn main:app --reload</code> — API at <code>http://localhost:8000</code>, WebSocket at <code>ws://localhost:8000/ws/live-game</code>
   </div>
+</div>
 
-  <div class="integration-bar" id="integration">
-    <div class="label">Built On</div>
-    <div class="items">
-      <div class="item">Kwyre Local AI</div>
-      <div class="item">FastAPI</div>
-      <div class="item">WebSocket</div>
-      <div class="item">React + Vite</div>
-      <div class="item">Cloudflare Pages</div>
-    </div>
-  </div>
+<script>
+const API='http://localhost:8000', WS_URL='ws://localhost:8000/ws/live-game';
+const TABS=['Scouting','Play Call','Blitz Read','Player Profile','Live Game'];
+let activeTab=0;
 
-  <section class="section" style="text-align:center;">
-    <div class="section-label">Coverage</div>
-    <h2>All 32 NFL Teams</h2>
-    <p class="desc" style="margin-left:auto;margin-right:auto;">
-      Complete tendency data, run/pass ratios, blitz rates, and coverage bases for every team
-      across all 8 divisions. Updated with 5 years of historical data.
-    </p>
-    <div id="teamGrid" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:32px;max-width:800px;margin-left:auto;margin-right:auto;"></div>
-  </section>
+const TEAMS=[
+  {a:'ARI',n:'Arizona Cardinals',d:'NFC West',c:'#97233F'},{a:'ATL',n:'Atlanta Falcons',d:'NFC South',c:'#A71930'},
+  {a:'BAL',n:'Baltimore Ravens',d:'AFC North',c:'#241773'},{a:'BUF',n:'Buffalo Bills',d:'AFC East',c:'#00338D'},
+  {a:'CAR',n:'Carolina Panthers',d:'NFC South',c:'#0085CA'},{a:'CHI',n:'Chicago Bears',d:'NFC North',c:'#0B162A'},
+  {a:'CIN',n:'Cincinnati Bengals',d:'AFC North',c:'#FB4F14'},{a:'CLE',n:'Cleveland Browns',d:'AFC North',c:'#311D00'},
+  {a:'DAL',n:'Dallas Cowboys',d:'NFC East',c:'#003594'},{a:'DEN',n:'Denver Broncos',d:'AFC West',c:'#FB4F14'},
+  {a:'DET',n:'Detroit Lions',d:'NFC North',c:'#0076B6'},{a:'GB',n:'Green Bay Packers',d:'NFC North',c:'#203731'},
+  {a:'HOU',n:'Houston Texans',d:'AFC South',c:'#03202F'},{a:'IND',n:'Indianapolis Colts',d:'AFC South',c:'#002C5F'},
+  {a:'JAX',n:'Jacksonville Jaguars',d:'AFC South',c:'#006778'},{a:'KC',n:'Kansas City Chiefs',d:'AFC West',c:'#E31837'},
+  {a:'LAC',n:'Los Angeles Chargers',d:'AFC West',c:'#0080C6'},{a:'LAR',n:'Los Angeles Rams',d:'NFC West',c:'#003594'},
+  {a:'LV',n:'Las Vegas Raiders',d:'AFC West',c:'#A5ACAF'},{a:'MIA',n:'Miami Dolphins',d:'AFC East',c:'#008E97'},
+  {a:'MIN',n:'Minnesota Vikings',d:'NFC North',c:'#4F2683'},{a:'NE',n:'New England Patriots',d:'AFC East',c:'#002244'},
+  {a:'NO',n:'New Orleans Saints',d:'NFC South',c:'#D3BC8D'},{a:'NYG',n:'New York Giants',d:'NFC East',c:'#0B2265'},
+  {a:'NYJ',n:'New York Jets',d:'AFC East',c:'#125740'},{a:'PHI',n:'Philadelphia Eagles',d:'NFC East',c:'#004C54'},
+  {a:'PIT',n:'Pittsburgh Steelers',d:'AFC North',c:'#FFB612'},{a:'SEA',n:'Seattle Seahawks',d:'NFC West',c:'#002244'},
+  {a:'SF',n:'San Francisco 49ers',d:'NFC West',c:'#AA0000'},{a:'TB',n:'Tampa Bay Buccaneers',d:'NFC South',c:'#D50A0A'},
+  {a:'TEN',n:'Tennessee Titans',d:'AFC South',c:'#0C2340'},{a:'WAS',n:'Washington Commanders',d:'NFC East',c:'#5A1414'}
+];
+const DOWNS=['1st','2nd','3rd','4th'];
+const DISTANCES=['1','2','3','4','5','6','7','8','9','10','15','20','Goal'];
+const FIELD_POS=['Own 5','Own 10','Own 15','Own 20','Own 25','Own 30','Own 35','Own 40','Own 45','Midfield','Opp 45','Opp 40','Opp 35','Opp 30','Opp 25','Opp 20','Opp 15','Opp 10','Opp 5','Opp 1'];
+const QUARTERS=['Q1','Q2','Q3','Q4','OT'];
 
-  <footer>
-    <div class="brand">Mint Rail LLC</div>
-    <p>NFL PlayCaller AI is a Kwyre product. All analysis runs locally. &copy; 2026 Mint Rail LLC.</p>
-  </footer>
+let sel={off:'',def:''},openDD=null,ddSearch='';
+let scoutResult=null,playResult=null,blitzResult=null,playerResult=null;
+let sit={down:'',dist:'',fp:'',qtr:'',score:'',defLook:''}, playerName='';
+let ws=null,wsConnected=false,liveData={home:'',away:'',homeScore:0,awayScore:0,quarter:'Q1',clock:'15:00',down:'1st',distance:'10',fieldPos:50,possession:'home',plays:[],suggestion:null};
 
-  <script>
-    const teams = [
-      {a:"ARI",c:"#97233F"},{a:"ATL",c:"#A71930"},{a:"BAL",c:"#241773"},{a:"BUF",c:"#00338D"},
-      {a:"CAR",c:"#0085CA"},{a:"CHI",c:"#0B162A"},{a:"CIN",c:"#FB4F14"},{a:"CLE",c:"#311D00"},
-      {a:"DAL",c:"#003594"},{a:"DEN",c:"#FB4F14"},{a:"DET",c:"#0076B6"},{a:"GB",c:"#203731"},
-      {a:"HOU",c:"#03202F"},{a:"IND",c:"#002C5F"},{a:"JAX",c:"#006778"},{a:"KC",c:"#E31837"},
-      {a:"LAC",c:"#0080C6"},{a:"LAR",c:"#003594"},{a:"LV",c:"#A5ACAF"},{a:"MIA",c:"#008E97"},
-      {a:"MIN",c:"#4F2683"},{a:"NE",c:"#002244"},{a:"NO",c:"#D3BC8D"},{a:"NYG",c:"#0B2265"},
-      {a:"NYJ",c:"#125740"},{a:"PHI",c:"#004C54"},{a:"PIT",c:"#FFB612"},{a:"SEA",c:"#002244"},
-      {a:"SF",c:"#AA0000"},{a:"TB",c:"#D50A0A"},{a:"TEN",c:"#0C2340"},{a:"WAS",c:"#5A1414"},
-    ];
+function checkServer(){fetch(API+'/health').then(r=>{setConn(r.ok)}).catch(()=>setConn(false))}
+function setConn(ok){document.getElementById('connDot').className='conn-dot'+(ok?' ok':'');document.getElementById('connText').textContent=ok?'Online':'Offline'}
 
-    const grid = document.getElementById('teamGrid');
-    teams.forEach(t => {
-      const el = document.createElement('div');
-      el.style.cssText = `width:44px;height:44px;border-radius:8px;background:${t.c};display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#fff;cursor:default;transition:transform 0.2s;`;
-      el.textContent = t.a;
-      el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.15)');
-      el.addEventListener('mouseleave', () => el.style.transform = 'scale(1)');
-      grid.appendChild(el);
+function renderNav(){
+  document.getElementById('nav').innerHTML=TABS.map((t,i)=>`<button class="${i===activeTab?'active':''}" onclick="switchTab(${i})">${t}</button>`).join('');
+}
+function switchTab(i){activeTab=i;renderNav();renderTab()}
+function renderTab(){
+  const c=document.getElementById('tabContent');
+  if(activeTab===0) renderScouting(c);
+  else if(activeTab===1) renderPlayCall(c);
+  else if(activeTab===2) renderBlitz(c);
+  else if(activeTab===3) renderPlayer(c);
+  else renderLive(c);
+}
+
+function teamOptHtml(id,label,exclude){
+  const tm=sel[id]?TEAMS.find(t=>t.a===sel[id]):null;
+  let h=`<div class="team-sel" id="ts_${id}"><span class="sel-label">${label}</span>`;
+  h+=`<button class="team-btn" onclick="toggleDD('${id}')" type="button">`;
+  if(tm) h+=`<span class="team-dot" style="background:${tm.c}">${tm.a}</span><span style="font-weight:600">${tm.n}</span>`;
+  else h+=`<span style="color:#666">Select team...</span>`;
+  h+=`<span style="margin-left:auto;font-size:10px;opacity:.4">▼</span></button>`;
+  if(openDD===id){
+    h+=`<div class="team-dd"><input type="text" placeholder="Search teams..." value="${ddSearch}" oninput="ddSearch=this.value;renderTab()" autofocus>`;
+    h+=`<div class="team-dd-list">`;
+    const divs={};
+    TEAMS.filter(t=>t.a!==sel[exclude]&&t.n.toLowerCase().includes(ddSearch.toLowerCase())).forEach(t=>{if(!divs[t.d])divs[t.d]=[];divs[t.d].push(t)});
+    Object.keys(divs).sort().forEach(d=>{
+      h+=`<div class="team-dd-div">${d}</div>`;
+      divs[d].forEach(t=>{h+=`<button class="team-dd-item" onclick="pickTeam('${id}','${t.a}')"><span class="team-dot" style="background:${t.c}">${t.a}</span>${t.n}</button>`});
     });
+    h+=`</div></div>`;
+  }
+  h+=`</div>`;return h;
+}
+function toggleDD(id){openDD=openDD===id?null:id;ddSearch='';renderTab();if(openDD){setTimeout(()=>{const inp=document.querySelector('.team-dd input');if(inp)inp.focus()},20)}}
+function pickTeam(id,abbr){sel[id]=abbr;openDD=null;ddSearch='';renderTab()}
 
-    // Field visualization
-    const fv = document.getElementById('fieldViz');
-    for (let i = 1; i < 10; i++) {
-      const yl = document.createElement('div');
-      yl.className = 'yard-line';
-      yl.style.left = (i * 10) + '%';
-      fv.appendChild(yl);
-    }
+document.addEventListener('mousedown',e=>{if(openDD&&!e.target.closest('.team-sel')){openDD=null;renderTab()}});
 
-    const offPositions = [
-      {x:35,y:50},{x:25,y:30},{x:25,y:70},{x:20,y:20},{x:20,y:80},
-      {x:30,y:50},{x:15,y:40},{x:15,y:60},{x:15,y:10},{x:15,y:90},{x:10,y:50}
-    ];
-    offPositions.forEach((p, i) => {
-      const dot = document.createElement('div');
-      dot.className = 'player-dot';
-      dot.style.cssText = `left:${p.x}%;top:${p.y}%;background:#d4c896;box-shadow:0 0 8px rgba(212,200,150,0.4);animation-delay:${i*0.15}s;`;
-      fv.appendChild(dot);
-    });
+function sitInputs(){
+  let h='<div class="card"><h3>Game Situation</h3>';
+  h+=`<div class="row"><div><span class="sel-label">Down</span><select onchange="sit.down=this.value"><option value="">—</option>${DOWNS.map(d=>`<option ${sit.down===d?'selected':''}>${d}</option>`).join('')}</select></div>`;
+  h+=`<div><span class="sel-label">Distance</span><select onchange="sit.dist=this.value"><option value="">—</option>${DISTANCES.map(d=>`<option ${sit.dist===d?'selected':''}>${d}</option>`).join('')}</select></div>`;
+  h+=`<div><span class="sel-label">Field Position</span><select onchange="sit.fp=this.value"><option value="">—</option>${FIELD_POS.map(d=>`<option ${sit.fp===d?'selected':''}>${d}</option>`).join('')}</select></div>`;
+  h+=`<div><span class="sel-label">Quarter</span><select onchange="sit.qtr=this.value"><option value="">—</option>${QUARTERS.map(d=>`<option ${sit.qtr===d?'selected':''}>${d}</option>`).join('')}</select></div></div>`;
+  h+=`<div class="row"><div><span class="sel-label">Score</span><input type="text" value="${sit.score}" onchange="sit.score=this.value" placeholder="e.g. KC 21 - BAL 17"></div>`;
+  h+=`<div><span class="sel-label">Defensive Look</span><input type="text" value="${sit.defLook}" onchange="sit.defLook=this.value" placeholder="e.g. Nickel, 2-high"></div></div></div>`;
+  return h;
+}
 
-    const defPositions = [
-      {x:45,y:25},{x:45,y:45},{x:45,y:55},{x:45,y:75},
-      {x:55,y:20},{x:55,y:40},{x:55,y:60},{x:55,y:80},
-      {x:70,y:30},{x:70,y:50},{x:70,y:70}
-    ];
-    defPositions.forEach((p, i) => {
-      const dot = document.createElement('div');
-      dot.className = 'player-dot';
-      dot.style.cssText = `left:${p.x}%;top:${p.y}%;background:#c44;box-shadow:0 0 8px rgba(204,68,68,0.4);animation-delay:${i*0.2}s;`;
-      fv.appendChild(dot);
-    });
+function formatResult(text){
+  if(!text) return '';
+  return text.split('\n').map(line=>{
+    if(line.startsWith('# ')) return `<h2>${line.slice(2)}</h2>`;
+    if(line.startsWith('## ')) return `<h3>${line.slice(3)}</h3>`;
+    if(line.startsWith('### ')) return `<h4 style="font-size:.85rem;font-weight:600;color:#bbb;margin:10px 0 4px">${line.slice(4)}</h4>`;
+    if(line.startsWith('- ')) return `<div style="padding-left:14px;position:relative;margin-bottom:3px"><span style="position:absolute;left:0;color:var(--gold)">•</span>${line.slice(2)}</div>`;
+    if(line.trim()==='') return '<div style="height:6px"></div>';
+    return `<div>${line}</div>`;
+  }).join('');
+}
 
-    const routes = [
-      {x:25,y:30,angle:-30,len:120},{x:25,y:70,angle:20,len:100},
-      {x:15,y:10,angle:-10,len:150},{x:15,y:90,angle:15,len:140}
-    ];
-    routes.forEach(r => {
-      const line = document.createElement('div');
-      line.className = 'route-line';
-      line.style.cssText = `left:${r.x}%;top:${r.y}%;width:${r.len}px;transform:rotate(${r.angle}deg);`;
-      fv.appendChild(line);
-    });
-  </script>
+function resultHtml(data,label){
+  if(!data) return '';
+  if(data.error) return `<div class="error-box">${data.error}</div>`;
+  const txt=typeof data==='string'?data:data.analysis||data.report||data.result||data.text||JSON.stringify(data,null,2);
+  return `<div class="result-box"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold)">${label}</span><div style="flex:1;height:1px;background:rgba(200,180,120,.15)"></div></div><div class="result-text">${formatResult(txt)}</div></div>`;
+}
+
+function renderScouting(c){
+  let h='<div class="tab active"><div class="card"><h3>Pre-Game Scouting Report</h3>';
+  h+=`<div class="row">${teamOptHtml('off','Offense','def')}${teamOptHtml('def','Defense','off')}</div>`;
+  const ok=sel.off&&sel.def;
+  h+=`<button class="btn btn-gold" style="width:100%" onclick="runScouting()" ${ok?'':'disabled'}>Generate Report</button></div>`;
+  h+=resultHtml(scoutResult,'Scouting Report');
+  h+='</div>';c.innerHTML=h;
+}
+async function runScouting(){
+  setLoading();
+  try{
+    const r=await fetch(API+'/v1/analysis/scouting',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({offense:sel.off,defense:sel.def})});
+    if(!r.ok) throw new Error((await r.json()).detail||'Failed');
+    scoutResult=await r.json();
+  }catch(e){scoutResult={error:e.message}}
+  renderTab();
+}
+
+function renderPlayCall(c){
+  let h='<div class="tab active"><div class="card"><h3>Situational Play Call</h3>';
+  h+=`<div class="row">${teamOptHtml('off','Offense','def')}${teamOptHtml('def','Defense','off')}</div></div>`;
+  h+=sitInputs();
+  const ok=sel.off&&sel.def;
+  h+=`<button class="btn btn-gold" style="width:100%;margin-bottom:12px" onclick="runPlayCall()" ${ok?'':'disabled'}>Call Play</button>`;
+  h+=resultHtml(playResult,'Play Call');
+  h+='</div>';c.innerHTML=h;
+}
+async function runPlayCall(){
+  setLoading();
+  try{
+    const r=await fetch(API+'/v1/analysis/playcall',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({offense:sel.off,defense:sel.def,...sit})});
+    if(!r.ok) throw new Error((await r.json()).detail||'Failed');
+    playResult=await r.json();
+  }catch(e){playResult={error:e.message}}
+  renderTab();
+}
+
+function renderBlitz(c){
+  let h='<div class="tab active"><div class="card"><h3>Blitz & Coverage Prediction</h3>';
+  h+=`<div class="row">${teamOptHtml('off','Offense','def')}${teamOptHtml('def','Defense','off')}</div></div>`;
+  h+=sitInputs();
+  const ok=sel.off&&sel.def;
+  h+=`<button class="btn btn-gold" style="width:100%;margin-bottom:12px" onclick="runBlitz()" ${ok?'':'disabled'}>Predict</button>`;
+  h+=resultHtml(blitzResult,'Blitz Read');
+  h+='</div>';c.innerHTML=h;
+}
+async function runBlitz(){
+  setLoading();
+  try{
+    const r=await fetch(API+'/v1/analysis/blitz',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({offense:sel.off,defense:sel.def,...sit})});
+    if(!r.ok) throw new Error((await r.json()).detail||'Failed');
+    blitzResult=await r.json();
+  }catch(e){blitzResult={error:e.message}}
+  renderTab();
+}
+
+function renderPlayer(c){
+  let h='<div class="tab active"><div class="card"><h3>Player Movement Profile</h3>';
+  h+=`<div class="row"><div>${teamOptHtml('off','Team','def')}</div><div><span class="sel-label">Player Name</span><input type="text" value="${playerName}" onchange="playerName=this.value" placeholder="e.g. Tyreek Hill, Micah Parsons"></div></div>`;
+  const ok=sel.off&&playerName;
+  h+=`<button class="btn btn-gold" style="width:100%" onclick="runPlayer()" ${ok?'':'disabled'}>Analyze Player</button></div>`;
+  h+=resultHtml(playerResult,'Player Profile');
+  h+='</div>';c.innerHTML=h;
+}
+async function runPlayer(){
+  setLoading();
+  try{
+    const r=await fetch(API+'/v1/analysis/player',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team:sel.off,player:playerName})});
+    if(!r.ok) throw new Error((await r.json()).detail||'Failed');
+    playerResult=await r.json();
+  }catch(e){playerResult={error:e.message}}
+  renderTab();
+}
+
+function setLoading(){
+  const btn=document.querySelector('.btn-gold');
+  if(btn){btn.innerHTML='<span class="spinner"></span> Analyzing...';btn.disabled=true}
+}
+
+function renderLive(c){
+  const d=liveData,ht=d.home?TEAMS.find(t=>t.a===d.home):null,at=d.away?TEAMS.find(t=>t.a===d.away):null;
+  let h='<div class="tab active">';
+  h+='<div class="card"><h3>Live Game Feed</h3>';
+  if(!wsConnected){
+    h+=`<div class="row">${teamOptHtml('off','Home Team','def')}${teamOptHtml('def','Away Team','off')}</div>`;
+    h+=`<button class="btn btn-gold" style="width:100%" onclick="connectWS()" ${sel.off&&sel.def?'':'disabled'}>Connect to Live Feed</button>`;
+  } else {
+    h+=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div class="ws-live"><span class="ld"></span> LIVE</div><button class="btn btn-outline" style="padding:6px 14px;font-size:.72rem" onclick="disconnectWS()">Disconnect</button></div>`;
+    h+=`<div class="scoreboard"><div class="sb-team" style="background:${ht?ht.c+'22':'var(--surface)'}"><div class="sb-abbr" style="color:${ht?ht.c:'var(--text)'}">${d.home||'—'}</div><div class="sb-score">${d.homeScore}</div></div>`;
+    h+=`<div class="sb-mid"><span>${d.quarter}</span><span style="font-size:.9rem;font-weight:700;color:var(--text)">${d.clock}</span><span>${d.down} & ${d.distance}</span></div>`;
+    h+=`<div class="sb-team" style="background:${at?at.c+'22':'var(--surface)'}"><div class="sb-abbr" style="color:${at?at.c:'var(--text)'}">${d.away||'—'}</div><div class="sb-score">${d.awayScore}</div></div></div>`;
+    h+=fieldVizHtml(d.fieldPos,d.possession==='home');
+    if(d.suggestion) h+=`<div class="sugg-card"><span style="font-size:.68rem;letter-spacing:1px;text-transform:uppercase;color:var(--gold);font-weight:700">Suggested Play</span><div style="margin-top:4px">${d.suggestion}</div></div>`;
+    h+='<div style="margin-top:12px"><span class="sel-label">Play-by-Play</span></div><div class="play-feed">';
+    if(d.plays.length===0) h+='<div class="play-feed-item" style="color:#555">Waiting for plays...</div>';
+    else [...d.plays].reverse().forEach(p=>{h+=`<div class="play-feed-item"><span class="pf-type">${p.type||'PLAY'}</span> ${p.text||p.description||JSON.stringify(p)}</div>`});
+    h+='</div>';
+  }
+  h+='</div></div>';c.innerHTML=h;
+}
+
+function fieldVizHtml(pos,homeHasBall){
+  let h='<div class="field-viz">';
+  for(let i=1;i<=9;i++){
+    h+=`<div class="field-yl" style="left:${i*10}%"></div>`;
+    const yd=i<=5?(i*10):(100-i*10);
+    h+=`<span class="field-label" style="left:${i*10}%">${yd}</span>`;
+  }
+  const pct=typeof pos==='number'?pos:50;
+  h+=`<div class="field-marker" style="left:${pct}%"></div>`;
+  h+='</div>';return h;
+}
+
+function connectWS(){
+  liveData.home=sel.off;liveData.away=sel.def;liveData.plays=[];
+  liveData.homeScore=0;liveData.awayScore=0;liveData.quarter='Q1';liveData.clock='15:00';liveData.fieldPos=25;liveData.suggestion=null;
+  try{
+    ws=new WebSocket(WS_URL);
+    ws.onopen=()=>{
+      wsConnected=true;
+      ws.send(JSON.stringify({type:'init',home:sel.off,away:sel.def}));
+      renderTab();
+    };
+    ws.onmessage=(e)=>{
+      try{
+        const msg=JSON.parse(e.data);
+        if(msg.homeScore!==undefined) liveData.homeScore=msg.homeScore;
+        if(msg.awayScore!==undefined) liveData.awayScore=msg.awayScore;
+        if(msg.quarter) liveData.quarter=msg.quarter;
+        if(msg.clock) liveData.clock=msg.clock;
+        if(msg.down) liveData.down=msg.down;
+        if(msg.distance) liveData.distance=msg.distance;
+        if(msg.fieldPos!==undefined) liveData.fieldPos=msg.fieldPos;
+        if(msg.possession) liveData.possession=msg.possession;
+        if(msg.suggestion) liveData.suggestion=msg.suggestion;
+        if(msg.play||msg.description||msg.text) liveData.plays.push({type:msg.type||'PLAY',text:msg.play||msg.description||msg.text});
+        renderTab();
+      }catch(_){}
+    };
+    ws.onclose=()=>{wsConnected=false;renderTab()};
+    ws.onerror=()=>{wsConnected=false;renderTab()};
+  }catch(e){wsConnected=false;renderTab()}
+}
+
+function disconnectWS(){if(ws){ws.close();ws=null}wsConnected=false;renderTab()}
+
+renderNav();renderTab();checkServer();setInterval(checkServer,10000);
+</script>
 </body>
 </html>

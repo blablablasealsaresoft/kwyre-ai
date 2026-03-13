@@ -1,382 +1,584 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CodeForge — AI That Understands Your Codebase</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CodeForge — AI Code Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
-    :root {
-      --bg:        #0d1117;
-      --surface:   #161b22;
-      --border:    #30363d;
-      --text:      #e6edf3;
-      --text-dim:  #8b949e;
-      --accent:    #58a6ff;
-      --green:     #3fb950;
-      --orange:    #d29922;
-      --red:       #f85149;
-      --purple:    #bc8cff;
-      --mono:      'JetBrains Mono', monospace;
-      --sans:      'Inter', -apple-system, sans-serif;
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a25;--border:#252535;
+      --orange:#f97316;--orange-dim:rgba(249,115,22,.1);--orange-glow:rgba(249,115,22,.25);
+      --text:#e4e4ec;--text-dim:#6b6b80;--white:#fff;
+      --red:#ef4444;--amber:#eab308;--green:#22c55e;--blue:#60a5fa;--purple:#a78bfa;
+      --mono:'JetBrains Mono',Consolas,'SF Mono',monospace;
     }
-
-    html { scroll-behavior: smooth; }
-
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-
-    /* ---- NAV ---- */
-    nav {
-      position: fixed; top: 0; width: 100%; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 1rem 2rem;
-      background: rgba(13, 17, 23, 0.85);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
-    }
-    .logo { font-family: var(--mono); font-weight: 700; font-size: 1.2rem; color: var(--accent); text-decoration: none; }
-    .logo span { color: var(--text); }
-    nav ul { list-style: none; display: flex; gap: 2rem; }
-    nav a { color: var(--text-dim); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
-    nav a:hover { color: var(--accent); }
-
-    /* ---- HERO ---- */
-    .hero {
-      min-height: 100vh; display: flex; flex-direction: column;
-      align-items: center; justify-content: center; text-align: center;
-      padding: 8rem 2rem 4rem;
-      background: radial-gradient(ellipse at 50% 0%, rgba(88,166,255,0.08) 0%, transparent 60%);
-    }
-    .hero h1 {
-      font-family: var(--mono); font-size: clamp(2rem, 5vw, 3.5rem);
-      font-weight: 700; letter-spacing: -0.02em; margin-bottom: 1rem;
-    }
-    .hero h1 .accent { color: var(--accent); }
-    .hero p { color: var(--text-dim); font-size: 1.15rem; max-width: 600px; margin-bottom: 2.5rem; }
-    .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
-    .btn {
-      display: inline-block; padding: 0.75rem 1.75rem; border-radius: 6px;
-      font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: all 0.2s;
-    }
-    .btn-primary { background: var(--accent); color: var(--bg); }
-    .btn-primary:hover { background: #79c0ff; }
-    .btn-secondary { border: 1px solid var(--border); color: var(--text-dim); }
-    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* ---- CODE BLOCK (Hero) ---- */
-    .code-window {
-      margin-top: 3rem; width: 100%; max-width: 720px;
-      border: 1px solid var(--border); border-radius: 8px;
-      overflow: hidden; text-align: left;
-      box-shadow: 0 16px 48px rgba(0,0,0,0.4);
-    }
-    .code-titlebar {
-      display: flex; align-items: center; gap: 6px;
-      padding: 10px 14px; background: var(--surface); border-bottom: 1px solid var(--border);
-    }
-    .dot { width: 12px; height: 12px; border-radius: 50%; }
-    .dot-r { background: var(--red); }
-    .dot-y { background: var(--orange); }
-    .dot-g { background: var(--green); }
-    .code-titlebar span { margin-left: auto; font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim); }
-    .code-body {
-      padding: 1.25rem; background: #0d1117;
-      font-family: var(--mono); font-size: 0.85rem; line-height: 1.7;
-      overflow-x: auto;
-    }
-    .code-body .kw { color: var(--purple); }
-    .code-body .fn { color: #d2a8ff; }
-    .code-body .str { color: #a5d6ff; }
-    .code-body .cmt { color: var(--text-dim); font-style: italic; }
-    .code-body .num { color: var(--orange); }
-    .code-body .warn { color: var(--red); }
-    .code-body .ok { color: var(--green); }
-    .code-body .ln { color: #484f58; user-select: none; display: inline-block; width: 2.5em; text-align: right; margin-right: 1.5em; }
-
-    /* ---- SECTIONS ---- */
-    section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
-    section h2 {
-      font-family: var(--mono); font-size: 1.8rem;
-      margin-bottom: 0.5rem; letter-spacing: -0.01em;
-    }
-    section .subtitle { color: var(--text-dim); font-size: 1rem; margin-bottom: 3rem; }
-
-    /* ---- FEATURES GRID ---- */
-    .features-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 1.5rem;
-    }
-    .feature-card {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-      padding: 1.75rem; transition: border-color 0.2s;
-    }
-    .feature-card:hover { border-color: var(--accent); }
-    .feature-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
-    .feature-card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
-    .feature-card p { color: var(--text-dim); font-size: 0.9rem; }
-
-    /* ---- LANGUAGES ---- */
-    .lang-badges {
-      display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem;
-    }
-    .lang-badge {
-      display: flex; align-items: center; gap: 0.5rem;
-      padding: 0.5rem 1rem; background: var(--surface); border: 1px solid var(--border);
-      border-radius: 20px; font-family: var(--mono); font-size: 0.85rem;
-    }
-    .lang-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .lang-dot.python { background: #3572A5; }
-    .lang-dot.typescript { background: #3178C6; }
-    .lang-dot.go { background: #00ADD8; }
-    .lang-dot.rust { background: #DEA584; }
-    .lang-dot.java { background: #B07219; }
-    .lang-dot.ruby { background: #CC342D; }
-
-    /* ---- API EXAMPLE ---- */
-    .api-example {
-      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
-      overflow: hidden; margin-top: 1.5rem;
-    }
-    .api-example-header {
-      display: flex; align-items: center; gap: 0.75rem;
-      padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border);
-      font-family: var(--mono); font-size: 0.8rem;
-    }
-    .method { padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
-    .method-post { background: rgba(63,185,80,0.15); color: var(--green); }
-    .method-get { background: rgba(88,166,255,0.15); color: var(--accent); }
-    .api-example pre {
-      padding: 1.25rem; font-family: var(--mono); font-size: 0.82rem;
-      line-height: 1.6; overflow-x: auto; color: var(--text-dim);
-    }
-
-    /* ---- PRIVACY ---- */
-    .privacy-banner {
-      display: flex; align-items: center; gap: 1.5rem;
-      padding: 2rem; margin-top: 3rem;
-      background: rgba(63,185,80,0.06); border: 1px solid rgba(63,185,80,0.2);
-      border-radius: 8px;
-    }
-    .privacy-banner .shield { font-size: 2.5rem; }
-    .privacy-banner h3 { font-size: 1.1rem; color: var(--green); margin-bottom: 0.25rem; }
-    .privacy-banner p { color: var(--text-dim); font-size: 0.9rem; }
-
-    /* ---- FOOTER ---- */
-    footer {
-      padding: 2rem; text-align: center;
-      border-top: 1px solid var(--border); color: var(--text-dim); font-size: 0.8rem;
-    }
-
-    @media (max-width: 640px) {
-      nav ul { display: none; }
-      .features-grid { grid-template-columns: 1fr; }
-      .privacy-banner { flex-direction: column; text-align: center; }
+    body{font-family:var(--mono);background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+    header{display:flex;align-items:center;justify-content:space-between;padding:.7rem 1.5rem;border-bottom:1px solid var(--border);background:var(--surface)}
+    .logo{font-size:1.15rem;font-weight:700;color:var(--white);letter-spacing:-.02em}
+    .logo span{color:var(--orange)}
+    .header-right{display:flex;align-items:center;gap:1rem}
+    .lang-badges{display:flex;gap:.35rem;flex-wrap:wrap}
+    .lang-badge{display:flex;align-items:center;gap:.3rem;padding:.15rem .45rem;font-size:.6rem;border-radius:3px;background:var(--surface2);border:1px solid var(--border);color:var(--text-dim)}
+    .lang-dot{width:6px;height:6px;border-radius:50%}
+    .lang-dot.py{background:#3572A5}.lang-dot.ts{background:#3178C6}.lang-dot.go{background:#00ADD8}
+    .lang-dot.rs{background:#DEA584}.lang-dot.java{background:#B07219}.lang-dot.rb{background:#CC342D}
+    .conn{display:flex;align-items:center;gap:.35rem;font-size:.7rem;color:var(--text-dim)}
+    .conn-dot{width:7px;height:7px;border-radius:50%;background:var(--red);transition:background .3s}
+    .conn-dot.ok{background:var(--green)}
+    .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface)}
+    .tab{padding:.65rem 1.2rem;font-size:.78rem;font-weight:500;color:var(--text-dim);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .2s;font-family:var(--mono)}
+    .tab:hover{color:var(--text)}
+    .tab.active{color:var(--orange);border-bottom-color:var(--orange);background:var(--orange-dim)}
+    .panel{display:none;padding:1.5rem;max-width:1000px;margin:0 auto}
+    .panel.active{display:block}
+    h2.section-title{font-size:1rem;font-weight:600;color:var(--white);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+    h2.section-title::before{content:'>';color:var(--orange);font-weight:700}
+    label{display:block;font-size:.72rem;font-weight:500;color:var(--text-dim);margin-bottom:.25rem;text-transform:uppercase;letter-spacing:.06em}
+    input[type="text"],textarea{width:100%;padding:.55rem .7rem;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:.82rem;font-family:var(--mono);resize:vertical;transition:border-color .2s}
+    input:focus,textarea:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 2px var(--orange-glow)}
+    textarea{min-height:120px}
+    .form-group{margin-bottom:1rem}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+    .btn-action{display:inline-flex;align-items:center;gap:.5rem;padding:.6rem 1.4rem;background:var(--orange);color:var(--bg);font-weight:700;font-size:.82rem;font-family:var(--mono);border:none;border-radius:4px;cursor:pointer;transition:all .2s;margin-top:.25rem}
+    .btn-action:hover{filter:brightness(1.15);transform:translateY(-1px)}
+    .btn-action:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .btn-action .spinner{display:none;width:13px;height:13px;border:2px solid transparent;border-top-color:var(--bg);border-radius:50%;animation:spin .6s linear infinite}
+    .btn-action.loading .spinner{display:block}
+    .btn-action.loading .btn-text{display:none}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .result-area{margin-top:1.5rem}
+    .result-card{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1rem;margin-bottom:.75rem;transition:border-color .15s}
+    .result-card:hover{border-color:var(--orange)}
+    .stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:.75rem}
+    .stat-box{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:1rem;text-align:center}
+    .stat-val{font-size:1.6rem;font-weight:700;color:var(--orange)}
+    .stat-label{font-size:.68rem;color:var(--text-dim);margin-top:.2rem;text-transform:uppercase;letter-spacing:.05em}
+    .progress-bar{height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;margin:1rem 0}
+    .progress-fill{height:100%;background:var(--orange);border-radius:3px;transition:width .5s;width:0}
+    .progress-text{font-size:.72rem;color:var(--text-dim);text-align:center}
+    .search-result{background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:.6rem;overflow:hidden;cursor:pointer;transition:border-color .15s}
+    .search-result:hover{border-color:var(--orange)}
+    .sr-header{display:flex;align-items:center;justify-content:space-between;padding:.6rem .8rem;border-bottom:1px solid var(--border);font-size:.75rem}
+    .sr-path{color:var(--orange);font-weight:500}
+    .sr-lines{color:var(--text-dim)}
+    .sr-score{background:var(--orange-dim);color:var(--orange);padding:.1rem .4rem;border-radius:3px;font-weight:600;font-size:.7rem}
+    .sr-code{padding:.6rem .8rem;font-size:.78rem;line-height:1.7;overflow-x:auto;white-space:pre;color:var(--text-dim)}
+    .sr-code .kw{color:var(--purple)}.sr-code .fn{color:var(--blue)}.sr-code .str{color:var(--green)}
+    .sr-code .cmt{color:#4a4a5a;font-style:italic}.sr-code .num{color:var(--orange)}
+    .sr-context{display:none;padding:.6rem .8rem;border-top:1px solid var(--border);font-size:.75rem;line-height:1.7;white-space:pre;color:var(--text-dim)}
+    .search-result.expanded .sr-context{display:block}
+    .review-card{background:var(--surface);border-left:3px solid var(--border);border-radius:0 6px 6px 0;padding:1rem;margin-bottom:.6rem}
+    .review-card.sev-critical{border-left-color:var(--red)}
+    .review-card.sev-warning{border-left-color:var(--amber)}
+    .review-card.sev-info{border-left-color:var(--blue)}
+    .rc-top{display:flex;align-items:center;gap:.5rem;margin-bottom:.4rem;flex-wrap:wrap}
+    .sev-badge{font-size:.65rem;font-weight:700;padding:.12rem .4rem;border-radius:3px;text-transform:uppercase;letter-spacing:.04em}
+    .sev-badge.critical{background:rgba(239,68,68,.15);color:var(--red)}
+    .sev-badge.warning{background:rgba(234,179,8,.15);color:var(--amber)}
+    .sev-badge.info{background:rgba(96,165,250,.15);color:var(--blue)}
+    .cat-badge{font-size:.65rem;padding:.12rem .4rem;border-radius:3px;background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)}
+    .rc-loc{font-size:.72rem;color:var(--text-dim);margin-left:auto}
+    .rc-desc{font-size:.82rem;color:var(--text);margin-bottom:.4rem}
+    .rc-suggestion{font-size:.78rem;color:var(--green);background:rgba(34,197,94,.06);padding:.4rem .6rem;border-radius:4px;border:1px solid rgba(34,197,94,.15)}
+    .summary-bar{display:flex;gap:1rem;padding:.75rem 1rem;background:var(--surface);border:1px solid var(--border);border-radius:6px;margin-bottom:1rem}
+    .summary-item{display:flex;align-items:center;gap:.3rem;font-size:.78rem;font-weight:600}
+    .file-tree{font-size:.78rem;line-height:1.8}
+    .tree-dir{color:var(--orange);cursor:pointer}
+    .tree-dir:hover{text-decoration:underline}
+    .tree-file{color:var(--text-dim);padding-left:1.2rem}
+    .lang-bar-container{margin-top:1rem}
+    .lang-bar{display:flex;height:20px;border-radius:4px;overflow:hidden;margin-bottom:.4rem}
+    .lang-segment{height:100%;transition:width .4s;min-width:2px}
+    .lang-legend{display:flex;flex-wrap:wrap;gap:.75rem}
+    .lang-legend-item{display:flex;align-items:center;gap:.3rem;font-size:.72rem;color:var(--text-dim)}
+    .lang-legend-dot{width:8px;height:8px;border-radius:2px}
+    .hotspot{display:flex;align-items:center;justify-content:space-between;padding:.5rem .7rem;margin-bottom:.35rem;background:var(--surface2);border-radius:4px;font-size:.78rem}
+    .hotspot-name{color:var(--text);font-weight:500}
+    .hotspot-score{color:var(--orange);font-weight:700}
+    .hotspot-bar{flex:0 0 80px;height:5px;background:var(--border);border-radius:3px;margin-left:.75rem;overflow:hidden}
+    .hotspot-bar-fill{height:100%;background:var(--orange);border-radius:3px}
+    .dep-card{font-size:.78rem;color:var(--text-dim);padding:.5rem .7rem;margin-bottom:.3rem;background:var(--surface2);border-radius:4px;display:flex;align-items:center;gap:.5rem}
+    .dep-arrow{color:var(--orange);font-weight:700}
+    .empty-state{text-align:center;padding:3rem 1rem;color:var(--text-dim)}
+    .empty-state .icon{font-size:2rem;margin-bottom:.5rem;opacity:.35}
+    .empty-state p{font-size:.82rem}
+    .error-banner{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:4px;padding:.6rem .8rem;margin-bottom:1rem;font-size:.78rem;color:var(--red);display:none}
+    .server-hint{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:.8rem;margin-top:1rem;font-size:.74rem;color:var(--text-dim)}
+    .server-hint code{background:var(--surface2);padding:.12rem .35rem;border-radius:3px;color:var(--orange);font-size:.72rem}
+    .drop-zone{border:2px dashed var(--border);border-radius:6px;padding:2rem;text-align:center;color:var(--text-dim);font-size:.82rem;cursor:pointer;transition:all .2s;margin-bottom:1rem}
+    .drop-zone:hover,.drop-zone.dragover{border-color:var(--orange);background:var(--orange-dim)}
+    .drop-zone p{pointer-events:none}
+    footer{text-align:center;padding:1rem;border-top:1px solid var(--border);font-size:.68rem;color:var(--text-dim)}
+    @media(max-width:640px){
+      .form-row{grid-template-columns:1fr}
+      .stat-grid{grid-template-columns:repeat(2,1fr)}
+      .lang-badges{display:none}
+      .tabs{overflow-x:auto}.tab{white-space:nowrap;flex-shrink:0}
+      .rc-loc{margin-left:0;width:100%}
     }
   </style>
 </head>
 <body>
 
-<!-- NAV -->
-<nav>
-  <a class="logo" href="#">Code<span>Forge</span></a>
-  <ul>
-    <li><a href="#features">Features</a></li>
-    <li><a href="#languages">Languages</a></li>
-    <li><a href="#api">API</a></li>
-    <li><a href="https://github.com/mintrail/codeforge">GitHub</a></li>
-  </ul>
-</nav>
+<header>
+  <div class="logo"><span>&lt;</span>Code<span>Forge/&gt;</span></div>
+  <div class="header-right">
+    <div class="lang-badges">
+      <div class="lang-badge"><div class="lang-dot py"></div>Python</div>
+      <div class="lang-badge"><div class="lang-dot ts"></div>TypeScript</div>
+      <div class="lang-badge"><div class="lang-dot go"></div>Go</div>
+      <div class="lang-badge"><div class="lang-dot rs"></div>Rust</div>
+      <div class="lang-badge"><div class="lang-dot java"></div>Java</div>
+      <div class="lang-badge"><div class="lang-dot rb"></div>Ruby</div>
+    </div>
+    <div class="conn"><div class="conn-dot" id="connDot"></div><span id="connText">Offline</span></div>
+  </div>
+</header>
 
-<!-- HERO -->
-<section class="hero">
-  <h1><span class="accent">AI</span> That Understands<br>Your Codebase</h1>
-  <p>Index your repository into a semantic vector store. Get instant search, automated review, and documentation — all running locally.</p>
-  <div class="hero-buttons">
-    <a class="btn btn-primary" href="#api">Get Started</a>
-    <a class="btn btn-secondary" href="#features">See Features</a>
+<div class="tabs">
+  <button class="tab active" data-tab="index">Index Repo</button>
+  <button class="tab" data-tab="search">Code Search</button>
+  <button class="tab" data-tab="review">Code Review</button>
+  <button class="tab" data-tab="arch">Architecture</button>
+</div>
+
+<!-- ─── Index Repo ─── -->
+<div class="panel active" id="panel-index">
+  <h2 class="section-title">Index Repository</h2>
+  <div id="indexError" class="error-banner"></div>
+
+  <div class="form-group">
+    <label for="repoPath">Repository Path</label>
+    <input type="text" id="repoPath" placeholder="/home/user/projects/my-app  or  C:\Users\dev\project">
   </div>
 
-  <div class="code-window">
-    <div class="code-titlebar">
-      <div class="dot dot-r"></div>
-      <div class="dot dot-y"></div>
-      <div class="dot dot-g"></div>
-      <span>review_output.json</span>
-    </div>
-    <div class="code-body">
-      <span class="ln"> 1</span>{<br>
-      <span class="ln"> 2</span>  <span class="str">"issues"</span>: [<br>
-      <span class="ln"> 3</span>    {<br>
-      <span class="ln"> 4</span>      <span class="str">"severity"</span>: <span class="warn">"high"</span>,<br>
-      <span class="ln"> 5</span>      <span class="str">"category"</span>: <span class="str">"security"</span>,<br>
-      <span class="ln"> 6</span>      <span class="str">"message"</span>: <span class="warn">"Hardcoded API key on line 42"</span>,<br>
-      <span class="ln"> 7</span>      <span class="str">"suggestion"</span>: <span class="ok">"Move to env variable"</span><br>
-      <span class="ln"> 8</span>    }<br>
-      <span class="ln"> 9</span>  ],<br>
-      <span class="ln">10</span>  <span class="str">"summary"</span>: { <span class="str">"high"</span>: <span class="num">1</span>, <span class="str">"medium"</span>: <span class="num">3</span>, <span class="str">"low"</span>: <span class="num">2</span> }<br>
-      <span class="ln">11</span>}<br>
+  <button class="btn-action" id="btnIndex" onclick="indexRepo()">
+    <div class="spinner"></div>
+    <span class="btn-text">Index Repository</span>
+  </button>
+
+  <div class="result-area" id="indexResults">
+    <div class="empty-state">
+      <div class="icon">&#128193;</div>
+      <p>Enter a local repository path and click Index to begin.</p>
     </div>
   </div>
-</section>
+</div>
 
-<!-- FEATURES -->
-<section id="features">
-  <h2>Features</h2>
-  <p class="subtitle">Everything you need to understand, review, and improve your codebase.</p>
-  <div class="features-grid">
-    <div class="feature-card">
-      <div class="feature-icon">&#x1F50D;</div>
-      <h3>Semantic Code Search</h3>
-      <p>Query your codebase in natural language. "Where do we handle auth?" returns ranked results with file paths and similarity scores.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">&#x1F4CB;</div>
-      <h3>Repo Indexing</h3>
-      <p>AST-like extraction of functions and classes, embedded with sentence-transformers and stored in a FAISS vector index.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">&#x1F6E1;</div>
-      <h3>Automated Code Review</h3>
-      <p>Catches hardcoded secrets, SQL injection, unused imports, excessive complexity, and missing error handling.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">&#x1F527;</div>
-      <h3>Refactoring Suggestions</h3>
-      <p>Identifies long functions, duplicated blocks, and deeply nested logic with actionable extraction targets.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">&#x1F9EA;</div>
-      <h3>Test Generation</h3>
-      <p>Generates test skeletons with setup, assertion placeholders, and edge-case comments from function signatures.</p>
-    </div>
-    <div class="feature-card">
-      <div class="feature-icon">&#x1F4DD;</div>
-      <h3>Documentation Generation</h3>
-      <p>Auto-generates docstrings and module documentation from function signatures and body analysis.</p>
-    </div>
+<!-- ─── Code Search ─── -->
+<div class="panel" id="panel-search">
+  <h2 class="section-title">Semantic Code Search</h2>
+  <div id="searchError" class="error-banner"></div>
+
+  <div class="form-group">
+    <label for="searchQuery">Query</label>
+    <input type="text" id="searchQuery" placeholder="Search by meaning, not keywords — e.g. 'where do we handle authentication?'">
   </div>
 
-  <div class="privacy-banner">
-    <div class="shield">&#x1F512;</div>
-    <div>
-      <h3>Your Code Never Leaves Your Machine</h3>
-      <p>CodeForge runs entirely locally. Embeddings are generated on-device, the FAISS index lives on disk, and zero data is sent externally.</p>
+  <button class="btn-action" id="btnSearch" onclick="searchCode()">
+    <div class="spinner"></div>
+    <span class="btn-text">Search</span>
+  </button>
+
+  <div class="result-area" id="searchResults">
+    <div class="empty-state">
+      <div class="icon">&#128270;</div>
+      <p>Describe what you're looking for in natural language.</p>
     </div>
   </div>
-</section>
+</div>
 
-<!-- LANGUAGES -->
-<section id="languages">
-  <h2>Supported Languages</h2>
-  <p class="subtitle">First-class indexing, review, and search across major languages.</p>
-  <div class="lang-badges">
-    <div class="lang-badge"><div class="lang-dot python"></div>Python</div>
-    <div class="lang-badge"><div class="lang-dot typescript"></div>TypeScript</div>
-    <div class="lang-badge"><div class="lang-dot go"></div>Go</div>
-    <div class="lang-badge"><div class="lang-dot rust"></div>Rust</div>
-    <div class="lang-badge"><div class="lang-dot java"></div>Java</div>
-    <div class="lang-badge"><div class="lang-dot ruby"></div>Ruby</div>
+<!-- ─── Code Review ─── -->
+<div class="panel" id="panel-review">
+  <h2 class="section-title">Code Review</h2>
+  <div id="reviewError" class="error-banner"></div>
+
+  <div class="drop-zone" id="dropZone">
+    <p>Drag &amp; drop a .diff file here, or click to select</p>
+    <input type="file" id="diffFile" accept=".diff,.patch,.txt" style="display:none">
   </div>
-</section>
 
-<!-- API -->
-<section id="api">
-  <h2>API</h2>
-  <p class="subtitle">RESTful endpoints — run locally on port 8000.</p>
+  <div class="form-group">
+    <label for="diffInput">Or paste a diff</label>
+    <textarea id="diffInput" placeholder="Paste your git diff output here..." style="min-height:160px"></textarea>
+  </div>
 
-  <div class="api-example">
-    <div class="api-example-header">
-      <span class="method method-post">POST</span>
-      <span>/v1/search/code</span>
+  <button class="btn-action" id="btnReview" onclick="reviewCode()">
+    <div class="spinner"></div>
+    <span class="btn-text">Review Code</span>
+  </button>
+
+  <div class="result-area" id="reviewResults"></div>
+</div>
+
+<!-- ─── Architecture ─── -->
+<div class="panel" id="panel-arch">
+  <h2 class="section-title">Architecture Analysis</h2>
+  <div id="archError" class="error-banner"></div>
+
+  <div class="form-group">
+    <label for="archPath">Repository Path</label>
+    <input type="text" id="archPath" placeholder="/home/user/projects/my-app">
+  </div>
+
+  <button class="btn-action" id="btnArch" onclick="analyzeArch()">
+    <div class="spinner"></div>
+    <span class="btn-text">Analyze</span>
+  </button>
+
+  <div class="result-area" id="archResults">
+    <div class="empty-state">
+      <div class="icon">&#128736;</div>
+      <p>Enter a repository path to analyze its architecture.</p>
     </div>
-    <pre><span style="color:var(--text-dim)">$ curl -X POST http://localhost:8000/v1/search/code \
-  -H "Content-Type: application/json" \
-  -d '{"query": "authentication middleware", "k": 5}'</span>
-
-{
-  "query": "authentication middleware",
-  "total_results": 3,
-  "results": [
-    {
-      "file": "src/middleware/auth.py",
-      "lines": [12, 45],
-      "score": 0.9234,
-      "preview": "class AuthMiddleware:\n    def __init__(self, app):\n        ..."
-    }
-  ]
-}</pre>
   </div>
+</div>
 
-  <div class="api-example" style="margin-top: 1rem;">
-    <div class="api-example-header">
-      <span class="method method-post">POST</span>
-      <span>/v1/review/diff</span>
-    </div>
-    <pre><span style="color:var(--text-dim)">$ curl -X POST http://localhost:8000/v1/review/diff \
-  -H "Content-Type: application/json" \
-  -d '{"diff": "'"$(git diff HEAD~1)"'"}'</span>
-
-{
-  "issues": [ ... ],
-  "summary": { "high": 1, "medium": 3, "low": 2 },
-  "total": 6
-}</pre>
-  </div>
-
-  <div class="api-example" style="margin-top: 1rem;">
-    <div class="api-example-header">
-      <span class="method method-get">GET</span>
-      <span>/health</span>
-    </div>
-    <pre>{
-  "status": "ok",
-  "indexed_files": 342,
-  "total_chunks": 1847,
-  "index_size_mb": 12.4
-}</pre>
-  </div>
-</section>
-
-<!-- FOOTER -->
-<footer>
-  &copy; 2026 Mint Rail LLC. All rights reserved.&ensp;|&ensp;CodeForge v0.1.0
-</footer>
+<footer>&copy; 2026 Mint Rail LLC &middot; CodeForge v0.2.0</footer>
 
 <script>
-  document.querySelectorAll('nav a[href^="#"]').forEach(link => {
-    link.addEventListener('click', e => {
-      e.preventDefault();
-      const target = document.querySelector(link.getAttribute('href'));
-      if (target) target.scrollIntoView({ behavior: 'smooth' });
-    });
-  });
+const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? `${window.location.protocol}//${window.location.hostname}:8000`
+  : '/api';
 
-  const observer = new IntersectionObserver(entries => {
-    entries.forEach(entry => {
-      if (entry.isIntersecting) {
-        entry.target.style.opacity = '1';
-        entry.target.style.transform = 'translateY(0)';
-      }
-    });
-  }, { threshold: 0.1 });
+let apiOnline = false;
 
-  document.querySelectorAll('.feature-card, .api-example, .privacy-banner').forEach(el => {
-    el.style.opacity = '0';
-    el.style.transform = 'translateY(20px)';
-    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
-    observer.observe(el);
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
   });
+});
+
+async function checkConnection() {
+  try {
+    const r = await fetch(API + '/health', { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      apiOnline = true;
+      document.getElementById('connDot').classList.add('ok');
+      document.getElementById('connText').textContent = 'API Online';
+    } else throw 0;
+  } catch {
+    apiOnline = false;
+    document.getElementById('connDot').classList.remove('ok');
+    document.getElementById('connText').textContent = 'Offline';
+  }
+}
+checkConnection();
+setInterval(checkConnection, 15000);
+
+function setLoading(btn, on) { btn.classList.toggle('loading', on); btn.disabled = on; }
+function showError(id, msg) { const el = document.getElementById(id); el.textContent = msg; el.style.display = 'block'; setTimeout(() => el.style.display = 'none', 8000); }
+function serverHint() {
+  return `<div class="server-hint"><strong>API offline — showing demo data.</strong> Start the server:<br><code>cd products/codeforge && python -m uvicorn app.main:app --port 8000</code></div>`;
+}
+
+async function apiCall(endpoint, body, errorId) {
+  if (!apiOnline) return null;
+  try {
+    const r = await fetch(API + endpoint, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body), signal: AbortSignal.timeout(60000)
+    });
+    if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || `Error ${r.status}`); }
+    return await r.json();
+  } catch (err) { showError(errorId, err.message); return null; }
+}
+
+// ─── Drop zone ───
+const dropZone = document.getElementById('dropZone');
+const diffFile = document.getElementById('diffFile');
+
+dropZone.addEventListener('click', () => diffFile.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  const file = e.dataTransfer.files[0];
+  if (file) readDiffFile(file);
+});
+diffFile.addEventListener('change', e => { if (e.target.files[0]) readDiffFile(e.target.files[0]); });
+
+function readDiffFile(file) {
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('diffInput').value = e.target.result;
+    dropZone.innerHTML = `<p>Loaded: <strong>${file.name}</strong> (${(file.size / 1024).toFixed(1)} KB)</p>`;
+  };
+  reader.readAsText(file);
+}
+
+// ─── Index Repo ───
+async function indexRepo() {
+  const btn = document.getElementById('btnIndex');
+  setLoading(btn, true);
+  const path = document.getElementById('repoPath').value;
+  const el = document.getElementById('indexResults');
+
+  el.innerHTML = `<div class="progress-bar"><div class="progress-fill" id="indexProgress"></div></div><div class="progress-text" id="indexProgressText">Scanning files...</div>`;
+  const bar = document.getElementById('indexProgress');
+  const txt = document.getElementById('indexProgressText');
+  let pct = 0;
+  const steps = ['Scanning files...', 'Parsing AST...', 'Generating embeddings...', 'Building vector index...', 'Finalizing...'];
+  const interval = setInterval(() => {
+    pct = Math.min(pct + Math.random() * 15 + 5, 95);
+    bar.style.width = pct + '%';
+    txt.textContent = steps[Math.min(Math.floor(pct / 20), steps.length - 1)];
+  }, 400);
+
+  let data = await apiCall('/v1/index/repo', { path }, 'indexError');
+  if (!data) data = demoIndex(path);
+
+  clearInterval(interval);
+  bar.style.width = '100%';
+  txt.textContent = 'Complete!';
+  await new Promise(r => setTimeout(r, 500));
+
+  renderIndex(data);
+  setLoading(btn, false);
+}
+
+function demoIndex(path) {
+  const name = (path || 'my-project').split(/[/\\]/).pop();
+  return {
+    repo: name,
+    files_indexed: 342,
+    functions_found: 1247,
+    classes_found: 89,
+    total_chunks: 1847,
+    languages: [
+      { name: 'Python', percentage: 45.2, color: '#3572A5' },
+      { name: 'TypeScript', percentage: 28.7, color: '#3178C6' },
+      { name: 'Go', percentage: 12.4, color: '#00ADD8' },
+      { name: 'Rust', percentage: 8.1, color: '#DEA584' },
+      { name: 'Other', percentage: 5.6, color: '#6b6b80' }
+    ]
+  };
+}
+
+function renderIndex(data) {
+  const el = document.getElementById('indexResults');
+  let html = (!apiOnline ? serverHint() : '');
+  html += `<div style="margin-bottom:1rem;font-size:.82rem;color:var(--text-dim)">Repository: <strong style="color:var(--orange)">${data.repo || 'project'}</strong></div>`;
+  html += `<div class="stat-grid">
+    <div class="stat-box"><div class="stat-val">${(data.files_indexed || 0).toLocaleString()}</div><div class="stat-label">Files Indexed</div></div>
+    <div class="stat-box"><div class="stat-val">${(data.functions_found || 0).toLocaleString()}</div><div class="stat-label">Functions</div></div>
+    <div class="stat-box"><div class="stat-val">${(data.classes_found || 0).toLocaleString()}</div><div class="stat-label">Classes</div></div>
+    <div class="stat-box"><div class="stat-val">${(data.total_chunks || 0).toLocaleString()}</div><div class="stat-label">Chunks</div></div>
+  </div>`;
+
+  if (data.languages && data.languages.length) {
+    html += '<div class="lang-bar-container"><div class="lang-bar">';
+    data.languages.forEach(l => { html += `<div class="lang-segment" style="width:${l.percentage}%;background:${l.color}" title="${l.name}: ${l.percentage}%"></div>`; });
+    html += '</div><div class="lang-legend">';
+    data.languages.forEach(l => { html += `<div class="lang-legend-item"><div class="lang-legend-dot" style="background:${l.color}"></div>${l.name} ${l.percentage}%</div>`; });
+    html += '</div></div>';
+  }
+  el.innerHTML = html;
+}
+
+// ─── Code Search ───
+async function searchCode() {
+  const btn = document.getElementById('btnSearch');
+  setLoading(btn, true);
+  const q = document.getElementById('searchQuery').value;
+  let data = await apiCall('/v1/search/code', { query: q, k: 8 }, 'searchError');
+  if (!data) data = demoSearch(q);
+  renderSearch(data);
+  setLoading(btn, false);
+}
+
+function demoSearch(query) {
+  return { query, total_results: 4, results: [
+    { file: 'src/middleware/auth.py', lines: [12, 45], score: 0.9234,
+      preview: '<span class="kw">class</span> <span class="fn">AuthMiddleware</span>:\n    <span class="kw">def</span> <span class="fn">__init__</span>(self, app):\n        self.app = app\n        self.secret = os.environ[<span class="str">"JWT_SECRET"</span>]',
+      context: '<span class="kw">async def</span> <span class="fn">__call__</span>(self, scope, receive, send):\n    <span class="kw">if</span> scope[<span class="str">"type"</span>] == <span class="str">"http"</span>:\n        headers = dict(scope[<span class="str">"headers"</span>])\n        token = self._extract_token(headers)\n        <span class="kw">if</span> <span class="kw">not</span> self._validate(token):\n            <span class="kw">raise</span> HTTPException(<span class="num">401</span>)' },
+    { file: 'src/api/routes/users.ts', lines: [8, 32], score: 0.8741,
+      preview: '<span class="kw">export const</span> <span class="fn">userRouter</span> = Router();\n\nuserRouter.get(<span class="str">"/me"</span>, authGuard, <span class="kw">async</span> (req, res) => {\n  <span class="kw">const</span> user = <span class="kw">await</span> User.findById(req.userId);',
+      context: '  <span class="kw">if</span> (!user) <span class="kw">return</span> res.status(<span class="num">404</span>).json({ error: <span class="str">"not found"</span> });\n  res.json({ id: user.id, email: user.email, role: user.role });\n});' },
+    { file: 'internal/handler/login.go', lines: [24, 58], score: 0.8103,
+      preview: '<span class="kw">func</span> (<span class="fn">h *Handler</span>) <span class="fn">Login</span>(w http.ResponseWriter, r *http.Request) {\n    <span class="kw">var</span> req LoginRequest\n    json.NewDecoder(r.Body).Decode(&req)\n    user, err := h.store.FindByEmail(req.Email)',
+      context: '    <span class="kw">if</span> err != nil || !checkPassword(user.Hash, req.Password) {\n        http.Error(w, <span class="str">"unauthorized"</span>, <span class="num">401</span>)\n        <span class="kw">return</span>\n    }\n    token := h.issueJWT(user.ID, user.Role)' },
+    { file: 'src/services/token.rs', lines: [1, 30], score: 0.7856,
+      preview: '<span class="kw">use</span> jsonwebtoken::{encode, decode, Header, Validation};\n\n<span class="kw">pub fn</span> <span class="fn">create_token</span>(user_id: &str, role: &str) -> Result&lt;String&gt; {\n    <span class="kw">let</span> claims = Claims { sub: user_id.into(), role: role.into() };',
+      context: '    <span class="kw">let</span> secret = std::env::var(<span class="str">"JWT_SECRET"</span>).expect(<span class="str">"JWT_SECRET must be set"</span>);\n    encode(&Header::default(), &claims, &EncodingKey::from_secret(secret.as_bytes()))' }
+  ]};
+}
+
+function renderSearch(data) {
+  const el = document.getElementById('searchResults');
+  let html = (!apiOnline ? serverHint() : '');
+  html += `<div style="font-size:.75rem;color:var(--text-dim);margin-bottom:.75rem">${data.total_results || 0} results for "<span style="color:var(--orange)">${data.query || ''}</span>"</div>`;
+  (data.results || []).forEach((r, i) => {
+    html += `<div class="search-result" onclick="this.classList.toggle('expanded')">
+      <div class="sr-header">
+        <span class="sr-path">${r.file}</span>
+        <span class="sr-lines">L${r.lines[0]}–${r.lines[1]}</span>
+        <span class="sr-score">${(r.score * 100).toFixed(1)}%</span>
+      </div>
+      <div class="sr-code">${r.preview}</div>
+      <div class="sr-context">${r.context || ''}</div>
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ─── Code Review ───
+async function reviewCode() {
+  const btn = document.getElementById('btnReview');
+  setLoading(btn, true);
+  const diff = document.getElementById('diffInput').value;
+  let data = await apiCall('/v1/review/diff', { diff }, 'reviewError');
+  if (!data) data = demoReview();
+  renderReview(data);
+  setLoading(btn, false);
+}
+
+function demoReview() {
+  return { issues: [
+    { severity: 'critical', category: 'security', description: 'Hardcoded API key detected in configuration file. This will be exposed in version control.', file: 'src/config.py', line: 42, suggestion: 'Move to environment variable: os.environ.get("API_KEY")' },
+    { severity: 'critical', category: 'security', description: 'SQL query constructed via string concatenation — vulnerable to SQL injection.', file: 'src/db/queries.py', line: 78, suggestion: 'Use parameterized queries: cursor.execute("SELECT * FROM users WHERE id = ?", (user_id,))' },
+    { severity: 'warning', category: 'complexity', description: 'Function exceeds 80 lines with cyclomatic complexity of 14. Difficult to test and maintain.', file: 'src/handlers/process.py', line: 23, suggestion: 'Extract validation, transformation, and persistence into separate functions.' },
+    { severity: 'warning', category: 'style', description: 'Inconsistent error handling — some branches return errors, others raise exceptions.', file: 'src/api/routes.py', line: 105, suggestion: 'Standardize on raising exceptions and use a global error handler middleware.' },
+    { severity: 'info', category: 'style', description: 'Unused import: `typing.Optional` is imported but never used in this module.', file: 'src/models/user.py', line: 3, suggestion: 'Remove unused import to keep the module clean.' },
+    { severity: 'info', category: 'performance', description: 'Database query inside a loop — N+1 query pattern detected.', file: 'src/services/report.py', line: 67, suggestion: 'Batch the query outside the loop: fetch all records first, then iterate.' }
+  ], summary: { critical: 2, warning: 2, info: 2 }, total: 6 };
+}
+
+function renderReview(data) {
+  const el = document.getElementById('reviewResults');
+  const s = data.summary || {};
+  let html = (!apiOnline ? serverHint() : '');
+  html += `<div class="summary-bar">
+    <div class="summary-item"><span class="sev-badge critical">${s.critical || 0} critical</span></div>
+    <div class="summary-item"><span class="sev-badge warning">${s.warning || 0} warning</span></div>
+    <div class="summary-item"><span class="sev-badge info">${s.info || 0} info</span></div>
+    <div style="margin-left:auto;font-size:.78rem;color:var(--text-dim)">${data.total || 0} findings</div>
+  </div>`;
+
+  (data.issues || []).forEach(issue => {
+    html += `<div class="review-card sev-${issue.severity}">
+      <div class="rc-top">
+        <span class="sev-badge ${issue.severity}">${issue.severity}</span>
+        <span class="cat-badge">${issue.category}</span>
+        <span class="rc-loc">${issue.file}:${issue.line}</span>
+      </div>
+      <div class="rc-desc">${issue.description}</div>
+      ${issue.suggestion ? `<div class="rc-suggestion">&#x1F4A1; ${issue.suggestion}</div>` : ''}
+    </div>`;
+  });
+  el.innerHTML = html;
+}
+
+// ─── Architecture ───
+async function analyzeArch() {
+  const btn = document.getElementById('btnArch');
+  setLoading(btn, true);
+  const path = document.getElementById('archPath').value;
+  let data = await apiCall('/v1/architecture/analyze', { path }, 'archError');
+  if (!data) data = demoArch(path);
+  renderArch(data);
+  setLoading(btn, false);
+}
+
+function demoArch(path) {
+  const name = (path || 'project').split(/[/\\]/).pop();
+  return {
+    repo: name,
+    tree: [
+      { type: 'dir', name: 'src/', children: [
+        { type: 'dir', name: 'api/', children: [
+          { type: 'file', name: 'routes.py' }, { type: 'file', name: 'middleware.py' }
+        ]},
+        { type: 'dir', name: 'models/', children: [
+          { type: 'file', name: 'user.py' }, { type: 'file', name: 'project.py' }
+        ]},
+        { type: 'dir', name: 'services/', children: [
+          { type: 'file', name: 'auth.py' }, { type: 'file', name: 'search.py' }, { type: 'file', name: 'indexer.py' }
+        ]},
+        { type: 'file', name: 'main.py' }
+      ]},
+      { type: 'dir', name: 'tests/', children: [
+        { type: 'file', name: 'test_auth.py' }, { type: 'file', name: 'test_search.py' }
+      ]},
+      { type: 'file', name: 'pyproject.toml' }, { type: 'file', name: 'Dockerfile' }
+    ],
+    dependencies: [
+      { from: 'api/routes', to: 'services/auth', label: 'imports' },
+      { from: 'api/routes', to: 'services/search', label: 'imports' },
+      { from: 'services/auth', to: 'models/user', label: 'imports' },
+      { from: 'services/search', to: 'services/indexer', label: 'imports' },
+      { from: 'api/middleware', to: 'services/auth', label: 'imports' }
+    ],
+    languages: [
+      { name: 'Python', percentage: 62, color: '#3572A5' },
+      { name: 'TypeScript', percentage: 22, color: '#3178C6' },
+      { name: 'Shell', percentage: 8, color: '#89e051' },
+      { name: 'Dockerfile', percentage: 5, color: '#384d54' },
+      { name: 'TOML', percentage: 3, color: '#9c4221' }
+    ],
+    hotspots: [
+      { file: 'src/services/search.py', complexity: 8.7 },
+      { file: 'src/api/routes.py', complexity: 7.2 },
+      { file: 'src/services/indexer.py', complexity: 6.5 },
+      { file: 'src/services/auth.py', complexity: 5.1 },
+      { file: 'src/models/user.py', complexity: 3.4 }
+    ]
+  };
+}
+
+function renderTree(nodes, depth) {
+  let html = '';
+  (nodes || []).forEach(n => {
+    const indent = '&nbsp;&nbsp;'.repeat(depth);
+    if (n.type === 'dir') {
+      html += `<div class="tree-dir">${indent}&#128193; ${n.name}</div>`;
+      html += renderTree(n.children, depth + 1);
+    } else {
+      html += `<div class="tree-file">${indent}&#128196; ${n.name}</div>`;
+    }
+  });
+  return html;
+}
+
+function renderArch(data) {
+  const el = document.getElementById('archResults');
+  let html = (!apiOnline ? serverHint() : '');
+
+  html += `<div class="result-card"><h3 style="font-size:.88rem;color:var(--white);margin-bottom:.6rem">&#128193; File Structure</h3><div class="file-tree">${renderTree(data.tree, 0)}</div></div>`;
+
+  html += `<div class="result-card"><h3 style="font-size:.88rem;color:var(--white);margin-bottom:.6rem">&#128279; Module Dependencies</h3>`;
+  (data.dependencies || []).forEach(d => {
+    html += `<div class="dep-card"><span style="color:var(--text)">${d.from}</span><span class="dep-arrow">&#8594;</span><span style="color:var(--orange)">${d.to}</span></div>`;
+  });
+  html += '</div>';
+
+  if (data.languages && data.languages.length) {
+    html += `<div class="result-card"><h3 style="font-size:.88rem;color:var(--white);margin-bottom:.6rem">&#128202; Language Breakdown</h3><div class="lang-bar-container"><div class="lang-bar">`;
+    data.languages.forEach(l => { html += `<div class="lang-segment" style="width:${l.percentage}%;background:${l.color}" title="${l.name}: ${l.percentage}%"></div>`; });
+    html += '</div><div class="lang-legend">';
+    data.languages.forEach(l => { html += `<div class="lang-legend-item"><div class="lang-legend-dot" style="background:${l.color}"></div>${l.name} ${l.percentage}%</div>`; });
+    html += '</div></div></div>';
+  }
+
+  if (data.hotspots && data.hotspots.length) {
+    const max = Math.max(...data.hotspots.map(h => h.complexity));
+    html += `<div class="result-card"><h3 style="font-size:.88rem;color:var(--white);margin-bottom:.6rem">&#128293; Complexity Hotspots</h3>`;
+    data.hotspots.forEach(h => {
+      const pct = (h.complexity / max * 100).toFixed(0);
+      html += `<div class="hotspot"><span class="hotspot-name">${h.file}</span><div class="hotspot-bar"><div class="hotspot-bar-fill" style="width:${pct}%"></div></div><span class="hotspot-score">${h.complexity}</span></div>`;
+    });
+    html += '</div>';
+  }
+
+  el.innerHTML = html;
+}
 </script>
-
 </body>
 </html>

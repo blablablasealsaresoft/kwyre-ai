@@ -3,468 +3,676 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>DentAI — AI-Powered Dental Intelligence</title>
+  <title>DentAI — Dental Practice Intelligence</title>
   <style>
-    :root {
-      --teal: #0d9488;
-      --teal-dark: #0f766e;
-      --teal-light: #ccfbf1;
-      --gray-50: #f9fafb;
-      --gray-100: #f3f4f6;
-      --gray-200: #e5e7eb;
-      --gray-600: #4b5563;
-      --gray-700: #374151;
-      --gray-900: #111827;
-      --white: #ffffff;
-      --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
-      --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#0a0f14;--surface:#111921;--surface2:#182028;--border:#1e2a35;
+      --teal:#14b8a6;--teal-dim:rgba(20,184,166,.12);--teal-glow:rgba(20,184,166,.25);
+      --text:#e2e8f0;--text-dim:#7a8a9e;--white:#fff;
+      --red:#ef4444;--amber:#f59e0b;--green:#22c55e;--blue:#3b82f6;
     }
-
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-      color: var(--gray-700);
-      line-height: 1.6;
-      background: var(--white);
-    }
-
-    nav {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 1rem 2rem;
-      max-width: 1200px;
-      margin: 0 auto;
-    }
-
-    .logo {
-      display: flex;
-      align-items: center;
-      gap: 0.5rem;
-      font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--gray-900);
-      text-decoration: none;
-    }
-
-    .logo svg { width: 32px; height: 32px; }
-
-    .nav-links { display: flex; gap: 2rem; list-style: none; }
-
-    .nav-links a {
-      text-decoration: none;
-      color: var(--gray-600);
-      font-weight: 500;
-      transition: color 0.2s;
-    }
-
-    .nav-links a:hover { color: var(--teal); }
-
-    .hero {
-      text-align: center;
-      padding: 5rem 2rem 4rem;
-      background: linear-gradient(135deg, var(--teal-light) 0%, var(--white) 50%, var(--gray-50) 100%);
-    }
-
-    .hero-badge {
-      display: inline-block;
-      background: var(--teal-light);
-      color: var(--teal-dark);
-      padding: 0.25rem 1rem;
-      border-radius: 9999px;
-      font-size: 0.85rem;
-      font-weight: 600;
-      margin-bottom: 1.5rem;
-    }
-
-    .hero h1 {
-      font-size: 3.2rem;
-      color: var(--gray-900);
-      line-height: 1.15;
-      max-width: 700px;
-      margin: 0 auto 1.5rem;
-    }
-
-    .hero h1 span { color: var(--teal); }
-
-    .hero p {
-      font-size: 1.2rem;
-      color: var(--gray-600);
-      max-width: 600px;
-      margin: 0 auto 2.5rem;
-    }
-
-    .btn {
-      display: inline-block;
-      padding: 0.85rem 2rem;
-      border-radius: 8px;
-      font-weight: 600;
-      font-size: 1rem;
-      text-decoration: none;
-      transition: all 0.2s;
-      cursor: pointer;
-      border: none;
-    }
-
-    .btn-primary {
-      background: var(--teal);
-      color: var(--white);
-    }
-
-    .btn-primary:hover { background: var(--teal-dark); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
-
-    .btn-outline {
-      background: var(--white);
-      color: var(--teal);
-      border: 2px solid var(--teal);
-      margin-left: 1rem;
-    }
-
-    .btn-outline:hover { background: var(--teal-light); }
-
-    .section { padding: 5rem 2rem; max-width: 1200px; margin: 0 auto; }
-
-    .section-label {
-      text-transform: uppercase;
-      font-size: 0.8rem;
-      font-weight: 700;
-      letter-spacing: 0.1em;
-      color: var(--teal);
-      margin-bottom: 0.5rem;
-    }
-
-    .section h2 {
-      font-size: 2.2rem;
-      color: var(--gray-900);
-      margin-bottom: 1rem;
-    }
-
-    .section > p {
-      color: var(--gray-600);
-      max-width: 640px;
-      margin-bottom: 3rem;
-    }
-
-    .features-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-      gap: 2rem;
-    }
-
-    .feature-card {
-      background: var(--white);
-      border: 1px solid var(--gray-200);
-      border-radius: 12px;
-      padding: 2rem;
-      transition: box-shadow 0.2s, transform 0.2s;
-    }
-
-    .feature-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
-
-    .feature-icon {
-      width: 48px;
-      height: 48px;
-      border-radius: 10px;
-      background: var(--teal-light);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      margin-bottom: 1.25rem;
-      font-size: 1.5rem;
-    }
-
-    .feature-card h3 {
-      font-size: 1.15rem;
-      color: var(--gray-900);
-      margin-bottom: 0.5rem;
-    }
-
-    .feature-card p {
-      font-size: 0.95rem;
-      color: var(--gray-600);
-    }
-
-    .audience {
-      background: var(--gray-50);
-      padding: 4rem 2rem;
-    }
-
-    .audience-inner {
-      max-width: 1200px;
-      margin: 0 auto;
-      text-align: center;
-    }
-
-    .audience h2 { font-size: 2rem; color: var(--gray-900); margin-bottom: 2rem; }
-
-    .roles {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
-      gap: 1rem;
-    }
-
-    .role-tag {
-      background: var(--white);
-      border: 1px solid var(--gray-200);
-      padding: 0.6rem 1.25rem;
-      border-radius: 9999px;
-      font-weight: 500;
-      color: var(--gray-700);
-      font-size: 0.95rem;
-    }
-
-    .hipaa-banner {
-      background: var(--teal-light);
-      border: 2px solid var(--teal);
-      border-radius: 12px;
-      padding: 2rem 2.5rem;
-      max-width: 900px;
-      margin: 0 auto 4rem;
-      display: flex;
-      align-items: flex-start;
-      gap: 1.25rem;
-    }
-
-    .hipaa-icon {
-      font-size: 2rem;
-      flex-shrink: 0;
-      line-height: 1;
-    }
-
-    .hipaa-banner h3 { color: var(--teal-dark); margin-bottom: 0.25rem; }
-    .hipaa-banner p { color: var(--gray-700); font-size: 0.95rem; }
-
-    .pricing {
-      background: var(--gray-50);
-      padding: 5rem 2rem;
-      text-align: center;
-    }
-
-    .pricing h2 { font-size: 2.2rem; color: var(--gray-900); margin-bottom: 0.5rem; }
-    .pricing > p { color: var(--gray-600); margin-bottom: 3rem; }
-
-    .pricing-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 2rem;
-      max-width: 1000px;
-      margin: 0 auto;
-    }
-
-    .price-card {
-      background: var(--white);
-      border: 1px solid var(--gray-200);
-      border-radius: 12px;
-      padding: 2.5rem 2rem;
-      position: relative;
-    }
-
-    .price-card.featured {
-      border-color: var(--teal);
-      box-shadow: 0 0 0 1px var(--teal);
-    }
-
-    .price-card.featured::before {
-      content: "Most Popular";
-      position: absolute;
-      top: -12px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--teal);
-      color: var(--white);
-      padding: 0.2rem 1rem;
-      border-radius: 9999px;
-      font-size: 0.8rem;
-      font-weight: 600;
-    }
-
-    .price-card h3 { font-size: 1.2rem; color: var(--gray-900); margin-bottom: 0.5rem; }
-
-    .price {
-      font-size: 2.5rem;
-      font-weight: 700;
-      color: var(--gray-900);
-      margin-bottom: 0.25rem;
-    }
-
-    .price span { font-size: 1rem; font-weight: 400; color: var(--gray-600); }
-
-    .price-card ul {
-      list-style: none;
-      margin: 1.5rem 0;
-      text-align: left;
-    }
-
-    .price-card li {
-      padding: 0.4rem 0;
-      font-size: 0.93rem;
-      color: var(--gray-600);
-    }
-
-    .price-card li::before {
-      content: "\2713";
-      color: var(--teal);
-      font-weight: 700;
-      margin-right: 0.5rem;
-    }
-
-    footer {
-      text-align: center;
-      padding: 3rem 2rem;
-      border-top: 1px solid var(--gray-200);
-      color: var(--gray-600);
-      font-size: 0.9rem;
-    }
-
-    footer a { color: var(--teal); text-decoration: none; }
-
-    @media (max-width: 768px) {
-      .hero h1 { font-size: 2.2rem; }
-      .nav-links { display: none; }
-      .btn-outline { margin-left: 0; margin-top: 0.75rem; }
-      .hipaa-banner { flex-direction: column; text-align: center; }
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);line-height:1.5;min-height:100vh}
+    header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;border-bottom:1px solid var(--border);background:var(--surface)}
+    .logo{font-size:1.25rem;font-weight:700;color:var(--white);letter-spacing:-.02em}
+    .logo span{color:var(--teal)}
+    .conn{display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--text-dim)}
+    .conn-dot{width:7px;height:7px;border-radius:50%;background:var(--red);transition:background .3s}
+    .conn-dot.ok{background:var(--green)}
+    .tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--surface)}
+    .tab{padding:.7rem 1.25rem;font-size:.82rem;font-weight:500;color:var(--text-dim);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;transition:all .2s}
+    .tab:hover{color:var(--text)}
+    .tab.active{color:var(--teal);border-bottom-color:var(--teal);background:var(--teal-dim)}
+    .panel{display:none;padding:1.5rem;max-width:960px;margin:0 auto}
+    .panel.active{display:block}
+    h2.section-title{font-size:1.1rem;font-weight:600;color:var(--white);margin-bottom:1rem;display:flex;align-items:center;gap:.5rem}
+    h2.section-title::before{content:'';width:3px;height:1.1rem;background:var(--teal);border-radius:2px}
+    label{display:block;font-size:.78rem;font-weight:500;color:var(--text-dim);margin-bottom:.3rem;text-transform:uppercase;letter-spacing:.04em}
+    input[type="text"],textarea,select{width:100%;padding:.6rem .75rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.88rem;font-family:inherit;resize:vertical;transition:border-color .2s}
+    input:focus,textarea:focus,select:focus{outline:none;border-color:var(--teal);box-shadow:0 0 0 2px var(--teal-glow)}
+    textarea{min-height:70px}
+    select{cursor:pointer;appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='%237a8a9e'%3E%3Cpath d='M2 4l4 4 4-4'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .75rem center}
+    select option{background:var(--surface2);color:var(--text)}
+    .form-row{display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-bottom:1rem}
+    .form-group{margin-bottom:1rem}
+    .checkbox-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:.4rem}
+    .checkbox-item{display:flex;align-items:center;gap:.4rem;font-size:.82rem;color:var(--text);cursor:pointer;padding:.3rem .5rem;border-radius:4px;transition:background .15s}
+    .checkbox-item:hover{background:var(--surface2)}
+    .checkbox-item input[type="checkbox"]{accent-color:var(--teal);cursor:pointer}
+    .btn-action{display:inline-flex;align-items:center;gap:.5rem;padding:.65rem 1.5rem;background:var(--teal);color:var(--bg);font-weight:600;font-size:.88rem;border:none;border-radius:6px;cursor:pointer;transition:all .2s;margin-top:.5rem}
+    .btn-action:hover{filter:brightness(1.15);transform:translateY(-1px)}
+    .btn-action:disabled{opacity:.5;cursor:not-allowed;transform:none}
+    .btn-action .spinner{display:none;width:14px;height:14px;border:2px solid transparent;border-top-color:var(--bg);border-radius:50%;animation:spin .6s linear infinite}
+    .btn-action.loading .spinner{display:block}
+    .btn-action.loading .btn-text{display:none}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .btn-sm{padding:.4rem .8rem;font-size:.76rem;background:var(--surface2);color:var(--text-dim);border:1px solid var(--border);border-radius:4px;cursor:pointer;transition:all .15s}
+    .btn-sm:hover{border-color:var(--teal);color:var(--teal)}
+    .result-area{margin-top:1.5rem;min-height:60px}
+    .result-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.25rem;margin-bottom:1rem}
+    .result-card h3{font-size:.95rem;font-weight:600;color:var(--white);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+    .phase-badge{font-size:.65rem;padding:.15rem .5rem;border-radius:9999px;font-weight:600;text-transform:uppercase;letter-spacing:.04em}
+    .phase-urgent{background:rgba(239,68,68,.15);color:var(--red)}
+    .phase-necessary{background:rgba(245,158,11,.15);color:var(--amber)}
+    .phase-elective{background:rgba(59,130,246,.15);color:var(--blue)}
+    .procedure-row{display:grid;grid-template-columns:1fr auto auto;gap:.75rem;align-items:start;padding:.6rem 0;border-bottom:1px solid var(--border);font-size:.84rem}
+    .procedure-row:last-child{border-bottom:none}
+    .procedure-name{color:var(--text);font-weight:500}
+    .procedure-code{font-family:"SF Mono",Consolas,monospace;color:var(--teal);font-size:.78rem;background:var(--teal-dim);padding:.1rem .4rem;border-radius:3px}
+    .procedure-cost{color:var(--amber);font-weight:500;white-space:nowrap}
+    .procedure-rationale{grid-column:1/-1;color:var(--text-dim);font-size:.78rem;font-style:italic;padding-top:.2rem}
+    .cdt-card{display:grid;grid-template-columns:auto 1fr auto;gap:.75rem;align-items:center;padding:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;margin-bottom:.6rem;transition:border-color .15s}
+    .cdt-card:hover{border-color:var(--teal)}
+    .cdt-code-lg{font-family:"SF Mono",Consolas,monospace;font-size:1rem;font-weight:700;color:var(--teal);min-width:70px}
+    .cdt-desc{font-size:.85rem;color:var(--text)}
+    .cdt-desc small{display:block;color:var(--text-dim);font-size:.76rem;margin-top:.15rem}
+    .cdt-score{text-align:right}
+    .confidence-bar{width:50px;height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-top:.2rem}
+    .confidence-fill{height:100%;background:var(--teal);border-radius:3px;transition:width .4s}
+    .cat-badge{font-size:.65rem;padding:.1rem .4rem;border-radius:3px;background:var(--surface2);color:var(--text-dim);border:1px solid var(--border)}
+    .quick-ref{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:1rem}
+    .quick-ref h4{font-size:.82rem;color:var(--white);margin-bottom:.6rem}
+    .ref-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:.4rem}
+    .ref-item{font-size:.76rem;color:var(--text-dim);padding:.25rem .4rem;border-radius:3px;background:var(--surface2)}
+    .ref-item strong{color:var(--teal)}
+    .soap-section{margin-bottom:1rem;background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+    .soap-header{padding:.5rem .75rem;font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em;border-bottom:1px solid var(--border)}
+    .soap-s .soap-header{background:rgba(59,130,246,.08);color:var(--blue)}
+    .soap-o .soap-header{background:rgba(22,197,166,.08);color:var(--teal)}
+    .soap-a .soap-header{background:rgba(245,158,11,.08);color:var(--amber)}
+    .soap-p .soap-header{background:rgba(139,92,246,.08);color:#8b5cf6}
+    .soap-body{padding:.75rem}
+    .soap-body p{font-size:.85rem;color:var(--text);line-height:1.6}
+    .soap-actions{display:flex;gap:.5rem;margin-top:1rem}
+    .gauge-container{display:flex;flex-direction:column;align-items:center;margin:1rem 0}
+    .gauge-svg{width:200px;height:120px}
+    .gauge-label{font-size:2rem;font-weight:700;margin-top:.25rem}
+    .gauge-sublabel{font-size:.78rem;color:var(--text-dim)}
+    .risk-factors{margin-top:1rem}
+    .risk-row{display:flex;align-items:center;justify-content:space-between;padding:.5rem .75rem;border-radius:6px;margin-bottom:.4rem;font-size:.84rem;background:var(--surface)}
+    .risk-row .factor-name{color:var(--text)}
+    .risk-row .factor-level{font-weight:600;font-size:.78rem;padding:.15rem .5rem;border-radius:3px}
+    .level-high{background:rgba(239,68,68,.15);color:var(--red)}
+    .level-moderate{background:rgba(245,158,11,.15);color:var(--amber)}
+    .level-low{background:rgba(22,197,166,.15);color:var(--green)}
+    .precautions{margin-top:1rem}
+    .precaution-item{display:flex;gap:.5rem;align-items:flex-start;padding:.5rem 0;font-size:.84rem;color:var(--text);border-bottom:1px solid var(--border)}
+    .precaution-item:last-child{border-bottom:none}
+    .precaution-icon{color:var(--amber);flex-shrink:0}
+    .empty-state{text-align:center;padding:3rem 1rem;color:var(--text-dim)}
+    .empty-state .icon{font-size:2.5rem;margin-bottom:.75rem;opacity:.4}
+    .empty-state p{font-size:.88rem}
+    .error-banner{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.25);border-radius:6px;padding:.75rem 1rem;margin-bottom:1rem;font-size:.82rem;color:var(--red);display:none}
+    .server-hint{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:1rem;font-size:.8rem;color:var(--text-dim)}
+    .server-hint code{background:var(--surface2);padding:.15rem .4rem;border-radius:3px;font-family:"SF Mono",Consolas,monospace;font-size:.78rem;color:var(--teal)}
+    footer{text-align:center;padding:1.25rem;border-top:1px solid var(--border);font-size:.72rem;color:var(--text-dim);display:flex;align-items:center;justify-content:center;gap:1rem;flex-wrap:wrap}
+    .hipaa-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.2rem .6rem;border:1px solid var(--teal);border-radius:4px;color:var(--teal);font-size:.68rem;font-weight:600;letter-spacing:.03em}
+    @media(max-width:640px){
+      .form-row{grid-template-columns:1fr}
+      .checkbox-grid{grid-template-columns:repeat(2,1fr)}
+      .procedure-row{grid-template-columns:1fr}
+      .cdt-card{grid-template-columns:1fr}
+      .tabs{overflow-x:auto;flex-wrap:nowrap}
+      .tab{white-space:nowrap;flex-shrink:0}
     }
   </style>
 </head>
 <body>
 
-  <nav>
-    <a href="#" class="logo">
-      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M16 2C12 2 9 5 8 8C7 11 7 14 8 17C9 20 11 24 14 28C15 29.5 17 29.5 18 28C21 24 23 20 24 17C25 14 25 11 24 8C23 5 20 2 16 2Z" fill="#0d9488"/>
-        <path d="M16 6C14 6 12 7.5 11.5 9.5C11 11.5 11.5 13.5 12.5 15.5C13.5 17.5 15 20 16 22C17 20 18.5 17.5 19.5 15.5C20.5 13.5 21 11.5 20.5 9.5C20 7.5 18 6 16 6Z" fill="#ccfbf1"/>
+<header>
+  <div class="logo">Dent<span>AI</span></div>
+  <div class="conn"><div class="conn-dot" id="connDot"></div><span id="connText">Disconnected</span></div>
+</header>
+
+<div class="tabs">
+  <button class="tab active" data-tab="treatment">Treatment Plan</button>
+  <button class="tab" data-tab="cdt">CDT Codes</button>
+  <button class="tab" data-tab="notes">Clinical Notes</button>
+  <button class="tab" data-tab="risk">Risk Assessment</button>
+</div>
+
+<!-- ─── Treatment Plan ─── -->
+<div class="panel active" id="panel-treatment">
+  <h2 class="section-title">Generate Treatment Plan</h2>
+  <div id="treatmentError" class="error-banner"></div>
+
+  <div class="form-group">
+    <label for="chiefComplaint">Chief Complaint</label>
+    <input type="text" id="chiefComplaint" placeholder="e.g. Patient reports persistent pain in lower right molar">
+  </div>
+
+  <div class="form-group">
+    <label>Symptoms</label>
+    <div class="checkbox-grid" id="symptomsGrid">
+      <label class="checkbox-item"><input type="checkbox" value="pain"> Pain</label>
+      <label class="checkbox-item"><input type="checkbox" value="sensitivity"> Sensitivity</label>
+      <label class="checkbox-item"><input type="checkbox" value="swelling"> Swelling</label>
+      <label class="checkbox-item"><input type="checkbox" value="bleeding"> Bleeding</label>
+      <label class="checkbox-item"><input type="checkbox" value="discoloration"> Discoloration</label>
+      <label class="checkbox-item"><input type="checkbox" value="mobility"> Mobility</label>
+      <label class="checkbox-item"><input type="checkbox" value="abscess"> Abscess</label>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="dentalHistory">Dental History</label>
+      <textarea id="dentalHistory" placeholder="Previous treatments, restorations, extractions..."></textarea>
+    </div>
+    <div class="form-group">
+      <label for="clinicalFindings">Clinical Findings</label>
+      <textarea id="clinicalFindings" placeholder="Exam observations, probing depths, caries..."></textarea>
+    </div>
+  </div>
+
+  <button class="btn-action" id="btnTreatment" onclick="generateTreatmentPlan()">
+    <div class="spinner"></div>
+    <span class="btn-text">Generate Plan</span>
+  </button>
+
+  <div class="result-area" id="treatmentResults"></div>
+</div>
+
+<!-- ─── CDT Codes ─── -->
+<div class="panel" id="panel-cdt">
+  <h2 class="section-title">CDT Code Lookup</h2>
+  <div id="cdtError" class="error-banner"></div>
+
+  <div class="form-group">
+    <label for="cdtQuery">Procedure Description</label>
+    <input type="text" id="cdtQuery" placeholder="e.g. porcelain crown on premolar, root canal, extraction">
+  </div>
+
+  <button class="btn-action" id="btnCdt" onclick="findCdtCodes()">
+    <div class="spinner"></div>
+    <span class="btn-text">Find Codes</span>
+  </button>
+
+  <div class="result-area" id="cdtResults"></div>
+
+  <div class="quick-ref">
+    <h4>Common CDT Categories</h4>
+    <div class="ref-grid">
+      <div class="ref-item"><strong>D0100-D0999</strong> Diagnostic</div>
+      <div class="ref-item"><strong>D1000-D1999</strong> Preventive</div>
+      <div class="ref-item"><strong>D2000-D2999</strong> Restorative</div>
+      <div class="ref-item"><strong>D3000-D3999</strong> Endodontics</div>
+      <div class="ref-item"><strong>D4000-D4999</strong> Periodontics</div>
+      <div class="ref-item"><strong>D5000-D5999</strong> Prosthodontics</div>
+      <div class="ref-item"><strong>D6000-D6999</strong> Implants</div>
+      <div class="ref-item"><strong>D7000-D7999</strong> Oral Surgery</div>
+      <div class="ref-item"><strong>D8000-D8999</strong> Orthodontics</div>
+      <div class="ref-item"><strong>D9000-D9999</strong> Adjunctive</div>
+    </div>
+  </div>
+</div>
+
+<!-- ─── Clinical Notes ─── -->
+<div class="panel" id="panel-notes">
+  <h2 class="section-title">SOAP Clinical Notes</h2>
+  <div id="notesError" class="error-banner"></div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="noteSubjective">Subjective — Patient Complaint &amp; History</label>
+      <textarea id="noteSubjective" placeholder="Patient's description of symptoms, onset, duration, relevant history..."></textarea>
+    </div>
+    <div class="form-group">
+      <label for="noteObjective">Objective — Exam Findings</label>
+      <textarea id="noteObjective" placeholder="Clinical exam findings, vitals, teeth examined, probing depths, radiograph findings..."></textarea>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group">
+      <label for="noteAssessment">Assessment — Diagnosis</label>
+      <textarea id="noteAssessment" placeholder="Clinical diagnosis, differential diagnoses..."></textarea>
+    </div>
+    <div class="form-group">
+      <label for="notePlan">Plan — Treatment</label>
+      <textarea id="notePlan" placeholder="Proposed treatment, referrals, follow-up, prescriptions..."></textarea>
+    </div>
+  </div>
+
+  <button class="btn-action" id="btnNotes" onclick="generateNote()">
+    <div class="spinner"></div>
+    <span class="btn-text">Generate Note</span>
+  </button>
+
+  <div class="result-area" id="notesResults"></div>
+</div>
+
+<!-- ─── Risk Assessment ─── -->
+<div class="panel" id="panel-risk">
+  <h2 class="section-title">Procedure Risk Assessment</h2>
+  <div id="riskError" class="error-banner"></div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="riskProcedure">Procedure</label>
+      <select id="riskProcedure">
+        <option value="">Select a procedure...</option>
+        <option value="extraction_simple">Simple Extraction</option>
+        <option value="extraction_surgical">Surgical Extraction</option>
+        <option value="root_canal">Root Canal Therapy</option>
+        <option value="crown_prep">Crown Preparation</option>
+        <option value="implant_placement">Implant Placement</option>
+        <option value="bone_graft">Bone Grafting</option>
+        <option value="periodontal_surgery">Periodontal Surgery</option>
+        <option value="apicoectomy">Apicoectomy</option>
+        <option value="sinus_lift">Sinus Lift</option>
+        <option value="full_arch_restoration">Full Arch Restoration</option>
+      </select>
+    </div>
+    <div class="form-group">
+      <label for="patientAge">Patient Age</label>
+      <input type="text" id="patientAge" placeholder="e.g. 45">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label>Medical Conditions</label>
+    <div class="checkbox-grid" id="conditionsGrid">
+      <label class="checkbox-item"><input type="checkbox" value="diabetes"> Diabetes</label>
+      <label class="checkbox-item"><input type="checkbox" value="hypertension"> Hypertension</label>
+      <label class="checkbox-item"><input type="checkbox" value="heart_disease"> Heart Disease</label>
+      <label class="checkbox-item"><input type="checkbox" value="blood_disorder"> Blood Disorder</label>
+      <label class="checkbox-item"><input type="checkbox" value="osteoporosis"> Osteoporosis</label>
+      <label class="checkbox-item"><input type="checkbox" value="immunocompromised"> Immunocompromised</label>
+      <label class="checkbox-item"><input type="checkbox" value="respiratory"> Respiratory Disease</label>
+      <label class="checkbox-item"><input type="checkbox" value="pregnancy"> Pregnancy</label>
+    </div>
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="medications">Current Medications</label>
+      <input type="text" id="medications" placeholder="e.g. warfarin, metformin, lisinopril">
+    </div>
+    <div class="form-group">
+      <label for="allergies">Allergies</label>
+      <input type="text" id="allergies" placeholder="e.g. penicillin, latex, lidocaine">
+    </div>
+  </div>
+
+  <button class="btn-action" id="btnRisk" onclick="assessRisk()">
+    <div class="spinner"></div>
+    <span class="btn-text">Assess Risk</span>
+  </button>
+
+  <div class="result-area" id="riskResults"></div>
+</div>
+
+<footer>
+  <span>&copy; 2026 Mint Rail LLC</span>
+  <div class="hipaa-badge">&#128274; HIPAA Compliant Architecture</div>
+  <span>DentAI is a clinical decision support tool.</span>
+</footer>
+
+<script>
+const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? `${window.location.protocol}//${window.location.hostname}:8000`
+  : '/api';
+
+let apiOnline = false;
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+  });
+});
+
+async function checkConnection() {
+  try {
+    const r = await fetch(API + '/health', { signal: AbortSignal.timeout(3000) });
+    if (r.ok) {
+      apiOnline = true;
+      document.getElementById('connDot').classList.add('ok');
+      document.getElementById('connText').textContent = 'API Connected';
+    } else { throw new Error(); }
+  } catch {
+    apiOnline = false;
+    document.getElementById('connDot').classList.remove('ok');
+    document.getElementById('connText').textContent = 'Disconnected';
+  }
+}
+checkConnection();
+setInterval(checkConnection, 15000);
+
+function setLoading(btn, loading) {
+  btn.classList.toggle('loading', loading);
+  btn.disabled = loading;
+}
+
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  el.textContent = msg;
+  el.style.display = 'block';
+  setTimeout(() => el.style.display = 'none', 8000);
+}
+
+function serverHint() {
+  return `<div class="server-hint">
+    <strong>API offline — showing demo data.</strong> Start the server:
+    <br><code>cd products/dentai && python -m uvicorn app.main:app --port 8000</code>
+  </div>`;
+}
+
+async function apiCall(endpoint, body, errorId) {
+  if (!apiOnline) return null;
+  try {
+    const r = await fetch(API + endpoint, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(body),
+      signal: AbortSignal.timeout(30000)
+    });
+    if (!r.ok) {
+      const e = await r.json().catch(() => ({}));
+      throw new Error(e.detail || `Server error ${r.status}`);
+    }
+    return await r.json();
+  } catch (err) {
+    showError(errorId, err.message);
+    return null;
+  }
+}
+
+function getCheckedValues(containerId) {
+  return [...document.querySelectorAll(`#${containerId} input:checked`)].map(c => c.value);
+}
+
+// ─── Treatment Plan ───
+async function generateTreatmentPlan() {
+  const btn = document.getElementById('btnTreatment');
+  setLoading(btn, true);
+
+  const body = {
+    chief_complaint: document.getElementById('chiefComplaint').value,
+    symptoms: getCheckedValues('symptomsGrid'),
+    dental_history: document.getElementById('dentalHistory').value,
+    clinical_findings: document.getElementById('clinicalFindings').value
+  };
+
+  let data = await apiCall('/v1/treatment/plan', body, 'treatmentError');
+  if (!data) data = demoTreatmentPlan(body);
+
+  renderTreatmentPlan(data);
+  setLoading(btn, false);
+}
+
+function demoTreatmentPlan(input) {
+  return {
+    phases: [
+      { priority: 'urgent', title: 'Immediate Care', procedures: [
+        { name: 'Pulp vitality testing — tooth #30', cdt_code: 'D0460', cost: '$45', rationale: 'Confirm vitality given reported pain and sensitivity symptoms' },
+        { name: 'Periapical radiograph — tooth #30', cdt_code: 'D0220', cost: '$35', rationale: 'Evaluate periapical pathology and root integrity' }
+      ]},
+      { priority: 'necessary', title: 'Definitive Treatment', procedures: [
+        { name: 'Root canal therapy — molar', cdt_code: 'D3330', cost: '$900–$1,100', rationale: 'Address irreversible pulpitis if vitality test confirms diagnosis' },
+        { name: 'PFM crown — tooth #30', cdt_code: 'D2750', cost: '$800–$1,200', rationale: 'Restore structural integrity post-endodontic treatment' }
+      ]},
+      { priority: 'elective', title: 'Optional / Preventive', procedures: [
+        { name: 'Comprehensive oral evaluation', cdt_code: 'D0150', cost: '$75–$120', rationale: 'Full assessment to identify additional treatment needs' },
+        { name: 'Prophylaxis — adult', cdt_code: 'D1110', cost: '$85–$150', rationale: 'Routine cleaning to maintain periodontal health' }
+      ]}
+    ]
+  };
+}
+
+function renderTreatmentPlan(data) {
+  const el = document.getElementById('treatmentResults');
+  const badgeClass = { urgent: 'phase-urgent', necessary: 'phase-necessary', elective: 'phase-elective' };
+  let html = (!apiOnline ? serverHint() : '');
+
+  (data.phases || []).forEach(phase => {
+    html += `<div class="result-card">
+      <h3><span class="phase-badge ${badgeClass[phase.priority] || ''}">${phase.priority}</span> ${phase.title}</h3>`;
+    (phase.procedures || []).forEach(p => {
+      html += `<div class="procedure-row">
+        <div class="procedure-name">${p.name}</div>
+        <span class="procedure-code">${p.cdt_code}</span>
+        <span class="procedure-cost">${p.cost}</span>
+        <div class="procedure-rationale">${p.rationale}</div>
+      </div>`;
+    });
+    html += '</div>';
+  });
+
+  el.innerHTML = html;
+}
+
+// ─── CDT Codes ───
+async function findCdtCodes() {
+  const btn = document.getElementById('btnCdt');
+  setLoading(btn, true);
+
+  const body = { description: document.getElementById('cdtQuery').value };
+  let data = await apiCall('/v1/coding/suggest', body, 'cdtError');
+  if (!data) data = demoCdtCodes(body);
+
+  renderCdtCodes(data);
+  setLoading(btn, false);
+}
+
+function demoCdtCodes(input) {
+  const q = (input.description || '').toLowerCase();
+  const allCodes = [
+    { code: 'D2740', description: 'Crown — porcelain/ceramic substrate', confidence: 0.96, category: 'Restorative' },
+    { code: 'D2750', description: 'Crown — porcelain fused to high noble metal', confidence: 0.91, category: 'Restorative' },
+    { code: 'D3330', description: 'Endodontic therapy — molar (excluding final restoration)', confidence: 0.88, category: 'Endodontics' },
+    { code: 'D7140', description: 'Extraction, erupted tooth or exposed root', confidence: 0.94, category: 'Oral Surgery' },
+    { code: 'D7210', description: 'Extraction — surgical, including elevation of mucoperiosteal flap', confidence: 0.87, category: 'Oral Surgery' },
+    { code: 'D0220', description: 'Intraoral — periapical first radiographic image', confidence: 0.82, category: 'Diagnostic' },
+    { code: 'D1110', description: 'Prophylaxis — adult', confidence: 0.79, category: 'Preventive' },
+    { code: 'D6010', description: 'Surgical placement of implant body — endosteal implant', confidence: 0.93, category: 'Implant Services' }
+  ];
+  if (q.includes('crown')) return { codes: allCodes.filter(c => c.category === 'Restorative') };
+  if (q.includes('root canal') || q.includes('endo')) return { codes: allCodes.filter(c => c.category === 'Endodontics') };
+  if (q.includes('extract')) return { codes: allCodes.filter(c => c.category === 'Oral Surgery') };
+  if (q.includes('implant')) return { codes: allCodes.filter(c => c.category === 'Implant Services') };
+  return { codes: allCodes.slice(0, 5) };
+}
+
+function renderCdtCodes(data) {
+  const el = document.getElementById('cdtResults');
+  let html = (!apiOnline ? serverHint() : '');
+
+  (data.codes || []).forEach(c => {
+    const pct = Math.round(c.confidence * 100);
+    html += `<div class="cdt-card">
+      <div class="cdt-code-lg">${c.code}</div>
+      <div class="cdt-desc">${c.description}<small><span class="cat-badge">${c.category}</span></small></div>
+      <div class="cdt-score">
+        <span style="font-size:.82rem;font-weight:600;color:var(--teal)">${pct}%</span>
+        <div class="confidence-bar"><div class="confidence-fill" style="width:${pct}%"></div></div>
+      </div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+// ─── Clinical Notes ───
+async function generateNote() {
+  const btn = document.getElementById('btnNotes');
+  setLoading(btn, true);
+
+  const body = {
+    subjective: document.getElementById('noteSubjective').value,
+    objective: document.getElementById('noteObjective').value,
+    assessment: document.getElementById('noteAssessment').value,
+    plan: document.getElementById('notePlan').value
+  };
+
+  let data = await apiCall('/v1/notes/generate', body, 'notesError');
+  if (!data) data = demoNote(body);
+
+  renderNote(data);
+  setLoading(btn, false);
+}
+
+function demoNote(input) {
+  return {
+    subjective: input.subjective || 'Patient presents with a chief complaint of sharp, intermittent pain in the lower right quadrant, exacerbated by cold stimuli and biting pressure. Pain onset approximately 2 weeks ago, progressively worsening. Patient reports no prior history of trauma to the area.',
+    objective: input.objective || 'Extraoral exam: No facial asymmetry or lymphadenopathy. Intraoral exam: Tooth #30 exhibits a large MOD amalgam restoration with marginal breakdown. Percussion test: positive. Cold test: lingering pain (>10s). Probing depths WNL (2-3mm). Periapical radiograph reveals periapical radiolucency at the mesial root apex of #30.',
+    assessment: input.assessment || 'Symptomatic irreversible pulpitis with symptomatic apical periodontitis — tooth #30. Differential: cracked tooth syndrome.',
+    plan: input.plan || '1. Root canal therapy on tooth #30\n2. Post-endodontic restoration with PFM crown (D2750)\n3. Prescribe: Amoxicillin 500mg TID x 7 days, Ibuprofen 600mg Q6H PRN\n4. Follow-up in 1 week to evaluate resolution of symptoms\n5. Refer to endodontist if retreatment becomes necessary',
+    date: new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' }),
+    provider: 'Dr. Provider'
+  };
+}
+
+function renderNote(data) {
+  const el = document.getElementById('notesResults');
+  const sections = [
+    { key: 'subjective', label: 'Subjective', cls: 'soap-s' },
+    { key: 'objective', label: 'Objective', cls: 'soap-o' },
+    { key: 'assessment', label: 'Assessment', cls: 'soap-a' },
+    { key: 'plan', label: 'Plan', cls: 'soap-p' }
+  ];
+
+  let html = (!apiOnline ? serverHint() : '');
+  html += `<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:.75rem">
+    <span style="font-size:.78rem;color:var(--text-dim)">${data.date || new Date().toLocaleDateString()}</span>
+    <div class="soap-actions">
+      <button class="btn-sm" onclick="copyNote()">Copy</button>
+      <button class="btn-sm" onclick="printNote()">Print</button>
+    </div>
+  </div>`;
+
+  sections.forEach(s => {
+    const text = (data[s.key] || '').replace(/\n/g, '<br>');
+    html += `<div class="soap-section ${s.cls}">
+      <div class="soap-header">${s.label}</div>
+      <div class="soap-body"><p>${text}</p></div>
+    </div>`;
+  });
+
+  el.innerHTML = html;
+}
+
+function copyNote() {
+  const sections = document.querySelectorAll('#notesResults .soap-body p');
+  const labels = ['SUBJECTIVE', 'OBJECTIVE', 'ASSESSMENT', 'PLAN'];
+  let text = '';
+  sections.forEach((s, i) => { text += labels[i] + ':\n' + s.textContent + '\n\n'; });
+  navigator.clipboard.writeText(text.trim());
+}
+
+function printNote() {
+  const content = document.getElementById('notesResults').innerHTML;
+  const win = window.open('', '_blank');
+  win.document.write(`<html><head><title>SOAP Note</title><style>body{font-family:serif;padding:2rem;color:#111;line-height:1.7}.soap-section{margin-bottom:1rem;border:1px solid #ccc;border-radius:4px;overflow:hidden}.soap-header{padding:.4rem .75rem;font-weight:bold;background:#f5f5f5;border-bottom:1px solid #ccc;text-transform:uppercase;font-size:.85rem}.soap-body{padding:.75rem}p{margin:0;font-size:.9rem}.server-hint,.btn-sm,.soap-actions{display:none!important}</style></head><body>${content}</body></html>`);
+  win.document.close();
+  win.print();
+}
+
+// ─── Risk Assessment ───
+async function assessRisk() {
+  const btn = document.getElementById('btnRisk');
+  setLoading(btn, true);
+
+  const body = {
+    procedure: document.getElementById('riskProcedure').value,
+    patient_age: parseInt(document.getElementById('patientAge').value) || null,
+    medical_conditions: getCheckedValues('conditionsGrid'),
+    medications: document.getElementById('medications').value,
+    allergies: document.getElementById('allergies').value
+  };
+
+  let data = await apiCall('/v1/risk/assess', body, 'riskError');
+  if (!data) data = demoRisk(body);
+
+  renderRisk(data);
+  setLoading(btn, false);
+}
+
+function demoRisk(input) {
+  const conditions = input.medical_conditions || [];
+  let score = 3;
+  if (conditions.includes('heart_disease')) score += 2;
+  if (conditions.includes('blood_disorder')) score += 2;
+  if (conditions.includes('diabetes')) score += 1.5;
+  if (conditions.includes('immunocompromised')) score += 1.5;
+  if ((input.patient_age || 40) > 65) score += 1;
+  if ((input.medications || '').toLowerCase().includes('warfarin')) score += 2;
+  const proc = input.procedure || '';
+  if (proc.includes('implant') || proc.includes('sinus') || proc.includes('bone')) score += 1.5;
+  score = Math.min(10, Math.round(score * 10) / 10);
+
+  const factors = [];
+  if (conditions.includes('diabetes')) factors.push({ name: 'Diabetes — impaired healing', level: 'moderate' });
+  if (conditions.includes('heart_disease')) factors.push({ name: 'Cardiovascular disease — hemodynamic risk', level: 'high' });
+  if (conditions.includes('blood_disorder')) factors.push({ name: 'Blood disorder — hemorrhage risk', level: 'high' });
+  if (conditions.includes('hypertension')) factors.push({ name: 'Hypertension — BP monitoring required', level: 'moderate' });
+  if (conditions.includes('immunocompromised')) factors.push({ name: 'Immunocompromised — infection risk', level: 'high' });
+  if ((input.patient_age || 40) > 65) factors.push({ name: 'Age > 65 — increased complication risk', level: 'moderate' });
+  if ((input.medications || '').toLowerCase().includes('warfarin')) factors.push({ name: 'Anticoagulant therapy (warfarin) — bleeding risk', level: 'high' });
+  if (factors.length === 0) factors.push({ name: 'No significant risk factors identified', level: 'low' });
+
+  return {
+    score,
+    label: score <= 3 ? 'Low Risk' : score <= 6 ? 'Moderate Risk' : 'High Risk',
+    factors,
+    precautions: [
+      'Obtain medical clearance from primary care physician prior to procedure',
+      'Monitor vitals (BP, HR, SpO2) throughout procedure',
+      'Have emergency medications readily available',
+      'Consider antibiotic prophylaxis per AHA guidelines',
+      'Schedule procedure early in the day when patient is well-rested',
+      'Ensure post-operative follow-up within 48 hours'
+    ].slice(0, score > 5 ? 6 : 3)
+  };
+}
+
+function renderRisk(data) {
+  const el = document.getElementById('riskResults');
+  const score = data.score || 0;
+  const color = score <= 3 ? 'var(--green)' : score <= 6 ? 'var(--amber)' : 'var(--red)';
+  const pct = score / 10;
+  const startAngle = Math.PI;
+  const endAngle = startAngle + pct * Math.PI;
+  const r = 80, cx = 100, cy = 95;
+  const x1 = cx + r * Math.cos(startAngle), y1 = cy + r * Math.sin(startAngle);
+  const x2 = cx + r * Math.cos(endAngle), y2 = cy + r * Math.sin(endAngle);
+  const large = pct > 0.5 ? 1 : 0;
+
+  let html = (!apiOnline ? serverHint() : '');
+  html += `<div class="result-card">
+    <div class="gauge-container">
+      <svg class="gauge-svg" viewBox="0 0 200 115">
+        <path d="M ${cx - r} ${cy} A ${r} ${r} 0 0 1 ${cx + r} ${cy}" fill="none" stroke="var(--surface2)" stroke-width="12" stroke-linecap="round"/>
+        <path d="M ${x1} ${y1} A ${r} ${r} 0 ${large} 1 ${x2} ${y2}" fill="none" stroke="${color}" stroke-width="12" stroke-linecap="round"/>
       </svg>
-      Dent<span style="color: var(--teal)">AI</span>
-    </a>
-    <ul class="nav-links">
-      <li><a href="#features">Features</a></li>
-      <li><a href="#audience">Who It's For</a></li>
-      <li><a href="#pricing">Pricing</a></li>
-      <li><a href="#" class="btn btn-primary" style="padding: 0.5rem 1.25rem; font-size: 0.9rem;">Get Started</a></li>
-    </ul>
-  </nav>
-
-  <section class="hero">
-    <div class="hero-badge">Mint Rail LLC</div>
-    <h1>AI-Powered <span>Dental Intelligence</span></h1>
-    <p>Treatment planning, insurance coding, clinical notes, risk assessment, and material recommendations — powered by intelligent automation.</p>
-    <a href="#features" class="btn btn-primary">Explore Features</a>
-    <a href="#pricing" class="btn btn-outline">View Pricing</a>
-  </section>
-
-  <section class="section" id="features">
-    <div class="section-label">Capabilities</div>
-    <h2>Everything your practice needs</h2>
-    <p>From first exam to final restoration, DentAI assists at every clinical and administrative touchpoint.</p>
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">&#128203;</div>
-        <h3>Treatment Planning</h3>
-        <p>Enter symptoms, history, and findings. Receive a phased treatment plan with urgent, necessary, and elective procedures — each with estimated costs, durations, and clinical rationale.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">&#128444;</div>
-        <h3>Radiograph Analysis Prep</h3>
-        <p>Upload dental radiographs for structured pre-analysis. Images are stored securely and queued for AI-assisted findings once diagnostic imaging integration is live.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">&#128179;</div>
-        <h3>CDT Insurance Coding</h3>
-        <p>Describe any dental procedure in plain language. DentAI returns the top matching CDT codes with confidence scores, descriptions, and category — reducing claim denials.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">&#128221;</div>
-        <h3>Clinical SOAP Notes</h3>
-        <p>Generate compliant SOAP-format clinical notes from structured input. Includes subjective, objective, assessment, and plan sections with proper dental terminology.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">&#9888;</div>
-        <h3>Procedure Risk Assessment</h3>
-        <p>Score procedural risk based on patient factors — age, medications, systemic conditions. Receive clear risk levels, contributing factors, and clinical recommendations.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">&#128300;</div>
-        <h3>Material Recommendations</h3>
-        <p>Get material options for crowns, fillings, implants, and more — with pros, cons, cost ranges, longevity estimates, and best-use guidance for each option.</p>
-      </div>
+      <div class="gauge-label" style="color:${color}">${score}/10</div>
+      <div class="gauge-sublabel">${data.label || ''}</div>
     </div>
-  </section>
+  </div>`;
 
-  <section class="section" style="padding-bottom: 2rem;">
-    <div class="hipaa-banner">
-      <div class="hipaa-icon">&#128274;</div>
-      <div>
-        <h3>HIPAA-Ready Architecture</h3>
-        <p>DentAI is designed with healthcare data security in mind. Patient data is processed in-memory with no persistent storage of PHI. Deploy on-premises or in a HIPAA-eligible cloud environment for full compliance. BAA available for enterprise customers.</p>
-      </div>
-    </div>
-  </section>
+  if (data.factors && data.factors.length) {
+    html += '<div class="result-card"><h3>Risk Factors</h3><div class="risk-factors">';
+    data.factors.forEach(f => {
+      html += `<div class="risk-row">
+        <span class="factor-name">${f.name}</span>
+        <span class="factor-level level-${f.level}">${f.level}</span>
+      </div>`;
+    });
+    html += '</div></div>';
+  }
 
-  <section class="audience" id="audience">
-    <div class="audience-inner">
-      <h2>Built for dental professionals</h2>
-      <div class="roles">
-        <div class="role-tag">General Dentists</div>
-        <div class="role-tag">Orthodontists</div>
-        <div class="role-tag">Oral Surgeons</div>
-        <div class="role-tag">Dental Hygienists</div>
-        <div class="role-tag">Endodontists</div>
-        <div class="role-tag">Periodontists</div>
-        <div class="role-tag">Office Managers</div>
-        <div class="role-tag">Dental Billing Staff</div>
-      </div>
-    </div>
-  </section>
+  if (data.precautions && data.precautions.length) {
+    html += '<div class="result-card"><h3>Precautions &amp; Recommendations</h3>';
+    data.precautions.forEach(p => {
+      html += `<div class="precaution-item"><span class="precaution-icon">&#9888;</span><span>${p}</span></div>`;
+    });
+    html += '</div>';
+  }
 
-  <section class="pricing" id="pricing">
-    <div class="section-label">Pricing</div>
-    <h2>Simple, transparent pricing</h2>
-    <p>Start free. Scale as your practice grows.</p>
-    <div class="pricing-grid">
-      <div class="price-card">
-        <h3>Starter</h3>
-        <div class="price">Free</div>
-        <ul>
-          <li>50 treatment plans / month</li>
-          <li>CDT code lookup</li>
-          <li>Basic SOAP notes</li>
-          <li>Community support</li>
-        </ul>
-        <a href="#" class="btn btn-outline" style="width: 100%; text-align: center;">Get Started</a>
-      </div>
-      <div class="price-card featured">
-        <h3>Professional</h3>
-        <div class="price">$99<span>/mo</span></div>
-        <ul>
-          <li>Unlimited treatment plans</li>
-          <li>Risk assessment engine</li>
-          <li>Material recommendations</li>
-          <li>Radiograph upload &amp; queue</li>
-          <li>Priority support</li>
-        </ul>
-        <a href="#" class="btn btn-primary" style="width: 100%; text-align: center;">Start Free Trial</a>
-      </div>
-      <div class="price-card">
-        <h3>Enterprise</h3>
-        <div class="price">Custom</div>
-        <ul>
-          <li>Multi-location support</li>
-          <li>HIPAA BAA included</li>
-          <li>On-premises deployment</li>
-          <li>EHR/PMS integration</li>
-          <li>Dedicated account manager</li>
-        </ul>
-        <a href="#" class="btn btn-outline" style="width: 100%; text-align: center;">Contact Sales</a>
-      </div>
-    </div>
-  </section>
-
-  <footer>
-    <p>&copy; 2026 Mint Rail LLC. All rights reserved. <a href="#">Privacy Policy</a> &middot; <a href="#">Terms of Service</a></p>
-    <p style="margin-top: 0.5rem; font-size: 0.82rem; color: #9ca3af;">DentAI is a clinical decision support tool. It does not replace professional dental judgment.</p>
-  </footer>
-
+  el.innerHTML = html;
+}
+</script>
 </body>
 </html>

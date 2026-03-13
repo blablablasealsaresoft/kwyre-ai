@@ -3,366 +3,599 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>QuantEdge — AI-Powered Quantitative Finance</title>
+  <title>QuantEdge — Quantitative Finance Terminal</title>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-
     :root {
-      --gold: #C9A84C;
-      --gold-dim: #A68A3E;
-      --gold-glow: rgba(201, 168, 76, 0.15);
-      --bg: #0A0A0A;
-      --bg-card: #111111;
-      --bg-card-hover: #161616;
-      --border: #1E1E1E;
-      --text: #E8E8E8;
-      --text-dim: #888888;
-      --green: #00D26A;
-      --red: #FF4444;
-      --mono: "SF Mono", "Cascadia Code", "Fira Code", "Consolas", monospace;
+      --gold: #C9A84C; --gold-dim: #A68A3E; --gold-glow: rgba(201,168,76,0.12);
+      --bg: #0A0A0A; --bg-panel: #111; --bg-input: #181818; --border: #1E1E1E;
+      --text: #E0E0E0; --dim: #777; --green: #00D26A; --red: #FF4444;
+      --mono: "SF Mono","Cascadia Code","Fira Code","Consolas",monospace;
     }
+    body { background: var(--bg); color: var(--text); font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif; }
+    input, select, textarea, button { font-family: inherit; }
 
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
-      line-height: 1.6;
-      overflow-x: hidden;
-    }
-
-    nav {
-      position: fixed; top: 0; width: 100%; z-index: 100;
+    header {
       display: flex; align-items: center; justify-content: space-between;
-      padding: 1rem 3rem;
-      background: rgba(10, 10, 10, 0.92);
-      backdrop-filter: blur(12px);
-      border-bottom: 1px solid var(--border);
+      padding: 0 24px; height: 48px;
+      background: #0d0d0d; border-bottom: 1px solid var(--border);
     }
-    .logo {
-      font-size: 1.1rem; font-weight: 700; letter-spacing: 0.15em;
-      color: var(--gold); text-transform: uppercase;
-    }
-    .logo span { color: var(--text-dim); font-weight: 400; }
-    nav a {
-      color: var(--text-dim); text-decoration: none; font-size: 0.85rem;
-      letter-spacing: 0.05em; transition: color 0.2s;
-    }
-    nav a:hover { color: var(--gold); }
-    .nav-links { display: flex; gap: 2rem; }
+    .logo { font-family: var(--mono); font-size: 1rem; font-weight: 700; color: var(--gold); letter-spacing: .12em; }
+    .logo span { color: var(--dim); font-weight: 400; font-size: .8rem; }
+    .status { display: flex; align-items: center; gap: 8px; font-size: .75rem; color: var(--dim); font-family: var(--mono); }
+    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
+    .status-dot.ok { background: var(--green); }
 
-    .hero {
-      min-height: 100vh;
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      text-align: center; padding: 6rem 2rem 4rem;
-      background:
-        radial-gradient(ellipse at 50% 0%, rgba(201, 168, 76, 0.06) 0%, transparent 60%),
-        var(--bg);
+    .tabs {
+      display: flex; background: #0d0d0d; border-bottom: 1px solid var(--border);
+      padding: 0 24px; gap: 0;
     }
-    .hero-tag {
-      font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.3em;
-      color: var(--gold); text-transform: uppercase;
-      border: 1px solid var(--gold-dim); padding: 0.4rem 1.2rem;
-      margin-bottom: 2rem;
+    .tab {
+      padding: 10px 20px; font-size: .8rem; font-family: var(--mono); letter-spacing: .06em;
+      color: var(--dim); cursor: pointer; border: none; background: none;
+      border-bottom: 2px solid transparent; transition: all .15s; text-transform: uppercase;
     }
-    .hero h1 {
-      font-size: clamp(2.5rem, 6vw, 4.5rem);
-      font-weight: 700; line-height: 1.1; letter-spacing: -0.02em;
-      margin-bottom: 1.5rem;
-    }
-    .hero h1 em {
-      font-style: normal;
-      background: linear-gradient(135deg, var(--gold), #E8D48B);
-      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    }
-    .hero p {
-      max-width: 600px; color: var(--text-dim); font-size: 1.1rem;
-      margin-bottom: 2.5rem;
-    }
-    .hero-cta {
-      display: inline-block; padding: 0.85rem 2.5rem;
-      background: var(--gold); color: #000; font-weight: 600;
-      text-decoration: none; font-size: 0.9rem; letter-spacing: 0.05em;
-      transition: all 0.2s;
-    }
-    .hero-cta:hover { background: #E0BC5A; transform: translateY(-1px); }
+    .tab:hover { color: var(--text); }
+    .tab.active { color: var(--gold); border-bottom-color: var(--gold); }
 
-    .ticker-bar {
-      display: flex; justify-content: center; gap: 3rem;
-      padding: 1rem 2rem;
-      border-top: 1px solid var(--border);
-      border-bottom: 1px solid var(--border);
-      background: var(--bg-card);
-      font-family: var(--mono); font-size: 0.8rem;
-      overflow: hidden;
-    }
-    .ticker-item span:first-child { color: var(--text-dim); margin-right: 0.5rem; }
-    .ticker-item .up { color: var(--green); }
-    .ticker-item .down { color: var(--red); }
+    .panel { display: none; padding: 24px; max-width: 1200px; margin: 0 auto; }
+    .panel.active { display: block; }
 
-    section { padding: 5rem 3rem; max-width: 1200px; margin: 0 auto; }
-    section h2 {
-      font-size: 2rem; font-weight: 700; margin-bottom: 0.75rem;
-      letter-spacing: -0.01em;
+    .grid-2 { display: grid; grid-template-columns: 340px 1fr; gap: 24px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    @media (max-width: 900px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--bg-panel); border: 1px solid var(--border); padding: 20px;
     }
-    section .subtitle {
-      color: var(--text-dim); font-size: 1rem; margin-bottom: 3rem;
-      max-width: 500px;
+    .card h3 {
+      font-family: var(--mono); font-size: .7rem; color: var(--gold); letter-spacing: .12em;
+      text-transform: uppercase; margin-bottom: 16px;
     }
 
-    .features-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 1.5rem;
+    label { display: block; font-size: .75rem; color: var(--dim); margin-bottom: 4px; font-family: var(--mono); }
+    input[type="number"], input[type="text"], select, textarea {
+      width: 100%; padding: 8px 10px; background: var(--bg-input); border: 1px solid var(--border);
+      color: var(--text); font-size: .85rem; margin-bottom: 12px; outline: none;
     }
-    .feature-card {
-      background: var(--bg-card);
-      border: 1px solid var(--border);
-      padding: 2rem;
-      transition: all 0.25s;
-      position: relative; overflow: hidden;
-    }
-    .feature-card::before {
-      content: ""; position: absolute; top: 0; left: 0; right: 0;
-      height: 2px; background: var(--gold); transform: scaleX(0);
-      transition: transform 0.3s;
-    }
-    .feature-card:hover {
-      border-color: var(--gold-dim);
-      background: var(--bg-card-hover);
-      transform: translateY(-2px);
-    }
-    .feature-card:hover::before { transform: scaleX(1); }
-    .feature-icon {
-      font-family: var(--mono); font-size: 0.7rem;
-      color: var(--gold); letter-spacing: 0.1em;
-      margin-bottom: 1rem; text-transform: uppercase;
-    }
-    .feature-card h3 { font-size: 1.15rem; margin-bottom: 0.6rem; }
-    .feature-card p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.7; }
+    input:focus, textarea:focus, select:focus { border-color: var(--gold-dim); }
+    textarea { resize: vertical; font-family: var(--mono); font-size: .8rem; }
 
-    .code-section { background: var(--bg-card); border: 1px solid var(--border); margin-top: 5rem; }
-    .code-header {
-      display: flex; align-items: center; gap: 0.5rem;
-      padding: 0.75rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-      font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim);
+    .btn {
+      display: inline-block; padding: 10px 24px; background: var(--gold); color: #000;
+      border: none; font-weight: 700; font-size: .8rem; letter-spacing: .06em;
+      cursor: pointer; text-transform: uppercase; transition: background .15s;
     }
-    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
-    .code-dot.r { background: #FF5F57; }
-    .code-dot.y { background: #FEBC2E; }
-    .code-dot.g { background: #28C840; }
-    .code-header span { margin-left: 0.75rem; }
-    .code-body {
-      padding: 1.5rem; font-family: var(--mono); font-size: 0.82rem;
-      line-height: 1.8; overflow-x: auto; color: var(--text-dim);
-    }
-    .code-body .kw { color: #C678DD; }
-    .code-body .str { color: var(--green); }
-    .code-body .num { color: #D19A66; }
-    .code-body .key { color: #61AFEF; }
-    .code-body .cmt { color: #555; }
+    .btn:hover { background: #E0BC5A; }
+    .btn:disabled { opacity: .4; cursor: not-allowed; }
+    .btn-outline { background: transparent; border: 1px solid var(--gold-dim); color: var(--gold); }
+    .btn-outline:hover { background: var(--gold-glow); }
 
-    .pricing-section { text-align: center; padding: 5rem 2rem; }
-    .pricing-grid {
-      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-      gap: 1.5rem; max-width: 900px; margin: 0 auto;
+    .result-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 8px;
     }
-    .pricing-card {
-      background: var(--bg-card); border: 1px solid var(--border);
-      padding: 2.5rem 2rem; text-align: left;
-      transition: border-color 0.2s;
+    .metric {
+      background: var(--bg-input); border: 1px solid var(--border); padding: 12px;
+      text-align: center;
     }
-    .pricing-card.featured { border-color: var(--gold); }
-    .pricing-card h3 {
-      font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.15em;
-      color: var(--text-dim); margin-bottom: 1rem;
-    }
-    .pricing-card .price {
-      font-size: 2.5rem; font-weight: 700; margin-bottom: 0.25rem;
-    }
-    .pricing-card .price span { font-size: 1rem; color: var(--text-dim); font-weight: 400; }
-    .pricing-card .period { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1.5rem; }
-    .pricing-card ul { list-style: none; }
-    .pricing-card li {
-      padding: 0.4rem 0; font-size: 0.9rem; color: var(--text-dim);
-      border-bottom: 1px solid var(--border);
-    }
-    .pricing-card li::before { content: "→ "; color: var(--gold); }
+    .metric .val { font-family: var(--mono); font-size: 1.1rem; color: var(--gold); font-weight: 700; }
+    .metric .lbl { font-size: .65rem; color: var(--dim); text-transform: uppercase; letter-spacing: .08em; margin-top: 4px; }
+    .metric.green .val { color: var(--green); }
+    .metric.red .val { color: var(--red); }
 
-    footer {
-      text-align: center; padding: 3rem 2rem;
-      border-top: 1px solid var(--border);
-      color: var(--text-dim); font-size: 0.8rem;
-    }
-    footer a { color: var(--gold); text-decoration: none; }
+    canvas { display: block; width: 100%; background: var(--bg-input); border: 1px solid var(--border); }
 
-    @media (max-width: 768px) {
-      nav { padding: 1rem 1.5rem; }
-      section { padding: 3rem 1.5rem; }
-      .ticker-bar { gap: 1.5rem; flex-wrap: wrap; }
-      .nav-links { gap: 1rem; }
+    .error-banner {
+      display: none; padding: 12px 20px; background: #1a0a0a; border: 1px solid #441111;
+      color: var(--red); font-family: var(--mono); font-size: .8rem; margin-bottom: 16px;
     }
+    .error-banner.show { display: block; }
+    .error-banner code { color: var(--gold); }
+
+    .signals-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: .8rem; }
+    .signals-table th {
+      text-align: left; padding: 8px 12px; color: var(--dim); font-size: .7rem;
+      letter-spacing: .08em; text-transform: uppercase; border-bottom: 1px solid var(--border);
+    }
+    .signals-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); }
+
+    .asset-row { display: flex; gap: 8px; margin-bottom: 6px; align-items: end; }
+    .asset-row input { margin-bottom: 0; }
+    .asset-row .rm { background: none; border: none; color: var(--red); cursor: pointer; font-size: 1rem; padding: 6px; }
+
+    .pie-legend { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 12px; font-size: .8rem; }
+    .pie-legend span { display: flex; align-items: center; gap: 6px; }
+    .pie-swatch { width: 12px; height: 12px; border-radius: 2px; }
+
+    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--gold-dim); border-top-color: var(--gold); border-radius: 50%; animation: spin .6s linear infinite; margin-left: 8px; vertical-align: middle; }
+    @keyframes spin { to { transform: rotate(360deg); } }
   </style>
 </head>
 <body>
-  <nav>
-    <div class="logo">QuantEdge <span>/ Mint Rail</span></div>
-    <div class="nav-links">
-      <a href="#features">Features</a>
-      <a href="#api">API</a>
-      <a href="#pricing">Pricing</a>
-      <a href="https://github.com/mintrail/quantedge">GitHub</a>
-    </div>
-  </nav>
+  <header>
+    <div class="logo">QUANTEDGE <span>/ TERMINAL</span></div>
+    <div class="status"><div class="status-dot" id="statusDot"></div><span id="statusText">Disconnected</span></div>
+  </header>
 
-  <section class="hero">
-    <div class="hero-tag">Mint Rail LLC</div>
-    <h1><em>AI-Powered</em><br>Quantitative Finance</h1>
-    <p>Institutional-grade options pricing, portfolio optimization, and risk analytics — delivered through a modern API.</p>
-    <a href="#api" class="hero-cta">Explore the API</a>
-  </section>
-
-  <div class="ticker-bar" id="ticker">
-    <div class="ticker-item"><span>SPY</span> <span class="up">487.32 +0.42%</span></div>
-    <div class="ticker-item"><span>AAPL</span> <span class="up">178.56 +0.18%</span></div>
-    <div class="ticker-item"><span>MSFT</span> <span class="down">412.90 -0.31%</span></div>
-    <div class="ticker-item"><span>GOOG</span> <span class="up">141.22 +0.65%</span></div>
-    <div class="ticker-item"><span>TSLA</span> <span class="down">248.10 -1.12%</span></div>
-    <div class="ticker-item"><span>VIX</span> <span class="up">14.82 +2.30%</span></div>
+  <div class="tabs">
+    <button class="tab active" data-tab="pricer">Options Pricer</button>
+    <button class="tab" data-tab="portfolio">Portfolio Optimizer</button>
+    <button class="tab" data-tab="risk">Risk Dashboard</button>
+    <button class="tab" data-tab="signals">Signals</button>
   </div>
 
-  <section id="features">
-    <h2>Built for quants.</h2>
-    <p class="subtitle">Every tool you need for systematic strategy research, from pricing to production.</p>
-    <div class="features-grid">
-      <div class="feature-card">
-        <div class="feature-icon">[ pricing ]</div>
-        <h3>Options Pricing</h3>
-        <p>Black-Scholes engine with full Greeks — delta, gamma, theta, vega, rho. Sub-millisecond computation for European calls and puts.</p>
+  <div id="globalError" class="error-banner" style="max-width:1200px;margin:16px auto 0">
+    Server offline. Start with: <code>uvicorn server.app:app --port 8000</code>
+  </div>
+
+  <!-- OPTIONS PRICER -->
+  <div class="panel active" id="panel-pricer">
+    <div class="grid-2">
+      <div class="card">
+        <h3>[ parameters ]</h3>
+        <label>Spot Price</label>    <input type="number" id="p-spot" value="100" step="0.01">
+        <label>Strike Price</label>  <input type="number" id="p-strike" value="105" step="0.01">
+        <label>Risk-Free Rate</label><input type="number" id="p-rate" value="0.05" step="0.001">
+        <label>Time to Expiry (years)</label><input type="number" id="p-time" value="0.25" step="0.01">
+        <label>Volatility (σ)</label><input type="number" id="p-vol" value="0.20" step="0.01">
+        <button class="btn" id="priceBtn" onclick="priceOptions()">Calculate</button>
       </div>
-      <div class="feature-card">
-        <div class="feature-icon">[ portfolio ]</div>
-        <h3>Portfolio Optimization</h3>
-        <p>Markowitz mean-variance optimization. Efficient frontier computation, maximum Sharpe ratio portfolios, configurable constraints.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">[ risk ]</div>
-        <h3>Risk Management</h3>
-        <p>Historical and parametric VaR/CVaR. Monte Carlo simulation. Maximum drawdown analysis. Configurable confidence intervals.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">[ signals ]</div>
-        <h3>Alpha Signals</h3>
-        <p>Momentum and mean-reversion signal generators with z-score normalization. Pluggable strategy framework for custom factors.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">[ backtest ]</div>
-        <h3>Backtesting Engine</h3>
-        <p>Run strategies against historical data. Equity curves, Sharpe ratios, drawdown analysis, and position tracking out of the box.</p>
-      </div>
-      <div class="feature-card">
-        <div class="feature-icon">[ stream ]</div>
-        <h3>Real-Time Data</h3>
-        <p>WebSocket market data stream with bid/ask, volume, and tick-by-tick price updates at 500ms intervals.</p>
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <h3>[ pricing result ]</h3>
+          <div id="priceResult" class="result-grid">
+            <div class="metric green"><div class="val" id="r-call">—</div><div class="lbl">Call Price</div></div>
+            <div class="metric red"><div class="val" id="r-put">—</div><div class="lbl">Put Price</div></div>
+            <div class="metric"><div class="val" id="r-delta">—</div><div class="lbl">Delta</div></div>
+            <div class="metric"><div class="val" id="r-gamma">—</div><div class="lbl">Gamma</div></div>
+            <div class="metric"><div class="val" id="r-theta">—</div><div class="lbl">Theta</div></div>
+            <div class="metric"><div class="val" id="r-vega">—</div><div class="lbl">Vega</div></div>
+            <div class="metric"><div class="val" id="r-rho">—</div><div class="lbl">Rho</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>[ payoff diagram ]</h3>
+          <canvas id="payoffCanvas" height="220"></canvas>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <section id="api">
-    <h2>One request away.</h2>
-    <p class="subtitle">Clean JSON API. No SDK required.</p>
-    <div class="code-section">
-      <div class="code-header">
-        <div class="code-dot r"></div>
-        <div class="code-dot y"></div>
-        <div class="code-dot g"></div>
-        <span>price_option.sh</span>
+  <!-- PORTFOLIO OPTIMIZER -->
+  <div class="panel" id="panel-portfolio">
+    <div class="grid-2">
+      <div class="card">
+        <h3>[ asset inputs ]</h3>
+        <div id="assetList">
+          <div class="asset-row">
+            <div style="flex:2"><label>Name</label><input type="text" value="AAPL"></div>
+            <div style="flex:1"><label>Return</label><input type="number" value="0.12" step="0.01"></div>
+            <div style="flex:1"><label>Risk</label><input type="number" value="0.18" step="0.01"></div>
+            <button class="rm" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+          <div class="asset-row">
+            <div style="flex:2"><label>Name</label><input type="text" value="MSFT"></div>
+            <div style="flex:1"><label>Return</label><input type="number" value="0.10" step="0.01"></div>
+            <div style="flex:1"><label>Risk</label><input type="number" value="0.15" step="0.01"></div>
+            <button class="rm" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+          <div class="asset-row">
+            <div style="flex:2"><label>Name</label><input type="text" value="GOOG"></div>
+            <div style="flex:1"><label>Return</label><input type="number" value="0.14" step="0.01"></div>
+            <div style="flex:1"><label>Risk</label><input type="number" value="0.22" step="0.01"></div>
+            <button class="rm" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+          <div class="asset-row">
+            <div style="flex:2"><label>Name</label><input type="text" value="BND"></div>
+            <div style="flex:1"><label>Return</label><input type="number" value="0.04" step="0.01"></div>
+            <div style="flex:1"><label>Risk</label><input type="number" value="0.05" step="0.01"></div>
+            <button class="rm" onclick="this.parentElement.remove()">&times;</button>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <button class="btn-outline btn" onclick="addAssetRow()">+ Add Asset</button>
+          <button class="btn" id="optBtn" onclick="optimizePortfolio()">Optimize</button>
+        </div>
       </div>
-      <div class="code-body">
-        <span class="cmt"># Price a call option with Black-Scholes</span><br>
-        <span class="kw">curl</span> -X POST https://api.quantedge.io/v1/price/options \<br>
-        &nbsp;&nbsp;-H <span class="str">"Content-Type: application/json"</span> \<br>
-        &nbsp;&nbsp;-d <span class="str">'{</span><br>
-        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"spot"</span>: <span class="num">100</span>,<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"strike"</span>: <span class="num">105</span>,<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"rate"</span>: <span class="num">0.05</span>,<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"time_to_expiry"</span>: <span class="num">0.25</span>,<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"volatility"</span>: <span class="num">0.2</span>,<br>
-        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"option_type"</span>: <span class="str">"call"</span><br>
-        &nbsp;&nbsp;<span class="str">}'</span><br><br>
-        <span class="cmt"># Response:</span><br>
-        {<br>
-        &nbsp;&nbsp;<span class="key">"price"</span>: <span class="num">2.4634</span>,<br>
-        &nbsp;&nbsp;<span class="key">"delta"</span>: <span class="num">0.3842</span>,<br>
-        &nbsp;&nbsp;<span class="key">"gamma"</span>: <span class="num">0.0354</span>,<br>
-        &nbsp;&nbsp;<span class="key">"theta"</span>: <span class="num">-0.0452</span>,<br>
-        &nbsp;&nbsp;<span class="key">"vega"</span>: <span class="num">0.1769</span>,<br>
-        &nbsp;&nbsp;<span class="key">"rho"</span>: <span class="num">0.0873</span><br>
-        }
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <h3>[ optimal allocation ]</h3>
+          <canvas id="pieCanvas" height="260"></canvas>
+          <div id="pieLegend" class="pie-legend"></div>
+        </div>
+        <div class="card">
+          <h3>[ portfolio metrics ]</h3>
+          <div class="result-grid" id="portMetrics">
+            <div class="metric green"><div class="val" id="pm-ret">—</div><div class="lbl">Exp. Return</div></div>
+            <div class="metric red"><div class="val" id="pm-vol">—</div><div class="lbl">Volatility</div></div>
+            <div class="metric"><div class="val" id="pm-sharpe">—</div><div class="lbl">Sharpe Ratio</div></div>
+          </div>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <section id="pricing" class="pricing-section">
-    <h2>Simple pricing.</h2>
-    <p class="subtitle" style="margin: 0 auto 3rem;">No hidden fees. Scale when you're ready.</p>
-    <div class="pricing-grid">
-      <div class="pricing-card">
-        <h3>Developer</h3>
-        <div class="price">Free <span></span></div>
-        <div class="period">For experimentation</div>
-        <ul>
-          <li>1,000 API calls / month</li>
-          <li>All pricing endpoints</li>
-          <li>Community support</li>
-          <li>Rate limited to 10 req/s</li>
-        </ul>
+  <!-- RISK DASHBOARD -->
+  <div class="panel" id="panel-risk">
+    <div class="grid-2">
+      <div class="card">
+        <h3>[ return series ]</h3>
+        <label>Paste daily returns (comma or newline separated)</label>
+        <textarea id="riskData" rows="10" placeholder="0.012, -0.003, 0.008, -0.015, 0.002, ..."></textarea>
+        <label>Or generate sample data:</label>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="btn-outline btn" onclick="generateSampleReturns()">Random Sample (252d)</button>
+          <button class="btn" id="riskBtn" onclick="computeRisk()">Analyze</button>
+        </div>
       </div>
-      <div class="pricing-card featured">
-        <h3>Professional</h3>
-        <div class="price">$149 <span>/ mo</span></div>
-        <div class="period">For trading desks</div>
-        <ul>
-          <li>100,000 API calls / month</li>
-          <li>All endpoints + WebSocket</li>
-          <li>Priority support</li>
-          <li>99.9% SLA</li>
-        </ul>
-      </div>
-      <div class="pricing-card">
-        <h3>Enterprise</h3>
-        <div class="price">Custom</div>
-        <div class="period">For institutions</div>
-        <ul>
-          <li>Unlimited API calls</li>
-          <li>Dedicated infrastructure</li>
-          <li>Custom models & signals</li>
-          <li>On-prem deployment option</li>
-        </ul>
+      <div>
+        <div class="card" style="margin-bottom:16px">
+          <h3>[ risk metrics ]</h3>
+          <div class="result-grid" id="riskMetrics">
+            <div class="metric red"><div class="val" id="rm-var95">—</div><div class="lbl">VaR 95%</div></div>
+            <div class="metric red"><div class="val" id="rm-var99">—</div><div class="lbl">VaR 99%</div></div>
+            <div class="metric red"><div class="val" id="rm-cvar95">—</div><div class="lbl">CVaR 95%</div></div>
+            <div class="metric red"><div class="val" id="rm-cvar99">—</div><div class="lbl">CVaR 99%</div></div>
+            <div class="metric red"><div class="val" id="rm-mdd">—</div><div class="lbl">Max Drawdown</div></div>
+            <div class="metric"><div class="val" id="rm-mean">—</div><div class="lbl">Mean Return</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <h3>[ return distribution ]</h3>
+          <canvas id="histCanvas" height="220"></canvas>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
 
-  <footer>
-    <p>&copy; 2026 <a href="https://mintrail.com">Mint Rail LLC</a>. All rights reserved. QuantEdge is a registered trademark.</p>
-  </footer>
+  <!-- SIGNALS -->
+  <div class="panel" id="panel-signals">
+    <div class="card">
+      <h3>[ momentum &amp; mean-reversion signals ]</h3>
+      <p style="color:var(--dim);font-size:.8rem;margin-bottom:16px">Sample signals generated from synthetic price data. Connect your API for live signals.</p>
+      <table class="signals-table" id="signalsTable">
+        <thead><tr><th>Ticker</th><th>Price</th><th>20d Momentum</th><th>Z-Score</th><th>Signal</th><th>Strength</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
 
-  <script>
-    (function () {
-      const tickers = document.querySelectorAll('.ticker-item');
-      setInterval(function () {
-        tickers.forEach(function (el) {
-          const span = el.querySelector('span:last-child');
-          const parts = span.textContent.trim().split(' ');
-          const price = parseFloat(parts[0]);
-          const change = (Math.random() - 0.48) * 0.4;
-          const newPrice = (price + change).toFixed(2);
-          const pct = ((change / price) * 100).toFixed(2);
-          const sign = change >= 0 ? '+' : '';
-          span.textContent = newPrice + ' ' + sign + pct + '%';
-          span.className = change >= 0 ? 'up' : 'down';
-        });
-      }, 2000);
-    })();
-  </script>
+<script>
+const API = 'http://localhost:8000';
+let connected = false;
+
+// --- Tab switching ---
+document.querySelectorAll('.tab').forEach(t => {
+  t.addEventListener('click', () => {
+    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
+    t.classList.add('active');
+    document.getElementById('panel-' + t.dataset.tab).classList.add('active');
+  });
+});
+
+// --- Connection check ---
+async function checkConnection() {
+  try {
+    const r = await fetch(API + '/health', { signal: AbortSignal.timeout(2000) });
+    if (r.ok) { setStatus(true); return; }
+  } catch {}
+  setStatus(false);
+}
+
+function setStatus(ok) {
+  connected = ok;
+  document.getElementById('statusDot').className = 'status-dot' + (ok ? ' ok' : '');
+  document.getElementById('statusText').textContent = ok ? 'Connected to localhost:8000' : 'Disconnected';
+  document.getElementById('globalError').classList.toggle('show', !ok);
+}
+
+checkConnection();
+setInterval(checkConnection, 10000);
+
+// --- API helper ---
+async function apiPost(path, body) {
+  const r = await fetch(API + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+    signal: AbortSignal.timeout(15000)
+  });
+  if (!r.ok) throw new Error('API returned ' + r.status);
+  return r.json();
+}
+
+// --- OPTIONS PRICER ---
+async function priceOptions() {
+  const btn = document.getElementById('priceBtn');
+  const params = {
+    spot: +document.getElementById('p-spot').value,
+    strike: +document.getElementById('p-strike').value,
+    rate: +document.getElementById('p-rate').value,
+    time_to_expiry: +document.getElementById('p-time').value,
+    volatility: +document.getElementById('p-vol').value
+  };
+
+  btn.disabled = true; btn.innerHTML = 'Calculating<span class="spinner"></span>';
+  try {
+    const data = await apiPost('/v1/price/options', params);
+    document.getElementById('r-call').textContent = fmt(data.call_price);
+    document.getElementById('r-put').textContent = fmt(data.put_price);
+    document.getElementById('r-delta').textContent = fmt(data.delta);
+    document.getElementById('r-gamma').textContent = fmt(data.gamma);
+    document.getElementById('r-theta').textContent = fmt(data.theta);
+    document.getElementById('r-vega').textContent = fmt(data.vega);
+    document.getElementById('r-rho').textContent = fmt(data.rho);
+    drawPayoff(params.spot, params.strike, data.call_price, data.put_price);
+  } catch (e) {
+    fallbackPrice(params);
+  }
+  btn.disabled = false; btn.textContent = 'Calculate';
+}
+
+function fallbackPrice(p) {
+  const d1 = (Math.log(p.spot / p.strike) + (p.rate + p.volatility ** 2 / 2) * p.time_to_expiry) / (p.volatility * Math.sqrt(p.time_to_expiry));
+  const d2 = d1 - p.volatility * Math.sqrt(p.time_to_expiry);
+  const nd1 = cdf(d1), nd2 = cdf(d2);
+  const disc = Math.exp(-p.rate * p.time_to_expiry);
+  const call = p.spot * nd1 - p.strike * disc * nd2;
+  const put = p.strike * disc * (1 - nd2) - p.spot * (1 - nd1);
+  const pdf_d1 = Math.exp(-d1 * d1 / 2) / Math.sqrt(2 * Math.PI);
+  const delta = nd1, gamma = pdf_d1 / (p.spot * p.volatility * Math.sqrt(p.time_to_expiry));
+  const theta = -(p.spot * pdf_d1 * p.volatility) / (2 * Math.sqrt(p.time_to_expiry)) - p.rate * p.strike * disc * nd2;
+  const vega = p.spot * pdf_d1 * Math.sqrt(p.time_to_expiry);
+  const rho = p.strike * p.time_to_expiry * disc * nd2;
+
+  document.getElementById('r-call').textContent = fmt(call);
+  document.getElementById('r-put').textContent = fmt(put);
+  document.getElementById('r-delta').textContent = fmt(delta);
+  document.getElementById('r-gamma').textContent = fmt(gamma);
+  document.getElementById('r-theta').textContent = fmt(theta / 365);
+  document.getElementById('r-vega').textContent = fmt(vega / 100);
+  document.getElementById('r-rho').textContent = fmt(rho / 100);
+  drawPayoff(p.spot, p.strike, call, put);
+}
+
+function cdf(x) {
+  const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741, a4 = -1.453152027, a5 = 1.061405429;
+  const sign = x < 0 ? -1 : 1;
+  x = Math.abs(x) / Math.SQRT2;
+  const t = 1 / (1 + 0.3275911 * x);
+  const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  return 0.5 * (1 + sign * y);
+}
+
+function drawPayoff(S, K, callPrem, putPrem) {
+  const canvas = document.getElementById('payoffCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth; canvas.height = 220;
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0, 0, w, h);
+
+  const lo = S * 0.7, hi = S * 1.3, steps = 200;
+  const callPL = [], putPL = [];
+  for (let i = 0; i <= steps; i++) {
+    const price = lo + (hi - lo) * i / steps;
+    callPL.push(Math.max(price - K, 0) - callPrem);
+    putPL.push(Math.max(K - price, 0) - putPrem);
+  }
+  const allPL = callPL.concat(putPL);
+  const minPL = Math.min(...allPL), maxPL = Math.max(...allPL);
+  const pad = 30;
+
+  const xOf = i => pad + (w - 2 * pad) * i / steps;
+  const yOf = v => pad + (h - 2 * pad) * (1 - (v - minPL) / (maxPL - minPL || 1));
+
+  // zero line
+  ctx.strokeStyle = '#333'; ctx.lineWidth = 1; ctx.setLineDash([4, 4]);
+  const y0 = yOf(0); ctx.beginPath(); ctx.moveTo(pad, y0); ctx.lineTo(w - pad, y0); ctx.stroke();
+  ctx.setLineDash([]);
+
+  // call payoff
+  ctx.strokeStyle = '#00D26A'; ctx.lineWidth = 2; ctx.beginPath();
+  for (let i = 0; i <= steps; i++) { i === 0 ? ctx.moveTo(xOf(i), yOf(callPL[i])) : ctx.lineTo(xOf(i), yOf(callPL[i])); }
+  ctx.stroke();
+
+  // put payoff
+  ctx.strokeStyle = '#FF4444'; ctx.lineWidth = 2; ctx.beginPath();
+  for (let i = 0; i <= steps; i++) { i === 0 ? ctx.moveTo(xOf(i), yOf(putPL[i])) : ctx.lineTo(xOf(i), yOf(putPL[i])); }
+  ctx.stroke();
+
+  // labels
+  ctx.fillStyle = '#555'; ctx.font = '10px ' + getComputedStyle(document.body).getPropertyValue('--mono');
+  ctx.fillText(lo.toFixed(0), pad, h - 6);
+  ctx.fillText(S.toFixed(0), xOf(steps * 0.5) - 8, h - 6);
+  ctx.fillText(hi.toFixed(0), w - pad - 20, h - 6);
+  ctx.fillStyle = '#00D26A'; ctx.fillText('Call P/L', w - pad - 44, 16);
+  ctx.fillStyle = '#FF4444'; ctx.fillText('Put P/L', w - pad - 44, 28);
+}
+
+// --- PORTFOLIO OPTIMIZER ---
+function addAssetRow() {
+  const row = document.createElement('div');
+  row.className = 'asset-row';
+  row.innerHTML = '<div style="flex:2"><label>Name</label><input type="text" placeholder="TICKER"></div>'
+    + '<div style="flex:1"><label>Return</label><input type="number" value="0.08" step="0.01"></div>'
+    + '<div style="flex:1"><label>Risk</label><input type="number" value="0.15" step="0.01"></div>'
+    + '<button class="rm" onclick="this.parentElement.remove()">&times;</button>';
+  document.getElementById('assetList').appendChild(row);
+}
+
+async function optimizePortfolio() {
+  const rows = document.querySelectorAll('#assetList .asset-row');
+  const assets = [], returns = [], risks = [];
+  rows.forEach(r => {
+    const inputs = r.querySelectorAll('input');
+    assets.push(inputs[0].value || 'Asset');
+    returns.push(+inputs[1].value);
+    risks.push(+inputs[2].value);
+  });
+  if (assets.length < 2) return;
+
+  const btn = document.getElementById('optBtn');
+  btn.disabled = true; btn.innerHTML = 'Optimizing<span class="spinner"></span>';
+  try {
+    const data = await apiPost('/v1/portfolio/optimize', { assets, expected_returns: returns, risks });
+    showPortfolioResult(assets, data);
+  } catch {
+    const n = assets.length;
+    const inv = risks.map(r => 1 / r);
+    const total = inv.reduce((a, b) => a + b, 0);
+    const weights = inv.map(v => v / total);
+    const expRet = weights.reduce((s, w, i) => s + w * returns[i], 0);
+    const vol = Math.sqrt(weights.reduce((s, w, i) => s + (w * risks[i]) ** 2, 0));
+    showPortfolioResult(assets, { weights, expected_return: expRet, volatility: vol, sharpe_ratio: expRet / vol });
+  }
+  btn.disabled = false; btn.textContent = 'Optimize';
+}
+
+function showPortfolioResult(assets, data) {
+  document.getElementById('pm-ret').textContent = (data.expected_return * 100).toFixed(2) + '%';
+  document.getElementById('pm-vol').textContent = (data.volatility * 100).toFixed(2) + '%';
+  document.getElementById('pm-sharpe').textContent = data.sharpe_ratio.toFixed(3);
+  drawPie(assets, data.weights);
+}
+
+const PIE_COLORS = ['#C9A84C','#00D26A','#61AFEF','#C678DD','#FF4444','#D19A66','#56B6C2','#E06C75','#98C379','#E5C07B'];
+
+function drawPie(labels, weights) {
+  const canvas = document.getElementById('pieCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth; canvas.height = 260;
+  const cx = canvas.width / 2, cy = 130, r = 100;
+  let angle = -Math.PI / 2;
+
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  weights.forEach((w, i) => {
+    const slice = w * 2 * Math.PI;
+    ctx.fillStyle = PIE_COLORS[i % PIE_COLORS.length];
+    ctx.beginPath(); ctx.moveTo(cx, cy); ctx.arc(cx, cy, r, angle, angle + slice); ctx.closePath(); ctx.fill();
+    const mid = angle + slice / 2;
+    if (w > 0.04) {
+      ctx.fillStyle = '#000'; ctx.font = 'bold 11px sans-serif';
+      ctx.fillText((w * 100).toFixed(1) + '%', cx + Math.cos(mid) * (r * 0.65) - 14, cy + Math.sin(mid) * (r * 0.65) + 4);
+    }
+    angle += slice;
+  });
+
+  const legend = document.getElementById('pieLegend');
+  legend.innerHTML = labels.map((l, i) =>
+    '<span><span class="pie-swatch" style="background:' + PIE_COLORS[i % PIE_COLORS.length] + '"></span>' + l + ' (' + (weights[i] * 100).toFixed(1) + '%)</span>'
+  ).join('');
+}
+
+// --- RISK DASHBOARD ---
+function generateSampleReturns() {
+  const data = [];
+  for (let i = 0; i < 252; i++) {
+    const u1 = Math.random(), u2 = Math.random();
+    data.push((Math.sqrt(-2 * Math.log(u1)) * Math.cos(2 * Math.PI * u2) * 0.015 + 0.0003).toFixed(5));
+  }
+  document.getElementById('riskData').value = data.join(', ');
+}
+
+async function computeRisk() {
+  const raw = document.getElementById('riskData').value.trim();
+  if (!raw) return;
+  const returns = raw.split(/[,\s\n]+/).map(Number).filter(v => !isNaN(v));
+  if (returns.length < 10) return;
+
+  const btn = document.getElementById('riskBtn');
+  btn.disabled = true; btn.innerHTML = 'Analyzing<span class="spinner"></span>';
+  try {
+    const data = await apiPost('/v1/risk/analyze', { returns });
+    showRiskResult(data, returns);
+  } catch {
+    const sorted = [...returns].sort((a, b) => a - b);
+    const percentile = (arr, p) => arr[Math.floor(arr.length * p)];
+    const mean = returns.reduce((a, b) => a + b, 0) / returns.length;
+    const var95 = -percentile(sorted, 0.05);
+    const var99 = -percentile(sorted, 0.01);
+    const tail95 = sorted.filter(v => v <= -var95);
+    const tail99 = sorted.filter(v => v <= -var99);
+    const cvar95 = tail95.length ? -tail95.reduce((a, b) => a + b, 0) / tail95.length : var95;
+    const cvar99 = tail99.length ? -tail99.reduce((a, b) => a + b, 0) / tail99.length : var99;
+
+    let maxDD = 0, peak = 1, equity = 1;
+    returns.forEach(r => { equity *= (1 + r); peak = Math.max(peak, equity); maxDD = Math.max(maxDD, (peak - equity) / peak); });
+
+    showRiskResult({ var_95: var95, var_99: var99, cvar_95: cvar95, cvar_99: cvar99, max_drawdown: maxDD, mean_return: mean }, returns);
+  }
+  btn.disabled = false; btn.textContent = 'Analyze';
+}
+
+function showRiskResult(d, returns) {
+  document.getElementById('rm-var95').textContent = pct(d.var_95);
+  document.getElementById('rm-var99').textContent = pct(d.var_99);
+  document.getElementById('rm-cvar95').textContent = pct(d.cvar_95);
+  document.getElementById('rm-cvar99').textContent = pct(d.cvar_99);
+  document.getElementById('rm-mdd').textContent = pct(d.max_drawdown);
+  document.getElementById('rm-mean').textContent = pct(d.mean_return);
+  drawHistogram(returns);
+}
+
+function drawHistogram(data) {
+  const canvas = document.getElementById('histCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = canvas.offsetWidth; canvas.height = 220;
+  const w = canvas.width, h = canvas.height, pad = 30;
+
+  const min = Math.min(...data), max = Math.max(...data);
+  const bins = 40, binW = (max - min) / bins;
+  const counts = new Array(bins).fill(0);
+  data.forEach(v => { const b = Math.min(Math.floor((v - min) / binW), bins - 1); counts[b]++; });
+  const maxC = Math.max(...counts);
+
+  ctx.clearRect(0, 0, w, h);
+  const barW = (w - 2 * pad) / bins;
+  counts.forEach((c, i) => {
+    const bh = (c / maxC) * (h - 2 * pad);
+    const x = pad + i * barW;
+    const binMid = min + (i + 0.5) * binW;
+    ctx.fillStyle = binMid < 0 ? 'rgba(255,68,68,0.7)' : 'rgba(0,210,106,0.6)';
+    ctx.fillRect(x, h - pad - bh, barW - 1, bh);
+  });
+
+  ctx.strokeStyle = '#333'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(pad, h - pad); ctx.lineTo(w - pad, h - pad); ctx.stroke();
+  ctx.fillStyle = '#555'; ctx.font = '10px sans-serif';
+  ctx.fillText((min * 100).toFixed(1) + '%', pad, h - 8);
+  ctx.fillText('0%', pad + (w - 2 * pad) * (-min / (max - min)) - 6, h - 8);
+  ctx.fillText((max * 100).toFixed(1) + '%', w - pad - 30, h - 8);
+}
+
+// --- SIGNALS ---
+function populateSignals() {
+  const tickers = [
+    { sym: 'AAPL', price: 187.44 }, { sym: 'MSFT', price: 415.20 }, { sym: 'GOOG', price: 142.65 },
+    { sym: 'AMZN', price: 178.90 }, { sym: 'TSLA', price: 251.30 }, { sym: 'NVDA', price: 875.40 },
+    { sym: 'META', price: 485.10 }, { sym: 'JPM', price: 198.75 }, { sym: 'V', price: 278.60 },
+    { sym: 'SPY', price: 502.15 }
+  ];
+
+  const tbody = document.querySelector('#signalsTable tbody');
+  tbody.innerHTML = tickers.map(t => {
+    const mom = (Math.random() - 0.45) * 12;
+    const z = (Math.random() - 0.5) * 4;
+    const signal = mom > 3 ? 'BUY' : mom < -3 ? 'SELL' : z > 1.5 ? 'MEAN-REV SELL' : z < -1.5 ? 'MEAN-REV BUY' : 'HOLD';
+    const strength = Math.min(Math.abs(mom) + Math.abs(z), 10).toFixed(1);
+    const color = signal.includes('BUY') ? 'var(--green)' : signal.includes('SELL') ? 'var(--red)' : 'var(--dim)';
+    return '<tr>'
+      + '<td style="color:var(--gold)">' + t.sym + '</td>'
+      + '<td>$' + t.price.toFixed(2) + '</td>'
+      + '<td style="color:' + (mom >= 0 ? 'var(--green)' : 'var(--red)') + '">' + (mom >= 0 ? '+' : '') + mom.toFixed(2) + '%</td>'
+      + '<td>' + z.toFixed(2) + '</td>'
+      + '<td style="color:' + color + ';font-weight:700">' + signal + '</td>'
+      + '<td>' + strength + '/10</td>'
+      + '</tr>';
+  }).join('');
+}
+populateSignals();
+setInterval(populateSignals, 8000);
+
+// --- Helpers ---
+function fmt(v) { return typeof v === 'number' ? v.toFixed(4) : '—'; }
+function pct(v) { return typeof v === 'number' ? (v * 100).toFixed(2) + '%' : '—'; }
+</script>
 </body>
 </html>

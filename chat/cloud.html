@@ -1,0 +1,1112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' data: https://*.googleusercontent.com https://avatars.githubusercontent.com; frame-src 'self'; base-uri 'self'; form-action 'self'">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
+<title>Kwyre Cloud</title>
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #05060a;
+  --surface: #0b0d14;
+  --surface2: #10131c;
+  --surface3: #161a27;
+  --border: #1c2033;
+  --border-hi: #2a3050;
+  --accent: #3b82f6;
+  --accent-dim: rgba(59,130,246,0.12);
+  --accent-glow: rgba(59,130,246,0.25);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --amber: #f59e0b;
+  --text: #e2e4ea;
+  --text2: #6b7294;
+  --text3: #3d4466;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Instrument Sans', -apple-system, sans-serif;
+  --win-radius: 12px;
+  --dock-h: 68px;
+  --topbar-h: 32px;
+}
+
+html, body {
+  width: 100%; height: 100%; overflow: hidden;
+  background: var(--bg);
+  font-family: var(--sans);
+  color: var(--text);
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+}
+
+::selection { background: var(--accent); color: #fff; }
+
+/* ── Background layers ── */
+.grid-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.018) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.018) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.grid-bg::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.05), transparent 70%);
+}
+#particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+/* ── Top Bar ── */
+#topbar {
+  position: fixed; top: 0; left: 0; right: 0; height: var(--topbar-h);
+  z-index: 9000;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 16px;
+  background: rgba(11,13,20,0.82);
+  backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
+  border-bottom: 1px solid rgba(28,32,51,0.5);
+  font-size: 12px;
+}
+#topbar .tb-left { display: flex; align-items: center; gap: 8px; font-weight: 600; font-family: var(--mono); color: var(--accent); letter-spacing: 0.5px; }
+#topbar .tb-left span { font-size: 11px; }
+#topbar .tb-center { font-family: var(--mono); color: var(--text2); font-size: 11px; font-weight: 400; }
+#topbar .tb-right { display: flex; align-items: center; gap: 12px; }
+#topbar .tb-right .bell { cursor: pointer; font-size: 13px; opacity: 0.6; transition: opacity .2s; }
+#topbar .tb-right .bell:hover { opacity: 1; }
+#topbar .tb-right .user-pill {
+  display: flex; align-items: center; gap: 6px;
+  padding: 2px 10px 2px 2px; border-radius: 20px;
+  background: rgba(59,130,246,0.08); cursor: pointer;
+  transition: background .2s;
+}
+#topbar .tb-right .user-pill:hover { background: rgba(59,130,246,0.15); }
+#topbar .tb-right .user-pill img {
+  width: 20px; height: 20px; border-radius: 50%; object-fit: cover;
+  border: 1px solid var(--border);
+}
+#topbar .tb-right .user-pill .uname { font-size: 11px; color: var(--text); font-weight: 500; }
+
+/* ── Desktop ── */
+#desktop {
+  position: fixed;
+  top: var(--topbar-h); left: 0; right: 0;
+  bottom: calc(var(--dock-h) + 16px);
+  z-index: 1;
+  padding: 20px;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, 88px);
+  grid-template-rows: repeat(auto-fill, 96px);
+  grid-auto-flow: column;
+  align-content: start;
+  gap: 4px;
+}
+
+.desk-icon {
+  width: 88px; height: 96px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px; border-radius: 10px; cursor: pointer;
+  transition: background .15s;
+}
+.desk-icon:hover { background: rgba(59,130,246,0.08); }
+.desk-icon:active { background: rgba(59,130,246,0.14); }
+.desk-icon .ico { font-size: 42px; line-height: 1; filter: drop-shadow(0 2px 6px rgba(0,0,0,0.4)); }
+.desk-icon .lbl {
+  font-size: 10.5px; color: var(--text); text-align: center;
+  text-shadow: 0 1px 4px rgba(0,0,0,0.8);
+  font-weight: 500; max-width: 80px;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+
+/* ── Window ── */
+.kw-window {
+  position: absolute; z-index: 100;
+  min-width: 400px; min-height: 300px;
+  border-radius: var(--win-radius);
+  border: 1px solid var(--border);
+  background: rgba(11,13,20,0.88);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.55), 0 0 0 1px rgba(59,130,246,0.06);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+  animation: winOpen .22s cubic-bezier(.22,.68,0,1.1);
+}
+.kw-window.closing {
+  animation: winClose .18s ease-in forwards;
+}
+.kw-window.minimizing {
+  animation: winMin .25s ease-in forwards;
+}
+.kw-window.maximized { border-radius: 0; }
+.kw-window.focused { box-shadow: 0 20px 60px rgba(0,0,0,0.6), 0 0 0 1px rgba(59,130,246,0.12), 0 0 40px rgba(59,130,246,0.06); }
+
+@keyframes winOpen {
+  from { opacity: 0; transform: scale(0.88) translateY(16px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes winClose {
+  to { opacity: 0; transform: scale(0.92); }
+}
+@keyframes winMin {
+  to { opacity: 0; transform: scale(0.4) translateY(60vh); }
+}
+
+.win-titlebar {
+  height: 40px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 12px;
+  background: rgba(16,19,28,0.6);
+  border-bottom: 1px solid rgba(28,32,51,0.4);
+  cursor: default;
+}
+.win-titlebar .win-title {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12.5px; font-weight: 600; color: var(--text);
+  pointer-events: none;
+}
+.win-titlebar .win-title .win-ico { font-size: 15px; }
+.win-btns { display: flex; gap: 8px; }
+.win-btns button {
+  width: 13px; height: 13px; border-radius: 50%;
+  border: none; cursor: pointer;
+  transition: filter .15s, transform .15s;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0; line-height: 0;
+}
+.win-btns button:hover { filter: brightness(1.3); transform: scale(1.15); }
+.win-btn-close { background: #ef4444; }
+.win-btn-min   { background: #f59e0b; }
+.win-btn-max   { background: #22c55e; }
+.win-btns:hover button { font-size: 8px; color: rgba(0,0,0,0.65); font-weight: 700; }
+
+.win-body {
+  flex: 1; overflow: auto; position: relative;
+}
+.win-body iframe {
+  width: 100%; height: 100%; border: none; background: var(--bg);
+}
+
+.win-resize {
+  position: absolute; bottom: 0; right: 0;
+  width: 18px; height: 18px; cursor: nwse-resize; z-index: 2;
+}
+.win-resize::after {
+  content: ''; position: absolute; bottom: 4px; right: 4px;
+  width: 8px; height: 8px;
+  border-right: 2px solid var(--text3);
+  border-bottom: 2px solid var(--text3);
+  opacity: 0.5;
+}
+
+/* ── Dock ── */
+#dock-wrap {
+  position: fixed; bottom: 8px; left: 50%; transform: translateX(-50%);
+  z-index: 9000;
+}
+#dock {
+  display: flex; align-items: flex-end; gap: 4px;
+  padding: 6px 14px 8px;
+  background: rgba(16,19,28,0.55);
+  backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(59,130,246,0.08);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.45);
+}
+.dock-item {
+  width: 48px; display: flex; flex-direction: column; align-items: center;
+  cursor: pointer; transition: transform .18s cubic-bezier(.22,.68,0,1.1);
+  position: relative;
+}
+.dock-item:hover { transform: scale(1.22) translateY(-6px); }
+.dock-item .dock-ico { font-size: 30px; line-height: 1; filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4)); }
+.dock-item .dock-dot {
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--accent); margin-top: 3px;
+  opacity: 0; transition: opacity .2s;
+}
+.dock-item.running .dock-dot { opacity: 1; }
+.dock-sep { width: 1px; height: 36px; background: var(--border); margin: 0 4px; flex-shrink: 0; }
+
+/* ── Context Menu ── */
+#ctx-menu {
+  position: fixed; z-index: 10000;
+  background: rgba(16,19,28,0.92);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-hi);
+  border-radius: 10px; padding: 6px 0;
+  min-width: 200px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.5);
+  display: none;
+  animation: ctxIn .12s ease-out;
+}
+@keyframes ctxIn { from { opacity: 0; transform: scale(0.95); } to { opacity: 1; transform: scale(1); } }
+#ctx-menu .ctx-item {
+  padding: 7px 16px; font-size: 12.5px; cursor: pointer;
+  display: flex; align-items: center; gap: 10px;
+  color: var(--text); transition: background .1s;
+}
+#ctx-menu .ctx-item:hover { background: rgba(59,130,246,0.12); }
+#ctx-menu .ctx-sep { height: 1px; background: var(--border); margin: 4px 12px; }
+
+/* ── Auth Overlay ── */
+#auth-gate {
+  position: fixed; inset: 0; z-index: 20000;
+  background: rgba(5,6,10,0.92);
+  backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+  display: flex; align-items: center; justify-content: center;
+  flex-direction: column; gap: 24px;
+}
+#auth-gate.hidden { display: none; }
+#auth-gate h1 { font-family: var(--mono); font-size: 22px; color: var(--accent); letter-spacing: 1px; }
+#auth-gate p { color: var(--text2); font-size: 14px; }
+#auth-gate .auth-btn {
+  padding: 12px 36px; border-radius: 8px; border: none;
+  background: var(--accent); color: #fff; font-family: var(--sans);
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: background .2s, transform .15s;
+}
+#auth-gate .auth-btn:hover { background: #2563eb; transform: translateY(-1px); }
+
+/* ── Terminal App ── */
+.term-wrap {
+  background: #000; color: #22c55e; font-family: var(--mono);
+  font-size: 13px; padding: 12px 16px; height: 100%;
+  overflow-y: auto; line-height: 1.6;
+  display: flex; flex-direction: column;
+}
+.term-wrap .term-line { white-space: pre-wrap; word-break: break-all; }
+.term-wrap .term-line.cmd { color: #22c55e; }
+.term-wrap .term-line.out { color: #9ca3af; }
+.term-wrap .term-line.err { color: #ef4444; }
+.term-input-row {
+  display: flex; align-items: center; gap: 0; flex-shrink: 0;
+}
+.term-prompt { color: var(--accent); white-space: pre; }
+.term-input {
+  flex: 1; background: none; border: none; outline: none;
+  color: #22c55e; font-family: var(--mono); font-size: 13px;
+  caret-color: #22c55e;
+}
+
+/* ── Files App ── */
+.files-wrap { display: flex; height: 100%; }
+.files-sidebar {
+  width: 180px; flex-shrink: 0; padding: 12px;
+  background: rgba(11,13,20,0.5); border-right: 1px solid var(--border);
+}
+.files-sidebar .fs-title { font-size: 10px; text-transform: uppercase; letter-spacing: 1px; color: var(--text3); margin-bottom: 8px; font-weight: 600; }
+.files-sidebar .fs-item {
+  padding: 6px 10px; border-radius: 6px; font-size: 12.5px; cursor: pointer;
+  color: var(--text2); transition: background .12s, color .12s;
+  display: flex; align-items: center; gap: 8px;
+}
+.files-sidebar .fs-item:hover, .files-sidebar .fs-item.active { background: var(--accent-dim); color: var(--text); }
+.files-main { flex: 1; padding: 12px; overflow-y: auto; }
+.files-toolbar {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 12px; padding-bottom: 8px; border-bottom: 1px solid var(--border);
+}
+.files-toolbar .ft-path { font-family: var(--mono); font-size: 11px; color: var(--text2); }
+.files-toolbar .ft-views { display: flex; gap: 4px; }
+.files-toolbar .ft-views button {
+  background: none; border: 1px solid var(--border); color: var(--text2);
+  padding: 3px 8px; border-radius: 4px; cursor: pointer; font-size: 11px;
+  transition: background .12s, color .12s;
+}
+.files-toolbar .ft-views button.active { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+.files-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  gap: 8px;
+}
+.files-grid.list-view { grid-template-columns: 1fr; }
+.file-item {
+  display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 12px 8px; border-radius: 8px; cursor: pointer;
+  transition: background .12s;
+}
+.file-item:hover { background: rgba(59,130,246,0.08); }
+.file-item .fi-ico { font-size: 32px; }
+.file-item .fi-name { font-size: 10.5px; color: var(--text2); text-align: center; word-break: break-all; }
+.file-item .fi-size { font-size: 9px; color: var(--text3); font-family: var(--mono); }
+.files-grid.list-view .file-item {
+  flex-direction: row; padding: 6px 10px; gap: 10px;
+}
+.files-grid.list-view .file-item .fi-ico { font-size: 18px; }
+
+/* ── Settings App ── */
+.settings-wrap { display: flex; height: 100%; }
+.settings-tabs {
+  width: 160px; flex-shrink: 0; padding: 16px 8px;
+  background: rgba(11,13,20,0.5); border-right: 1px solid var(--border);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.settings-tabs .st-item {
+  padding: 8px 12px; border-radius: 6px; font-size: 12.5px; cursor: pointer;
+  color: var(--text2); transition: background .12s, color .12s;
+}
+.settings-tabs .st-item:hover, .settings-tabs .st-item.active { background: var(--accent-dim); color: var(--text); }
+.settings-panel { flex: 1; padding: 24px; overflow-y: auto; }
+.settings-panel h3 { font-size: 16px; margin-bottom: 16px; font-weight: 600; }
+.settings-panel .s-group { margin-bottom: 20px; }
+.settings-panel .s-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text3); margin-bottom: 6px; }
+.settings-panel .s-row {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 14px; background: var(--surface2); border-radius: 8px;
+  margin-bottom: 6px; border: 1px solid var(--border);
+}
+.settings-panel .s-row .s-val { font-family: var(--mono); font-size: 12px; color: var(--text2); }
+.settings-panel .s-btn {
+  padding: 5px 14px; border-radius: 6px; border: 1px solid var(--border);
+  background: var(--surface3); color: var(--text); font-size: 11px;
+  cursor: pointer; font-family: var(--sans); transition: background .15s;
+}
+.settings-panel .s-btn:hover { background: var(--accent-dim); }
+.settings-panel .s-btn.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.settings-panel .s-btn.primary:hover { background: #2563eb; }
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--text3); }
+</style>
+</head>
+<body>
+
+<!-- Background -->
+<div class="grid-bg"></div>
+<canvas id="particles"></canvas>
+
+<!-- Auth Gate -->
+<div id="auth-gate">
+  <div style="font-size:48px; margin-bottom:4px;">☁️</div>
+  <h1>KWYRE CLOUD</h1>
+  <p>Sign in to access your workspace</p>
+  <button class="auth-btn" onclick="location.href='login.html'">Sign In</button>
+</div>
+
+<!-- Top Bar -->
+<div id="topbar">
+  <div class="tb-left"><span>☁ KWYRE CLOUD</span></div>
+  <div class="tb-center" id="clock"></div>
+  <div class="tb-right">
+    <div class="bell" title="Notifications">🔔</div>
+    <div class="user-pill" id="user-pill">
+      <img id="user-avatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect fill='%231c2033' width='40' height='40'/%3E%3Ctext x='50%25' y='55%25' text-anchor='middle' dominant-baseline='middle' fill='%236b7294' font-size='16'%3E?%3C/text%3E%3C/svg%3E" alt="">
+      <span class="uname" id="user-name">User</span>
+    </div>
+  </div>
+</div>
+
+<!-- Desktop Icons -->
+<div id="desktop"></div>
+
+<!-- Windows Layer -->
+<div id="windows-layer" style="position:fixed;inset:0;z-index:100;pointer-events:none;"></div>
+
+<!-- Context Menu -->
+<div id="ctx-menu">
+  <div class="ctx-item" data-action="refresh">🔄 &nbsp;Refresh Desktop</div>
+  <div class="ctx-item" data-action="terminal">▸_ &nbsp;Open Terminal</div>
+  <div class="ctx-sep"></div>
+  <div class="ctx-item" data-action="settings">⚙️ &nbsp;Settings</div>
+  <div class="ctx-item" data-action="about">ℹ️ &nbsp;About Kwyre Cloud</div>
+</div>
+
+<!-- Dock -->
+<div id="dock-wrap">
+  <div id="dock"></div>
+</div>
+
+<script>
+/* ═══════════════════════════════════════════
+   KWYRE CLOUD — Desktop OS Environment
+   ═══════════════════════════════════════════ */
+
+const ALL_APPS = [
+  { id:'kwyre-ai',   icon:'⚡', label:'Kwyre AI',       type:'iframe', src:'main.html', licensed:true },
+  { id:'quantedge',  icon:'📈', label:'QuantEdge',      type:'iframe', src:'/products/quantedge/site/index.html', licensed:true },
+  { id:'labmind',    icon:'🔬', label:'LabMind',        type:'iframe', src:'/products/labmind/site/index.html', licensed:true },
+  { id:'dentai',     icon:'🦷', label:'DentAI',         type:'iframe', src:'/products/dentai/site/index.html', licensed:true },
+  { id:'codeforge',  icon:'⚙️', label:'CodeForge',      type:'iframe', src:'/products/codeforge/site/index.html', licensed:true },
+  { id:'taxshield',  icon:'🛡️', label:'TaxShield',      type:'iframe', src:'/products/taxshield/site/index.html', licensed:true },
+  { id:'launchpad',  icon:'🚀', label:'LaunchPad',      type:'iframe', src:'/products/launchpad/site/index.html', licensed:true },
+  { id:'soulsync',   icon:'💕', label:'SoulSync',       type:'iframe', src:'/products/soulsync/site/index.html', licensed:true },
+  { id:'nfl-play',   icon:'🏈', label:'NFL PlayCaller', type:'iframe', src:'/products/nfl-playcaller/site/index.html', licensed:true },
+  { id:'terminal',   icon:'▸_', label:'Terminal',       type:'builtin', builtin:'terminal', licensed:false },
+  { id:'files',      icon:'📁', label:'Files',          type:'builtin', builtin:'files', licensed:false },
+  { id:'settings',   icon:'⚙️', label:'Settings',       type:'builtin', builtin:'settings', licensed:false },
+];
+
+const DOCK_IDS = ['kwyre-ai','quantedge','terminal','files','settings'];
+
+let userProfile = { name: 'User', avatar: null, licenses: [] };
+
+/* ── Clock ── */
+function tickClock() {
+  const d = new Date();
+  const opts = { weekday:'short', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit', hour12:true };
+  document.getElementById('clock').textContent = d.toLocaleDateString('en-US', opts);
+}
+setInterval(tickClock, 1000);
+tickClock();
+
+/* ── Particles ── */
+(function initParticles() {
+  const c = document.getElementById('particles');
+  const ctx = c.getContext('2d');
+  let w, h, pts = [];
+  function resize() { w = c.width = innerWidth; h = c.height = innerHeight; }
+  resize(); addEventListener('resize', resize);
+  for (let i = 0; i < 50; i++) {
+    pts.push({ x: Math.random()*w, y: Math.random()*h, vx:(Math.random()-0.5)*0.3, vy:(Math.random()-0.5)*0.3, r: Math.random()*1.5+0.5 });
+  }
+  function draw() {
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle = 'rgba(59,130,246,0.15)';
+    for (const p of pts) {
+      p.x += p.vx; p.y += p.vy;
+      if (p.x < 0) p.x = w; if (p.x > w) p.x = 0;
+      if (p.y < 0) p.y = h; if (p.y > h) p.y = 0;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.r, 0, Math.PI*2); ctx.fill();
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+/* ═══════════════════════════════════════════
+   WINDOW MANAGER
+   ═══════════════════════════════════════════ */
+class WindowManager {
+  constructor() {
+    this.windows = new Map();
+    this.zCounter = 200;
+    this.layer = document.getElementById('windows-layer');
+    this._dragState = null;
+    this._resizeState = null;
+    this._initGlobalListeners();
+  }
+
+  _initGlobalListeners() {
+    document.addEventListener('mousemove', (e) => {
+      if (this._dragState) this._onDragMove(e);
+      if (this._resizeState) this._onResizeMove(e);
+    });
+    document.addEventListener('mouseup', () => {
+      if (this._dragState) { document.body.style.cursor = ''; this._dragState = null; }
+      if (this._resizeState) { document.body.style.cursor = ''; this._resizeState = null; }
+    });
+  }
+
+  openWindow(appId, title, icon, contentHtml, options = {}) {
+    if (this.windows.has(appId)) {
+      const existing = this.windows.get(appId);
+      if (existing.minimized) { this.restoreWindow(appId); return; }
+      this.focusWindow(appId);
+      return;
+    }
+
+    const w = options.width || 900;
+    const h = options.height || 600;
+    const x = 80 + (this.windows.size % 8) * 30;
+    const y = 60 + (this.windows.size % 6) * 30;
+
+    const el = document.createElement('div');
+    el.className = 'kw-window focused';
+    el.dataset.appId = appId;
+    el.style.cssText = `left:${x}px;top:${y}px;width:${w}px;height:${h}px;z-index:${++this.zCounter};pointer-events:auto;`;
+
+    el.innerHTML = `
+      <div class="win-titlebar">
+        <div class="win-title"><span class="win-ico">${icon}</span>${title}</div>
+        <div class="win-btns">
+          <button class="win-btn-close" data-action="close" title="Close">✕</button>
+          <button class="win-btn-min" data-action="min" title="Minimize">−</button>
+          <button class="win-btn-max" data-action="max" title="Maximize">+</button>
+        </div>
+      </div>
+      <div class="win-body">${contentHtml}</div>
+      <div class="win-resize"></div>
+    `;
+
+    this.layer.appendChild(el);
+
+    const state = {
+      el, appId, title, icon, minimized: false, maximized: false,
+      prev: { x, y, w, h }
+    };
+    this.windows.set(appId, state);
+
+    const titlebar = el.querySelector('.win-titlebar');
+    titlebar.addEventListener('mousedown', (e) => {
+      if (e.target.closest('.win-btns')) return;
+      this.focusWindow(appId);
+      this._dragState = { el, startX: e.clientX, startY: e.clientY, origX: el.offsetLeft, origY: el.offsetTop };
+      document.body.style.cursor = 'grabbing';
+      e.preventDefault();
+    });
+
+    el.querySelector('.win-resize').addEventListener('mousedown', (e) => {
+      this.focusWindow(appId);
+      this._resizeState = { el, startX: e.clientX, startY: e.clientY, origW: el.offsetWidth, origH: el.offsetHeight };
+      document.body.style.cursor = 'nwse-resize';
+      e.preventDefault();
+    });
+
+    el.querySelector('.win-btns').addEventListener('click', (e) => {
+      const btn = e.target.closest('button');
+      if (!btn) return;
+      const action = btn.dataset.action;
+      if (action === 'close') this.closeWindow(appId);
+      else if (action === 'min') this.minimizeWindow(appId);
+      else if (action === 'max') this.maximizeWindow(appId);
+    });
+
+    el.addEventListener('mousedown', () => this.focusWindow(appId));
+
+    this._updateDock();
+
+    if (options.onReady) options.onReady(el);
+  }
+
+  _onDragMove(e) {
+    const s = this._dragState;
+    const nx = s.origX + (e.clientX - s.startX);
+    const ny = Math.max(32, s.origY + (e.clientY - s.startY));
+    s.el.style.left = nx + 'px';
+    s.el.style.top = ny + 'px';
+  }
+
+  _onResizeMove(e) {
+    const s = this._resizeState;
+    const nw = Math.max(400, s.origW + (e.clientX - s.startX));
+    const nh = Math.max(300, s.origH + (e.clientY - s.startY));
+    s.el.style.width = nw + 'px';
+    s.el.style.height = nh + 'px';
+  }
+
+  focusWindow(appId) {
+    const state = this.windows.get(appId);
+    if (!state) return;
+    this.layer.querySelectorAll('.kw-window').forEach(w => w.classList.remove('focused'));
+    state.el.style.zIndex = ++this.zCounter;
+    state.el.classList.add('focused');
+  }
+
+  minimizeWindow(appId) {
+    const state = this.windows.get(appId);
+    if (!state) return;
+    state.minimized = true;
+    state.el.classList.add('minimizing');
+    setTimeout(() => { state.el.style.display = 'none'; state.el.classList.remove('minimizing'); }, 250);
+    this._updateDock();
+  }
+
+  restoreWindow(appId) {
+    const state = this.windows.get(appId);
+    if (!state) return;
+    state.minimized = false;
+    state.el.style.display = '';
+    state.el.style.animation = 'none';
+    void state.el.offsetHeight;
+    state.el.style.animation = 'winOpen .22s cubic-bezier(.22,.68,0,1.1)';
+    this.focusWindow(appId);
+    this._updateDock();
+  }
+
+  maximizeWindow(appId) {
+    const state = this.windows.get(appId);
+    if (!state) return;
+    if (state.maximized) {
+      const p = state.prev;
+      state.el.style.cssText = `left:${p.x}px;top:${p.y}px;width:${p.w}px;height:${p.h}px;z-index:${state.el.style.zIndex};pointer-events:auto;`;
+      state.el.classList.remove('maximized');
+      state.maximized = false;
+    } else {
+      state.prev = { x: state.el.offsetLeft, y: state.el.offsetTop, w: state.el.offsetWidth, h: state.el.offsetHeight };
+      state.el.style.cssText = `left:0;top:32px;width:100vw;height:calc(100vh - 32px - ${parseInt(getComputedStyle(document.documentElement).getPropertyValue('--dock-h'))+24}px);z-index:${state.el.style.zIndex};pointer-events:auto;`;
+      state.el.classList.add('maximized');
+      state.maximized = true;
+    }
+  }
+
+  closeWindow(appId) {
+    const state = this.windows.get(appId);
+    if (!state) return;
+    state.el.classList.add('closing');
+    setTimeout(() => {
+      state.el.remove();
+      this.windows.delete(appId);
+      this._updateDock();
+    }, 180);
+  }
+
+  _updateDock() {
+    buildDock();
+  }
+}
+
+const wm = new WindowManager();
+
+/* ═══════════════════════════════════════════
+   BUILT-IN APP CONTENT GENERATORS
+   ═══════════════════════════════════════════ */
+
+function buildTerminalContent() {
+  return `<div class="term-wrap" id="term-${Date.now()}">
+    <div class="term-line out">Kwyre Cloud Terminal v2.4.0</div>
+    <div class="term-line out">Type 'help' for available commands.</div>
+    <div class="term-line out">&nbsp;</div>
+    <div class="term-output"></div>
+    <div class="term-input-row">
+      <span class="term-prompt">kwyre@cloud:~$ </span>
+      <input class="term-input" type="text" autofocus spellcheck="false" autocomplete="off">
+    </div>
+  </div>`;
+}
+
+function initTerminal(winEl) {
+  const wrap = winEl.querySelector('.term-wrap');
+  const output = wrap.querySelector('.term-output');
+  const input = wrap.querySelector('.term-input');
+  const history = [];
+  let histIdx = -1;
+  const startTime = Date.now();
+
+  input.focus();
+  winEl.addEventListener('click', () => input.focus());
+
+  const commands = {
+    help: () => `Available commands:
+  help        Show this help message
+  clear       Clear the terminal
+  ls          List files in current directory
+  whoami      Display current user
+  date        Show current date and time
+  kwyre --version   Show Kwyre Cloud version
+  uptime      Show system uptime`,
+    clear: () => '__CLEAR__',
+    ls: () => `Documents/  Downloads/  Models/  Adapters/
+config.json   .env   README.md`,
+    whoami: () => userProfile.name || 'kwyre-user',
+    date: () => new Date().toString(),
+    'kwyre': (args) => {
+      if (args.includes('--version')) return 'Kwyre Cloud v2.4.0 (build 2026.03.13)';
+      return 'kwyre: try "kwyre --version"';
+    },
+    uptime: () => {
+      const sec = Math.floor((Date.now() - startTime) / 1000);
+      const m = Math.floor(sec / 60); const s = sec % 60;
+      return `up ${m}m ${s}s`;
+    }
+  };
+
+  input.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      const cmd = input.value.trim();
+      input.value = '';
+      if (!cmd) return;
+      history.push(cmd);
+      histIdx = history.length;
+
+      const cmdLine = document.createElement('div');
+      cmdLine.className = 'term-line cmd';
+      cmdLine.textContent = `kwyre@cloud:~$ ${cmd}`;
+      output.appendChild(cmdLine);
+
+      const parts = cmd.split(/\s+/);
+      const base = parts[0];
+      const args = parts.slice(1).join(' ');
+
+      let result;
+      if (commands[base]) {
+        result = commands[base](args);
+      } else {
+        result = `${base}: command not found`;
+      }
+
+      if (result === '__CLEAR__') {
+        output.innerHTML = '';
+      } else {
+        const outLine = document.createElement('div');
+        outLine.className = 'term-line out';
+        outLine.textContent = result;
+        output.appendChild(outLine);
+      }
+      wrap.scrollTop = wrap.scrollHeight;
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      if (histIdx > 0) { histIdx--; input.value = history[histIdx]; }
+    } else if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (histIdx < history.length - 1) { histIdx++; input.value = history[histIdx]; }
+      else { histIdx = history.length; input.value = ''; }
+    }
+  });
+}
+
+function buildFilesContent() {
+  return `<div class="files-wrap">
+    <div class="files-sidebar">
+      <div class="fs-title">Locations</div>
+      <div class="fs-item active" data-folder="Documents">📄 Documents</div>
+      <div class="fs-item" data-folder="Downloads">📥 Downloads</div>
+      <div class="fs-item" data-folder="Models">🧠 Models</div>
+      <div class="fs-item" data-folder="Adapters">🔗 Adapters</div>
+    </div>
+    <div class="files-main">
+      <div class="files-toolbar">
+        <span class="ft-path">~/Documents</span>
+        <div class="ft-views">
+          <button class="active" data-view="grid">⊞</button>
+          <button data-view="list">☰</button>
+        </div>
+      </div>
+      <div class="files-grid" id="files-grid"></div>
+    </div>
+  </div>`;
+}
+
+const MOCK_FILES = {
+  Documents: [
+    { name:'project-brief.pdf', icon:'📄', size:'2.4 MB' },
+    { name:'api-keys.json', icon:'🔑', size:'1.2 KB' },
+    { name:'notes.md', icon:'📝', size:'8.7 KB' },
+    { name:'invoice-march.pdf', icon:'📄', size:'340 KB' },
+  ],
+  Downloads: [
+    { name:'kwyre-cli-2.4.0.tar.gz', icon:'📦', size:'18.2 MB' },
+    { name:'dataset-v3.csv', icon:'📊', size:'142 MB' },
+    { name:'report-final.pdf', icon:'📄', size:'5.1 MB' },
+  ],
+  Models: [
+    { name:'llama-3.1-8b.gguf', icon:'🧠', size:'4.7 GB' },
+    { name:'mistral-7b-v0.3.safetensors', icon:'🧠', size:'14.5 GB' },
+    { name:'phi-3-mini.gguf', icon:'🧠', size:'2.2 GB' },
+    { name:'config.json', icon:'⚙️', size:'4 KB' },
+  ],
+  Adapters: [
+    { name:'lora-medical-v2.safetensors', icon:'🔗', size:'67 MB' },
+    { name:'lora-legal-v1.safetensors', icon:'🔗', size:'52 MB' },
+    { name:'adapter-config.json', icon:'⚙️', size:'2 KB' },
+    { name:'manifest.json', icon:'📋', size:'1 KB' },
+  ]
+};
+
+function initFiles(winEl) {
+  const grid = winEl.querySelector('#files-grid');
+  const sidebar = winEl.querySelector('.files-sidebar');
+  const pathEl = winEl.querySelector('.ft-path');
+  const viewBtns = winEl.querySelectorAll('.ft-views button');
+
+  function renderFiles(folder) {
+    const files = MOCK_FILES[folder] || [];
+    grid.innerHTML = files.map(f => `
+      <div class="file-item">
+        <div class="fi-ico">${f.icon}</div>
+        <div class="fi-name">${f.name}</div>
+        <div class="fi-size">${f.size}</div>
+      </div>
+    `).join('');
+    pathEl.textContent = `~/${folder}`;
+  }
+
+  sidebar.addEventListener('click', (e) => {
+    const item = e.target.closest('.fs-item');
+    if (!item) return;
+    sidebar.querySelectorAll('.fs-item').forEach(i => i.classList.remove('active'));
+    item.classList.add('active');
+    renderFiles(item.dataset.folder);
+  });
+
+  viewBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      viewBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      grid.classList.toggle('list-view', btn.dataset.view === 'list');
+    });
+  });
+
+  renderFiles('Documents');
+}
+
+function buildSettingsContent() {
+  const masked = '••••••••••••••••••••kw_3f8a';
+  return `<div class="settings-wrap">
+    <div class="settings-tabs">
+      <div class="st-item active" data-tab="general">General</div>
+      <div class="st-item" data-tab="account">Account</div>
+      <div class="st-item" data-tab="api">API</div>
+      <div class="st-item" data-tab="about">About</div>
+    </div>
+    <div class="settings-panel">
+      <div data-panel="general">
+        <h3>General</h3>
+        <div class="s-group">
+          <div class="s-label">Appearance</div>
+          <div class="s-row"><span>Theme</span><span class="s-val">Dark (default)</span></div>
+          <div class="s-row"><span>Accent Color</span><span class="s-val" style="color:var(--accent);">● Blue #3b82f6</span></div>
+        </div>
+        <div class="s-group">
+          <div class="s-label">Language</div>
+          <div class="s-row"><span>Display Language</span><span class="s-val">English (US)</span></div>
+        </div>
+        <div class="s-group">
+          <div class="s-label">Notifications</div>
+          <div class="s-row"><span>Desktop Notifications</span><span class="s-val">Enabled</span></div>
+          <div class="s-row"><span>Sound Effects</span><span class="s-val">Off</span></div>
+        </div>
+      </div>
+      <div data-panel="account" style="display:none">
+        <h3>Account</h3>
+        <div class="s-group">
+          <div class="s-label">Profile</div>
+          <div class="s-row"><span>Name</span><span class="s-val" id="set-name">${userProfile.name}</span></div>
+          <div class="s-row"><span>Email</span><span class="s-val" id="set-email">user@kwyre.com</span></div>
+          <div class="s-row"><span>Avatar</span><span class="s-val">Synced from provider</span></div>
+        </div>
+        <div class="s-group">
+          <div class="s-label">Session</div>
+          <div class="s-row"><span>Status</span><span class="s-val" style="color:var(--green);">● Authenticated</span></div>
+          <div class="s-row"><span>Sign Out</span><button class="s-btn" onclick="localStorage.removeItem('kwyre_token');location.reload();">Sign Out</button></div>
+        </div>
+      </div>
+      <div data-panel="api" style="display:none">
+        <h3>API Access</h3>
+        <div class="s-group">
+          <div class="s-label">API Key</div>
+          <div class="s-row">
+            <span class="s-val" style="font-size:11px;" id="api-key-display">${masked}</span>
+            <button class="s-btn" onclick="navigator.clipboard.writeText('kw_3f8a9c2b1d4e5f6a7b8c9d0e1f2a3b4c');this.textContent='Copied!';setTimeout(()=>this.textContent='Copy',1500);">Copy</button>
+          </div>
+        </div>
+        <div class="s-group">
+          <div class="s-label">Usage</div>
+          <div class="s-row"><span>Requests Today</span><span class="s-val">847 / 10,000</span></div>
+          <div class="s-row"><span>Rate Limit</span><span class="s-val">60 req/min</span></div>
+        </div>
+      </div>
+      <div data-panel="about" style="display:none">
+        <h3>About Kwyre Cloud</h3>
+        <div class="s-group">
+          <div class="s-row"><span>Version</span><span class="s-val">2.4.0 (2026.03.13)</span></div>
+          <div class="s-row"><span>Build</span><span class="s-val">cloud-prod-a8f3c2</span></div>
+          <div class="s-row"><span>Runtime</span><span class="s-val">Cloudflare Workers</span></div>
+          <div class="s-row"><span>Platform</span><span class="s-val">${navigator.platform}</span></div>
+        </div>
+        <div class="s-group">
+          <div class="s-label">Credits</div>
+          <div class="s-row" style="flex-direction:column;align-items:flex-start;gap:6px;">
+            <span style="font-size:13px;font-weight:600;">Kwyre AI, Inc.</span>
+            <span class="s-val">Your AI. Not Theirs.</span>
+            <span class="s-val">© 2026 Kwyre AI. All rights reserved.</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+}
+
+function initSettings(winEl) {
+  const tabs = winEl.querySelectorAll('.st-item');
+  const panels = winEl.querySelectorAll('[data-panel]');
+
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => t.classList.remove('active'));
+      tab.classList.add('active');
+      panels.forEach(p => p.style.display = p.dataset.panel === tab.dataset.tab ? '' : 'none');
+    });
+  });
+}
+
+/* ═══════════════════════════════════════════
+   APP LAUNCHER
+   ═══════════════════════════════════════════ */
+
+function launchApp(appId) {
+  const app = ALL_APPS.find(a => a.id === appId);
+  if (!app) return;
+
+  let content, options = {};
+
+  if (app.type === 'iframe') {
+    content = `<iframe src="${app.src}" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" loading="lazy"></iframe>`;
+    options = { width: 1000, height: 650 };
+  } else if (app.builtin === 'terminal') {
+    content = buildTerminalContent();
+    options = { width: 680, height: 440, onReady: initTerminal };
+  } else if (app.builtin === 'files') {
+    content = buildFilesContent();
+    options = { width: 780, height: 500, onReady: initFiles };
+  } else if (app.builtin === 'settings') {
+    content = buildSettingsContent();
+    options = { width: 680, height: 480, onReady: initSettings };
+  }
+
+  wm.openWindow(appId, app.label, app.icon, content, options);
+}
+
+/* ═══════════════════════════════════════════
+   DESKTOP ICONS
+   ═══════════════════════════════════════════ */
+
+function renderDesktopIcons(visibleApps) {
+  const desktop = document.getElementById('desktop');
+  desktop.innerHTML = '';
+  visibleApps.forEach(app => {
+    const el = document.createElement('div');
+    el.className = 'desk-icon';
+    el.dataset.appId = app.id;
+    el.innerHTML = `<div class="ico">${app.icon}</div><div class="lbl">${app.label}</div>`;
+    el.addEventListener('dblclick', () => launchApp(app.id));
+    desktop.appendChild(el);
+  });
+}
+
+/* ═══════════════════════════════════════════
+   DOCK
+   ═══════════════════════════════════════════ */
+
+function buildDock() {
+  const dock = document.getElementById('dock');
+  dock.innerHTML = '';
+
+  const pinnedApps = DOCK_IDS.map(id => ALL_APPS.find(a => a.id === id)).filter(Boolean);
+  const runningIds = [...wm.windows.keys()];
+  const extraRunning = runningIds.filter(id => !DOCK_IDS.includes(id));
+  const extraApps = extraRunning.map(id => ALL_APPS.find(a => a.id === id)).filter(Boolean);
+
+  pinnedApps.forEach(app => {
+    const isRunning = wm.windows.has(app.id);
+    const item = document.createElement('div');
+    item.className = 'dock-item' + (isRunning ? ' running' : '');
+    item.title = app.label;
+    item.innerHTML = `<div class="dock-ico">${app.icon}</div><div class="dock-dot"></div>`;
+    item.addEventListener('click', () => {
+      if (isRunning) {
+        const state = wm.windows.get(app.id);
+        if (state.minimized) wm.restoreWindow(app.id);
+        else wm.focusWindow(app.id);
+      } else {
+        launchApp(app.id);
+      }
+    });
+    dock.appendChild(item);
+  });
+
+  if (extraApps.length > 0) {
+    const sep = document.createElement('div');
+    sep.className = 'dock-sep';
+    dock.appendChild(sep);
+    extraApps.forEach(app => {
+      const item = document.createElement('div');
+      item.className = 'dock-item running';
+      item.title = app.label;
+      item.innerHTML = `<div class="dock-ico">${app.icon}</div><div class="dock-dot"></div>`;
+      item.addEventListener('click', () => {
+        const state = wm.windows.get(app.id);
+        if (state.minimized) wm.restoreWindow(app.id);
+        else wm.focusWindow(app.id);
+      });
+      dock.appendChild(item);
+    });
+  }
+}
+
+/* ═══════════════════════════════════════════
+   CONTEXT MENU
+   ═══════════════════════════════════════════ */
+
+(function initContextMenu() {
+  const menu = document.getElementById('ctx-menu');
+
+  document.addEventListener('contextmenu', (e) => {
+    if (e.target.closest('.kw-window') || e.target.closest('#dock') || e.target.closest('#topbar')) return;
+    e.preventDefault();
+    menu.style.display = 'block';
+    let mx = e.clientX, my = e.clientY;
+    if (mx + 220 > innerWidth) mx = innerWidth - 220;
+    if (my + 160 > innerHeight) my = innerHeight - 160;
+    menu.style.left = mx + 'px';
+    menu.style.top = my + 'px';
+  });
+
+  document.addEventListener('click', () => { menu.style.display = 'none'; });
+
+  menu.querySelectorAll('.ctx-item').forEach(item => {
+    item.addEventListener('click', () => {
+      const action = item.dataset.action;
+      if (action === 'refresh') location.reload();
+      else if (action === 'terminal') launchApp('terminal');
+      else if (action === 'settings') launchApp('settings');
+      else if (action === 'about') {
+        launchApp('settings');
+        setTimeout(() => {
+          const winEl = wm.windows.get('settings')?.el;
+          if (winEl) {
+            winEl.querySelectorAll('.st-item').forEach(t => {
+              t.classList.remove('active');
+              if (t.dataset.tab === 'about') t.classList.add('active');
+            });
+            winEl.querySelectorAll('[data-panel]').forEach(p => p.style.display = p.dataset.panel === 'about' ? '' : 'none');
+          }
+        }, 300);
+      }
+    });
+  });
+})();
+
+/* ═══════════════════════════════════════════
+   AUTH & INIT
+   ═══════════════════════════════════════════ */
+
+async function init() {
+  const token = localStorage.getItem('kwyre_token');
+  const gate = document.getElementById('auth-gate');
+
+  if (!token) {
+    gate.classList.remove('hidden');
+    return;
+  }
+
+  gate.classList.add('hidden');
+
+  try {
+    const res = await fetch('/api/user/profile', {
+      headers: { 'Authorization': `Bearer ${token}` }
+    });
+    if (res.ok) {
+      const data = await res.json();
+      userProfile.name = data.name || data.displayName || 'User';
+      userProfile.avatar = data.avatar || data.photoURL || null;
+      userProfile.licenses = data.licenses || [];
+      document.getElementById('user-name').textContent = userProfile.name;
+      if (userProfile.avatar) document.getElementById('user-avatar').src = userProfile.avatar;
+    }
+  } catch (_) {
+    /* offline / api unavailable — continue with defaults */
+  }
+
+  const builtinIds = ['terminal', 'files', 'settings'];
+  const visibleApps = ALL_APPS.filter(app => {
+    if (builtinIds.includes(app.id)) return true;
+    if (userProfile.licenses.length === 0) return true;
+    return userProfile.licenses.includes(app.id);
+  });
+
+  renderDesktopIcons(visibleApps);
+  buildDock();
+}
+
+init();
+</script>
+</body>
+</html>
