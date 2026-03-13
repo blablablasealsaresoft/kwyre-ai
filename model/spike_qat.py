@@ -16,8 +16,8 @@ from collections import defaultdict
 # ---------------------------------------------------------------------------
 # Module-level mutable state (hooks read these every forward pass)
 # ---------------------------------------------------------------------------
-_current_k: float = 8.0
-_current_max_spike: int = 31
+_current_k: float = 5.0
+_current_max_spike: int = 15
 
 _qat_stats = defaultdict(lambda: {"total": 0, "zeros": 0, "calls": 0})
 _qat_tracking = True
@@ -89,7 +89,7 @@ def spike_ste(x: torch.Tensor, k: float, max_spike: int) -> torch.Tensor:
 # ---------------------------------------------------------------------------
 # Hook attachment
 # ---------------------------------------------------------------------------
-def apply_spike_hooks_trainable(model, k=8.0, max_spike=31, skip_patterns=None, layer_stride=1):
+def apply_spike_hooks_trainable(model, k=5.0, max_spike=15, skip_patterns=None, layer_stride=1):
     """Attach STE spike-encoding hooks to eligible Linear layers.
 
     Unlike spike_serve.apply_spike_hooks, this always modifies activations
@@ -186,10 +186,10 @@ class KCurriculumScheduler:
 
     DEFAULT_SCHEDULE = [
         (0, 50.0),
-        (6000, 25.0),
-        (12000, 12.0),
-        (18000, 8.0),
-        (24000, 5.0),
+        (4000, 20.0),
+        (8000, 10.0),
+        (14000, 5.0),
+        (20000, 3.0),
     ]
 
     def __init__(

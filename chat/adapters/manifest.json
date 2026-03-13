@@ -1,0 +1,76 @@
+{
+  "_comment": "Kwyre domain adapter CDN manifest — served at https://kwyre.com/adapters/manifest.json",
+  "_updated": "2026-03-12",
+  "blockchain_crypto": {
+    "version": "1.0.0",
+    "display_name": "Blockchain & Crypto Forensics",
+    "description": "on-chain tracing, smart contract analysis, DeFi forensics, RICO/BSA/AML compliance",
+    "url": "https://cdn.kwyre.com/adapters/blockchain-crypto-4b-v1.0.0.zip",
+    "sha256": "",
+    "model_tier": "4b",
+    "estimated_size_mb": 162,
+    "base_model": "Qwen/Qwen3.5-4B",
+    "lora_rank": 32,
+    "training_traces": 1000
+  },
+  "legal_compliance": {
+    "version": "1.0.0",
+    "display_name": "Legal & Compliance",
+    "description": "NDA analysis, contract review, privilege screening, SEC/FINRA compliance, regulatory citations",
+    "url": "https://cdn.kwyre.com/adapters/legal-compliance-4b-v1.0.0.zip",
+    "sha256": "",
+    "model_tier": "4b",
+    "estimated_size_mb": 162,
+    "base_model": "Qwen/Qwen3.5-4B",
+    "lora_rank": 32,
+    "training_traces": 1000
+  },
+  "insurance_actuarial": {
+    "version": "1.0.0",
+    "display_name": "Insurance & Actuarial",
+    "description": "reinsurance treaties, loss development, IBNR reserving, catastrophe modeling, Solvency II/RBC",
+    "url": "https://cdn.kwyre.com/adapters/insurance-actuarial-4b-v1.0.0.zip",
+    "sha256": "",
+    "model_tier": "4b",
+    "estimated_size_mb": 162,
+    "base_model": "Qwen/Qwen3.5-4B",
+    "lora_rank": 32,
+    "training_traces": 1000
+  },
+  "defense_intelligence": {
+    "version": "1.0.0",
+    "display_name": "Defense & Intelligence",
+    "description": "CUI handling, OSINT methodology, MITRE ATT&CK, NIST 800-171, intel product formats",
+    "url": "https://cdn.kwyre.com/adapters/defense-intelligence-4b-v1.0.0.zip",
+    "sha256": "",
+    "model_tier": "4b",
+    "estimated_size_mb": 162,
+    "base_model": "Qwen/Qwen3.5-4B",
+    "lora_rank": 32,
+    "training_traces": 1000
+  },
+  "financial_trading": {
+    "version": "1.0.0",
+    "display_name": "Financial Trading & Algorithms",
+    "description": "options pricing, statistical arbitrage, risk management, execution algorithms, regulatory compliance",
+    "url": "https://cdn.kwyre.com/adapters/financial-trading-4b-v1.0.0.zip",
+    "sha256": "",
+    "model_tier": "4b",
+    "estimated_size_mb": 162,
+    "base_model": "Qwen/Qwen3.5-4B",
+    "lora_rank": 32,
+    "training_traces": 1000
+  },
+  "healthcare_lifesciences": {
+    "version": "1.0.0",
+    "display_name": "Healthcare & Life Sciences",
+    "description": "HIPAA compliance, clinical trials, FDA submissions, medical coding, drug interactions",
+    "url": "https://cdn.kwyre.com/adapters/healthcare-lifesciences-4b-v1.0.0.zip",
+    "sha256": "",
+    "model_tier": "4b",
+    "estimated_size_mb": 162,
+    "base_model": "Qwen/Qwen3.5-4B",
+    "lora_rank": 32,
+    "training_traces": 1000
+  }
+}

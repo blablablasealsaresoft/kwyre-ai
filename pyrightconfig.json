@@ -1,0 +1,4 @@
+{
+  "extraPaths": ["model", "server", "security"],
+  "reportMissingImports": "warning"
+}

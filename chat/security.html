@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<!--
+    ╔═══════════════════════════════════════════════════════════╗
+    ║  CLASSIFICATION: KWYRE EYES ONLY                         ║
+    ║  DOCUMENT: KW-006 / ARREST WARRANT                       ║
+    ║  ANALYST: CK                                             ║
+    ║  STATUS: WARRANT ISSUED                                  ║
+    ╚═══════════════════════════════════════════════════════════╝
+
+    BRIEFING: Page 6 of 8. The warrant is signed.
+
+    UNITED STATES DISTRICT COURT
+    SOUTHERN DISTRICT OF NEW YORK
+
+    SEALED CRIMINAL COMPLAINT
+
+    UNITED STATES OF AMERICA
+              v.
+    [REDACTED], a/k/a "PHANTOM"
+
+    VIOLATIONS:
+    18 U.S.C. § 1956 — Money Laundering
+    18 U.S.C. § 1960 — Unlicensed Money Transmitting
+    31 U.S.C. § 5332 — Bulk Cash Smuggling
+    18 U.S.C. § 1343 — Wire Fraud
+
+    PROBABLE CAUSE: On-chain analysis conducted by KWYRE AI
+    identified 47 wallets controlled by the defendant, tracing
+    $47.2M in cryptocurrency through multiple mixing services
+    and cross-chain bridges to a fiat off-ramp in Dubai.
+
+    無恐怖遠離一切顛倒夢想究竟涅槃三世諸佛
+    ⌬ 0x4B575952455F414952474150 ⌬ KEY:六道輪迴 ⌬
+
+    NEXT CLUE: The platform page has the extraction plan.
+
+    Everyone dies. Not everyone lives.
+                                        — CK
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' data:; base-uri 'self'; form-action 'self'">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
+<title>Kwyre AI — Security &amp; Compliance</title>
+<meta name="description" content="Kwyre security architecture: 6-layer defense, 47/47 pentest findings resolved, privacy guarantees, SOC2/HIPAA/FINRA compliance documentation.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #05060a;
+  --surface: #0b0d14;
+  --surface2: #10131c;
+  --surface3: #161a27;
+  --border: #1c2033;
+  --border-hi: #2a3050;
+  --accent: #3b82f6;
+  --accent-dim: rgba(59,130,246,0.12);
+  --accent-glow: rgba(59,130,246,0.25);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --amber: #f59e0b;
+  --text: #e2e4ea;
+  --text2: #6b7294;
+  --text3: #3d4466;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Instrument Sans', -apple-system, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: #fff; }
+
+#particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+.grid-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+.grid-bg::after {
+  content: ''; position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.06), transparent 70%);
+}
+
+.m-scanlines {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+}
+
+.m-noise {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none; opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+.m-orb {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0; filter: blur(120px);
+}
+.m-orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(239,68,68,0.05), transparent 70%);
+  top: -5%; right: -5%;
+  animation: m-orb-a 18s ease-in-out infinite alternate;
+}
+.m-orb-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(59,130,246,0.04), transparent 70%);
+  bottom: 10%; left: -8%;
+  animation: m-orb-b 22s ease-in-out infinite alternate;
+}
+@keyframes m-orb-a { 0%{transform:translate(0,0)} 100%{transform:translate(-60px,40px)} }
+@keyframes m-orb-b { 0%{transform:translate(0,0)} 100%{transform:translate(50px,-30px)} }
+
+.reveal {
+  opacity: 0; transform: translateY(32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.vis { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: 0.1s; }
+.reveal-d2 { transition-delay: 0.2s; }
+.reveal-d3 { transition-delay: 0.3s; }
+
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+.section { padding: 80px 0; }
+.section + .section { border-top: 1px solid var(--border); }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(5,6,10,0.85);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between; height: 56px;
+}
+.nav-brand {
+  font-family: var(--mono); font-size: 16px; font-weight: 700;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: #fff; text-decoration: none;
+  text-shadow: 0 0 12px rgba(255,255,255,0.25);
+}
+.nav-brand span { color: #fff; }
+.nav-brand img { filter: brightness(1.6) contrast(1.2); }
+.nav-links { display: flex; gap: 32px; align-items: center; }
+.nav-links a {
+  font-size: 13px; font-weight: 500; color: #fff;
+  text-decoration: none; letter-spacing: 0.3px; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--accent); }
+.nav-links a.active { color: var(--accent); }
+.nav-cta {
+  font-family: var(--mono) !important; font-size: 11px !important;
+  letter-spacing: 1px !important; text-transform: uppercase !important;
+  padding: 8px 20px; background: var(--accent) !important;
+  color: #fff !important; border-radius: 4px;
+  transition: box-shadow 0.2s, transform 0.1s !important;
+}
+.nav-cta:hover { box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-1px) !important; }
+
+/* PAGE HERO */
+.page-hero { padding: 140px 0 60px; text-align: center; }
+.page-hero-eyebrow {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--red); margin-bottom: 20px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+}
+.page-hero-eyebrow::before, .page-hero-eyebrow::after {
+  content: ''; width: 40px; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--red));
+}
+.page-hero-eyebrow::after { background: linear-gradient(90deg, var(--red), transparent); }
+.page-hero h1 {
+  font-size: clamp(32px, 4.5vw, 52px); font-weight: 700;
+  line-height: 1.12; letter-spacing: -1px; margin-bottom: 20px;
+}
+.page-hero h1 em { font-style: normal; color: var(--red); }
+.page-hero p {
+  font-size: 17px; color: var(--text2); max-width: 620px;
+  margin: 0 auto; line-height: 1.7;
+}
+
+/* SECTION HEADERS */
+.sh { text-align: center; margin-bottom: 48px; }
+.sh-eyebrow {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 16px;
+}
+.sh-eyebrow-red { color: var(--red); }
+.sh-eyebrow-green { color: var(--green); }
+.sh h2 {
+  font-size: clamp(28px, 3.5vw, 40px); font-weight: 700;
+  letter-spacing: -0.5px; line-height: 1.15; margin-bottom: 16px;
+}
+.sh p { font-size: 16px; color: var(--text2); max-width: 560px; margin: 0 auto; line-height: 1.6; }
+
+/* PENTEST BANNER */
+.pentest-hero {
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 32px; align-items: center;
+  background: var(--surface);
+  border: 1px solid rgba(34,197,94,0.15);
+  border-radius: 8px;
+  padding: 36px 32px;
+  margin-top: 48px;
+}
+.pentest-number {
+  text-align: center;
+}
+.pentest-big {
+  font-family: var(--mono); font-size: 56px; font-weight: 700;
+  color: var(--green); line-height: 1;
+}
+.pentest-of {
+  font-family: var(--mono); font-size: 13px;
+  color: var(--text3); letter-spacing: 1px; margin-top: 4px;
+}
+.pentest-body h3 {
+  font-size: 20px; font-weight: 700; color: var(--text); margin-bottom: 8px;
+}
+.pentest-body p {
+  font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 16px;
+}
+.pentest-tags { display: flex; gap: 8px; flex-wrap: wrap; }
+.ptag {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 4px 12px; border-radius: 3px;
+}
+.ptag-crit { background: var(--red-dim); color: var(--red); border: 1px solid rgba(239,68,68,0.15); }
+.ptag-high { background: rgba(249,115,22,0.12); color: #f97316; border: 1px solid rgba(249,115,22,0.15); }
+.ptag-med { background: rgba(245,158,11,0.12); color: var(--amber); border: 1px solid rgba(245,158,11,0.15); }
+.ptag-low { background: var(--green-dim); color: var(--green); border: 1px solid rgba(34,197,94,0.15); }
+
+/* PENTEST BANNER (prominent results) */
+.pentest-banner {
+  display: grid; grid-template-columns: auto 1fr;
+  gap: 28px; align-items: center;
+  background: var(--surface);
+  border: 1px solid rgba(34,197,94,0.2);
+  border-radius: 8px;
+  padding: 32px 36px;
+  box-shadow: 0 0 0 1px rgba(34,197,94,0.06);
+}
+.pentest-banner-icon {
+  width: 56px; height: 56px; border-radius: 8px;
+  background: var(--green-dim);
+  border: 1px solid rgba(34,197,94,0.2);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; flex-shrink: 0;
+}
+.pentest-banner-icon svg {
+  width: 28px; height: 28px; stroke: var(--green); fill: none; stroke-width: 1.5;
+}
+.pentest-banner-check {
+  position: absolute; bottom: 4px; right: 4px;
+  font-size: 12px; font-weight: 700; color: var(--green);
+  background: var(--surface); border-radius: 50%;
+  width: 16px; height: 16px; display: flex; align-items: center; justify-content: center;
+  line-height: 1;
+}
+.pentest-banner-content { min-width: 0; }
+.pentest-banner-headline {
+  font-family: var(--mono); font-size: clamp(18px, 2.2vw, 24px); font-weight: 700;
+  color: var(--text); letter-spacing: 0.5px; margin-bottom: 12px;
+}
+.pentest-banner-headline .pentest-banner-headline-accent { color: var(--green); }
+.pentest-banner-desc {
+  font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 20px;
+}
+.pentest-banner-stats {
+  display: flex; flex-wrap: wrap; gap: 1px; background: var(--border);
+  border-radius: 6px; overflow: hidden; max-width: 560px;
+}
+.pentest-stat {
+  flex: 1; min-width: 90px; padding: 12px 16px;
+  background: var(--surface2); transition: background 0.2s;
+}
+.pentest-stat:hover { background: var(--surface3); }
+.pentest-stat-success { background: rgba(34,197,94,0.06); }
+.pentest-stat-success:hover { background: rgba(34,197,94,0.1); }
+.pentest-stat-val {
+  display: block; font-family: var(--mono); font-size: 14px; font-weight: 600;
+  color: var(--text); margin-bottom: 2px;
+}
+.pentest-stat-success .pentest-stat-val { color: var(--green); }
+.pentest-stat-label {
+  font-size: 10px; font-weight: 500; color: var(--text3);
+  letter-spacing: 0.5px; text-transform: uppercase;
+}
+
+/* HARDENING LIST */
+.hardening-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 1px; background: var(--border);
+  border-radius: 8px; overflow: hidden; margin-top: 32px;
+}
+.harden-item {
+  background: var(--surface); padding: 20px 24px;
+  transition: background 0.2s;
+}
+.harden-item:hover { background: var(--surface2); }
+.harden-item h4 {
+  font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px;
+}
+.harden-item p {
+  font-size: 12px; color: var(--text2); line-height: 1.5;
+}
+
+/* PRIVACY FEATURES */
+.privacy-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: var(--border);
+  border-radius: 8px; overflow: hidden; margin-top: 48px;
+}
+.privacy-card {
+  background: var(--surface); padding: 28px 24px;
+  transition: background 0.2s;
+}
+.privacy-card:hover { background: var(--surface2); }
+.privacy-icon {
+  width: 36px; height: 36px; border-radius: 4px;
+  background: var(--green-dim);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 14px;
+}
+.privacy-icon svg { width: 18px; height: 18px; stroke: var(--green); fill: none; stroke-width: 1.5; }
+.privacy-card h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 8px; }
+.privacy-card p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+/* COMPLIANCE */
+.compliance-grid {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 1px; background: var(--border);
+  border-radius: 8px; overflow: hidden; margin-top: 48px;
+}
+.compliance-card {
+  background: var(--surface); padding: 28px 24px;
+  transition: background 0.2s, border-color 0.2s;
+  display: block; text-decoration: none; color: inherit;
+  position: relative;
+}
+.compliance-card:hover { background: var(--surface2); }
+.compliance-card.linked { cursor: pointer; }
+.compliance-card.linked::after {
+  content: '→';
+  position: absolute; top: 28px; right: 24px;
+  font-size: 16px; color: var(--accent); opacity: 0;
+  transition: opacity 0.2s, transform 0.2s;
+}
+.compliance-card.linked:hover::after { opacity: 1; transform: translateX(3px); }
+.compliance-card h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
+.compliance-card .cc-path {
+  font-family: var(--mono); font-size: 10px; color: var(--accent);
+  letter-spacing: 0.5px; margin-bottom: 10px;
+}
+.compliance-card p { font-size: 13px; color: var(--text2); line-height: 1.6; }
+
+/* FRAMEWORK BADGES */
+.framework-row {
+  display: flex; gap: 1px; background: var(--border);
+  border-radius: 8px; overflow: hidden; margin-top: 24px;
+}
+.fw-badge {
+  flex: 1; background: var(--surface); padding: 16px 12px;
+  text-align: center; transition: background 0.2s;
+}
+.fw-badge:hover { background: var(--surface2); }
+.fw-badge h4 {
+  font-family: var(--mono); font-size: 12px; font-weight: 600;
+  color: var(--text); margin-bottom: 4px;
+}
+.fw-badge p { font-size: 10px; color: var(--text3); letter-spacing: 0.5px; }
+
+/* VERIFY */
+.verify-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 1px; background: var(--border);
+  border-radius: 8px; overflow: hidden; margin-top: 48px;
+}
+.verify-card {
+  background: var(--surface); padding: 28px 24px;
+  transition: background 0.2s;
+}
+.verify-card:hover { background: var(--surface2); }
+.verify-card h3 {
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 14px;
+}
+.verify-code {
+  font-family: var(--mono); font-size: 11px; color: var(--text2);
+  line-height: 1.8; background: var(--bg);
+  border: 1px solid var(--border); border-radius: 4px;
+  padding: 16px; margin-bottom: 12px;
+  white-space: pre-wrap; word-break: break-all;
+}
+.verify-expect {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--green); letter-spacing: 0.5px;
+}
+
+/* CTA */
+.cta-bar { text-align: center; padding: 80px 0; }
+.cta-bar h2 { font-size: clamp(24px, 3vw, 36px); font-weight: 700; margin-bottom: 12px; }
+.cta-bar p { font-size: 15px; color: var(--text2); margin-bottom: 32px; }
+.cta-actions { display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 32px; font-family: var(--mono);
+  font-size: 12px; font-weight: 500; letter-spacing: 1px;
+  text-transform: uppercase; text-decoration: none;
+  border-radius: 4px; transition: all 0.2s; cursor: pointer; border: none;
+}
+.btn-primary { background: var(--accent); color: #fff; box-shadow: 0 2px 16px var(--accent-glow); }
+.btn-primary:hover { box-shadow: 0 4px 28px var(--accent-glow); transform: translateY(-1px); }
+.btn-ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+.btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+
+/* FOOTER */
+.site-footer { border-top: 1px solid var(--border); padding: 40px 0; }
+.footer-inner {
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 16px;
+}
+.footer-brand {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 2px;
+  color: var(--text3); text-transform: uppercase;
+}
+.footer-legal { font-size: 12px; color: var(--text3); max-width: 500px; line-height: 1.5; }
+
+/* ENHANCED COSMIC LAYERS */
+.m-vignette {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 35%, rgba(5,6,10,0.85) 100%);
+}
+.m-sweep-line {
+  position: fixed; left: 0; right: 0; height: 1px; z-index: 0; pointer-events: none;
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 40%, rgba(59,130,246,0.5) 50%, var(--accent) 60%, transparent 100%);
+  box-shadow: 0 0 20px var(--accent-glow);
+  animation: m-sweep-move 5s ease-in-out infinite;
+  opacity: 0;
+}
+@keyframes m-sweep-move {
+  0%   { top: -1px; opacity: 0; }
+  3%   { opacity: 0.6; }
+  97%  { opacity: 0.6; }
+  100% { top: 100vh; opacity: 0; }
+}
+#embers { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.hex-pulse {
+  position: fixed; width: 200px; height: 200px;
+  border-radius: 50%; pointer-events: none; z-index: 0;
+  background: radial-gradient(circle, rgba(59,130,246,0.04), transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s;
+  opacity: 0;
+}
+.hex-pulse.visible { opacity: 1; }
+
+@media (max-width: 768px) {
+  .nav-links a:not(.nav-cta) { display: none; }
+  .page-hero { padding: 120px 0 40px; }
+  .pentest-hero { grid-template-columns: 1fr; text-align: center; }
+  .pentest-banner { grid-template-columns: 1fr; text-align: center; }
+  .pentest-banner-stats { flex-direction: column; max-width: none; }
+  .hardening-grid { grid-template-columns: 1fr; }
+  .privacy-grid { grid-template-columns: 1fr; }
+  .compliance-grid { grid-template-columns: 1fr; }
+  .verify-grid { grid-template-columns: 1fr; }
+  .framework-row { flex-direction: column; }
+  .wrap { padding: 0 20px; }
+  .footer-inner { flex-direction: column; text-align: center; }
+}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="grid-bg"></div>
+<div class="m-scanlines"></div>
+<div class="m-noise"></div>
+<div class="m-orb m-orb-1"></div>
+<div class="m-orb m-orb-2"></div>
+<div class="m-vignette"></div>
+<div class="m-sweep-line"></div>
+<canvas id="embers"></canvas>
+<div class="hex-pulse" id="hexPulse"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="main.html" class="nav-brand"><img src="kwyre-icon.svg" alt="Kwyre" style="height:28px;vertical-align:middle;margin-right:10px;"><span>K</span>WYRE</a>
+    <div class="nav-links">
+      <a href="technology.html">Data Privacy</a>
+      <a href="custom.html">Custom</a>
+      <a href="security.html" class="active">Security &amp; Compliance</a>
+      <a href="products.html">Products</a>
+      <a href="platform.html">Platform</a>
+      <a href="pay.html">Purchase</a>
+      <a href="kwyre-demo.html" class="nav-cta">App Demo</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Psalm 34:7 — The angel of the LORD encamps around those who fear him, and he delivers them. -->
+
+<!-- PAGE HERO -->
+<div class="page-hero">
+  <div class="wrap">
+    <div class="page-hero-eyebrow reveal" style="color: #a855f7;">The Kwyre Tiger Team</div>
+    <h1 class="reveal reveal-d1">Purple hat penetration testing<br>on <em>every product</em> before it ships.</h1>
+    <p class="reveal reveal-d2">
+      Our security team wears every hat &mdash; red, blue, and purple. Offensive testing, defensive hardening, and adversarial simulation by cybersecurity professionals who've worked both sides. Every Kwyre product is battle-tested before it reaches you.
+    </p>
+  </div>
+</div>
+
+<!-- Ephesians 6:11 — Put on the full armor of God, so that you can take your stand against the devil's schemes. -->
+
+<!-- PENTEST RESULTS BANNER -->
+<div class="wrap" style="padding-bottom: 48px;">
+  <div class="pentest-banner reveal reveal-d2">
+    <div class="pentest-banner-icon">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      <span class="pentest-banner-check" aria-hidden="true">✓</span>
+    </div>
+    <div class="pentest-banner-content">
+      <h2 class="pentest-banner-headline"><span class="pentest-banner-headline-accent">47/47</span> Penetration Test Findings Resolved</h2>
+      <p class="pentest-banner-desc">Independent third-party penetration testing verified our security posture. All identified vulnerabilities have been remediated.</p>
+      <div class="pentest-banner-stats">
+        <div class="pentest-stat"><span class="pentest-stat-val">47</span><span class="pentest-stat-label">findings identified</span></div>
+        <div class="pentest-stat"><span class="pentest-stat-val">47</span><span class="pentest-stat-label">findings resolved</span></div>
+        <div class="pentest-stat pentest-stat-success"><span class="pentest-stat-val">100%</span><span class="pentest-stat-label">remediation</span></div>
+        <div class="pentest-stat pentest-stat-success"><span class="pentest-stat-val">0</span><span class="pentest-stat-label">critical/high remaining</span></div>
+        <div class="pentest-stat"><span class="pentest-stat-val">Mar 2026</span><span class="pentest-stat-label">last assessment</span></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PRIVACY (moved to top) -->
+<div class="section">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow sh-eyebrow-green reveal">Privacy Guarantees</div>
+      <h2 class="reveal reveal-d1">Architecturally impossible to leak</h2>
+      <p class="reveal reveal-d2">Not privacy by policy. Privacy by engineering. Every guarantee is verifiable with standard network tools.</p>
+    </div>
+
+    <div class="privacy-grid reveal reveal-d3">
+      <div class="privacy-card">
+        <div class="privacy-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Zero Content Logging</h3>
+        <p>Metadata only &mdash; timestamps and token counts. Conversation content is never written to disk, log files, or any persistent storage.</p>
+      </div>
+      <div class="privacy-card">
+        <div class="privacy-icon"><svg viewBox="0 0 24 24"><path d="M18 6L6 18M6 6l12 12"/></svg></div>
+        <h3>No Telemetry</h3>
+        <p>Zero analytics. Zero error reporting. Zero update pings. Zero license callbacks. Verify with Wireshark &mdash; no packets leave your machine.</p>
+      </div>
+      <div class="privacy-card">
+        <div class="privacy-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg></div>
+        <h3>Monero (XMR) Payment</h3>
+        <p>No payment record. No email required. No account creation. Fully anonymous purchase. One-time payment &mdash; no recurring billing.</p>
+      </div>
+      <div class="privacy-card">
+        <div class="privacy-icon"><svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg></div>
+        <h3>Ed25519 Offline License Keys</h3>
+        <p>License validation works without any network call. Cryptographic signature verification happens entirely on your machine.</p>
+      </div>
+      <div class="privacy-card">
+        <div class="privacy-icon"><svg viewBox="0 0 24 24"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg></div>
+        <h3>Self-Delete Conversation</h3>
+        <p>User-initiated cryptographic wipe via POST /v1/session/end. Session content overwritten with random bytes before clearing. Unrecoverable.</p>
+      </div>
+      <div class="privacy-card">
+        <div class="privacy-icon"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></div>
+        <h3>Uncensored &mdash; Never Refuses</h3>
+        <p>Qwen3.5-4B Uncensored passes 0/465 refusal tests. Your sensitive investigation data, privileged documents, and classified-adjacent work product is analyzed without restriction. Security without censorship.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Psalm 18:2 — The LORD is my rock, my fortress and my deliverer; my God is my rock, in whom I take refuge. -->
+
+<!-- VERIFY + UNIVERSAL PROTECTION (two columns) -->
+<div class="section">
+  <div class="wrap">
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;">
+
+      <div>
+        <div class="sh" style="text-align: left; margin-bottom: 24px;">
+          <div class="sh-eyebrow sh-eyebrow-green">Verify It Yourself</div>
+          <h2 style="font-size: 22px;">Don't trust us. Check.</h2>
+        </div>
+        <div class="verify-grid" style="margin-top: 0;">
+          <div class="verify-card">
+            <h3>Network Sockets</h3>
+            <div class="verify-code">ss -tp | grep python</div>
+            <div class="verify-expect">Confirm: only 127.0.0.1</div>
+          </div>
+          <div class="verify-card">
+            <h3>Live Monitor</h3>
+            <div class="verify-code">watch -n 1 "ss -tp | grep python"</div>
+            <div class="verify-expect">Confirm: only localhost</div>
+          </div>
+          <div class="verify-card">
+            <h3>Wireshark</h3>
+            <div class="verify-code">Interface: loopback (lo) | Filter: tcp.port == 8000</div>
+            <div class="verify-expect">Confirm: zero external traffic</div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sh" style="text-align: left; margin-bottom: 24px;">
+          <div class="sh-eyebrow">Universal Protection</div>
+          <h2 style="font-size: 22px;">Same security. Every product.</h2>
+        </div>
+        <div style="display: flex; flex-direction: column; gap: 1px; background: var(--border); border-radius: 8px; overflow: hidden;">
+          <div style="background: var(--surface); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 1px; text-transform: uppercase;">Personal</span>
+            <span style="font-size: 12px; color: var(--text2);">6 layers</span>
+          </div>
+          <div style="background: var(--surface); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 1px; text-transform: uppercase;">Professional</span>
+            <span style="font-size: 12px; color: var(--text2);">6 layers</span>
+          </div>
+          <div style="background: var(--surface); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--accent); letter-spacing: 1px; text-transform: uppercase;">Air (CPU)</span>
+            <span style="font-size: 12px; color: var(--text2);">6 layers</span>
+          </div>
+          <div style="background: var(--surface); padding: 16px 20px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-family: var(--mono); font-size: 11px; font-weight: 600; color: var(--green); letter-spacing: 1px; text-transform: uppercase;">Custom LLM</span>
+            <span style="font-size: 12px; color: var(--text2);">6 layers</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- 2 Timothy 1:7 — For the Spirit God gave us does not make us timid, but gives us power, love and self-discipline. -->
+
+<!-- COMPLIANCE -->
+<div class="section">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow reveal">Compliance &amp; Audit</div>
+      <h2 class="reveal reveal-d1">Documentation your legal team needs</h2>
+      <p class="reveal reveal-d2">Formal attestation, deployment guides, and audit packages for regulated environments.</p>
+    </div>
+
+    <div class="framework-row reveal reveal-d2">
+      <div class="fw-badge"><h4>HIPAA</h4><p>PHI protection</p></div>
+      <div class="fw-badge"><h4>FINRA</h4><p>Financial data</p></div>
+      <div class="fw-badge"><h4>SOC 2</h4><p>Trust criteria</p></div>
+      <div class="fw-badge"><h4>GDPR</h4><p>Data privacy</p></div>
+      <div class="fw-badge"><h4>ITAR</h4><p>Export control</p></div>
+      <div class="fw-badge"><h4>FRE</h4><p>Evidence rules</p></div>
+      <div class="fw-badge"><h4>ABA</h4><p>Attorney ethics</p></div>
+    </div>
+
+    <div class="compliance-grid reveal reveal-d3">
+      <a href="docs/soc2.html" class="compliance-card linked">
+        <h3>SOC 2 Deployment Guide</h3>
+        <div class="cc-path">KWYRE-SOC2-001 · For Auditors &amp; Compliance Teams</div>
+        <p>Maps Kwyre's 6 security layers to SOC 2 Trust Service Criteria. Includes pre-deployment checklist, evidence artifacts, and auditor FAQ. All 18 controls documented.</p>
+      </a>
+      <a href="docs/security-architecture.html" class="compliance-card linked">
+        <h3>Security Architecture</h3>
+        <div class="cc-path">Technical Reference · 6-Layer Defense Model</div>
+        <p>Layer-by-layer technical breakdown: localhost binding, process isolation, dependency integrity, model weight verification, secure session buffer, and intrusion watchdog.</p>
+      </a>
+      <a href="docs/data-residency.html" class="compliance-card linked">
+        <h3>Data Residency &amp; Privacy</h3>
+        <div class="cc-path">GDPR · HIPAA · SOC 2 · ITAR · FRE · ABA</div>
+        <p>Data flow architecture, conversation lifecycle, cryptographic wipe procedures, and regulatory alignment for GDPR, HIPAA, ITAR, and attorney-client privilege.</p>
+      </a>
+      <div class="compliance-card">
+        <h3>Enterprise Audit Package</h3>
+        <div class="cc-path">KWYRE-AUDIT-001 · Available on Request</div>
+        <p>Audit specifications, data flow diagrams, cryptographic control details, and pentest summary. Ready for your compliance team's review.</p>
+      </div>
+      <div class="compliance-card">
+        <h3>Compliance Attestation Letter</h3>
+        <div class="cc-path">KWYRE-COMP-001 · Available on Request</div>
+        <p>Formal attestation for GDPR, HIPAA, SOC 2, FINRA, ITAR, FRE, and ABA. Present directly to your legal and compliance teams.</p>
+      </div>
+      <div class="compliance-card">
+        <h3>Incident Response Plan</h3>
+        <div class="cc-path">KWYRE-IR-001 · Available on Request</div>
+        <p>Security event classification, response procedures, escalation matrix, and post-incident review process.</p>
+      </div>
+    </div>
+
+    <div style="margin-top:32px; padding:20px 24px; background:var(--surface); border:1px solid var(--border); border-radius:6px;">
+      <div style="display:flex; gap:16px; align-items:center; flex-wrap:wrap;">
+        <div style="font-family:var(--mono); font-size:11px; color:var(--accent); letter-spacing:1px; text-transform:uppercase; white-space:nowrap;">Live Endpoints</div>
+        <div style="font-size:13px; color:var(--text2); line-height:1.6;">
+          <strong style="color:var(--text);">GET /audit</strong> &mdash; metadata-only compliance log with security control attestation &nbsp;&middot;&nbsp;
+          <strong style="color:var(--text);">GET /health</strong> &mdash; security stack status, watchdog, KV cache, streaming, VRAM usage
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Nahum 1:7 — The LORD is good, a refuge in times of trouble. He cares for those who trust in him. -->
+
+<!-- CTA -->
+<div class="cta-bar">
+  <div class="wrap">
+    <h2>See the inference engine.</h2>
+    <p>Qwen3.5-4B Uncensored (0/465 refusals). 6 domain LoRA adapters hot-swap at runtime. 4 backends: GPU, vLLM, CPU, MLX. Your sensitive data never refuses to be analyzed.</p>
+    <div class="cta-actions">
+      <a href="technology.html" class="btn btn-primary">Technology</a>
+      <a href="platform.html" class="btn btn-ghost">Platform Support</a>
+    </div>
+  </div>
+</div>
+
+<!-- Psalm 91:4 — He will cover you with his feathers, and under his wings you will find refuge; his faithfulness will be your shield. -->
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-inner">
+      <div class="footer-brand">KWYRE &middot; Mint Rail LLC</div>
+      <div class="footer-legal">All inference runs 100% locally. No data leaves your machine.</div>
+    </div>
+  </div>
+</footer>
+
+<script nonce="{{CSP_NONCE}}">
+(function(){
+  const cv = document.getElementById('particles');
+  const cx = cv.getContext('2d');
+  let W, H, pts = [], mx = -9999, my = -9999, clickWaves = [];
+  const N = 120, CONN = 160, MOUSE_R = 200;
+  const hexPulse = document.getElementById('hexPulse');
+
+  function resize(){ W = cv.width = innerWidth; H = cv.height = innerHeight; }
+  function init(){
+    pts = Array.from({length:N}, ()=>({
+      x: Math.random()*W, y: Math.random()*H,
+      vx: (Math.random()-.5)*.35, vy: (Math.random()-.5)*.35,
+      ox: 0, oy: 0,
+      r: Math.random()*1.8+.4, p: Math.random()*Math.PI*2
+    }));
+  }
+
+  window.addEventListener('click', e => {
+    clickWaves.push({ x: e.clientX, y: e.clientY, r: 0, maxR: 350, life: 1 });
+    pts.forEach(n => {
+      const d = Math.hypot(n.x - e.clientX, n.y - e.clientY);
+      if(d < 250) {
+        const angle = Math.atan2(n.y - e.clientY, n.x - e.clientX);
+        const force = (1 - d/250) * 8;
+        n.ox += Math.cos(angle) * force;
+        n.oy += Math.sin(angle) * force;
+      }
+    });
+  });
+
+  function frame(){
+    cx.clearRect(0,0,W,H);
+
+    clickWaves.forEach(w => {
+      w.r += 4;
+      w.life -= 0.015;
+      if(w.life > 0) {
+        cx.beginPath();
+        cx.arc(w.x, w.y, w.r, 0, Math.PI*2);
+        cx.strokeStyle = `rgba(59,130,246,${w.life * 0.3})`;
+        cx.lineWidth = 1.5;
+        cx.stroke();
+        cx.beginPath();
+        cx.arc(w.x, w.y, w.r * 0.7, 0, Math.PI*2);
+        cx.strokeStyle = `rgba(34,197,94,${w.life * 0.15})`;
+        cx.lineWidth = 0.8;
+        cx.stroke();
+      }
+    });
+    clickWaves = clickWaves.filter(w => w.life > 0);
+
+    pts.forEach(n=>{
+      n.ox *= 0.94; n.oy *= 0.94;
+      n.x += n.vx + n.ox; n.y += n.vy + n.oy; n.p += .015;
+      if(n.x<0||n.x>W) n.vx*=-1;
+      if(n.y<0||n.y>H) n.vy*=-1;
+      n.x = Math.max(0, Math.min(W, n.x));
+      n.y = Math.max(0, Math.min(H, n.y));
+    });
+
+    for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
+      const a=pts[i],b=pts[j],d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d>CONN)continue;
+      const near=Math.hypot(a.x-mx,a.y-my)<MOUSE_R||Math.hypot(b.x-mx,b.y-my)<MOUSE_R;
+      const al=(1-d/CONN)*(near?.22:.09);
+      cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);
+      cx.strokeStyle=near?`rgba(34,197,94,${al*2})`:`rgba(59,130,246,${al})`;
+      cx.lineWidth=near?1.2:.4;cx.stroke();
+    }
+
+    pts.forEach(n=>{
+      const near=Math.hypot(n.x-mx,n.y-my)<MOUSE_R;
+      const r=Math.max(0.1,n.r+Math.sin(n.p)*.5);
+      const col=near?'34,197,94':'59,130,246';
+      if(near){
+        cx.beginPath();cx.arc(n.x,n.y,r*6,0,Math.PI*2);
+        cx.fillStyle=`rgba(${col},.05)`;cx.fill();
+      }
+      cx.beginPath();cx.arc(n.x,n.y,r,0,Math.PI*2);
+      cx.fillStyle=`rgba(${col},${near?.85:.35+Math.sin(n.p)*.2})`;cx.fill();
+    });
+    requestAnimationFrame(frame);
+  }
+
+  window.addEventListener('mousemove',e=>{
+    mx=e.clientX;my=e.clientY;
+    hexPulse.style.left=mx+'px'; hexPulse.style.top=my+'px';
+    hexPulse.classList.add('visible');
+  });
+  window.addEventListener('resize',()=>{resize();init();emberResize();});
+  resize(); init(); frame();
+
+  /* EMBER PARTICLES */
+  const ecv = document.getElementById('embers');
+  const ecx = ecv.getContext('2d');
+  let eW, eH, embers = [];
+  const EC = 50;
+
+  function emberResize() { eW = ecv.width = innerWidth; eH = ecv.height = innerHeight; }
+  function mkEmbers() {
+    embers = Array.from({length: EC}, () => ({
+      x: Math.random()*eW, y: Math.random()*eH,
+      vx: (Math.random()-.5)*.12, vy: -(Math.random()*.5+.15),
+      r: Math.random()*1.6+.3, life: Math.random(),
+      decay: Math.random()*.003+.001,
+      color: Math.random()>.7 ? '34,197,94' : '59,130,246',
+      flicker: Math.random()*Math.PI*2,
+    }));
+  }
+  function emberFrame() {
+    ecx.clearRect(0,0,eW,eH);
+    embers.forEach(e => {
+      e.x += e.vx + Math.sin(e.flicker)*.1;
+      e.y += e.vy;
+      e.flicker += .025;
+      e.life -= e.decay;
+      if(e.life<=0 || e.y<-10) {
+        e.x=Math.random()*eW; e.y=eH+10;
+        e.life=1; e.r=Math.random()*1.6+.3;
+      }
+      const a = e.life * (.45 + Math.sin(e.flicker)*.2);
+      ecx.beginPath();
+      ecx.arc(e.x, e.y, e.r, 0, Math.PI*2);
+      ecx.fillStyle=`rgba(${e.color},${a})`;
+      ecx.fill();
+      if(e.r > 1) {
+        ecx.beginPath();
+        ecx.arc(e.x, e.y, e.r*3.5, 0, Math.PI*2);
+        ecx.fillStyle=`rgba(${e.color},${a*.07})`;
+        ecx.fill();
+      }
+    });
+    requestAnimationFrame(emberFrame);
+  }
+  emberResize(); mkEmbers(); emberFrame();
+})();
+
+(function(){
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{ if(e.isIntersecting){e.target.classList.add('vis');obs.unobserve(e.target);} });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el=> obs.observe(el));
+})();
+</script>
+</body>
+</html>

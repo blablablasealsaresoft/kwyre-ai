@@ -1,0 +1,118 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1400 400" width="1400" height="400">
+  <defs>
+    <linearGradient id="wkM" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8AAAFF"/>
+      <stop offset="100%" stop-color="#6E8FFF"/>
+    </linearGradient>
+    <linearGradient id="wfS" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8AAAFF" stop-opacity="0.5"/>
+      <stop offset="30%" stop-color="#6E8FFF" stop-opacity="0.15"/>
+      <stop offset="70%" stop-color="#6E8FFF" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#8AAAFF" stop-opacity="0.4"/>
+    </linearGradient>
+    <filter id="wkG" x="-25%" y="-25%" width="150%" height="150%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="3" result="b"/>
+      <feColorMatrix in="b" type="matrix" values="0 0 0 0 0.43  0 0 0 0 0.56  0 0 0 0 1  0 0 0 0.4 0" result="gb"/>
+      <feMerge><feMergeNode in="gb"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="wnG" x="-100%" y="-100%" width="300%" height="300%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="2.5" result="b"/>
+      <feColorMatrix in="b" type="matrix" values="0 0 0 0 0.43  0 0 0 0 0.56  0 0 0 0 1  0 0 0 0.5 0"/>
+    </filter>
+    <style>
+      @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@700;800;900&amp;display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&amp;display=swap');
+    </style>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="1400" height="400" fill="#0B1120" rx="16"/>
+  <radialGradient id="wAmb" cx="22%" cy="50%" r="45%">
+    <stop offset="0%" stop-color="#111d38"/><stop offset="100%" stop-color="#0B1120"/>
+  </radialGradient>
+  <rect width="1400" height="400" fill="url(#wAmb)" rx="16"/>
+  
+  <!-- === ICON === -->
+  <g transform="translate(28, 16) scale(0.72)">
+    <!-- Forcefield hex rings -->
+    <polygon points="256,46 433,148 433,364 256,466 79,364 79,148" 
+             fill="#6E8FFF" fill-opacity="0.03" stroke="url(#wfS)" stroke-width="1.6"/>
+    <polygon points="256,78 408,168 408,344 256,434 104,344 104,168" 
+             fill="none" stroke="#6E8FFF" stroke-width="0.8" opacity="0.1"/>
+    <polygon points="256,108 384,188 384,324 256,404 128,324 128,188" 
+             fill="none" stroke="#6E8FFF" stroke-width="0.5" opacity="0.08"/>
+    <circle cx="256" cy="256" r="218" fill="none" stroke="#6E8FFF" stroke-width="0.6" stroke-dasharray="3 10" opacity="0.06"/>
+    
+    <!-- Hex vertex nodes -->
+    <circle cx="256" cy="46" r="3.5" fill="#8AAAFF" opacity="0.6"/>
+    <circle cx="433" cy="148" r="3.5" fill="#8AAAFF" opacity="0.5"/>
+    <circle cx="433" cy="364" r="3" fill="#6E8FFF" opacity="0.3"/>
+    <circle cx="256" cy="466" r="3.5" fill="#6E8FFF" opacity="0.4"/>
+    <circle cx="79" cy="364" r="3" fill="#6E8FFF" opacity="0.25"/>
+    <circle cx="79" cy="148" r="3.5" fill="#8AAAFF" opacity="0.5"/>
+    
+    <!-- K -->
+    <g filter="url(#wkG)">
+      <rect x="152" y="138" width="36" height="240" fill="url(#wkM)" rx="3"/>
+      <polygon points="188,260 332,138 370,138 370,174 222,270" fill="url(#wkM)"/>
+      <polygon points="188,280 222,268 370,378 332,378" fill="url(#wkM)"/>
+    </g>
+    
+    <!-- Nodes -->
+    <circle cx="170" cy="138" r="7" fill="#8AAAFF" filter="url(#wnG)"/>
+    <circle cx="170" cy="138" r="7" fill="#8AAAFF"/>
+    <circle cx="170" cy="378" r="7" fill="#8AAAFF"/>
+    <circle cx="370" cy="156" r="8" fill="#AABBFF" filter="url(#wnG)"/>
+    <circle cx="370" cy="156" r="8" fill="#AABBFF"/>
+    <circle cx="370" cy="378" r="7" fill="#8AAAFF"/>
+    
+    <!-- Traces -->
+    <line x1="383" y1="156" x2="412" y2="156" stroke="#6E8FFF" stroke-width="1.8" stroke-linecap="round" opacity="0.45"/>
+    <line x1="383" y1="378" x2="412" y2="378" stroke="#6E8FFF" stroke-width="1.8" stroke-linecap="round" opacity="0.35"/>
+    <line x1="152" y1="258" x2="122" y2="258" stroke="#6E8FFF" stroke-width="1.8" stroke-linecap="round" opacity="0.3"/>
+    <circle cx="412" cy="156" r="2.5" fill="#6E8FFF" opacity="0.45"/>
+    <circle cx="412" cy="378" r="2.5" fill="#6E8FFF" opacity="0.35"/>
+    <circle cx="122" cy="258" r="2.5" fill="#6E8FFF" opacity="0.3"/>
+    
+    <!-- Keyhole -->
+    <circle cx="206" cy="270" r="14" fill="#0B1120"/>
+    <circle cx="206" cy="270" r="14" fill="none" stroke="#6E8FFF" stroke-width="1.2" opacity="0.45"/>
+    <circle cx="206" cy="266" r="4" fill="#8AAAFF" opacity="0.6"/>
+    <rect x="203" y="268" width="6" height="10" fill="#6E8FFF" opacity="0.4" rx="1"/>
+    
+    <!-- Green status dot -->
+    <circle cx="460" cy="460" r="4" fill="#5BBE6A" opacity="0.6"/>
+  </g>
+  
+  <!-- Divider -->
+  <line x1="410" y1="55" x2="410" y2="345" stroke="#6E8FFF" stroke-width="0.8" opacity="0.08"/>
+  
+  <!-- === WORDMARK === -->
+  <!-- KWYRE — W is the blue accent, rest is white -->
+  <text x="445" y="218" font-family="Outfit, 'Segoe UI', sans-serif" font-weight="900" font-size="126" fill="#E8ECF2" letter-spacing="10">K</text>
+  <text x="555" y="218" font-family="Outfit, 'Segoe UI', sans-serif" font-weight="900" font-size="126" fill="#6E8FFF" letter-spacing="10">W</text>
+  <text x="687" y="218" font-family="Outfit, 'Segoe UI', sans-serif" font-weight="900" font-size="126" fill="#E8ECF2" letter-spacing="10">YRE</text>
+  
+  <!-- Tagline -->
+  <text x="450" y="276" font-family="'IBM Plex Mono', 'Courier New', monospace" font-weight="400" font-size="17" fill="#5A6B82" letter-spacing="5">YOUR AI. NOT THEIRS.</text>
+  
+  <!-- Spec badges -->
+  <g transform="translate(450, 300)">
+    <rect x="0" y="0" width="84" height="28" fill="none" stroke="#1A2940" stroke-width="1" rx="4"/>
+    <text x="42" y="12" font-family="'IBM Plex Mono', monospace" font-weight="500" font-size="9" fill="#6E8FFF" text-anchor="middle" letter-spacing="1">LOCAL</text>
+    <text x="42" y="22" font-family="'IBM Plex Mono', monospace" font-weight="400" font-size="7" fill="#3D4F66" text-anchor="middle" letter-spacing="1">INFERENCE</text>
+    
+    <rect x="94" y="0" width="84" height="28" fill="none" stroke="#1A2940" stroke-width="1" rx="4"/>
+    <text x="136" y="12" font-family="'IBM Plex Mono', monospace" font-weight="500" font-size="9" fill="#6E8FFF" text-anchor="middle" letter-spacing="1">ZERO</text>
+    <text x="136" y="22" font-family="'IBM Plex Mono', monospace" font-weight="400" font-size="7" fill="#3D4F66" text-anchor="middle" letter-spacing="1">TELEMETRY</text>
+    
+    <rect x="188" y="0" width="84" height="28" fill="none" stroke="#1A2940" stroke-width="1" rx="4"/>
+    <text x="230" y="12" font-family="'IBM Plex Mono', monospace" font-weight="500" font-size="9" fill="#6E8FFF" text-anchor="middle" letter-spacing="1">AIR</text>
+    <text x="230" y="22" font-family="'IBM Plex Mono', monospace" font-weight="400" font-size="7" fill="#3D4F66" text-anchor="middle" letter-spacing="1">GAPPED</text>
+  </g>
+  
+  <!-- Status -->
+  <circle cx="1340" cy="28" r="3.5" fill="#5BBE6A" opacity="0.6"/>
+  <circle cx="1340" cy="28" r="6" fill="none" stroke="#5BBE6A" stroke-width="0.5" opacity="0.2"/>
+  <text x="1278" y="32" font-family="'IBM Plex Mono', monospace" font-weight="400" font-size="9" fill="#3D5040" letter-spacing="2">SECURE</text>
+</svg>

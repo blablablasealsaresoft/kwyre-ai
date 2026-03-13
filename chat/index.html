@@ -1,10 +1,37 @@
 <!DOCTYPE html>
+<!--
+    ╔═══════════════════════════════════════════════════════════╗
+    ║  CLASSIFICATION: KWYRE EYES ONLY                         ║
+    ║  DOCUMENT: KW-002 / INDEX SECTOR                         ║
+    ║  ANALYST: CK                                             ║
+    ║  STATUS: COMPROMISED                                     ║
+    ╚═══════════════════════════════════════════════════════════╝
+
+    BRIEFING: Page 2 of 8. You're getting warmer.
+
+    INTERCEPTED TRANSMISSION (partial):
+    "The wallet moved 847 BTC through Tornado Cash at 03:47 UTC.
+    By 04:12 it was bridged to Solana. By 04:30 it was gone.
+    We traced it to a CEX in the Seychelles but the KYC docs
+    were forged. The passport belonged to a man who died in 2019."
+
+    是諸法空相不生不滅不垢不淨不增不減是故空中無色
+    ⌬ 0xDEADBEEF ⌬ IV:虛空無量 ⌬ ROUNDS:∞ ⌬
+    無眼耳鼻舌身意無色聲香味觸法無眼界乃至無意識界
+
+    NEXT CLUE: The technology page has the witness statement.
+
+    Everyone dies. Not everyone lives.
+                                        — CK
+-->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Kwyre AI — Air-Gapped Inference</title>
-<meta name="description" content="Air-gapped AI inference for analysts who cannot afford a breach. 6-layer security stack. Zero data leaves your machine.">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://cloudflareinsights.com; img-src 'self' data:; base-uri 'self'; form-action 'self'">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
+<title>Kwyre AI — Your AI. Not Theirs.</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -13,18 +40,11 @@
 :root {
   --bg: #05060a;
   --surface: #0b0d14;
-  --surface2: #10131c;
-  --surface3: #161a27;
   --border: #1c2033;
-  --border-hi: #2a3050;
   --accent: #3b82f6;
-  --accent-dim: rgba(59,130,246,0.12);
-  --accent-glow: rgba(59,130,246,0.25);
+  --accent-glow: rgba(59,130,246,0.35);
   --green: #22c55e;
-  --green-dim: rgba(34,197,94,0.12);
   --red: #ef4444;
-  --red-dim: rgba(239,68,68,0.12);
-  --amber: #f59e0b;
   --text: #e2e4ea;
   --text2: #6b7294;
   --text3: #3d4466;
@@ -32,1383 +52,531 @@
   --sans: 'Instrument Sans', -apple-system, sans-serif;
 }
 
-html { scroll-behavior: smooth; }
+html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg); -webkit-font-smoothing: antialiased; cursor: crosshair; }
 
-body {
-  font-family: var(--sans);
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
+/* CANVAS */
+#neural { position: fixed; inset: 0; z-index: 0; width: 100%; height: 100%; }
 
-::selection { background: var(--accent); color: #fff; }
-
-/* --- GRID OVERLAY --- */
+/* LAYERS */
 .grid-bg {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
   background-image:
-    linear-gradient(rgba(59,130,246,0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(59,130,246,0.015) 1px, transparent 1px);
+    linear-gradient(rgba(59,130,246,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.025) 1px, transparent 1px);
   background-size: 60px 60px;
 }
-
-.grid-bg::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.06), transparent 70%);
-}
-
-/* --- LAYOUT --- */
-.wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
-.section { padding: 80px 0; }
-.section + .section { border-top: 1px solid var(--border); }
-
-/* --- NAV --- */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(5,6,10,0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid var(--border);
-}
-
-.nav-inner {
-  max-width: 1120px; margin: 0 auto; padding: 0 32px;
-  display: flex; align-items: center; justify-content: space-between;
-  height: 56px;
-}
-
-.nav-brand {
-  font-family: var(--mono);
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--text);
-  text-decoration: none;
-}
-
-.nav-brand span { color: var(--accent); }
-
-.nav-links { display: flex; gap: 32px; align-items: center; }
-
-.nav-links a {
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text2);
-  text-decoration: none;
-  letter-spacing: 0.3px;
-  transition: color 0.2s;
-}
-
-.nav-links a:hover { color: var(--text); }
-
-.nav-cta {
-  font-family: var(--mono) !important;
-  font-size: 11px !important;
-  letter-spacing: 1px !important;
-  text-transform: uppercase !important;
-  padding: 8px 20px;
-  background: var(--accent) !important;
-  color: #fff !important;
-  border-radius: 4px;
-  transition: box-shadow 0.2s, transform 0.1s !important;
-}
-
-.nav-cta:hover { box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-1px) !important; }
-
-/* --- HERO --- */
-.hero {
-  padding: 160px 0 100px;
-  text-align: center;
-  position: relative;
-}
-
-.hero-eyebrow {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 28px;
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-}
-
-.hero-eyebrow::before, .hero-eyebrow::after {
-  content: '';
-  width: 40px;
-  height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent));
-}
-
-.hero-eyebrow::after { background: linear-gradient(90deg, var(--accent), transparent); }
-
-.hero h1 {
-  font-size: clamp(36px, 5.5vw, 64px);
-  font-weight: 700;
-  line-height: 1.08;
-  letter-spacing: -1.5px;
-  margin-bottom: 24px;
-  color: var(--text);
-}
-
-.hero h1 em {
-  font-style: normal;
-  color: var(--accent);
-}
-
-.hero-sub {
-  font-size: 18px;
-  color: var(--text2);
-  max-width: 640px;
-  margin: 0 auto 48px;
-  line-height: 1.7;
-  font-weight: 400;
-}
-
-.hero-sub strong { color: var(--text); font-weight: 600; }
-
-.hero-stats {
-  display: flex;
-  justify-content: center;
-  gap: 1px;
-  background: var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  max-width: 680px;
-  margin: 0 auto;
-}
-
-.hero-stat {
-  flex: 1;
-  padding: 20px 16px;
-  background: var(--surface);
-  text-align: center;
-  min-width: 0;
-}
-
-.hero-stat-val {
-  font-family: var(--mono);
-  font-size: 20px;
-  font-weight: 600;
-  color: var(--text);
-  margin-bottom: 4px;
-  white-space: nowrap;
-}
-
-.hero-stat-label {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-}
-
-/* --- THREAT BAR --- */
-.threat-bar {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 24px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  margin-top: 40px;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
-}
-
-.threat-dot {
-  width: 6px; height: 6px;
-  border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 8px rgba(34,197,94,0.5);
-  animation: threat-pulse 2s ease-in-out infinite;
-}
-
-@keyframes threat-pulse {
-  0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
-}
-
-.threat-bar span {
-  font-family: var(--mono);
-  font-size: 11px;
-  color: var(--text2);
-  letter-spacing: 0.5px;
-}
-
-.threat-bar strong { color: var(--green); font-weight: 500; }
-
-/* --- BUYERS --- */
-.buyers-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 1px;
-  background: var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  margin-top: 48px;
-}
-
-.buyer-card {
-  background: var(--surface);
-  padding: 28px 24px;
-  position: relative;
-  transition: background 0.2s;
-}
-
-.buyer-card:hover { background: var(--surface2); }
-
-.buyer-role {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 1.5px;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 10px;
-}
-
-.buyer-pain {
-  font-size: 14px;
-  color: var(--text);
-  line-height: 1.6;
-  margin-bottom: 10px;
-  font-weight: 500;
-}
-
-.buyer-solve {
-  font-size: 13px;
-  color: var(--text2);
-  line-height: 1.5;
-}
-
-/* --- SECTION HEADERS --- */
-.sh {
-  text-align: center;
-  margin-bottom: 48px;
-}
-
-.sh-eyebrow {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 500;
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 16px;
-}
-
-.sh h2 {
-  font-size: clamp(28px, 3.5vw, 40px);
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  line-height: 1.15;
-  margin-bottom: 16px;
-}
-
-.sh p {
-  font-size: 16px;
-  color: var(--text2);
-  max-width: 560px;
-  margin: 0 auto;
-  line-height: 1.6;
-}
-
-/* --- SECURITY STACK --- */
-.sec-layers {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-  margin-top: 48px;
-}
-
-.sec-layer {
-  display: grid;
-  grid-template-columns: 56px 1fr;
-  gap: 20px;
-  padding: 24px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  transition: border-color 0.3s, background 0.2s;
-  position: relative;
-}
-
-.sec-layer:hover { border-color: var(--border-hi); background: var(--surface2); }
-
-.sec-layer-num {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 600;
-  color: var(--text3);
-  letter-spacing: 1px;
-  padding-top: 2px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.sec-layer-num .lnum {
-  width: 36px; height: 36px;
-  border-radius: 4px;
-  background: var(--accent-dim);
-  color: var(--accent);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono);
-  font-size: 13px;
-  font-weight: 600;
-}
-
-.sec-layer-body h3 {
-  font-size: 15px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: var(--text);
-}
-
-.sec-layer-body p {
-  font-size: 13px;
-  color: var(--text2);
-  line-height: 1.6;
-}
-
-.sec-layer-body .sec-tag {
-  display: inline-block;
-  font-family: var(--mono);
-  font-size: 10px;
-  padding: 3px 10px;
-  border-radius: 3px;
-  margin-top: 10px;
-  letter-spacing: 0.8px;
-  text-transform: uppercase;
-  background: var(--green-dim);
-  color: var(--green);
-  border: 1px solid rgba(34,197,94,0.15);
-}
-
-/* --- FEATURES GRID --- */
-.feat-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  margin-top: 48px;
-}
-
-.feat-cell {
-  background: var(--surface);
-  padding: 32px 24px;
-  transition: background 0.2s;
-}
-
-.feat-cell:hover { background: var(--surface2); }
-
-.feat-cell-icon {
-  width: 32px; height: 32px;
-  border-radius: 4px;
-  background: var(--accent-dim);
-  display: flex; align-items: center; justify-content: center;
-  margin-bottom: 16px;
-}
-
-.feat-cell-icon svg { width: 16px; height: 16px; stroke: var(--accent); fill: none; stroke-width: 1.5; }
-
-.feat-cell h3 {
-  font-size: 14px;
-  font-weight: 600;
-  margin-bottom: 8px;
-  color: var(--text);
-}
-
-.feat-cell p {
-  font-size: 13px;
-  color: var(--text2);
-  line-height: 1.6;
-}
-
-/* --- MATRIX TABLE --- */
-.matrix-wrap {
-  overflow-x: auto;
-  border-radius: 8px;
-  border: 1px solid var(--border);
-  margin-top: 48px;
-}
-
-.matrix {
-  width: 100%;
-  border-collapse: collapse;
-  font-size: 12px;
-  min-width: 780px;
-}
-
-.matrix thead { background: var(--surface2); }
-
-.matrix th {
-  padding: 14px 16px;
-  text-align: left;
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 600;
-  color: var(--text3);
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  border-bottom: 1px solid var(--border);
-  white-space: nowrap;
-}
-
-.matrix th.m-kwyre { color: var(--accent); }
-
-.matrix td {
-  padding: 11px 16px;
-  border-bottom: 1px solid var(--border);
-  color: var(--text2);
-  font-size: 12px;
-}
-
-.matrix td.m-label {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 500;
-  color: var(--text);
-  letter-spacing: 0.3px;
-  white-space: nowrap;
-}
-
-.matrix td.m-kwyre {
-  color: var(--text);
-  background: rgba(59,130,246,0.03);
-  font-weight: 500;
-}
-
-.matrix tbody tr { background: var(--surface); transition: background 0.15s; }
-.matrix tbody tr:hover { background: var(--surface2); }
-.matrix tbody tr:last-child td { border-bottom: none; }
-
-.m-y { color: var(--green); font-family: var(--mono); font-weight: 600; }
-.m-n { color: var(--text3); font-family: var(--mono); }
-
-/* --- ARCHITECTURE --- */
-.arch-block {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 40px;
-  margin-top: 48px;
-  font-family: var(--mono);
-  font-size: 12px;
-  line-height: 1.7;
-  color: var(--text2);
-  overflow-x: auto;
-  white-space: pre;
-}
-
-.arch-block .a-accent { color: var(--accent); }
-.arch-block .a-green { color: var(--green); }
-.arch-block .a-dim { color: var(--text3); }
-
-/* --- PRICING --- */
-.pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  margin-top: 48px;
-}
-
-.price-card {
-  background: var(--surface);
-  padding: 36px 28px;
-  display: flex;
-  flex-direction: column;
-  transition: background 0.2s;
-}
-
-.price-card:hover { background: var(--surface2); }
-.price-card.featured { background: var(--surface2); }
-.price-card.featured .price-name { color: var(--accent); }
-
-.price-name {
-  font-family: var(--mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 2px;
-  text-transform: uppercase;
-  color: var(--text2);
-  margin-bottom: 20px;
-}
-
-.price-amount {
-  font-size: 36px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-
-.price-type {
-  font-size: 13px;
-  color: var(--text3);
-  margin-bottom: 24px;
-}
-
-.price-features {
-  list-style: none;
-  flex: 1;
-}
-
-.price-features li {
-  font-size: 13px;
-  color: var(--text2);
-  padding: 6px 0;
-  border-bottom: 1px solid var(--border);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.price-features li:last-child { border-bottom: none; }
-
-.price-features li::before {
-  content: '';
-  width: 4px; height: 4px;
-  border-radius: 1px;
-  background: var(--accent);
-  flex-shrink: 0;
-}
-
-/* --- CTA SECTION --- */
-.cta-final {
-  text-align: center;
-  padding: 100px 0;
-}
-
-.cta-final h2 {
-  font-size: clamp(28px, 4vw, 44px);
-  font-weight: 700;
-  letter-spacing: -0.5px;
-  margin-bottom: 16px;
-}
-
-.cta-final p {
-  font-size: 16px;
-  color: var(--text2);
-  max-width: 480px;
-  margin: 0 auto 40px;
-  line-height: 1.6;
-}
-
-.cta-actions {
-  display: flex;
-  gap: 16px;
-  justify-content: center;
-  flex-wrap: wrap;
-}
-
-.btn {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 14px 32px;
-  font-family: var(--mono);
-  font-size: 12px;
-  font-weight: 500;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  text-decoration: none;
-  border-radius: 4px;
-  transition: all 0.2s;
-  cursor: pointer;
-  border: none;
-}
-
-.btn-primary {
-  background: var(--accent);
-  color: #fff;
-  box-shadow: 0 2px 16px var(--accent-glow);
-}
-
-.btn-primary:hover { box-shadow: 0 4px 28px var(--accent-glow); transform: translateY(-1px); }
-
-.btn-ghost {
-  background: transparent;
-  color: var(--text2);
-  border: 1px solid var(--border);
-}
-
-.btn-ghost:hover { border-color: var(--text2); color: var(--text); }
-
-/* --- FOOTER --- */
-.site-footer {
-  border-top: 1px solid var(--border);
-  padding: 40px 0;
-}
-
-.footer-inner {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 16px;
-}
-
-.footer-brand {
-  font-family: var(--mono);
-  font-size: 11px;
-  letter-spacing: 2px;
-  color: var(--text3);
-  text-transform: uppercase;
-}
-
-.footer-legal {
-  font-size: 12px;
-  color: var(--text3);
-  max-width: 500px;
-  line-height: 1.5;
-}
-
-/* --- LOCAL CHAT (only on localhost) --- */
-.api-key-bar {
-  display: flex;
-  gap: 10px;
-  margin-bottom: 16px;
-}
-
-.api-key-bar input {
-  flex: 1;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 10px 14px;
-  color: var(--text);
-  font-family: var(--mono);
-  font-size: 13px;
-  outline: none;
-  transition: border-color 0.2s;
-}
-
-.api-key-bar input:focus { border-color: var(--accent); }
-.api-key-bar input::placeholder { color: var(--text3); }
-
-.api-key-bar .status-dot {
-  width: 8px; height: 8px;
-  border-radius: 50%;
-  background: var(--text3);
-  align-self: center;
-  transition: background 0.3s;
-  flex-shrink: 0;
-}
-
-.api-key-bar .status-dot.connected { background: var(--green); box-shadow: 0 0 8px rgba(34,197,94,0.5); }
-.api-key-bar .status-dot.error { background: var(--red); }
-
-.chat-container {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  margin-bottom: 48px;
-}
-
-.chat-messages {
-  height: 420px;
-  overflow-y: auto;
-  padding: 24px;
-  scroll-behavior: smooth;
-}
-
-.chat-messages::-webkit-scrollbar { width: 3px; }
-.chat-messages::-webkit-scrollbar-track { background: transparent; }
-.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-.message { margin-bottom: 20px; animation: fadeUp 0.3s ease; }
-
-@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
-
-.message-role {
-  font-family: var(--mono);
-  font-size: 10px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  margin-bottom: 6px;
-  color: var(--text3);
-}
-
-.message.user .message-role { color: var(--accent); }
-.message.assistant .message-role { color: var(--green); }
-
-.message-content {
-  font-size: 14px;
-  line-height: 1.7;
-  color: var(--text);
-  padding-left: 12px;
-  border-left: 1px solid var(--border);
-}
-
-.message.user .message-content { border-left-color: rgba(59,130,246,0.3); }
-.message.assistant .message-content { border-left-color: rgba(34,197,94,0.3); }
-
-.typing-indicator {
-  display: inline-flex; gap: 4px; padding-left: 12px;
-  border-left: 1px solid rgba(34,197,94,0.3);
-}
-
-.typing-indicator span {
-  width: 5px; height: 5px;
-  background: var(--green);
-  border-radius: 50%;
-  animation: tdot 1.2s ease-in-out infinite;
-}
-
-.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
-
-@keyframes tdot { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  color: var(--text3);
-  font-size: 13px;
-  gap: 8px;
-  font-family: var(--mono);
-}
-
-.chat-input {
-  display: flex;
-  gap: 10px;
-  padding: 16px 24px;
-  background: var(--surface2);
-  border-top: 1px solid var(--border);
-}
-
-.chat-input textarea {
-  flex: 1;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 12px 16px;
-  color: var(--text);
-  font-family: var(--sans);
-  font-size: 14px;
-  resize: none;
-  outline: none;
-  min-height: 46px;
-  max-height: 120px;
-  transition: border-color 0.2s;
-}
-
-.chat-input textarea:focus { border-color: var(--accent); }
-.chat-input textarea::placeholder { color: var(--text3); }
-
-.send-btn {
-  align-self: flex-end;
-  background: var(--accent);
-  border: none;
-  border-radius: 4px;
-  padding: 12px 24px;
-  color: #fff;
-  font-family: var(--mono);
-  font-weight: 500;
-  font-size: 11px;
-  letter-spacing: 1px;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition: box-shadow 0.2s, transform 0.1s;
-}
-
-.send-btn:hover { box-shadow: 0 0 16px var(--accent-glow); }
-.send-btn:active { transform: scale(0.97); }
-.send-btn:disabled { background: var(--border); cursor: not-allowed; box-shadow: none; }
-
-.tool-badges {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  margin-bottom: 6px;
-  padding-left: 12px;
-}
-
-.tool-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-family: var(--mono);
-  font-size: 10px;
-  padding: 2px 8px;
-  border-radius: 2px;
-  background: var(--accent-dim);
-  border: 1px solid rgba(59,130,246,0.15);
-  color: var(--accent);
-  letter-spacing: 0.3px;
-}
-
-.spike-meta {
-  font-family: var(--mono);
-  font-size: 10px;
-  color: var(--green);
-  opacity: 0.6;
-  padding-left: 14px;
-  margin-top: 4px;
-  letter-spacing: 0.3px;
-}
-
-.hidden { display: none !important; }
-
-/* --- RESPONSIVE --- */
-@media (max-width: 768px) {
-  .nav-links a:not(.nav-cta) { display: none; }
-  .hero { padding: 120px 0 60px; }
-  .hero-stats { flex-direction: column; }
-  .feat-grid { grid-template-columns: 1fr; }
-  .pricing-grid { grid-template-columns: 1fr; }
-  .buyers-grid { grid-template-columns: 1fr; }
-  .wrap { padding: 0 20px; }
-  .sec-layer { grid-template-columns: 1fr; }
-  .sec-layer-num { flex-direction: row; }
-  .footer-inner { flex-direction: column; text-align: center; }
-}
-
-@media (max-width: 480px) {
-  .hero h1 { letter-spacing: -0.5px; }
-  .section { padding: 60px 0; }
+.vignette {
+  position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 35%, rgba(5,6,10,0.95) 100%);
+}
+.scanlines {
+  position: fixed; inset: 0; z-index: 2; pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
+}
+
+/* SCAN SWEEP */
+.sweep {
+  position: fixed; left: 0; right: 0; height: 2px; z-index: 5; pointer-events: none;
+  background: linear-gradient(90deg, transparent 0%, var(--accent) 40%, rgba(59,130,246,0.6) 50%, var(--accent) 60%, transparent 100%);
+  box-shadow: 0 0 24px var(--accent-glow), 0 0 80px rgba(59,130,246,0.08);
+  animation: sweep-anim 3.5s ease-in-out 0.5s infinite;
+  opacity: 0;
+}
+@keyframes sweep-anim {
+  0%   { top: -2px; opacity: 0; }
+  3%   { opacity: 0.9; }
+  97%  { opacity: 0.9; }
+  100% { top: 100vh; opacity: 0; }
+}
+
+/* FLOATING EMBERS */
+#embers { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+
+/* GRADIENT ORBS */
+.orb {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  filter: blur(100px);
+  animation: orb-drift 12s ease-in-out infinite alternate;
+}
+.orb-1 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(59,130,246,0.08), transparent 70%);
+  top: -10%; left: -10%;
+  animation-duration: 14s;
+}
+.orb-2 {
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, rgba(34,197,94,0.05), transparent 70%);
+  bottom: -10%; right: -10%;
+  animation-duration: 18s; animation-delay: -4s;
+}
+.orb-3 {
+  width: 300px; height: 300px;
+  background: radial-gradient(circle, rgba(59,130,246,0.06), transparent 70%);
+  top: 50%; right: 20%;
+  animation-duration: 16s; animation-delay: -8s;
+}
+@keyframes orb-drift {
+  0% { transform: translate(0, 0) scale(1); }
+  50% { transform: translate(30px, -40px) scale(1.1); }
+  100% { transform: translate(-20px, 30px) scale(0.95); }
+}
+
+/* GLITCH TEXT */
+.h-line { position: relative; }
+.h-line.glitch::before, .h-line.glitch::after {
+  content: attr(data-text); position: absolute; top: 0; left: 0; right: 0;
+  overflow: hidden; pointer-events: none;
+}
+.h-line.glitch::before {
+  color: var(--accent); z-index: -1;
+  animation: glitch-1 3s infinite linear alternate-reverse;
+  clip-path: inset(0 0 80% 0);
+}
+.h-line.glitch::after {
+  color: var(--green); z-index: -1;
+  animation: glitch-2 2.5s infinite linear alternate-reverse;
+  clip-path: inset(80% 0 0 0);
+}
+@keyframes glitch-1 {
+  0%, 92% { transform: translate(0); }
+  93% { transform: translate(-3px, 1px); }
+  94% { transform: translate(2px, -1px); }
+  95% { transform: translate(-1px, 2px); }
+  96%, 100% { transform: translate(0); }
+}
+@keyframes glitch-2 {
+  0%, 90% { transform: translate(0); }
+  91% { transform: translate(2px, 1px); }
+  92% { transform: translate(-3px, -1px); }
+  93% { transform: translate(1px, -2px); }
+  94%, 100% { transform: translate(0); }
+}
+
+/* HEX PULSE (mouse proximity) */
+.hex-pulse {
+  position: fixed; width: 200px; height: 200px;
+  border-radius: 50%; pointer-events: none; z-index: 2;
+  background: radial-gradient(circle, rgba(59,130,246,0.04), transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s;
+  opacity: 0;
+}
+.hex-pulse.visible { opacity: 1; }
+
+/* NOISE OVERLAY */
+.noise {
+  position: fixed; inset: 0; z-index: 4; pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+/* AR CORNERS */
+.corner { position: fixed; width: 44px; height: 44px; z-index: 6; pointer-events: none; opacity: 0; animation: corner-show 0.5s ease forwards; }
+.corner::before, .corner::after { content: ''; position: absolute; background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
+.corner::before { width: 100%; height: 2px; top: 0; left: 0; }
+.corner::after  { width: 2px; height: 100%; top: 0; left: 0; }
+.c-tl { top: 20px; left: 20px; animation-delay: 0.2s; }
+.c-tr { top: 20px; right: 20px; transform: rotate(90deg); animation-delay: 0.3s; }
+.c-bl { bottom: 20px; left: 20px; transform: rotate(270deg); animation-delay: 0.4s; }
+.c-br { bottom: 20px; right: 20px; transform: rotate(180deg); animation-delay: 0.5s; }
+@keyframes corner-show { from { opacity:0; } to { opacity:1; } }
+
+/* HUD LABELS */
+.hud { position: fixed; font-family: var(--mono); font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--accent); z-index: 6; pointer-events: none; opacity: 0; animation: fade-up 0.5s ease forwards; }
+.hud-tl { top: 72px; left: 64px; animation-delay: 0.9s; }
+.hud-tr { top: 72px; right: 64px; text-align: right; animation-delay: 1.0s; }
+.hud-bl { bottom: 72px; left: 64px; animation-delay: 1.1s; }
+.hud-br { bottom: 72px; right: 64px; text-align: right; animation-delay: 1.2s; }
+@keyframes fade-up { from { opacity:0; transform: translateY(6px); } to { opacity:0.7; transform: translateY(0); } }
+
+/* RETICLE */
+.reticle { position: fixed; width: 90px; height: 90px; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 6; pointer-events: none; opacity: 0; animation: fade-in 0.6s ease 0.7s forwards; }
+.r-outer { position: absolute; inset: 0; border: 1px solid rgba(59,130,246,0.25); border-radius: 50%; animation: spin 10s linear infinite; }
+.r-inner { position: absolute; inset: 16px; border: 1px solid rgba(59,130,246,0.12); border-radius: 50%; animation: spin 6s linear infinite reverse; }
+.r-cross::before, .r-cross::after { content: ''; position: absolute; background: rgba(59,130,246,0.3); }
+.r-cross::before { width: 1px; height: 100%; left: 50%; transform: translateX(-50%); }
+.r-cross::after  { height: 1px; width: 100%; top: 50%; transform: translateY(-50%); }
+@keyframes spin { to { transform: rotate(360deg); } }
+@keyframes fade-in { from { opacity:0; } to { opacity:1; } }
+
+/* DATA STREAMS */
+.stream { position: fixed; top: 50%; transform: translateY(-50%); width: 190px; z-index: 6; pointer-events: none; opacity: 0; animation: fade-in 0.5s ease 1.3s forwards; }
+.stream.sl { left: 20px; }
+.stream.sr { right: 20px; text-align: right; }
+.sl-row { font-family: var(--mono); font-size: 9px; letter-spacing: 1px; color: var(--text3); margin-bottom: 7px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; transition: color 0.3s; }
+.sl-row.ok  { color: var(--green); }
+.sl-row.act { color: var(--accent); opacity: 0.8; }
+
+/* MAIN STAGE */
+#stage { position: fixed; inset: 0; z-index: 10; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 40px; }
+#seq { text-align: center; max-width: 780px; width: 100%; }
+
+.eyebrow {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 4px; text-transform: uppercase; color: var(--accent);
+  margin-bottom: 32px; display: flex; align-items: center; justify-content: center; gap: 14px;
+  opacity: 0; transform: translateY(8px); transition: opacity 0.55s ease, transform 0.55s ease;
+}
+.eyebrow::before, .eyebrow::after { content: ''; flex: 1; max-width: 56px; height: 1px; }
+.eyebrow::before { background: linear-gradient(90deg, transparent, var(--accent)); }
+.eyebrow::after  { background: linear-gradient(90deg, var(--accent), transparent); }
+.eyebrow.vis { opacity: 1; transform: translateY(0); }
+
+.h-line {
+  font-family: var(--sans); font-size: clamp(30px, 5.5vw, 70px); font-weight: 700; line-height: 1.06;
+  letter-spacing: -2px; color: var(--text); margin-bottom: 6px;
+  opacity: 0; transform: translateY(22px); transition: opacity 0.65s ease, transform 0.65s ease;
+  min-height: 1.1em;
+}
+.h-line.vis { opacity: 1; transform: translateY(0); }
+.h-line .a  { color: var(--accent); }
+.h-line .d  { color: var(--text2); }
+.h-line .s  { text-decoration: line-through; color: var(--text3); text-decoration-color: var(--red); text-decoration-thickness: 2px; }
+
+.sub-text {
+  font-family: var(--sans); font-size: clamp(13px, 1.5vw, 16px); color: var(--text2); line-height: 1.72;
+  max-width: 500px; margin: 24px auto 0;
+  opacity: 0; transform: translateY(12px); transition: opacity 0.55s ease 0.15s, transform 0.55s ease 0.15s;
+}
+.sub-text.vis { opacity: 1; transform: translateY(0); }
+
+/* STATUS CHIPS */
+.chips { display: flex; align-items: center; justify-content: center; gap: 10px; margin-top: 28px; flex-wrap: wrap; opacity: 0; transition: opacity 0.5s ease; }
+.chips.vis { opacity: 1; }
+.chip { display: flex; align-items: center; gap: 7px; font-family: var(--mono); font-size: 9px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text3); padding: 7px 14px; border: 1px solid var(--border); border-radius: 3px; background: var(--surface); }
+.chip-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); box-shadow: 0 0 6px rgba(34,197,94,0.6); animation: pdot 2s ease-in-out infinite; flex-shrink: 0; }
+@keyframes pdot { 0%,100%{opacity:1;transform:scale(1);} 50%{opacity:0.4;transform:scale(0.8);} }
+
+/* ENTER BUTTON */
+#enter-btn {
+  display: none; margin-top: 44px; padding: 16px 52px;
+  font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 4px; text-transform: uppercase;
+  color: var(--accent); background: transparent; border: 1px solid var(--accent); border-radius: 4px;
+  cursor: pointer; position: relative; overflow: hidden;
+  opacity: 0; transform: translateY(14px); transition: opacity 0.55s ease, transform 0.55s ease, color 0.25s, box-shadow 0.25s;
+}
+#enter-btn.vis { opacity: 1; transform: translateY(0); display: inline-block; }
+#enter-btn::before { content: ''; position: absolute; inset: 0; background: var(--accent); transform: scaleX(0); transform-origin: left; transition: transform 0.28s ease; z-index: -1; }
+#enter-btn:hover { color: #fff; box-shadow: 0 0 32px var(--accent-glow); }
+#enter-btn:hover::before { transform: scaleX(1); }
+
+/* HINT */
+.hint { position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%); font-family: var(--mono); font-size: 9px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3); z-index: 10; opacity: 0; animation: fade-in 0.5s ease 2s forwards; pointer-events: none; }
+
+/* PROGRESS */
+.prog-wrap { position: fixed; bottom: 0; left: 0; right: 0; height: 2px; z-index: 20; }
+.prog-bar { height: 100%; background: linear-gradient(90deg, var(--accent), rgba(59,130,246,0.3)); width: 0%; transition: width 0.15s linear; box-shadow: 0 0 12px var(--accent-glow); }
+
+/* EXIT */
+#exit { position: fixed; inset: 0; z-index: 100; background: var(--bg); opacity: 0; pointer-events: none; transition: opacity 0.55s ease; }
+#exit.on { opacity: 1; pointer-events: all; }
+
+@media (max-width: 640px) {
+  .stream, .hud { display: none; }
+  .corner { width: 28px; height: 28px; }
+  .c-tl,.c-tr { top: 14px; } .c-bl,.c-br { bottom: 14px; }
+  .c-tl,.c-bl { left: 14px; } .c-tr,.c-br { right: 14px; }
 }
 </style>
 </head>
 <body>
+
+<canvas id="neural"></canvas>
+<canvas id="embers"></canvas>
 <div class="grid-bg"></div>
+<div class="vignette"></div>
+<div class="scanlines"></div>
+<div class="noise"></div>
+<div class="sweep"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+<div class="orb orb-3"></div>
+<div class="hex-pulse" id="hexPulse"></div>
 
-<!-- NAV -->
-<nav>
-  <div class="nav-inner">
-    <a href="#" class="nav-brand"><span>K</span>WYRE</a>
-    <div class="nav-links">
-      <a href="#security">Security</a>
-      <a href="#features">Features</a>
-      <a href="#pricing">Pricing</a>
-      <a href="mailto:contact@kwyre.com" class="nav-cta">Request Access</a>
+<!-- Proverbs 4:23 — Above all else, guard your heart, for everything you do flows from it. -->
+
+<!-- AR corners -->
+<div class="corner c-tl"></div>
+<div class="corner c-tr"></div>
+<div class="corner c-bl"></div>
+<div class="corner c-br"></div>
+
+<!-- HUD -->
+<div class="hud hud-tl">KWYRE / LOCAL INFERENCE v0.2</div>
+<div class="hud hud-tr">SECURITY STACK / ALL LAYERS ACTIVE</div>
+<div class="hud hud-bl">ZERO TELEMETRY / VERIFIED</div>
+<div class="hud hud-br">MINT RAIL LLC</div>
+
+<!-- Psalm 121:7 — The LORD will keep you from all harm — he will watch over your life. -->
+
+<!-- Reticle -->
+<div class="reticle">
+  <div class="r-outer"></div>
+  <div class="r-inner"></div>
+  <div class="r-cross"></div>
+</div>
+
+<!-- Proverbs 25:2 — It is the glory of God to conceal a matter; to search out a matter is the glory of kings. -->
+
+<!-- Data streams -->
+<div class="stream sl" id="sl"></div>
+<div class="stream sr" id="sr"></div>
+
+<!-- Romans 8:28 — And we know that in all things God works for the good of those who love him. -->
+
+<!-- Stage -->
+<div id="stage">
+  <div id="seq">
+    <div class="eyebrow" id="ey">Local AI System</div>
+    <div class="h-line"  id="l1"></div>
+    <div class="h-line"  id="l2"></div>
+    <div class="sub-text" id="sb"></div>
+    <div class="chips"   id="ch">
+      <div class="chip"><div class="chip-dot"></div>No Cloud</div>
+      <div class="chip"><div class="chip-dot"></div>No Telemetry</div>
+      <div class="chip"><div class="chip-dot"></div>No Logs</div>
+      <div class="chip"><div class="chip-dot"></div>No Subscriptions</div>
     </div>
-  </div>
-</nav>
-
-<!-- HERO -->
-<div class="hero">
-  <div class="wrap">
-    <div class="hero-eyebrow">Air-Gapped Inference</div>
-    <h1>AI for analysts who<br>cannot afford <em>a breach</em></h1>
-    <p class="hero-sub">
-      The only local AI that protects your data <strong>even if your machine is compromised.</strong>
-      Six layers of active defense. Zero data leaves your machine. Not to a cloud. Not to us. Not to anyone.
-    </p>
-
-    <div class="hero-stats">
-      <div class="hero-stat">
-        <div class="hero-stat-val">Qwen3.5-9B</div>
-        <div class="hero-stat-label">Base Model</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-val">4-bit NF4</div>
-        <div class="hero-stat-label">Quantization</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-val">6.5 GB</div>
-        <div class="hero-stat-label">VRAM Required</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-val">6 Layers</div>
-        <div class="hero-stat-label">Security Stack</div>
-      </div>
-      <div class="hero-stat">
-        <div class="hero-stat-val" id="sparsityStat">~60%</div>
-        <div class="hero-stat-label">Act. Sparsity</div>
-      </div>
-    </div>
-
-    <div class="threat-bar">
-      <div class="threat-dot"></div>
-      <span>All systems operational &mdash; <strong>zero outbound connections</strong></span>
-    </div>
+    <button id="enter-btn" onclick="enter()">ENTER KWYRE</button>
   </div>
 </div>
 
-<!-- WHO IT'S FOR -->
-<div class="section" id="buyers">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow">Use Cases</div>
-      <h2>Built for adversarial environments</h2>
-      <p>Kwyre exists because these professionals cannot upload their work to cloud AI. Not legally. Not ethically. Not safely.</p>
-    </div>
+<!-- Ecclesiastes 12:14 — For God will bring every deed into judgment, including every hidden thing, whether it is good or evil. -->
 
-    <div class="buyers-grid">
-      <div class="buyer-card">
-        <div class="buyer-role">Forensic Investigators</div>
-        <div class="buyer-pain">Cannot upload $3B fraud evidence to ChatGPT during an active federal case.</div>
-        <div class="buyer-solve">Full local inference, zero telemetry, no chain-of-custody risk.</div>
-      </div>
-      <div class="buyer-card">
-        <div class="buyer-role">Criminal Defense Attorneys</div>
-        <div class="buyer-pain">Attorney-client privilege prohibits cloud AI on case materials.</div>
-        <div class="buyer-solve">Air-gapped by architecture, not policy.</div>
-      </div>
-      <div class="buyer-card">
-        <div class="buyer-role">M&amp;A Law Firms</div>
-        <div class="buyer-pain">Associates uploading NDA-protected deal docs to ChatGPT is malpractice liability.</div>
-        <div class="buyer-solve">Verified zero outbound connections, auditable.</div>
-      </div>
-      <div class="buyer-card">
-        <div class="buyer-role">Insurance Underwriters</div>
-        <div class="buyer-pain">Actuarial models and cedent PII cannot touch cloud APIs under compliance rules.</div>
-        <div class="buyer-solve">Compliance documentation package for your legal team.</div>
-      </div>
-      <div class="buyer-card">
-        <div class="buyer-role">Cleared Defense Contractors</div>
-        <div class="buyer-pain">Sensitive unclassified data. Can't use classified AI, can't use ChatGPT.</div>
-        <div class="buyer-solve">Local, offline, no cleared facility required.</div>
-      </div>
-      <div class="buyer-card">
-        <div class="buyer-role">Forensic Accountants</div>
-        <div class="buyer-pain">SEC whistleblower cases, active DOJ investigations. Evidence integrity is paramount.</div>
-        <div class="buyer-solve">RAM-only storage, cryptographic wipe on session end.</div>
-      </div>
-    </div>
-  </div>
-</div>
+<div class="hint" id="hint">CLICK OR PRESS SPACE TO ADVANCE</div>
+<div class="prog-wrap"><div class="prog-bar" id="pb"></div></div>
+<div id="exit"></div>
 
-<!-- SECURITY STACK -->
-<div class="section" id="security">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow">Defense Architecture</div>
-      <h2>Six layers of active security</h2>
-      <p>Every local AI tool treats "local" as the security boundary. Kwyre treats the machine itself as potentially compromised.</p>
-    </div>
+<script nonce="{{CSP_NONCE}}">
+/* ── NEURAL CANVAS ── */
+const cv = document.getElementById('neural');
+const cx = cv.getContext('2d');
+let W, H, nodes = [], mx = -999, my = -999;
+const NC = 75, CD = 145, MD = 165;
 
-    <div class="sec-layers">
-      <div class="sec-layer">
-        <div class="sec-layer-num"><div class="lnum">L1</div></div>
-        <div class="sec-layer-body">
-          <h3>Network Isolation</h3>
-          <p>Server binds to 127.0.0.1 only &mdash; physically unreachable from any network at the OS level. No firewall rules required. The OS itself blocks all external connections.</p>
-          <span class="sec-tag">OS-Level Enforcement</span>
-        </div>
-      </div>
-      <div class="sec-layer">
-        <div class="sec-layer-num"><div class="lnum">L2</div></div>
-        <div class="sec-layer-body">
-          <h3>Process-Level Network Lockdown</h3>
-          <p>iptables rules scoped to the inference process. All outbound traffic blocked except localhost. Even a fully compromised server process cannot make outbound connections.</p>
-          <span class="sec-tag">Kernel-Level Enforcement</span>
-        </div>
-      </div>
-      <div class="sec-layer">
-        <div class="sec-layer-num"><div class="lnum">L3</div></div>
-        <div class="sec-layer-body">
-          <h3>Dependency Integrity</h3>
-          <p>SHA256 hash manifest of every installed Python package generated on clean install. Verified at server startup. Tampered torch, transformers, or any dependency causes immediate abort.</p>
-          <span class="sec-tag">Supply Chain Defense</span>
-        </div>
-      </div>
-      <div class="sec-layer">
-        <div class="sec-layer-num"><div class="lnum">L4</div></div>
-        <div class="sec-layer-body">
-          <h3>Model Weight Integrity</h3>
-          <p>SHA256 hashes of all model config files verified at every startup. Tampered or replaced model weights cause immediate process abort with clear error.</p>
-          <span class="sec-tag">Cryptographic Verification</span>
-        </div>
-      </div>
-      <div class="sec-layer">
-        <div class="sec-layer-num"><div class="lnum">L5</div></div>
-        <div class="sec-layer-body">
-          <h3>Secure RAM Session Storage</h3>
-          <p>Conversations stored only in RAM. Each session gets a unique 32-byte random key. On session end: secure_wipe() overwrites all content with random bytes before clearing references. RAM scraping returns garbage.</p>
-          <span class="sec-tag">Cryptographic Wipe</span>
-        </div>
-      </div>
-      <div class="sec-layer">
-        <div class="sec-layer-num"><div class="lnum">L6</div></div>
-        <div class="sec-layer-body">
-          <h3>Intrusion Detection + Auto-Wipe</h3>
-          <p>Background watchdog monitors for unexpected outbound connections and known analysis tools (Wireshark, x64dbg, Fiddler, Ghidra, IDA). On confirmed intrusion: all sessions wiped, server terminated.</p>
-          <span class="sec-tag">Active Threat Response</span>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- FEATURES -->
-<div class="section" id="features">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow">Capabilities</div>
-      <h2>Production inference engine</h2>
-      <p>Frontier-class model with dual-layer compression. Spike QAT training plus 4-bit quantization. Nobody else does this.</p>
-    </div>
-
-    <div class="feat-grid">
-      <div class="feat-cell">
-        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-        <h3>Spike QAT Training</h3>
-        <p>Custom pipeline using Straight-Through Estimator spike encoding with k-curriculum annealing (k=50&#8594;5). The model learns to tolerate spike-encoded activations.</p>
-      </div>
-      <div class="feat-cell">
-        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
-        <h3>SpikeServe Activation Encoding</h3>
-        <p>Dynamic spike encoding at inference time. Significant activation sparsity without quality loss. Dual compression: weights AND activations.</p>
-      </div>
-      <div class="feat-cell">
-        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
-        <h3>Zero Content Logging</h3>
-        <p>Metadata only. No telemetry, no analytics, no error reporting, no update pings, no license callbacks. Verify yourself with Wireshark.</p>
-      </div>
-      <div class="feat-cell">
-        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
-        <h3>OpenAI-Compatible API</h3>
-        <p>POST /v1/chat/completions drop-in replacement. Works with any OpenAI SDK. Session management and compliance endpoints built in.</p>
-      </div>
-      <div class="feat-cell">
-        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
-        <h3>LoRA Fine-Tuning</h3>
-        <p>Adapters targeting MLP layers (gate_proj, up_proj, down_proj). Fine-tuning with 0.2% trainable parameters. QLoRA rank 64, alpha 128.</p>
-      </div>
-      <div class="feat-cell">
-        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
-        <h3>Compliance & Audit</h3>
-        <p>GET /audit for metadata-only compliance logs. GET /health for full security stack status. Architecture designed for HIPAA, FINRA, SOC2-adjacent requirements.</p>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- COMPETITIVE MATRIX -->
-<div class="section" id="matrix">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow">Competitive Analysis</div>
-      <h2>Every security feature is unique to Kwyre</h2>
-      <p>No other local inference tool targets the compliance and adversarial environment use case.</p>
-    </div>
-
-    <div class="matrix-wrap">
-      <table class="matrix">
-        <thead>
-          <tr>
-            <th>Capability</th>
-            <th class="m-kwyre">Kwyre</th>
-            <th>ChatGPT</th>
-            <th>Ollama</th>
-            <th>LM Studio</th>
-            <th>Jan.ai</th>
-            <th>LocalAI</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr><td class="m-label">Fully local</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td></tr>
-          <tr><td class="m-label">Open source</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-y">YES</span></td><td><span class="m-y">YES</span></td></tr>
-          <tr><td class="m-label">Localhost-only binding</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Process outbound block</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Dependency integrity</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Model weight verification</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">RAM-only sessions</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Cryptographic session wipe</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Intrusion detection + auto-wipe</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Compliance documentation</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Audit endpoint</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Anonymous payment (XMR)</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td>free</td><td>free</td><td>free</td><td>free</td></tr>
-          <tr><td class="m-label">Spike activation encoding</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-          <tr><td class="m-label">Custom QAT training</td><td class="m-kwyre"><span class="m-y">YES</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td><td><span class="m-n">&mdash;</span></td></tr>
-        </tbody>
-      </table>
-    </div>
-  </div>
-</div>
-
-<!-- PRICING -->
-<div class="section" id="pricing">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow">Pricing</div>
-      <h2>One-time. No subscription.</h2>
-      <p>Credit card or Monero. No email required for Monero purchases. No recurring billing. No statement entries.</p>
-    </div>
-
-    <div class="pricing-grid">
-      <div class="price-card">
-        <div class="price-name">Personal</div>
-        <div class="price-amount">$299</div>
-        <div class="price-type">One-time &middot; 1 machine</div>
-        <ul class="price-features">
-          <li>Full inference server</li>
-          <li>6-layer security stack</li>
-          <li>Compliance documentation</li>
-          <li>OpenAI-compatible API</li>
-        </ul>
-      </div>
-      <div class="price-card featured">
-        <div class="price-name">Professional</div>
-        <div class="price-amount">$799</div>
-        <div class="price-type">One-time &middot; 3 machines</div>
-        <ul class="price-features">
-          <li>Everything in Personal</li>
-          <li>Priority support</li>
-          <li>Multi-seat deployment</li>
-          <li>Full audit package</li>
-        </ul>
-      </div>
-      <div class="price-card">
-        <div class="price-name">Air-Gapped Kit</div>
-        <div class="price-amount">$1,499</div>
-        <div class="price-type">One-time &middot; 5 machines</div>
-        <ul class="price-features">
-          <li>Everything in Professional</li>
-          <li>Offline installer</li>
-          <li>Full audit package</li>
-          <li>White-glove setup</li>
-        </ul>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- CTA -->
-<div id="ctaSection" class="cta-final hidden">
-  <div class="wrap">
-    <h2>Your data stays yours.</h2>
-    <p>No cloud. No subscriptions. No data collection. Runs on a $3,500 workstation in 10 minutes.</p>
-    <div class="cta-actions">
-      <a href="mailto:contact@kwyre.com" class="btn btn-primary">Request Access</a>
-      <a href="#security" class="btn btn-ghost">Review Architecture</a>
-    </div>
-  </div>
-</div>
-
-<!-- LOCAL CHAT (localhost only) -->
-<div id="localChat" class="section">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow">Console</div>
-      <h2>Inference terminal</h2>
-    </div>
-    <div class="api-key-bar">
-      <div class="status-dot" id="statusDot"></div>
-      <input type="password" id="apiKeyInput" placeholder="sk-kwyre-..." autocomplete="off">
-    </div>
-    <div class="chat-container">
-      <div class="chat-messages" id="chatMessages">
-        <div class="empty-state">
-          <div>AWAITING AUTHENTICATION</div>
-        </div>
-      </div>
-      <div class="chat-input">
-        <textarea id="msgInput" placeholder="Enter query..." rows="1" disabled></textarea>
-        <button class="send-btn" id="sendBtn" disabled>Send</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- FOOTER -->
-<footer class="site-footer">
-  <div class="wrap">
-    <div class="footer-inner">
-      <div class="footer-brand">KWYRE &middot; APOLLO CyberSentinel LLC</div>
-      <div class="footer-legal">All inference runs 100% locally. No data leaves your machine. This is not legal advice. Verify your own compliance requirements.</div>
-    </div>
-  </div>
-</footer>
-
-<script>
-const isLocal = ['localhost', '127.0.0.1', '0.0.0.0'].includes(window.location.hostname);
-const API_BASE = window.location.origin;
-
-if (!isLocal) {
-  document.getElementById('ctaSection').classList.remove('hidden');
-  document.getElementById('localChat').classList.add('hidden');
+function resize() { W = cv.width = innerWidth; H = cv.height = innerHeight; }
+function mkNodes() {
+  nodes = Array.from({length: NC}, () => ({
+    x: Math.random()*W, y: Math.random()*H,
+    vx: (Math.random()-.5)*.4, vy: (Math.random()-.5)*.4,
+    r: Math.random()*1.5+.5, p: Math.random()*Math.PI*2,
+  }));
 }
-
-const chatMessages = document.getElementById('chatMessages');
-const msgInput = document.getElementById('msgInput');
-const sendBtn = document.getElementById('sendBtn');
-const apiKeyInput = document.getElementById('apiKeyInput');
-const statusDot = document.getElementById('statusDot');
-
-let messages = [];
-let isGenerating = false;
-
-if (isLocal) {
-  const saved = localStorage.getItem('kwyre_api_key');
-  if (saved) { apiKeyInput.value = saved; validateKey(saved); }
-}
-
-apiKeyInput.addEventListener('input', () => {
-  const key = apiKeyInput.value.trim();
-  if (key.startsWith('sk-kwyre-') && key.length > 20) {
-    localStorage.setItem('kwyre_api_key', key);
-    validateKey(key);
-  } else {
-    statusDot.className = 'status-dot';
-    msgInput.disabled = true;
-    sendBtn.disabled = true;
+function frame() {
+  cx.clearRect(0,0,W,H);
+  nodes.forEach(n => {
+    n.x+=n.vx; n.y+=n.vy; n.p+=.018;
+    if(n.x<0||n.x>W) n.vx*=-1;
+    if(n.y<0||n.y>H) n.vy*=-1;
+  });
+  for(let i=0;i<nodes.length;i++) for(let j=i+1;j<nodes.length;j++) {
+    const a=nodes[i],b=nodes[j];
+    const d=Math.hypot(a.x-b.x,a.y-b.y);
+    if(d>CD) continue;
+    const near=(Math.hypot(a.x-mx,a.y-my)<MD)||(Math.hypot(b.x-mx,b.y-my)<MD);
+    const al=(1-d/CD)*(near?.22:.14);
+    cx.beginPath(); cx.moveTo(a.x,a.y); cx.lineTo(b.x,b.y);
+    cx.strokeStyle=near?`rgba(34,197,94,${al*2})`:`rgba(59,130,246,${al})`;
+    cx.lineWidth=near?1.2:.4; cx.stroke();
   }
+  nodes.forEach(n => {
+    const near=Math.hypot(n.x-mx,n.y-my)<MD;
+    const r=Math.max(0.1,n.r+Math.sin(n.p)*.5);
+    const col=near?'34,197,94':'59,130,246';
+    if(near){cx.beginPath();cx.arc(n.x,n.y,r*7,0,Math.PI*2);cx.fillStyle=`rgba(${col},.05)`;cx.fill();}
+    cx.beginPath();cx.arc(n.x,n.y,r,0,Math.PI*2);
+    cx.fillStyle=`rgba(${col},${near?.9:.4+Math.sin(n.p)*.2})`; cx.fill();
+  });
+  requestAnimationFrame(frame);
+}
+const hexPulse = document.getElementById('hexPulse');
+window.addEventListener('mousemove',e=>{
+  mx=e.clientX; my=e.clientY;
+  hexPulse.style.left=mx+'px'; hexPulse.style.top=my+'px';
+  hexPulse.classList.add('visible');
 });
+window.addEventListener('resize',()=>{resize();mkNodes();emberResize();});
+resize(); mkNodes(); frame();
 
-async function validateKey(key) {
-  try {
-    const r = await fetch(`${API_BASE}/v1/models`, { headers: { 'Authorization': `Bearer ${key}` } });
-    if (r.ok) {
-      statusDot.className = 'status-dot connected';
-      msgInput.disabled = false;
-      sendBtn.disabled = false;
-      if (chatMessages.querySelector('.empty-state')) {
-        chatMessages.innerHTML = '';
-        addMessage('assistant', 'Kwyre AI online. All security layers active. Ready for queries.');
-      }
-    } else {
-      statusDot.className = 'status-dot error';
-      msgInput.disabled = true;
-      sendBtn.disabled = true;
+/* ── EMBER PARTICLES ── */
+const ecv = document.getElementById('embers');
+const ecx = ecv.getContext('2d');
+let eW, eH, embers = [];
+const EC = 60;
+
+function emberResize() { eW = ecv.width = innerWidth; eH = ecv.height = innerHeight; }
+function mkEmbers() {
+  embers = Array.from({length: EC}, () => ({
+    x: Math.random()*eW,
+    y: Math.random()*eH,
+    vx: (Math.random()-.5)*.15,
+    vy: -(Math.random()*.6+.2),
+    r: Math.random()*1.8+.3,
+    life: Math.random(),
+    decay: Math.random()*.003+.001,
+    color: Math.random()>.7 ? '34,197,94' : '59,130,246',
+    flicker: Math.random()*Math.PI*2,
+  }));
+}
+function emberFrame() {
+  ecx.clearRect(0,0,eW,eH);
+  embers.forEach(e => {
+    e.x += e.vx + Math.sin(e.flicker)*.12;
+    e.y += e.vy;
+    e.flicker += .03;
+    e.life -= e.decay;
+    if(e.life<=0 || e.y<-10) {
+      e.x=Math.random()*eW; e.y=eH+10;
+      e.life=1; e.r=Math.random()*1.8+.3;
     }
-  } catch {
-    statusDot.className = 'status-dot error';
-  }
+    const a = e.life * (.5 + Math.sin(e.flicker)*.2);
+    ecx.beginPath();
+    ecx.arc(e.x, e.y, e.r, 0, Math.PI*2);
+    ecx.fillStyle=`rgba(${e.color},${a})`;
+    ecx.fill();
+    if(e.r > 1) {
+      ecx.beginPath();
+      ecx.arc(e.x, e.y, e.r*4, 0, Math.PI*2);
+      ecx.fillStyle=`rgba(${e.color},${a*.08})`;
+      ecx.fill();
+    }
+  });
+  requestAnimationFrame(emberFrame);
+}
+emberResize(); mkEmbers(); emberFrame();
+
+
+/* ── DATA STREAMS ── */
+const L=[
+  'SYS / INTEGRITY CHECK','LAYER 1 / BOUND 127.0.0.1','LAYER 2 / OUTBOUND BLOCKED',
+  'LAYER 3 / DEP MANIFEST OK','LAYER 4 / WEIGHTS VERIFIED','LAYER 5 / RAM SESSION',
+  'LAYER 6 / WATCHDOG ACTIVE','─────────────────────','STATUS / ALL CLEAR ✓',
+];
+const R=[
+  'MODEL / QWEN3.5-4B UNCENSORED','QUANT / 4-BIT NF4','SPECULATIVE / 0.8B DRAFT',
+  'ADAPTERS / 6 DOMAIN LoRA HOT-SWAP','DOWNLOAD / 3.3 GB','REFUSALS / 0 OF 465',
+  'BACKENDS / GPU vLLM CPU MLX','─────────────────────','READY / AWAITING INPUT',
+];
+function mkStream(id, arr) {
+  const el = document.getElementById(id);
+  arr.forEach((t,i) => {
+    const d=document.createElement('div');
+    d.className='sl-row'+(t.includes('CLEAR')||t.includes('READY')?' ok':t.includes('ACTIVE')?' act':'');
+    d.textContent=t; el.appendChild(d);
+    setTimeout(()=>{d.style.opacity='1';},1400+i*70);
+    d.style.opacity='0'; d.style.transition='opacity .3s';
+  });
+}
+mkStream('sl',L); mkStream('sr',R);
+
+// Flicker effect
+setInterval(()=>{
+  const all=document.querySelectorAll('.sl-row');
+  if(!all.length) return;
+  const el=all[Math.floor(Math.random()*all.length)];
+  el.style.opacity='.2';
+  setTimeout(()=>el.style.opacity='1',120);
+},900);
+
+
+/* ── HTML SANITIZER ── */
+function sanitizeHtml(html) {
+  const SAFE_TAGS = new Set(['B','STRONG','I','EM','SPAN','BR']);
+  const SAFE_ATTRS = new Set(['class']);
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  (function clean(node) {
+    for (const child of [...node.childNodes]) {
+      if (child.nodeType === 1) {
+        if (!SAFE_TAGS.has(child.tagName)) {
+          child.replaceWith(document.createTextNode(child.textContent));
+        } else {
+          [...child.attributes].forEach(a => {
+            if (!SAFE_ATTRS.has(a.name)) child.removeAttribute(a.name);
+          });
+          clean(child);
+        }
+      }
+    }
+  })(doc.body);
+  return doc.body.innerHTML;
 }
 
-msgInput.addEventListener('keydown', (e) => {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
-});
+/* ── SEQUENCE ENGINE ── */
+const SEQ=[
+  { ey:'Standard AI', l1:'<span class="s">Your queries, their servers.</span>', l2:'<span class="s">Your data, their product.</span>', sb:'', dur:2400 },
+  { ey:'The reality', l1:'<span class="d">Every prompt you send</span>', l2:'<span class="d">feeds <span class="a">someone else\'s</span> model.</span>', sb:'', dur:2400 },
+  { ey:'A different idea', l1:'What if your AI', l2:'answered only to <span class="a">you?</span>', sb:'Not a cloud service. Not a subscription. Not a surveillance tool. A model that lives on your machine, serves your work, and forgets everything the moment you\'re done.', dur:3200 },
+  { ey:'Your pet, not their pipeline', l1:'Zero data leaves', l2:'your <span class="a">machine. Ever.</span>', sb:'No telemetry. No analytics. No content logs. Cryptographic session wipe. Intrusion detection. Verified locally. Completely yours.', dur:3200, chips:true },
+  { ey:'Air-gapped inference', l1:'Built for work that <span class="a">cannot</span>', l2:'afford a breach.', sb:'Federal investigations. Attorney-client privilege. Regulated financial data. Sensitive unclassified work product. Your AI stays in the room with you.', dur:0, chips:true, enter:true },
+];
 
-msgInput.addEventListener('input', () => {
-  msgInput.style.height = 'auto';
-  msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + 'px';
-});
+let idx=0, timer=null;
+const ey=document.getElementById('ey'), l1=document.getElementById('l1'),
+      l2=document.getElementById('l2'), sb=document.getElementById('sb'),
+      ch=document.getElementById('ch'), btn=document.getElementById('enter-btn'),
+      pb=document.getElementById('pb'), hint=document.getElementById('hint');
 
-sendBtn.addEventListener('click', send);
+function show(i) {
+  const s=SEQ[i];
+  [ey,l1,l2,sb,ch].forEach(e=>e.classList.remove('vis'));
+  btn.classList.remove('vis');
 
-function addMessage(role, content, toolsUsed, spikeStats, usage) {
-  messages.push({ role, content });
-  const div = document.createElement('div');
-  div.className = `message ${role}`;
-  let toolHtml = '';
-  if (toolsUsed && toolsUsed.length > 0) {
-    toolHtml = '<div class="tool-badges">' +
-      toolsUsed.map(t => `<span class="tool-badge">${escapeHtml(t)}</span>`).join('') +
-      '</div>';
-  }
-  let metaHtml = '';
-  if (role === 'assistant' && (spikeStats || usage)) {
-    const parts = [];
-    if (spikeStats && spikeStats.activation_sparsity_pct > 0)
-      parts.push(`sparsity: ${spikeStats.activation_sparsity_pct}%`);
-    if (spikeStats && spikeStats.spike_encoded_layers > 0)
-      parts.push(`${spikeStats.spike_encoded_layers} spike layers`);
-    if (usage && usage.tokens_per_second > 0)
-      parts.push(`${usage.tokens_per_second} tok/s`);
-    if (parts.length > 0)
-      metaHtml = `<div class="spike-meta">${parts.join(' \u00b7 ')}</div>`;
-  }
-  div.innerHTML = `
-    <div class="message-role ${role}">${role}</div>
-    ${toolHtml}
-    <div class="message-content">${escapeHtml(content)}</div>
-    ${metaHtml}
-  `;
-  chatMessages.appendChild(div);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-  return div;
-}
-
-function showTyping() {
-  const div = document.createElement('div');
-  div.className = 'message assistant';
-  div.id = 'typing';
-  div.innerHTML = `
-    <div class="message-role assistant">assistant</div>
-    <div class="typing-indicator"><span></span><span></span><span></span></div>
-  `;
-  chatMessages.appendChild(div);
-  chatMessages.scrollTop = chatMessages.scrollHeight;
-}
-
-function removeTyping() {
-  const el = document.getElementById('typing');
-  if (el) el.remove();
-}
-
-function escapeHtml(text) {
-  const d = document.createElement('div');
-  d.textContent = text;
-  return d.innerHTML;
-}
-
-async function send() {
-  const content = msgInput.value.trim();
-  if (!content || isGenerating) return;
-
-  const key = apiKeyInput.value.trim();
-  if (!key) return;
-
-  addMessage('user', content);
-  msgInput.value = '';
-  msgInput.style.height = 'auto';
-  isGenerating = true;
-  sendBtn.disabled = true;
-  showTyping();
-
-  try {
-    const apiMessages = messages.map(m => ({ role: m.role, content: m.content }));
-    const r = await fetch(`${API_BASE}/v1/chat/completions`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${key}` },
-      body: JSON.stringify({ messages: apiMessages, max_tokens: 2048, temperature: 0.7 }),
+  setTimeout(()=>{
+    ey.textContent=s.ey;
+    l1.innerHTML=sanitizeHtml(s.l1||''); l2.innerHTML=sanitizeHtml(s.l2||''); sb.textContent=s.sb||'';
+    l1.setAttribute('data-text',l1.textContent); l1.classList.add('glitch');
+    l2.setAttribute('data-text',l2.textContent); l2.classList.add('glitch');
+    requestAnimationFrame(()=>{
+      setTimeout(()=>ey.classList.add('vis'),40);
+      setTimeout(()=>l1.classList.add('vis'),160);
+      setTimeout(()=>l2.classList.add('vis'),290);
+      if(s.sb) setTimeout(()=>sb.classList.add('vis'),420);
+      if(s.chips) setTimeout(()=>ch.classList.add('vis'),540);
+      if(s.enter) {
+        setTimeout(()=>{
+          btn.style.display='inline-block';
+          requestAnimationFrame(()=>btn.classList.add('vis'));
+        },680);
+        // Hide hint when enter shown
+        hint.style.opacity='0';
+      }
     });
 
-    if (!r.ok) {
-      const err = await r.json().catch(() => ({ error: 'Request failed' }));
-      removeTyping();
-      addMessage('assistant', `Error: ${err.error || r.statusText}`);
-      return;
-    }
-
-    const data = await r.json();
-    const reply = data.choices?.[0]?.message?.content || 'No response.';
-    const toolsUsed = data.tools_used || [];
-    const spikeStats = data.spike_stats || {};
-    const usage = data.usage || {};
-    removeTyping();
-    addMessage('assistant', reply, toolsUsed, spikeStats, usage);
-
-    if (spikeStats.activation_sparsity_pct > 0) {
-      document.getElementById('sparsityStat').textContent =
-        spikeStats.activation_sparsity_pct + '%';
-    }
-  } catch (err) {
-    removeTyping();
-    addMessage('assistant', `Connection error: ${err.message}`);
-  } finally {
-    isGenerating = false;
-    sendBtn.disabled = false;
-    msgInput.focus();
-  }
+    if(s.dur>0) {
+      const from=i/SEQ.length*100, to=(i+1)/SEQ.length*100;
+      const t0=Date.now();
+      function tick(){ const p=Math.min((Date.now()-t0)/s.dur,1); pb.style.width=(from+(to-from)*p)+'%'; if(p<1) requestAnimationFrame(tick); }
+      tick();
+      timer=setTimeout(()=>{idx++;show(idx);},s.dur);
+    } else { pb.style.width='100%'; }
+  },320);
 }
 
-document.querySelectorAll('a[href^="#"]').forEach(a => {
-  a.addEventListener('click', e => {
-    const target = document.querySelector(a.getAttribute('href'));
-    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
-  });
+setTimeout(()=>show(0),1000);
+
+function advance() {
+  if(timer) clearTimeout(timer);
+  if(idx<SEQ.length-1){ idx++; show(idx); }
+}
+
+document.getElementById('stage').addEventListener('click',e=>{
+  if(e.target===btn||btn.contains(e.target)) return;
+  advance();
 });
+document.addEventListener('keydown',e=>{
+  if((e.key===' '||e.key==='ArrowRight')&&!e.target.closest('button')) { e.preventDefault(); advance(); }
+  if(e.key==='Enter'&&btn.classList.contains('vis')) enter();
+});
+
+
+/* ── ENTER TRANSITION ── */
+function enter() {
+  const ex=document.getElementById('exit');
+  btn.textContent='LOADING...';
+  ex.classList.add('on');
+  setTimeout(()=>{ window.location.href='main.html'; },600);
+}
 </script>
 </body>
 </html>

@@ -14,10 +14,17 @@ echo "============================================================"
 echo "Kwyre QAT Training — Lambda GH200 Setup"
 echo "============================================================"
 
+if [ -z "${VIRTUAL_ENV:-}" ]; then
+    echo "[Setup] Creating venv with system site-packages (keeps Lambda's CUDA torch)..."
+    python3 -m venv ~/venv --system-site-packages
+    source ~/venv/bin/activate
+    echo "[Setup] Virtual environment activated: $VIRTUAL_ENV"
+fi
+
 pip install --upgrade pip
-pip install torch torchvision torchaudio
+pip install --upgrade scipy scikit-learn Pillow numpy
 pip install transformers accelerate bitsandbytes peft trl datasets
-pip install psutil safetensors tokenizers scipy pyyaml huggingface_hub
+pip install psutil safetensors tokenizers pyyaml huggingface_hub
 
 echo "[Setup] Dependencies installed."
 

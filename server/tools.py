@@ -1,6 +1,10 @@
 """
 Tool router: augments LLM queries with real-time data from free public APIs.
 No API keys needed -- every integration here is free and unauthenticated.
+
+This module is OPT-IN.  Set  KWYRE_ENABLE_TOOLS=1  to activate.
+When disabled (default), route_tools() returns empty results and NO
+external HTTP requests are ever made, preserving the air-gap guarantee.
 """
 
 import re
@@ -12,8 +16,24 @@ from datetime import datetime, timezone
 
 TIMEOUT = 5
 
+ALLOWED_TOOL_HOSTS = frozenset({
+    "geocoding-api.open-meteo.com", "api.open-meteo.com",
+    "api.coingecko.com", "hacker-news.firebaseio.com",
+    "api.dictionaryapi.dev", "restcountries.com",
+    "newton.now.sh", "v2.jokeapi.dev", "uselessfacts.jsph.pl",
+    "zenquotes.io", "ip-api.com",
+    "earthquake.usgs.gov", "opentdb.com", "api.nasa.gov",
+    "pokeapi.co", "universities.hipolabs.com",
+    "dogapi.dog", "catfact.ninja", "numbersapi.com",
+    "api.frankfurter.app", "api.spaceflightnewsapi.net",
+    "bored-api.appbrewery.com",
+})
+
 
 def _get(url, headers=None):
+    parsed = urllib.parse.urlparse(url)
+    if parsed.hostname not in ALLOWED_TOOL_HOSTS:
+        return None
     req = urllib.request.Request(url, headers=headers or {"User-Agent": "KwyreAI/1.0"})
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
@@ -23,6 +43,9 @@ def _get(url, headers=None):
 
 
 def _get_text(url):
+    parsed = urllib.parse.urlparse(url)
+    if parsed.hostname not in ALLOWED_TOOL_HOSTS:
+        return None
     req = urllib.request.Request(url, headers={"User-Agent": "KwyreAI/1.0"})
     try:
         with urllib.request.urlopen(req, timeout=TIMEOUT) as r:
@@ -241,6 +264,7 @@ def get_quote():
 # ---------------------------------------------------------------------------
 
 def get_ip_info(ip):
+    # ip-api.com free tier only supports HTTP; HTTPS requires a paid plan
     data = _get(f"http://ip-api.com/json/{urllib.parse.quote(ip)}?fields=status,message,country,regionName,city,zip,lat,lon,timezone,isp,org,as,query")
     if not data or data.get("status") != "success":
         return None
@@ -335,7 +359,7 @@ def get_pokemon(name):
 # ---------------------------------------------------------------------------
 
 def search_universities(query):
-    data = _get(f"http://universities.hipolabs.com/search?name={urllib.parse.quote(query)}")
+    data = _get(f"https://universities.hipolabs.com/search?name={urllib.parse.quote(query)}")
     if not data:
         return None
     lines = [f"Universities matching \"{query}\":"]
@@ -368,7 +392,7 @@ def get_cat_fact():
 # ---------------------------------------------------------------------------
 
 def get_number_fact(number):
-    text = _get_text(f"http://numbersapi.com/{number}?json")
+    text = _get_text(f"https://numbersapi.com/{number}?json")
     if not text:
         return None
     try:

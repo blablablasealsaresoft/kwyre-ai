@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kwyre AI — Data Residency &amp; Privacy Architecture</title>
+<meta name="description" content="Kwyre AI Data Residency and Privacy Architecture. Technical controls and regulatory alignment for GDPR, HIPAA, SOC 2, ITAR, and attorney-client privilege.">
+<meta name="robots" content="noindex">
+<link rel="icon" type="image/x-icon" href="../favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #05060a;
+  --surface: #0b0d14;
+  --surface2: #10131c;
+  --surface3: #161a27;
+  --border: #1c2033;
+  --border-hi: #2a3050;
+  --accent: #3b82f6;
+  --accent-dim: rgba(59,130,246,0.12);
+  --accent-glow: rgba(59,130,246,0.25);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --amber: #f59e0b;
+  --red: #ef4444;
+  --text: #e2e4ea;
+  --text2: #6b7294;
+  --text3: #3d4466;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Instrument Sans', -apple-system, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: #fff; }
+
+/* NAV */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(5,6,10,0.9);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+}
+.nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between; height: 56px;
+}
+.nav-brand {
+  font-family: var(--mono); font-size: 16px; font-weight: 700;
+  letter-spacing: 4px; text-transform: uppercase;
+  color: #fff; text-decoration: none;
+  text-shadow: 0 0 12px rgba(255,255,255,0.25);
+}
+.nav-links { display: flex; gap: 28px; align-items: center; }
+.nav-links a {
+  font-size: 13px; font-weight: 500; color: #fff;
+  text-decoration: none; letter-spacing: 0.3px; transition: color 0.2s;
+}
+.nav-links a:hover { color: var(--accent); }
+.nav-links a.active { color: var(--accent); }
+.nav-cta {
+  font-family: var(--mono) !important; font-size: 11px !important;
+  letter-spacing: 1px !important; text-transform: uppercase !important;
+  padding: 8px 20px; background: var(--accent) !important;
+  color: #fff !important; border-radius: 4px;
+  transition: box-shadow 0.2s, transform 0.1s !important;
+}
+.nav-cta:hover { box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-1px) !important; }
+
+/* LAYOUT */
+.doc-wrap {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 100px 32px 80px;
+}
+
+/* HERO */
+.doc-hero {
+  padding: 40px 0 48px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 40px;
+}
+.doc-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 18px;
+}
+.doc-hero h1 {
+  font-size: clamp(26px, 3.5vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+  margin-bottom: 14px;
+}
+.doc-hero-sub {
+  font-size: 15px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+.back-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text2);
+  text-decoration: none;
+  letter-spacing: 1px;
+  margin-bottom: 32px;
+  transition: color 0.2s;
+}
+.back-link:hover { color: var(--accent); }
+.back-link::before { content: '←'; }
+
+/* SUMMARY CALLOUT */
+.summary-callout {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--green);
+  border-radius: 0 0 6px 6px;
+  padding: 24px 28px;
+  margin-bottom: 48px;
+}
+.summary-callout p {
+  font-size: 16px;
+  line-height: 1.75;
+  color: var(--text);
+  margin-bottom: 10px;
+}
+.summary-callout p:last-child { margin-bottom: 0; }
+.summary-callout strong { color: var(--green); }
+
+/* SECTIONS */
+.doc-section {
+  margin-bottom: 56px;
+}
+.doc-section h2 {
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 24px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+.doc-section h3 {
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--text);
+  margin: 28px 0 14px;
+}
+.doc-section p {
+  font-size: 15px;
+  line-height: 1.75;
+  color: var(--text);
+  margin-bottom: 16px;
+}
+.doc-section p:last-child { margin-bottom: 0; }
+
+/* TABLES */
+.table-wrap {
+  overflow-x: auto;
+  margin: 16px 0 24px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 12.5px;
+}
+thead th {
+  background: var(--surface2);
+  color: var(--text2);
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  padding: 12px 16px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+tbody td {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  line-height: 1.6;
+  color: var(--text);
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr:hover td { background: rgba(59,130,246,0.04); }
+td strong { color: var(--accent); font-weight: 600; }
+td code, p code {
+  background: var(--surface3);
+  color: var(--green);
+  padding: 1px 6px;
+  border-radius: 3px;
+  font-family: var(--mono);
+  font-size: 12px;
+}
+
+/* LAYER BADGE IN TABLE */
+.layer-badge {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 3px;
+  letter-spacing: 0.5px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  white-space: nowrap;
+}
+.layer-badge.none {
+  background: var(--surface3);
+  color: var(--text3);
+}
+
+/* PRE / CODE BLOCKS */
+pre {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px;
+  overflow-x: auto;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--text);
+  margin: 16px 0 24px;
+}
+pre.json { color: #a8d8a8; }
+
+/* NUMBERED LIST */
+.lifecycle-list {
+  list-style: none;
+  counter-reset: lc;
+  margin: 0 0 16px;
+}
+.lifecycle-list li {
+  counter-increment: lc;
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(28,32,51,0.5);
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text);
+}
+.lifecycle-list li:last-child { border-bottom: none; }
+.lc-num {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(59,130,246,0.3);
+  border-radius: 50%;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--accent);
+  flex-shrink: 0;
+}
+.lc-body strong { display: block; font-weight: 600; margin-bottom: 4px; }
+.lc-body ul {
+  margin: 8px 0 0 18px;
+  color: var(--text2);
+  line-height: 2;
+  font-size: 13.5px;
+}
+
+/* BULLET LIST */
+.bullet-list {
+  list-style: none;
+  margin: 0 0 16px;
+}
+.bullet-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+  font-size: 14.5px;
+  line-height: 1.6;
+  color: var(--text2);
+  border-bottom: 1px solid rgba(28,32,51,0.3);
+}
+.bullet-list li:last-child { border-bottom: none; }
+.bullet-list li::before {
+  content: '✕';
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--red);
+  flex-shrink: 0;
+  margin-top: 3px;
+}
+.bullet-list.check li::before {
+  content: '✓';
+  color: var(--green);
+}
+
+/* REGULATORY BLOCKS */
+.reg-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+.reg-item {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 16px 18px;
+}
+.reg-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent);
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.reg-desc {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text2);
+}
+.reg-desc strong { color: var(--text); }
+
+/* VERIFICATION TABLE */
+.ver-table td:first-child {
+  font-weight: 600;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+/* DATA FLOW DIAGRAM */
+.flow-diagram {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 20px;
+  margin: 16px 0 24px;
+  overflow-x: auto;
+}
+.flow-diagram pre {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font-size: 13px;
+  color: var(--text);
+}
+.flow-diagram p {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text2);
+  margin: 12px 0 0;
+  line-height: 1.7;
+}
+
+/* CONTACT */
+.contact-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 24px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.contact-block p {
+  font-size: 14px;
+  color: var(--text2);
+  margin: 0;
+  line-height: 1.6;
+}
+.contact-block a {
+  font-family: var(--mono);
+  font-size: 13px;
+  color: var(--accent);
+  text-decoration: none;
+  font-weight: 600;
+  transition: opacity 0.2s;
+}
+.contact-block a:hover { opacity: 0.8; text-decoration: underline; }
+
+/* FOOTER */
+.doc-footer {
+  margin-top: 80px;
+  padding-top: 32px;
+  border-top: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+.footer-brand {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 3px;
+  color: var(--text2);
+}
+.footer-meta {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: 0.5px;
+}
+.footer-tagline {
+  width: 100%;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text3);
+  letter-spacing: 0.5px;
+  margin-top: 4px;
+}
+
+@media (max-width: 700px) {
+  .doc-wrap { padding: 88px 20px 60px; }
+  .nav-links { display: none; }
+  .reg-grid { grid-template-columns: 1fr; }
+  .doc-footer { flex-direction: column; gap: 8px; }
+  .contact-block { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-inner">
+    <a href="../main.html" class="nav-brand"><span>K</span>WYRE</a>
+    <div class="nav-links">
+      <a href="../technology.html">Data Privacy</a>
+      <a href="../custom.html">Custom</a>
+      <a href="../security.html" class="active">Security &amp; Compliance</a>
+      <a href="../products.html">Products</a>
+      <a href="../platform.html">Platform</a>
+      <a href="../pay.html">Purchase</a>
+      <a href="../../kwyre-demo.html" class="nav-cta">App Demo</a>
+    </div>
+  </div>
+</nav>
+
+<div class="doc-wrap">
+
+  <a href="../security.html" class="back-link">Back to Security &amp; Compliance</a>
+
+  <div class="doc-hero">
+    <div class="doc-eyebrow">COMPLIANCE DOCUMENT</div>
+    <h1>Data Residency &amp; Privacy Architecture</h1>
+    <div class="doc-hero-sub">Technical controls and regulatory alignment for local-only AI inference</div>
+  </div>
+
+  <!-- SUMMARY -->
+  <div class="summary-callout">
+    <p>All inference processing occurs exclusively on the user's local hardware. <strong>No data, queries, or responses are transmitted to any external server.</strong> This document describes the technical controls that enforce this guarantee.</p>
+  </div>
+
+  <!-- DATA FLOW -->
+  <div class="doc-section">
+    <h2>Data Flow</h2>
+    <div class="flow-diagram">
+<pre>[User Input] ──► [Local RAM] ──► [Local GPU] ──► [Local RAM] ──► [User Output]
+                                      │
+                          No network path exists</pre>
+      <p>Every stage of the inference pipeline executes within the user's own machine.<br>
+      There is no cloud component, no telemetry endpoint, no update server.</p>
+    </div>
+  </div>
+
+  <!-- TECHNICAL CONTROLS -->
+  <div class="doc-section">
+    <h2>Technical Controls</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr><th>Layer</th><th>Control</th><th>Implementation</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><span class="layer-badge">L1</span></td>
+            <td><strong>Network binding</strong></td>
+            <td>Server binds to <code>127.0.0.1</code> only — OS-level enforcement, unreachable from LAN or internet</td>
+          </tr>
+          <tr>
+            <td><span class="layer-badge">L2</span></td>
+            <td><strong>Outbound firewall</strong></td>
+            <td>Process-scoped outbound block via <code>iptables</code> (Linux/WSL2) and Windows Firewall rules — even a fully compromised server process cannot reach the internet</td>
+          </tr>
+          <tr>
+            <td><span class="layer-badge">L3</span></td>
+            <td><strong>Dependency integrity</strong></td>
+            <td>SHA256 manifest of all installed Python packages verified at every startup — detects supply-chain tampering</td>
+          </tr>
+          <tr>
+            <td><span class="layer-badge">L4</span></td>
+            <td><strong>Weight integrity</strong></td>
+            <td>SHA256 hashes of model configuration files verified at every startup — detects model substitution or tampering</td>
+          </tr>
+          <tr>
+            <td><span class="layer-badge">L5</span></td>
+            <td><strong>Conversation storage</strong></td>
+            <td>RAM only — conversations are never written to disk, never logged, never persisted in any form</td>
+          </tr>
+          <tr>
+            <td><span class="layer-badge">L5a</span></td>
+            <td><strong>Session wipe</strong></td>
+            <td>Cryptographic overwrite (random bytes) of conversation buffer on session end, idle timeout (1 hour), server shutdown, or intrusion detection</td>
+          </tr>
+          <tr>
+            <td><span class="layer-badge">L6</span></td>
+            <td><strong>Intrusion detection</strong></td>
+            <td>Background watchdog monitors for debugging tools, traffic analyzers, and unexpected outbound connections — triggers immediate session wipe and process termination on confirmed violation</td>
+          </tr>
+          <tr>
+            <td><span class="layer-badge none">—</span></td>
+            <td><strong>Telemetry</strong></td>
+            <td><strong style="color:var(--green)">None.</strong> Zero analytics, zero error reporting, zero update checks, zero phone-home of any kind</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- CONVERSATION LIFECYCLE -->
+  <div class="doc-section">
+    <h2>Conversation Lifecycle</h2>
+    <ol class="lifecycle-list">
+      <li>
+        <span class="lc-num">1</span>
+        <div class="lc-body">
+          <strong>Creation</strong>
+          Client sends first message with a <code>session_id</code>. Server creates an in-memory <code>SecureConversationBuffer</code> with a per-session 256-bit random key.
+        </div>
+      </li>
+      <li>
+        <span class="lc-num">2</span>
+        <div class="lc-body">
+          <strong>Usage</strong>
+          Messages are appended to the RAM buffer. The buffer is accessed only by the inference thread handling that session.
+        </div>
+      </li>
+      <li>
+        <span class="lc-num">3</span>
+        <div class="lc-body">
+          <strong>Termination</strong> — any of the following triggers:
+          <ul>
+            <li>Client calls <code>POST /v1/session/end</code> with the session ID</li>
+            <li>Session idle for &gt;1 hour (automatic reaping)</li>
+            <li>Server process shuts down (graceful <code>SIGTERM</code> handler)</li>
+            <li>Intrusion watchdog triggers lockdown</li>
+          </ul>
+        </div>
+      </li>
+      <li>
+        <span class="lc-num">4</span>
+        <div class="lc-body">
+          <strong>Wipe procedure</strong>
+          <ul>
+            <li>Every message's content is overwritten with <code>secrets.token_hex()</code> random bytes</li>
+            <li>Every message's role field is overwritten with random bytes</li>
+            <li>The message list is cleared</li>
+            <li>The per-session key is zeroed</li>
+            <li>The buffer object is dereferenced for garbage collection</li>
+            <li>The wipe is logged as metadata only (session ID prefix + message count + reason)</li>
+          </ul>
+          <p style="margin-top:10px; font-size:13px; font-family:var(--mono); color:var(--text3);">No conversation content is ever written to the wipe log or any other log.</p>
+        </div>
+      </li>
+    </ol>
+  </div>
+
+  <!-- AUDIT ENDPOINT -->
+  <div class="doc-section">
+    <h2>Audit Endpoint</h2>
+    <p><code>GET /audit</code> returns metadata-only compliance information:</p>
+<pre class="json">{
+  "server": "kwyre-9b-spikeserve",
+  "timestamp": "2026-03-07T12:00:00Z",
+  "active_sessions": 1,
+  "security_controls": {
+    "network_binding": "127.0.0.1:8000 (localhost only)",
+    "weight_integrity": "enabled",
+    "conversation_storage": "RAM-only",
+    "session_wipe": "on_close + idle_timeout_1hr + shutdown + intrusion",
+    "intrusion_watchdog": { "running": true, "triggered": false },
+    "content_logging": "NEVER"
+  },
+  "note": "Metadata only. No conversation content is ever logged or persisted."
+}</pre>
+  </div>
+
+  <!-- INDEPENDENT VERIFICATION -->
+  <div class="doc-section">
+    <h2>Independent Verification</h2>
+    <p>Users and auditors can independently verify zero outbound network activity using standard OS tools — no vendor cooperation required:</p>
+    <div class="table-wrap">
+      <table class="ver-table">
+        <thead>
+          <tr><th>Platform</th><th>Command</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Windows</td>
+            <td><code>Resource Monitor &gt; Network tab — filter by python.exe</code></td>
+          </tr>
+          <tr>
+            <td>Windows (PowerShell)</td>
+            <td><code>Get-NetTCPConnection -OwningProcess (Get-Process python).Id</code></td>
+          </tr>
+          <tr>
+            <td>Linux / WSL2</td>
+            <td><code>ss -tp | grep python</code></td>
+          </tr>
+          <tr>
+            <td>Any platform</td>
+            <td>Wireshark capture on all interfaces — only <code>127.0.0.1</code> traffic visible</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- WHAT KWYRE DOES NOT DO -->
+  <div class="doc-section">
+    <h2>What Kwyre Does NOT Do</h2>
+    <ul class="bullet-list">
+      <li>Does NOT send queries to any API (OpenAI, Anthropic, Google, or otherwise)</li>
+      <li>Does NOT phone home for updates, analytics, or crash reports</li>
+      <li>Does NOT write conversation content to disk — no logs, no database, no temp files</li>
+      <li>Does NOT require an internet connection after initial model download</li>
+      <li>Does NOT transmit model weights, activations, or inference results off-device</li>
+      <li>Does NOT collect or store any user-identifiable information</li>
+    </ul>
+  </div>
+
+  <!-- REGULATORY ALIGNMENT -->
+  <div class="doc-section">
+    <h2>Regulatory Alignment</h2>
+    <p>This architecture is designed to satisfy requirements under:</p>
+    <div class="reg-grid">
+      <div class="reg-item">
+        <div class="reg-label">GDPR · Art. 25</div>
+        <div class="reg-desc"><strong>Data Protection by Design</strong> — personal data never leaves the controller's infrastructure</div>
+      </div>
+      <div class="reg-item">
+        <div class="reg-label">HIPAA</div>
+        <div class="reg-desc"><strong>Technical Safeguards</strong> — encryption at rest is moot when data is never at rest; access controls are OS-level process isolation</div>
+      </div>
+      <div class="reg-item">
+        <div class="reg-label">SOC 2 Type II</div>
+        <div class="reg-desc">Audit trail via <code>/audit</code> endpoint, access controls via API key authentication, data handling via RAM-only storage</div>
+      </div>
+      <div class="reg-item">
+        <div class="reg-label">ITAR / EAR</div>
+        <div class="reg-desc">No data export occurs because no data leaves the machine</div>
+      </div>
+      <div class="reg-item">
+        <div class="reg-label">Attorney-Client</div>
+        <div class="reg-desc">Conversations never traverse third-party infrastructure</div>
+      </div>
+      <div class="reg-item">
+        <div class="reg-label">Air-Gap Deployments</div>
+        <div class="reg-desc"><code>HF_HUB_OFFLINE=1</code> and <code>TRANSFORMERS_OFFLINE=1</code> hardcoded — no network access after initial setup</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACT -->
+  <div class="doc-section">
+    <h2>Contact</h2>
+    <div class="contact-block">
+      <p>For security architecture questions or compliance audits:</p>
+      <a href="mailto:security@kwyre.com">security@kwyre.com</a>
+    </div>
+  </div>
+
+  <footer class="doc-footer">
+    <div class="footer-brand">KWYRE</div>
+    <div class="footer-meta">Mint Rail LLC</div>
+    <div class="footer-tagline">All inference runs 100% locally. No data leaves your machine.</div>
+  </footer>
+
+</div>
+
+</body>
+</html>

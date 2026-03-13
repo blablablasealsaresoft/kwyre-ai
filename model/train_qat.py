@@ -1,5 +1,17 @@
 #!/usr/bin/env python3
-"""QAT fine-tuning: teach Qwen3.5-9B to tolerate spike-encoded activations.
+"""QAT fine-tuning: teach Qwen3.5-4B/9B to tolerate spike-encoded activations.
+
+Supports both Personal (4B) and Professional (9B) tiers. The 4B model
+benefits from QAT when running with SpikeServe on the main model
+(not just the draft model), enabling higher sparsity inference.
+
+Usage:
+    python model/train_qat.py --model_id Qwen/Qwen3.5-9B --output_dir ./qat_output_9b
+
+Training config (9B):
+    LoRA rank: 128 (alpha 256), targets: gate_proj, up_proj, down_proj
+    Spike hooks: 408 MLP layers, k-curriculum: 50.0 -> 3.0
+    Dataset: teknium/OpenHermes-2.5
 
 Loads model from local HF cache, trains with STE spike encoding hooks
 and a k-curriculum that gradually increases quantization aggressiveness.
@@ -39,18 +51,33 @@ SPIKE_SKIP = [
     "q_proj", "k_proj", "v_proj", "o_proj",
 ]
 
-LOCAL_MODEL = os.path.join(
-    os.path.expanduser("~"),
-    ".cache", "huggingface", "hub",
-    "models--Qwen--Qwen3.5-9B", "snapshots",
-    "c202236235762e1c871ad0ccb60c8ee5ba337b9a",
-)
+def _resolve_model_path(model_id: str) -> str:
+    """Resolve model path from dist/, HuggingFace cache, or use the ID directly."""
+    project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    name_map = {
+        "HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive": "kwyre-4b",
+        "Qwen/Qwen3.5-9B": "kwyre-9b",
+    }
+    short_name = name_map.get(model_id, "")
+    if short_name:
+        dist_path = os.path.join(project_root, "dist", f"{short_name}-nf4")
+        if os.path.isdir(dist_path):
+            return dist_path
+    cache_path = os.path.join(
+        os.path.expanduser("~"), ".cache", "huggingface", "hub",
+        f"models--{model_id.replace('/', '--')}", "snapshots",
+    )
+    if os.path.isdir(cache_path):
+        snap_dirs = [d for d in os.listdir(cache_path) if os.path.isdir(os.path.join(cache_path, d))]
+        if snap_dirs:
+            return os.path.join(cache_path, snap_dirs[0])
+    return model_id
 
 
 def parse_args():
     p = argparse.ArgumentParser(description="QLoRA + Spike QAT Training")
-    p.add_argument("--model_id", type=str, default=LOCAL_MODEL,
-                    help="Model path or HF id (default: local cache)")
+    p.add_argument("--model_id", type=str, default="Qwen/Qwen3.5-9B",
+                    help="Model ID or path. Supports both 4B (Personal) and 9B (Professional).")
     p.add_argument("--dataset", type=str, default="teknium/OpenHermes-2.5")
     p.add_argument("--max_samples", type=int, default=100_000)
     p.add_argument("--output_dir", type=str, default="./qat_output")
@@ -59,12 +86,12 @@ def parse_args():
     p.add_argument("--grad_accum", type=int, default=16)
     p.add_argument("--lr", type=float, default=2e-5)
     p.add_argument("--max_seq_len", type=int, default=2048)
-    p.add_argument("--lora_rank", type=int, default=64)
-    p.add_argument("--lora_alpha", type=int, default=128)
+    p.add_argument("--lora_rank", type=int, default=128)
+    p.add_argument("--lora_alpha", type=int, default=256)
     p.add_argument("--k_start", type=float, default=50.0)
-    p.add_argument("--k_end", type=float, default=5.0)
+    p.add_argument("--k_end", type=float, default=3.0)
     p.add_argument("--k_schedule", type=str, default="step", choices=["step", "linear"])
-    p.add_argument("--max_spike", type=int, default=31)
+    p.add_argument("--max_spike", type=int, default=15)
     p.add_argument("--layer_stride", type=int, default=1,
                     help="Only hook every Nth eligible MLP layer (1=all, 4=every 4th)")
     p.add_argument("--warmup_steps", type=int, default=500)
@@ -79,8 +106,11 @@ def parse_args():
 
 
 def load_model_and_tokenizer(args):
+    model_path = _resolve_model_path(args.model_id)
+    print(f"[QAT] Model path: {model_path}")
+
     tokenizer = AutoTokenizer.from_pretrained(
-        args.model_id, padding_side="right", trust_remote_code=True,
+        model_path, padding_side="right", trust_remote_code=True,
     )
     if tokenizer.pad_token is None:
         tokenizer.pad_token = tokenizer.eos_token
@@ -94,7 +124,7 @@ def load_model_and_tokenizer(args):
 
     print(f"Loading {args.model_id} with 4-bit NF4 quantization...")
     model = AutoModelForCausalLM.from_pretrained(
-        args.model_id,
+        model_path,
         trust_remote_code=True,
         quantization_config=quant_config,
         device_map="auto",
@@ -176,7 +206,7 @@ class SpikeKSchedulerCallback(TrainerCallback):
 
 def build_k_schedule(args, total_steps):
     if args.k_schedule == "step":
-        k_values = [50.0, 25.0, 12.0, 8.0, 5.0]
+        k_values = [50.0, 20.0, 10.0, 5.0, 3.0]
         n_phases = len(k_values)
         phase_len = max(total_steps // n_phases, 1)
         schedule = [(i * phase_len, kv) for i, kv in enumerate(k_values)]

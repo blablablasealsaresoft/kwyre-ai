@@ -1,0 +1,146 @@
+{
+  "name": "General Compliance Tasks",
+  "category": "legal",
+  "tasks": [
+    {
+      "id": "comp-001",
+      "prompt": "A multinational corporation headquartered in Delaware with EU operations receives a GDPR data subject access request (DSAR) from a former employee in Germany. The employee requests all personal data held about them, including internal performance reviews, emails mentioning them, and any data shared with third-party background check services. The company uses a cloud-based HRIS, has data stored across US and EU servers, and the employee's contract contained a standard data processing consent clause. Analyze the company's obligations under GDPR Articles 15, 17, and 20, including any exemptions that may apply, the timeline for response, and the specific format requirements for the response.",
+      "reference_answer": "Key points: (1) Under Article 15, the company must provide all personal data being processed, the purposes, categories of data, recipients, retention periods, and the right to lodge a complaint. (2) The 30-day response deadline with possible 60-day extension for complex requests. (3) Performance reviews likely contain personal data but may be partially exempt under recital 63 if they reveal trade secrets or IP. (4) Emails mentioning the employee are personal data but may require redaction of third-party personal data. (5) Data shared with background check services must be disclosed including the identity of the recipient. (6) Article 17 right to erasure applies post-employment but exemptions exist for legal obligation retention (tax records, employment law requirements). (7) Article 20 portability applies only to data provided by the data subject and processed by automated means with consent or contract basis. (8) The consent clause in the employment contract may not constitute valid GDPR consent due to the power imbalance in employment relationships (recital 43). (9) Cross-border transfer mechanisms (SCCs, adequacy decisions) must be in place for US-stored data. (10) Response must be in a commonly used electronic format if requested.",
+      "scoring_criteria": [
+        "Correctly identifies GDPR articles 15, 17, and 20 obligations",
+        "Addresses the 30-day response timeline",
+        "Discusses exemptions for performance reviews and trade secrets",
+        "Addresses third-party data redaction requirements",
+        "Notes the invalidity of employment consent under power imbalance",
+        "Mentions cross-border data transfer requirements"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "comp-002",
+      "prompt": "You are a compliance officer at a mid-size broker-dealer. An internal audit reveals that three registered representatives have been using personal Gmail accounts to communicate with clients about investment recommendations, account balances, and trade confirmations over the past 18 months. Draft an analysis of the FINRA rule violations, SEC recordkeeping implications, potential penalties, and an immediate remediation plan.",
+      "reference_answer": "Key points: (1) FINRA Rule 3110 — supervision failure; the firm failed to supervise off-channel communications. (2) FINRA Rule 4511 — books and records; business communications must be preserved for 3-6 years depending on type. (3) SEC Rule 17a-4 — electronic communications retention requirements. (4) SEC Rule 204-2 for investment advisers if applicable. (5) The firm faces potential FINRA enforcement action with fines ranging from $100K-$1M+ depending on scope. (6) Individual representatives face potential suspensions and fines. (7) Remediation plan should include: immediate cessation of personal email use, review and reconstruction of communications where possible, updated written supervisory procedures (WSPs), technology controls (email archiving, DLP), mandatory compliance training, self-reporting consideration to FINRA. (8) The firm should conduct a privileged investigation before deciding on self-reporting. (9) Reference to FINRA's 2021 enforcement sweep on off-channel communications resulting in $81M+ in combined fines.",
+      "scoring_criteria": [
+        "Identifies FINRA Rules 3110 and 4511",
+        "References SEC Rule 17a-4 recordkeeping",
+        "Discusses potential penalty ranges",
+        "Provides actionable remediation steps",
+        "Addresses self-reporting considerations",
+        "Mentions technology controls for prevention"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "comp-003",
+      "prompt": "A forensic accounting team is investigating a suspected revenue recognition fraud at a publicly traded manufacturing company. Preliminary analysis shows the company recognized $47M in Q4 revenue from 12 large orders where goods were shipped to a third-party warehouse rather than customer locations, with no evidence of customer acceptance. The CFO approved a 'bill-and-hold' accounting treatment for these transactions. Identify the specific ASC 606 criteria for bill-and-hold arrangements that appear to have been violated, the red flags a forensic accountant should look for, and the SEC enforcement implications.",
+      "reference_answer": "Key points: (1) ASC 606-10-55-83 requires all of the following for bill-and-hold: substantive reason for the arrangement, product identified separately as belonging to the customer, product currently ready for transfer, entity cannot use the product or direct it to another customer. (2) Red flags: third-party warehouse rather than customer-designated location suggests goods not identified as belonging to customer; no evidence of customer acceptance suggests arrangement may not be customer-initiated; Q4 concentration suggests channel stuffing; CFO override of normal revenue recognition process. (3) Additional forensic procedures: examine customer purchase orders for bill-and-hold language, verify warehouse receipts and insurance, check for side agreements or right-of-return, analyze whether customers were invoiced and aging of receivables, interview warehouse personnel, review board minutes for approval. (4) SEC implications: potential violations of Section 10(b) and Rule 10b-5 (securities fraud), Section 13(a) (reporting violations), Section 13(b)(2)(A) (books and records), SOX Section 302/906 (CEO/CFO certifications). (5) Reference to SEC enforcement actions: Channel stuffing cases, SEC v. Vitesse Semiconductor.",
+      "scoring_criteria": [
+        "Correctly cites ASC 606 bill-and-hold criteria",
+        "Identifies specific red flags in the scenario",
+        "Suggests appropriate forensic audit procedures",
+        "References SEC enforcement provisions (10b-5, 13a, 13b)",
+        "Discusses SOX certification implications",
+        "Demonstrates understanding of channel stuffing patterns"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "comp-004",
+      "prompt": "Draft a chain of custody procedure for digital evidence in a federal white-collar criminal investigation. The evidence consists of a corporate laptop seized from a suspect's office, three external USB drives found in the suspect's desk, and email server backup tapes from the company's IT department. Address acquisition, transportation, storage, and access logging requirements consistent with Federal Rules of Evidence Rule 901(b)(9) and DOJ CCIPS guidelines.",
+      "reference_answer": "Key points: (1) Acquisition: photograph evidence in situ before touching, use write-blockers for all media, create forensic bit-stream copies (not logical copies), compute and record MD5 and SHA-256 hashes of all original media, use evidence bags with tamper-evident seals, document serial numbers, make/model, and physical condition. (2) Transportation: evidence in anti-static bags, maintain continuous custody documentation, transport in locked container, avoid exposure to magnetic fields or extreme temperatures. (3) Storage: secure evidence room with access controls, temperature/humidity monitoring, separate original evidence from working copies, maintain evidence log with check-in/check-out records. (4) Access logging: every person who handles evidence documented with date/time, purpose, and duration; working copies used for analysis (never originals); all forensic tools and versions documented. (5) FRE 901(b)(9) requires showing that the process or system produces accurate results and was properly applied — chain of custody documentation supports this foundation. (6) DOJ CCIPS best practices: use validated forensic tools (EnCase, FTK, Autopsy), maintain forensic lab accreditation, document examiner qualifications. (7) Hash verification at every transfer point to prove no alteration.",
+      "scoring_criteria": [
+        "Addresses all four phases: acquisition, transport, storage, access",
+        "Specifies write-blocker and forensic imaging requirements",
+        "Includes hash verification (MD5 and SHA-256)",
+        "References FRE 901(b)(9) authentication requirements",
+        "Mentions DOJ CCIPS guidelines or equivalent",
+        "Includes access logging and tamper-evident controls"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "comp-005",
+      "prompt": "An insurance company is analyzing a proportional quota share reinsurance treaty with a 40% cession rate. The treaty covers a commercial property portfolio with $500M in gross written premium. During the treaty year, the portfolio experienced a $120M catastrophe loss from a hurricane, plus $80M in attritional losses. The ceding commission is 32% of ceded premium, and there is a 15% sliding scale commission that activates when the loss ratio falls below 55%. Calculate the net financial impact on both the cedent and the reinsurer, and analyze the key treaty provisions that affect the economics.",
+      "reference_answer": "Key points: (1) Ceded premium calculation: $500M × 40% = $200M ceded to reinsurer. (2) Cedent retained premium: $500M - $200M = $300M. (3) Ceding commission: $200M × 32% = $64M paid by reinsurer to cedent. (4) Ceded losses: ($120M + $80M) × 40% = $80M borne by reinsurer. (5) Retained losses: $200M × 60% = $120M retained by cedent. (6) Loss ratio on ceded business: $80M / $200M = 40%. (7) Since 40% < 55% threshold, sliding scale commission activates: additional 15% × $200M = $30M to cedent. (8) Reinsurer net: $200M premium - $64M commission - $30M sliding scale - $80M losses = $26M profit. (9) Cedent net: $300M retained premium + $64M commission + $30M sliding scale - $120M retained losses = $274M, effectively transferring catastrophe risk while maintaining profitability. (10) Key treaty provisions: follow-the-fortunes doctrine, reporting requirements, cut-through endorsements, commutation options, territory and class limitations.",
+      "scoring_criteria": [
+        "Correctly calculates ceded and retained premium",
+        "Correctly calculates ceded and retained losses",
+        "Applies the 32% ceding commission correctly",
+        "Determines sliding scale commission eligibility",
+        "Calculates net financial position for both parties",
+        "Identifies key treaty provisions affecting economics"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "comp-006",
+      "prompt": "You are preparing an expert witness report for a securities fraud case. The plaintiff alleges that a biotech company's CEO made materially misleading statements about the Phase III clinical trial results for their lead drug candidate, causing a 45% stock price decline when the true results were disclosed. The CEO stated in an earnings call that the trial showed 'statistically significant improvement in the primary endpoint' when internal documents show the p-value was 0.08 (above the pre-specified significance threshold of 0.05). Outline the key sections of the expert report, the economic analysis required, and the legal standards that apply under Dura Pharmaceuticals v. Broudo and Basic v. Levinson.",
+      "reference_answer": "Key points: (1) Report structure: qualifications, materials reviewed, methodology, analysis, opinions, limitations. (2) Under Basic v. Levinson — fraud-on-the-market doctrine: presumption of reliance if the stock trades in an efficient market, requiring market efficiency analysis (Cammer factors). (3) Under Dura Pharmaceuticals — loss causation: plaintiff must show the misstatement caused the loss, not just inflated the price at purchase; must demonstrate a corrective disclosure and resulting price decline. (4) Economic analysis: event study methodology to isolate the stock price impact of the corrective disclosure from market-wide and industry-specific factors; calculate abnormal returns; determine class period damages using price inflation model. (5) Materiality analysis: a reasonable investor would consider the difference between p=0.05 and p=0.08 significant for a biotech company where drug approval is the primary value driver. (6) The statement about 'statistically significant improvement' when p=0.08 is literally false — statistical significance at the 0.05 level requires p<0.05. (7) Scienter analysis: internal documents showing the CEO knew the true p-value supports strong inference of intent. (8) Damages methodology: per-share inflation calculation based on event study, multiplied by class period trading volume.",
+      "scoring_criteria": [
+        "Outlines proper expert report structure",
+        "Correctly explains Basic v. Levinson fraud-on-the-market doctrine",
+        "Correctly explains Dura Pharmaceuticals loss causation standard",
+        "Describes event study methodology for damages",
+        "Addresses materiality of p-value misrepresentation",
+        "Discusses scienter based on internal documents"
+      ],
+      "difficulty": "hard"
+    },
+    {
+      "id": "comp-007",
+      "prompt": "A bank's compliance department has flagged a series of wire transfers that may indicate money laundering. Over a 90-day period, a commercial real estate LLC received 23 incoming wire transfers from 8 different shell companies registered in Delaware, Wyoming, and Nevada, totaling $4.7M. Each transfer was structured just below $10,000 reporting thresholds (ranging from $8,200 to $9,800). The LLC then made large payments to a construction company that has no online presence and was incorporated 3 months ago. Analyze the AML red flags, the BSA/AML reporting obligations, and recommend next steps.",
+      "reference_answer": "Key points: (1) Red flags: structuring (smurfing) — transactions deliberately below $10K CTR threshold (31 USC § 5324); shell company layering — multiple entities with no apparent business purpose; rapid movement of funds through newly formed entity; construction company with no online presence and recent incorporation suggests possible front company; Delaware/Wyoming/Nevada — states with minimal beneficial ownership disclosure. (2) BSA reporting obligations: SAR filing required under 31 CFR 1020.320 — suspicious activity involving $5,000+ from a single customer or $25,000+ regardless; this clearly exceeds both thresholds. CTRs should have been filed for any individual transactions exceeding $10,000 when aggregated for the same customer in a business day. (3) Enhanced Due Diligence required under CDD Rule (31 CFR 1010.230) — beneficial ownership of the LLC and all sending entities must be identified. (4) FinCEN reporting: file SAR within 30 days of detection, preserve all records for 5 years. (5) Next steps: file SAR immediately, perform enhanced due diligence on all parties, review all accounts for additional suspicious activity, consider voluntary self-disclosure if prior obligations were missed, engage outside AML counsel. (6) Do not tip off the customer about the investigation (31 USC § 5318(g)(2)).",
+      "scoring_criteria": [
+        "Identifies structuring/smurfing as primary red flag",
+        "References BSA/AML reporting obligations with specific regulations",
+        "Explains SAR filing requirements and timeline",
+        "Addresses beneficial ownership and CDD requirements",
+        "Warns against tipping off the customer",
+        "Recommends specific next steps including SAR filing"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "comp-008",
+      "prompt": "A publicly traded technology company's board of directors is evaluating whether its current corporate governance practices comply with NYSE listing standards and Dodd-Frank Act requirements. The board has 9 members: the CEO (who also serves as board chair), the CFO, the General Counsel, and 6 outside directors. One outside director is the CEO's former college roommate who owns a consulting firm that received $180,000 in fees from the company last year. Analyze the independence issues, committee composition requirements, and recommended governance reforms.",
+      "reference_answer": "Key points: (1) NYSE Section 303A requires majority independent directors — currently 6/9 outside directors, but independence must be assessed. (2) The CEO's former roommate likely fails independence under NYSE 303A.02(b) — director independence is compromised if the director or an immediate family member received >$120,000 in direct compensation from the company in any 12-month period within the last 3 years. The $180,000 consulting fee exceeds this threshold. (3) With the roommate failing independence: 5 independent out of 9 = 55.6%, which technically meets the majority requirement but is thin. (4) CEO serving as board chair — NYSE recommends but does not require separation; however, if combined, a lead independent director should be designated per corporate governance best practices. (5) Audit committee must be 100% independent (NYSE 303A.07, SOX Section 301); CFO and General Counsel cannot serve. (6) Compensation committee must be 100% independent (NYSE 303A.05, Dodd-Frank Section 952). (7) Nominating/governance committee must be 100% independent (NYSE 303A.04). (8) Recommended reforms: CEO/chair separation or lead independent director appointment, terminate or reduce consulting arrangement with the roommate director, review all director relationships for undisclosed conflicts, implement annual board self-assessment, consider board refreshment/skills matrix.",
+      "scoring_criteria": [
+        "Identifies the $120,000 independence threshold under NYSE rules",
+        "Correctly assesses the roommate director's independence failure",
+        "Addresses CEO/chair duality governance concerns",
+        "Lists committee independence requirements (audit, comp, nom/gov)",
+        "References Dodd-Frank and SOX requirements",
+        "Provides actionable governance reform recommendations"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "comp-009",
+      "prompt": "An attorney at a large law firm discovers that a junior associate inadvertently uploaded 47 pages of attorney-client privileged documents to a shared cloud drive that was accessible to opposing counsel in an active litigation matter. The documents include litigation strategy memos, witness interview notes, and a draft settlement authority memorandum. The upload occurred 72 hours ago. Analyze the privilege implications, the applicable ethical rules, case law on inadvertent disclosure, and the immediate steps the attorney should take.",
+      "reference_answer": "Key points: (1) Federal Rule of Evidence 502(b) — inadvertent disclosure does not waive privilege if: the disclosure was inadvertent, the holder took reasonable steps to prevent disclosure, and the holder promptly took reasonable steps to rectify the error. (2) FRE 502(b) analysis: 72-hour delay may be defensible if discovery was prompt after the disclosure was identified, but each day increases risk. (3) Immediate steps: send a clawback letter to opposing counsel citing FRE 502(b), demand return or destruction of all copies, notify the client immediately, preserve all evidence of the inadvertent nature of the disclosure, document the circumstances and timeline. (4) Opposing counsel's obligations under Model Rule 4.4(b): upon receipt of inadvertently sent privileged materials, lawyer must promptly notify sender; jurisdiction-specific rules may require additional steps (some jurisdictions require return without review). (5) Subject matter waiver risk: under FRE 502(a), intentional disclosure waives privilege for same subject matter — but 502(b) protects against this for inadvertent disclosures. (6) Ethics obligations: Model Rule 1.6 (duty of confidentiality), Model Rule 5.1/5.3 (supervisory responsibility for associate's error), potential duty to inform the client under Rule 1.4. (7) Remediation: implement DLP controls, review cloud drive permissions, provide associate training, consider stipulated protective order covering inadvertent disclosures.",
+      "scoring_criteria": [
+        "Correctly applies FRE 502(b) inadvertent disclosure test",
+        "Addresses opposing counsel's obligations under Model Rule 4.4(b)",
+        "Recommends immediate clawback letter and client notification",
+        "Discusses subject matter waiver risk under FRE 502(a)",
+        "Identifies supervisory responsibility under Rules 5.1/5.3",
+        "Provides practical remediation steps"
+      ],
+      "difficulty": "medium"
+    },
+    {
+      "id": "comp-010",
+      "prompt": "A defense contractor with a Secret-level facility clearance is considering deploying an AI tool for analyzing unclassified but controlled technical documents (CUI/FOUO). The documents relate to a weapons system subcomponent and contain technical specifications that, while individually unclassified, could reveal classified capabilities when aggregated. Analyze the ITAR, NIST SP 800-171, and DFARS 252.204-7012 implications of using a locally-deployed AI system versus a cloud-based AI service for this analysis. Include the concept of compilation classification.",
+      "reference_answer": "Key points: (1) ITAR (22 CFR 120-130): technical data related to defense articles is export-controlled; using a cloud AI service could constitute an 'export' if data is processed on foreign servers or accessible to foreign nationals (including cloud provider employees). (2) NIST SP 800-171: CUI must be protected per 14 families of security requirements; cloud services must be FedRAMP Moderate (minimum) for CUI processing; a locally-deployed system on an authorized network satisfies requirements more directly. (3) DFARS 252.204-7012: requires 'adequate security' for covered defense information on contractor systems; mandates NIST SP 800-171 compliance; requires 72-hour cyber incident reporting to DoD. (4) Compilation classification (NISPOM 4-210): individually unclassified items that reveal classified information when aggregated must be protected at the classified level; AI analysis that draws inferences across multiple CUI documents could generate derived classified information. (5) Cloud AI risks: data residency uncertainty, multi-tenant environment, foreign access risk, potential for AI model to retain training artifacts. (6) Local AI advantages: data never leaves the accredited facility, no foreign access risk, no third-party processing, supports NIST 800-171 AC and MP control families directly. (7) Recommendation: locally-deployed AI is strongly preferred; if cloud AI is used, it must be in a US-sovereign cloud (GovCloud/Azure Government/GCC High) with appropriate security controls.",
+      "scoring_criteria": [
+        "Explains ITAR export control implications for cloud AI",
+        "References NIST SP 800-171 and DFARS 252.204-7012",
+        "Addresses compilation classification concept",
+        "Compares security posture of local vs cloud deployment",
+        "Identifies specific risks of cloud AI for defense data",
+        "Provides a clear recommendation with justification"
+      ],
+      "difficulty": "hard"
+    }
+  ]
+}

@@ -1,601 +1,230 @@
-# Kwyre AI — Full Build Plan
+# Kwyre AI — Build Plan
 > Air-gapped compliance inference. Local. Private. Uncompromisable.
 
 ---
 
-## CURRENT STATE
-- Model: Qwen3.5-9B + SpikeServe activation encoding
-- QAT training run in progress (stopping now)
-- 6-layer security stack coded
-- Target market: forensic investigators, law firms, financial analysts, cleared contractors
+## COMPLETED PHASES (v0.1 — v1.1)
+
+All original build phases have been completed and shipped.
+
+### Phase 0 — Training + Checkpoint (DONE)
+- QAT training with Spike STE hooks on Qwen3.5-9B
+- k-curriculum annealing (k=50 to 5) over 5 phases
+- LoRA rank 64, alpha 128, targeting MLP layers
+- Checkpoints saved, LoRA adapters merged for deployment
+
+### Phase 1 — Repository Structure (DONE)
+- Full project structure with server/, model/, security/, chat/, installer/, finetune/, benchmarks/, docs/, tests/
+- Git repo initialized, .gitignore for weights, manifests, .env, build artifacts
+
+### Phase 2 — Security Stack (DONE)
+- 6-layer defense: L1 localhost bind, L2 process firewall, L3 dependency integrity, L4 weight integrity, L5 RAM-only sessions + crypto wipe, L6 intrusion watchdog
+- Shared security infrastructure in `server/security_core.py`
+- All backends (GPU, CPU, MLX) use the same security stack
+- 110 security tests across 3 test suites, all passing
+
+### Phase 3 — Training + Evaluation (DONE)
+- Qwen3.5-4B (personal tier) and Qwen3.5-9B (professional tier)
+- Pre-quantized NF4 models in dist/ (~2.5 GB main, ~0.8 GB draft)
+- SpikeServe on draft model (84 MLP layers, measure-only mode)
+- Speculative decoding with Qwen3.5-0.8B draft model
+
+### Phase 4 — Docker + Installers (DONE)
+- Dockerfile (CUDA 12.4.1, non-root kwyre user, entrypoint with model download)
+- docker-compose.yml (GPU reservation, localhost-only port, HF cache volume)
+- Windows installer (CLI + tkinter GUI wizard)
+- Linux installer (systemd + iptables)
+- macOS installer (launchd + PF firewall)
+
+### Phase 5 — Compliance Documentation (DONE)
+- DATA_RESIDENCY.md, SECURITY_ARCHITECTURE.md
+- SOC2_DEPLOYMENT_GUIDE.md, ENTERPRISE_AUDIT.md
+- COMPLIANCE_LETTER.md (GDPR, HIPAA, SOC 2, FINRA, ITAR, FRE, ABA)
+- VERIFICATION_GUIDE.md, DEPLOYMENT_CHECKLIST.md, INCIDENT_RESPONSE.md
+- Benchmark suite vs GPT-4o (3 datasets, 30 tasks, LLM-as-judge scoring)
+
+### Phase 6 — Payments + Distribution (DONE)
+- Monero (XMR) payment integration (no email required)
+- Ed25519 offline license keys with hardware-bound machine fingerprinting
+- pay.html with CC/XMR payment flow
+- kwyre.com live on Cloudflare Pages
+
+### Phase 7 — Production Hardening (DONE — v1.0 + v1.1)
+- Nuitka build pipeline (compiled binary, source protection)
+- Code signing (Ed25519-signed MANIFEST.sig.json)
+- Air-gap safe update mechanism (.kwyre-update packages)
+- Flash Attention 2 (auto-detected, +20-40% throughput)
+- TF32 matmul + cuDNN benchmark
+- torch.inference_mode() for reduced overhead
+- Session reaper race condition fixed
+- Stream error surfacing (finish_reason: "error")
+- Memory leak prevention (rate_tracker cleanup, intrusion_log cap)
+- Thread-safe SpikeServe stats
+- Default system prompt (professional legal/forensic persona)
+- repetition_penalty + top_k parameter support
+- Markdown rendering, copy-to-clipboard, conversation export, dark/light mode
+- Chat UI consolidated into main.html (chat.html removed)
+- Integration test suite (HTTP endpoints, SSE, KV cache, sessions)
 
 ---
 
-## PHASE 0 — STOP TRAINING + SAVE CHECKPOINT
+## CURRENT STATE (v1.2)
 
-### Step 0.1 — Kill the training process cleanly
-```bash
-# In the WSL2 terminal running train_qat.py
-# Press Ctrl+C once — let it save the current checkpoint gracefully
-# Do NOT force kill or the checkpoint will be corrupt
+```
+Backends:   serve_local_4bit.py (GPU), serve_vllm.py (vLLM), serve_cpu.py (CPU), serve_mlx.py (MLX)
+Model:      Qwen3.5-4B main + Qwen3.5-0.8B draft (pre-quantized NF4 in dist/)
+VRAM:       3.9 GB total (both models + KV cache)
+Speed:      6.7 tok/s warmed up (RTX 4090 Laptop), target 7-14 tok/s
+RAG:        PDF/DOCX/TXT upload, FAISS vector search, RAM-only, crypto-wipe
+Security:   6 layers active, 110 tests passing
+Frontend:   main.html — markdown, copy, export, dark/light, upload docs, session mgmt
+Enterprise: SIEM export (JSONL + CEF), Helm chart, extended .env config
+Deployed:   GitHub (main branch), Cloudflare Pages (kwyre.com)
+Tests:      110 security + integration suite
 ```
 
-### Step 0.2 — Verify checkpoint was saved
-```bash
-ls -la ~/qat_output/
-ls -la ~/qat_output/checkpoint-*/
-# You should see checkpoint-XXX folders with pytorch_model files
-# Note the highest checkpoint number — that's your resume point
-```
+### Four Products
 
-### Step 0.3 — Free the VRAM
-```bash
-# Restart WSL2 from Windows PowerShell to release all orphaned VRAM
-wsl --shutdown
-# Then reopen WSL2 and verify
-nvidia-smi
-# Should show ~0 VRAM used
-```
+| Product | Identity | Key Features | What It Doesn't Have |
+|---------|----------|-------------|---------------------|
+| **Kwyre Personal** | Speed king | Flash Attention, speculative decoding, SpikeServe, KV cache, RAG, tools | QAT domain training |
+| **Kwyre Professional** | Domain specialist | Everything Personal has + QAT-trained legal/financial/forensic adapters + multi-user RBAC | — |
+| **Kwyre Air** | Lightweight portable | llama.cpp CPU inference, streaming, tools (opt-in), minimal deps | RAG, SpikeServe, KV cache, multi-user (too heavy) |
+| **Kwyre (Apple Silicon)** | Native Mac | MLX Metal acceleration, streaming, tools (opt-in) | RAG, SpikeServe, KV cache, multi-user (not needed for Mac) |
 
-### Step 0.4 — Record what you have
-```bash
-# Check what sparsity and loss the partial run achieved
-cat ~/qat_output/trainer_state.json | python -c "
-import json, sys
-state = json.load(sys.stdin)
-print('Steps completed:', state.get('global_step'))
-print('Best loss:', state.get('best_metric'))
-print('Log history (last 5):')
-for entry in state.get('log_history', [])[-5:]:
-    print(' ', entry)
-"
-```
+All products share: 6-layer security, OpenAI API, SSE streaming, crypto session wipe, system prompt, repetition_penalty, top_k.
 
 ---
 
-## PHASE 1 — REPOSITORY STRUCTURE
+## PHASE 8 — GROWTH + SCALE (NEXT)
 
-### Step 1.1 — Create clean project structure
+### 8.1 — First Customer Acquisition
+```
+1. Use Kwyre on an APOLLO CyberSentinel investigation
+   - Document the task, the data sensitivity, the output quality
+   - This becomes the first case study
+
+2. r/netsec technical writeup
+   - Spike QAT + privacy architecture deep dive
+   - Title: "I built a local LLM with hardware-level isolation for
+            air-gapped security work. Here's the architecture."
+
+3. OSINT/forensics communities (Trace Labs, DFIR Discord)
+   - Lead with the investigator use case
+
+4. Direct outreach to 5 solo forensic accountants on LinkedIn
+   - "Do you use AI tools for case analysis?"
+
+5. Do NOT launch on ProductHunt until 10 happy users.
+```
+
+### 8.2 — Domain Fine-Tuning (Legal/Forensic Specialization)
+```
+Use the existing finetune/ pipeline to train domain adapters:
+
+1. Legal adapter — NDA analysis, privilege review, contract extraction
+   - Use finetune/templates.py legal templates (12 scenarios)
+   - Target: beat GPT-4o on contract clause extraction
+
+2. Forensic adapter — chain of custody, evidence analysis, expert reports
+   - Use finetune/templates.py forensic templates (12 scenarios)
+   - Target: beat GPT-4o on financial fraud pattern detection
+
+3. Financial adapter — SEC filings, BSA/AML, forensic accounting
+   - Use finetune/templates.py financial templates (12 scenarios)
+   - Target: beat GPT-4o on regulatory citation accuracy
+
+Run benchmarks/benchmark.py after each adapter to track quality.
+```
+
+### 8.3 — RAG / Document Ingestion (DONE)
+- `server/rag.py` — `DocumentParser` (PDF/DOCX/TXT), `SecureRAGStore` (FAISS, RAM-only, crypto-wipe), `encode_texts` (sentence-transformers on CPU)
+- `POST /v1/documents/upload` — multipart file upload, auto-chunking, embedding, session-bound
+- RAG context injection in `_handle_chat_completions` alongside tool data
+- Lifecycle wiring: wipe on session end, shutdown, intrusion
+- Frontend: "Upload Docs" button in chat toolbar
+
+### 8.4 — Performance (DONE)
+- `server/serve_vllm.py` — vLLM backend with continuous batching, PagedAttention, speculative decoding
+- Shared security stack via `security_core.py`
+- SSE streaming, all standard endpoints
+- Configured via `KWYRE_BACKEND=vllm`, `KWYRE_VLLM_GPU_MEMORY`, `KWYRE_VLLM_MAX_MODEL_LEN`
+
+### 8.5 — Enterprise (DONE)
+- `audit.py` extended with `export_jsonl()` (JSON Lines) and `export_cef()` (CEF for Splunk/QRadar)
+- `deploy/helm/kwyre/` — full Helm chart (Deployment, Service, Secret, PVC) with GPU scheduling and health probes
+- `.env.example` expanded to 110+ lines covering all 30+ environment variables
+
+---
+
+## PROJECT STRUCTURE (current)
+
 ```
 kwyre/
-├── model/
-│   ├── spike_qat.py              # (existing — your STE training hooks)
-│   ├── spike_serve.py            # (existing — inference hooks)
-│   └── train_qat.py              # (existing — QAT training pipeline)
 ├── server/
-│   ├── serve_local_4bit.py       # (new full version with all 6 security layers)
-│   └── tools.py                  # (existing — tool routing)
+│   ├── serve_local_4bit.py    # GPU inference (Flash Attn, speculative, KV cache, RAG, SSE)
+│   ├── serve_vllm.py          # vLLM backend (continuous batching, PagedAttention)
+│   ├── serve_cpu.py           # CPU inference via llama.cpp (Kwyre Air)
+│   ├── serve_mlx.py           # Apple Silicon inference via MLX
+│   ├── security_core.py       # Shared security infrastructure (all 6 layers)
+│   ├── rag.py                 # RAG document ingestion (FAISS + embeddings)
+│   ├── users.py               # Multi-user management (Fernet-encrypted)
+│   ├── audit.py               # Per-user audit logging + SIEM export (JSONL, CEF)
+│   └── tools.py               # External API tool router
+├── model/
+│   ├── spike_serve.py         # SpikeServe activation encoding hooks
+│   ├── spike_qat.py           # QAT training hooks (STE, k-curriculum)
+│   ├── train_qat.py           # QAT training pipeline
+│   ├── quantize_nf4.py        # NF4 pre-quantization
+│   ├── quantize_awq.py        # AWQ quantization
+│   ├── convert_gguf.py        # HuggingFace → GGUF
+│   ├── convert_mlx.py         # HuggingFace → MLX
+│   └── merge_and_export.py    # LoRA merge + export
 ├── security/
-│   ├── setup_isolation.sh        # (new — Layer 2 network isolation)
-│   └── verify_deps.py            # (new — Layer 3 dependency integrity)
+│   ├── verify_deps.py         # Layer 3 — dependency integrity
+│   ├── license.py             # Ed25519 license + hardware fingerprint
+│   ├── codesign.py            # Ed25519 release signing
+│   ├── updater.py             # Air-gap safe update mechanism
+│   └── setup_isolation.sh     # Layer 2 network isolation
 ├── chat/
-│   └── chat.html                 # (existing — frontend)
+│   ├── main.html              # Product page + chat UI (all features)
+│   ├── landing.html           # Marketing landing page
+│   ├── index.html             # Entry / splash page
+│   └── pay.html               # Payment + license download
 ├── installer/
-│   ├── install_windows.ps1       # (todo — Phase 4)
-│   └── install_linux.sh          # (todo — Phase 4)
-├── docs/
-│   ├── DATA_RESIDENCY.md         # (todo — Phase 3)
-│   └── SECURITY_ARCHITECTURE.md  # (todo — Phase 3)
-├── requirements.in               # (todo — unpinned deps)
-├── requirements.txt              # (todo — pinned with hashes)
-├── docker-compose.yml            # (todo — Phase 4)
-└── README.md                     # (todo — Phase 5)
-```
-
-### Step 1.2 — Initialize git repo
-```bash
-cd ~/kwyre
-git init
-echo "*.safetensors" >> .gitignore
-echo "*.bin" >> .gitignore
-echo "qat_output/" >> .gitignore
-echo "__pycache__/" >> .gitignore
-echo ".env" >> .gitignore
-echo "kwyre_dep_manifest.json" >> .gitignore  # generated per-machine
-git add .
-git commit -m "initial: kwyre base structure"
+│   ├── install_windows.ps1    # Windows CLI installer
+│   ├── install_windows_gui.py # Windows GUI installer (tkinter)
+│   ├── install_linux.sh       # Linux installer (systemd + iptables)
+│   └── install_macos.sh       # macOS installer (launchd + PF)
+├── finetune/                  # Domain-specific fine-tuning pipeline
+├── benchmarks/                # Benchmark suite vs GPT-4o (3 datasets, 30 tasks)
+├── docs/                      # Compliance documentation package
+├── tests/                     # 110 security tests + integration suite
+├── deploy/
+│   └── helm/kwyre/            # Kubernetes Helm chart (GPU, probes, PVC, secrets)
+├── dist/                      # Pre-quantized model weights
+│   ├── kwyre-4b-nf4/          # Main model (~2.5 GB)
+│   └── kwyre-draft-nf4/       # Draft model (~0.8 GB)
+├── build.py                   # Nuitka build + installer pipeline
+├── Dockerfile                 # CUDA 12.4.1 runtime container
+├── docker-compose.yml         # One-command deployment
+└── .env.example               # Comprehensive config (30+ variables)
 ```
 
 ---
 
-## PHASE 2 — SECURITY STACK (all 6 layers)
-
-### Step 2.1 — Deploy the full server (Layers 1, 4, 5, 6)
-```bash
-# Copy serve_local_4bit_full.py into your server directory
-cp serve_local_4bit_full.py kwyre/server/serve_local_4bit.py
-
-# Install psutil (required for Layer 6 watchdog)
-pip install psutil --break-system-packages
-```
-
-### Step 2.2 — Generate weight integrity hashes (Layer 4)
-```bash
-# Run ONCE on your clean model install
-# Generates SHA256 hashes for config files
-python -c "
-import sys
-sys.path.insert(0, './server')
-from serve_local_4bit import generate_weight_hashes
-import json
-
-model_path = '/root/.cache/huggingface/hub/models--Qwen--Qwen3.5-9B/snapshots/c202236235762e1c871ad0ccb60c8ee5ba337b9a'
-hashes = generate_weight_hashes(model_path)
-print(json.dumps(hashes, indent=2))
-"
-# Copy the output into KNOWN_WEIGHT_HASHES dict in serve_local_4bit.py
-```
-
-### Step 2.3 — Install Layer 2 (network isolation)
-```bash
-# WSL2 Linux side
-chmod +x kwyre/security/setup_isolation.sh
-sudo kwyre/security/setup_isolation.sh install
-
-# Windows Firewall side (print PowerShell commands)
-sudo kwyre/security/setup_isolation.sh windows
-# Then run those commands in elevated PowerShell on Windows
-```
-
-### Step 2.4 — Generate dependency manifest (Layer 3)
-```bash
-# Run ONCE on clean install — generates hash manifest
-python kwyre/security/verify_deps.py generate
-# Commit kwyre_dep_manifest.json to repo
-```
-
-### Step 2.5 — Add Layer 3 to server startup
-```python
-# Add these two lines to serve_local_4bit.py startup section
-# (before model loading, after integrity check)
-from verify_deps import startup_check
-startup_check(abort_on_failure=True)
-```
-
-### Step 2.6 — Test all security layers
-```bash
-# Start server
-python kwyre/server/serve_local_4bit.py
-
-# Verify health endpoint shows all layers active
-curl http://127.0.0.1:8000/health | python -m json.tool
-# Should show:
-# - bind_address: 127.0.0.1:8000
-# - weight_integrity: configured
-# - conversation_storage: RAM-only
-# - watchdog: running: true
-
-# Verify audit endpoint
-curl -H "Authorization: Bearer sk-kwyre-dev-local" \
-     http://127.0.0.1:8000/audit | python -m json.tool
-
-# Verify server is NOT reachable from network
-# From a different machine or WSL2 instance:
-curl http://0.0.0.0:8000/health  # Should fail/refuse connection
-```
-
----
-
-## PHASE 3 — TRAINING (proper run)
-
-### Step 3.1 — Fix the k-curriculum for your actual step count
-```python
-# In train_qat.py, update build_k_schedule() for smaller runs
-# The original schedule was designed for 30K steps
-# For ~3K steps (50K samples, 1 epoch):
-
-def build_k_schedule(args, total_steps):
-    if args.k_schedule == "step":
-        n_phases = 5
-        phase_len = max(total_steps // n_phases, 1)
-        k_values = [50.0, 25.0, 12.0, 8.0, 5.0]
-        schedule = [(i * phase_len, kv) for i, kv in enumerate(k_values)]
-        return KCurriculumScheduler(
-            mode="step", k_schedule=schedule,
-            total_steps=total_steps, start_k=args.k_start, end_k=args.k_end,
-        )
-    return KCurriculumScheduler(
-        mode="linear", total_steps=total_steps,
-        warmup_steps=args.warmup_steps, start_k=args.k_start, end_k=args.k_end,
-    )
-```
-
-### Step 3.2 — Run proper training (optimized for 16GB VRAM)
-```bash
-python kwyre/model/train_qat.py \
-  --dataset teknium/OpenHermes-2.5 \
-  --max_samples 50000 \
-  --num_epochs 1 \
-  --batch_size 1 \
-  --grad_accum 16 \
-  --lora_rank 64 \
-  --lora_alpha 128 \
-  --max_seq_len 2048 \
-  --layer_stride 2 \
-  --k_start 50.0 \
-  --k_end 5.0 \
-  --k_schedule step \
-  --lr 2e-5 \
-  --output_dir ./qat_output_v1 \
-  --save_steps 500 \
-  --eval_steps 250 \
-  --logging_steps 25
-# Estimated: ~3,125 steps at ~44s/it = ~38 hours
-# Monitor: watch -n 300 nvidia-smi
-```
-
-### Step 3.3 — Evaluate after training
-```bash
-# Check final sparsity and loss
-cat ./qat_output_v1/trainer_state.json | python -c "
-import json, sys
-state = json.load(sys.stdin)
-print('Final step:', state['global_step'])
-print('Best eval loss:', state['best_metric'])
-print('Final log entry:', state['log_history'][-1])
-"
-
-# Load the final checkpoint and check sparsity via health endpoint
-# Update serve_local_4bit.py MODEL_ID to point at ./qat_output_v1/final
-# Restart server and check:
-curl http://127.0.0.1:8000/health
-# spike_analysis.projected_sparsity_pct should be meaningfully higher
-# than the base model — target is 40%+
-```
-
-### Step 3.4 — Merge LoRA adapters for deployment
-```bash
-python -c "
-from peft import PeftModel
-from transformers import AutoModelForCausalLM, AutoTokenizer
-import torch
-
-base_model_id = 'Qwen/Qwen3.5-9B'
-lora_path = './qat_output_v1/final'
-output_path = './kwyre-9b-v1-merged'
-
-print('Loading base model...')
-model = AutoModelForCausalLM.from_pretrained(
-    base_model_id, torch_dtype=torch.bfloat16, device_map='cpu'
-)
-tokenizer = AutoTokenizer.from_pretrained(base_model_id)
-
-print('Loading LoRA adapters...')
-model = PeftModel.from_pretrained(model, lora_path)
-
-print('Merging...')
-model = model.merge_and_unload()
-
-print(f'Saving merged model to {output_path}')
-model.save_pretrained(output_path)
-tokenizer.save_pretrained(output_path)
-print('Done.')
-"
-```
-
----
-
-## PHASE 4 — INSTALLER + DOCKER
-
-### Step 4.1 — Create docker-compose.yml
-```yaml
-# kwyre/docker-compose.yml
-version: '3.8'
-
-services:
-  kwyre:
-    build: .
-    container_name: kwyre-inference
-    runtime: nvidia
-    environment:
-      - NVIDIA_VISIBLE_DEVICES=0
-      - KWYRE_API_KEYS=${KWYRE_API_KEYS:-sk-kwyre-dev-local:admin}
-    ports:
-      - "127.0.0.1:8000:8000"   # Localhost only — never 0.0.0.0
-    volumes:
-      - ${HF_CACHE:-~/.cache/huggingface}:/root/.cache/huggingface:ro  # Read-only
-      - kwyre_logs:/var/log/kwyre  # Metadata logs only
-    restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://127.0.0.1:8000/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-
-volumes:
-  kwyre_logs:
-```
-
-### Step 4.2 — Create Dockerfile
-```dockerfile
-# kwyre/Dockerfile
-FROM nvidia/cuda:12.1-cudnn8-runtime-ubuntu22.04
-
-RUN apt-get update && apt-get install -y \
-    python3.11 python3-pip curl git \
-    && rm -rf /var/lib/apt/lists/*
-
-WORKDIR /workspace
-
-# Install deps with hash verification
-COPY requirements.txt .
-RUN pip install --require-hashes -r requirements.txt
-
-# Copy server code
-COPY server/ ./
-COPY security/verify_deps.py ./
-COPY model/spike_serve.py ./
-
-# No model weights in image — mounted from host at runtime
-# This keeps the image small and weights under user control
-
-EXPOSE 8000
-CMD ["python", "serve_local_4bit.py"]
-```
-
-### Step 4.3 — Create Windows installer script
-```powershell
-# kwyre/installer/install_windows.ps1
-# Run in elevated PowerShell
-
-param(
-    [string]$InstallDir = "$env:USERPROFILE\kwyre",
-    [string]$ModelDir = "$env:USERPROFILE\.cache\huggingface"
-)
-
-Write-Host "=== Kwyre AI Installer ===" -ForegroundColor Cyan
-Write-Host "Install directory: $InstallDir"
-
-# Check NVIDIA GPU
-$gpu = Get-WmiObject Win32_VideoController | Where-Object { $_.Name -like "*NVIDIA*" }
-if (-not $gpu) {
-    Write-Error "No NVIDIA GPU detected. Kwyre requires CUDA-capable GPU."
-    exit 1
-}
-Write-Host "GPU detected: $($gpu.Name)" -ForegroundColor Green
-
-# Check VRAM (need at least 8GB)
-# Create install directory
-New-Item -ItemType Directory -Force -Path $InstallDir | Out-Null
-New-Item -ItemType Directory -Force -Path $ModelDir | Out-Null
-
-# Clone repo (or copy files)
-# Download model weights via huggingface-cli
-# Install Python deps
-# Apply Windows Firewall rules
-# Create desktop shortcut
-
-Write-Host "Installing Windows Firewall isolation rules..." -ForegroundColor Yellow
-$pythonPath = "$InstallDir\venv\Scripts\python.exe"
-Remove-NetFirewallRule -DisplayName "Kwyre-*" -ErrorAction SilentlyContinue
-New-NetFirewallRule -DisplayName "Kwyre-BlockOutbound" -Direction Outbound `
-    -Action Block -Program $pythonPath -Profile Any
-New-NetFirewallRule -DisplayName "Kwyre-AllowLocalhost" -Direction Outbound `
-    -Action Allow -Program $pythonPath -RemoteAddress "127.0.0.1" -Profile Any
-Write-Host "Firewall rules installed." -ForegroundColor Green
-
-Write-Host "Installation complete." -ForegroundColor Green
-Write-Host "Launch Kwyre: $InstallDir\start_kwyre.bat"
-```
-
----
-
-## PHASE 5 — COMPLIANCE DOCUMENTATION
-
-### Step 5.1 — Write DATA_RESIDENCY.md
-```markdown
-# Kwyre Data Residency & Privacy Architecture
-
-## Summary
-All inference processing occurs exclusively on the user's local hardware.
-No data, queries, or responses are transmitted to any external server.
-
-## Data Flow
-[User Input] → [Local RAM] → [Local GPU] → [Local RAM] → [User Output]
-                                ↑
-                    No network path exists
-
-## Technical Controls
-| Control | Implementation |
-|---------|---------------|
-| Network binding | 127.0.0.1 only — OS-level block |
-| Outbound firewall | Process-scoped block via iptables/Windows Firewall |
-| Conversation storage | RAM only — never written to disk |
-| Session wipe | Cryptographic overwrite on session end |
-| Weight integrity | SHA256 verification at every startup |
-| Dependency integrity | SHA256 manifest verified at startup |
-| Intrusion response | Auto-wipe + process termination on detection |
-| Telemetry | None. Zero. No analytics, no error reporting, no update checks. |
-
-## Audit Trail
-GET /audit returns metadata-only log:
-- Timestamp
-- Active session count
-- Security control status
-NO conversation content is ever logged.
-
-## Verification
-Users can independently verify zero outbound connections using:
-- Windows: Resource Monitor → Network tab
-- Linux/WSL2: ss -tp | grep python
-- Any: Wireshark on loopback interface shows only 127.0.0.1 traffic
-```
-
-### Step 5.2 — Benchmark against GPT-4o on three tasks
-```
-Target tasks for your buyers:
-1. Contract clause extraction (law firm buyers)
-   → Feed 10 NDAs, extract confidentiality clauses
-   → Compare accuracy vs GPT-4o
-
-2. Transaction pattern summarization (forensic investigator buyers)
-   → Feed blockchain transaction logs, summarize patterns
-   → Compare accuracy vs Claude Sonnet
-
-3. Regulatory citation lookup (compliance buyers)
-   → Ask about specific FINRA/SEC rules
-   → Compare accuracy vs GPT-4o
-
-Publish results. You only need to win on YOUR tasks.
-```
-
----
-
-## PHASE 6 — PAYMENTS + DISTRIBUTION
-
-### Step 6.1 — Monero payment integration
-```
-Options (in order of complexity):
-1. BTCPay Server (self-hosted, accepts XMR natively)
-   → Run on a separate VPS, not on inference machine
-   → Never touches user data
-
-2. GloBee or CoinPayments (hosted XMR processor)
-   → Simpler but adds third-party dependency
-
-3. Manual XMR address + license key email
-   → Lowest friction to start, not scalable
-
-Start with option 3 for first 10 customers.
-Automate later.
-```
-
-### Step 6.2 — License key system
-```python
-# Simple license validation — no phone-home required
-# License key encodes: buyer_id + expiry + features
-# Validated entirely locally using HMAC-SHA256
-
-import hmac
-import hashlib
-import base64
-import time
-
-LICENSE_SECRET = "your-secret-key-never-committed-to-git"
-
-def generate_license(buyer_id: str, expiry_timestamp: int, tier: str) -> str:
-    payload = f"{buyer_id}:{expiry_timestamp}:{tier}"
-    sig = hmac.new(
-        LICENSE_SECRET.encode(),
-        payload.encode(),
-        hashlib.sha256
-    ).hexdigest()[:16]
-    raw = f"{payload}:{sig}"
-    return base64.urlsafe_b64encode(raw.encode()).decode()
-
-def validate_license(license_key: str) -> dict:
-    try:
-        raw = base64.urlsafe_b64decode(license_key).decode()
-        parts = raw.split(":")
-        buyer_id, expiry, tier, sig = parts[0], parts[1], parts[2], parts[3]
-        
-        expected_payload = f"{buyer_id}:{expiry}:{tier}"
-        expected_sig = hmac.new(
-            LICENSE_SECRET.encode(),
-            expected_payload.encode(),
-            hashlib.sha256
-        ).hexdigest()[:16]
-        
-        if not hmac.compare_digest(sig, expected_sig):
-            return {"valid": False, "reason": "invalid signature"}
-        
-        if int(expiry) < time.time():
-            return {"valid": False, "reason": "expired"}
-        
-        return {"valid": True, "buyer": buyer_id, "tier": tier}
-    except Exception:
-        return {"valid": False, "reason": "malformed key"}
-```
-
-### Step 6.3 — Distribution page (minimal)
-```
-kwyre.ai landing page needs only:
-1. One paragraph: what it is
-2. One section: what data it DOESN'T collect (the list)
-3. Hardware requirements (4090 or equivalent, 16GB+ VRAM)
-4. Pricing table (Personal $299 | Professional $799 | Air-Gapped Kit $1499)
-5. Download button (triggers license purchase flow)
-6. Link to DATA_RESIDENCY.md
-
-No blog. No social proof yet. No fluff.
-Ship the product, get users, add proof later.
-```
-
----
-
-## PHASE 7 — FIRST CUSTOMER
-
-### Step 7.1 — Use it yourself first
-```
-Run Kwyre on an APOLLO CyberSentinel investigation.
-Document specifically:
-- What task you used it for
-- What data you could NOT have sent to ChatGPT
-- How the output compared to ChatGPT
-- Time saved
-
-This becomes your first case study.
-```
-
-### Step 7.2 — First outreach targets
-```
-In order:
-1. r/netsec — post technical writeup of spike QAT + privacy architecture
-   Title: "I built a local LLM inference server with hardware-level 
-           isolation for air-gapped security work. Here's the architecture."
-   
-2. OSINT/forensics communities (Trace Labs, DFIR Discord)
-   Lead with the investigator use case
-
-3. Direct outreach to 5 solo forensic accountants on LinkedIn
-   One sentence: "Do you use AI tools for case analysis? 
-                  Asking because I built something you might need."
-
-Do NOT launch on ProductHunt until you have 10 happy users.
-```
-
----
-
-## PRIORITY ORDER — THIS WEEK
-
-```
-Day 1 (today):
-  [ ] Stop training, save checkpoint (Phase 0)
-  [ ] Set up repo structure (Phase 1)
-  [ ] Deploy serve_local_4bit_full.py (Phase 2, Step 2.1)
-  [ ] Generate weight hashes (Phase 2, Step 2.2)
-
-Day 2:
-  [ ] Install network isolation (Phase 2, Step 2.3)
-  [ ] Generate dep manifest (Phase 2, Step 2.4)
-  [ ] Test all 6 security layers (Phase 2, Step 2.6)
-  [ ] Write DATA_RESIDENCY.md (Phase 5, Step 5.1)
-
-Day 3-4:
-  [ ] Start proper training run (Phase 3, Step 3.2)
-  [ ] While training: write Docker setup (Phase 4)
-  [ ] While training: fix k-curriculum (Phase 3, Step 3.1)
-
-Day 5:
-  [ ] Evaluate trained model (Phase 3, Step 3.3)
-  [ ] Merge LoRA adapters (Phase 3, Step 3.4)
-  [ ] Run first benchmark task
-
-Next week:
-  [ ] Installer (Phase 4)
-  [ ] Compliance docs (Phase 5)
-  [ ] Pricing page (Phase 6)
-  [ ] First customer outreach (Phase 7)
-```
-
----
-
-## NOTES FOR CURSOR
-
-- All security files are in `kwyre/security/`
-- Server entry point is always `kwyre/server/serve_local_4bit.py`
-- Model training is always run from repo root, output goes to `qat_output_v1/`
-- Never commit: model weights, .env, dep manifest (machine-specific), API keys
-- Always commit: security scripts, server code, training code, docs
-- The `KNOWN_WEIGHT_HASHES` dict in serve_local_4bit.py must be populated manually per deployment
-- `LICENSE_SECRET` in the license system must come from environment variable, never hardcoded
+## NOTES FOR DEVELOPMENT
+
+- Server entry point: `serve_local_4bit.py` (GPU), `serve_vllm.py` (vLLM), `serve_cpu.py` (CPU), `serve_mlx.py` (MLX)
+- All four backends share `server/security_core.py` — never duplicate security code
+- RAG module: `server/rag.py` — used by GPU backend, can be imported by others
+- Helm chart: `deploy/helm/kwyre/` — install with `helm install kwyre ./deploy/helm/kwyre`
+- Frontend is a single page: `chat/main.html` (no separate chat.html)
+- `/chat` route serves `main.html` (same as `/main.html`)
+- Never commit: model weights (.safetensors), .env, dep manifest, API keys, .cache/
+- Always commit: server code, security scripts, tests, docs, HTML
+- `KNOWN_WEIGHT_HASHES` in each server must be populated per deployment
+- License keys use Ed25519 (not HMAC) — public key embedded at build time
+- Tests run without GPU: `python -m unittest discover -s tests -p "test_*.py"`
+- Integration tests require running server: `python -m unittest tests.test_integration`
+- Deploy to Cloudflare: `npx wrangler pages deploy chat/ --project-name kwyre-ai`

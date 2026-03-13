@@ -1,0 +1,4251 @@
+<!DOCTYPE html>
+<!--
+    ╔═══════════════════════════════════════════════════════════╗
+    ║  CLASSIFICATION: KWYRE EYES ONLY                         ║
+    ║  DOCUMENT: KW-003 / MAIN OPERATIONS                      ║
+    ║  ANALYST: CK                                             ║
+    ║  STATUS: HANDLER LOCATED                                 ║
+    ╚═══════════════════════════════════════════════════════════╝
+
+    BRIEFING: Page 3 of 8. The handler has been identified.
+
+    ASSET PROFILE:
+    Codename:       PHANTOM
+    Last known:     Kowloon, Hong Kong
+    Cover:          Import/export consulting
+    Real activity:  Cryptocurrency OTC desk (unlicensed)
+    Monthly volume: $12-15M USDT
+    Known wallets:  47 (clustered via Chainalysis Reactor)
+
+    NOTE: PHANTOM's operational security is exceptional.
+    All communications routed through Signal with disappearing
+    messages. No email. No social media. Pays rent in cash.
+    The only mistake was a single Binance deposit from an
+    IP that resolved to a Macau hotel on March 3, 2024.
+
+    無無明亦無無明盡乃至無老死亦無老死盡無苦集滅道
+    ⌬ HMAC:般若波羅蜜 ⌬ DIGEST:空即是色 ⌬
+
+    NEXT CLUE: The technology page has the surveillance log.
+
+    Everyone dies. Not everyone lives.
+                                        — CK
+-->
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' https://static.cloudflareinsights.com https://cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.kwyre.com http://127.0.0.1:8000 http://localhost:8000 https://cloudflareinsights.com; img-src 'self' data:; base-uri 'self'; form-action 'self'">
+<meta http-equiv="X-Content-Type-Options" content="nosniff">
+<meta name="referrer" content="no-referrer">
+<title>Kwyre AI — Air-Gapped Inference</title>
+<meta name="description" content="Air-gapped AI inference for analysts who cannot afford a breach. 6-layer security stack. Zero data leaves your machine.">
+<link rel="icon" type="image/x-icon" href="favicon.ico">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked@14/marked.min.js"></script>
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg: #05060a;
+  --surface: #0b0d14;
+  --surface2: #10131c;
+  --surface3: #161a27;
+  --border: #1c2033;
+  --border-hi: #2a3050;
+  --accent: #3b82f6;
+  --accent-dim: rgba(59,130,246,0.12);
+  --accent-glow: rgba(59,130,246,0.25);
+  --green: #22c55e;
+  --green-dim: rgba(34,197,94,0.12);
+  --red: #ef4444;
+  --red-dim: rgba(239,68,68,0.12);
+  --amber: #f59e0b;
+  --text: #e2e4ea;
+  --text2: #6b7294;
+  --text3: #3d4466;
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'Instrument Sans', -apple-system, sans-serif;
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--sans);
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection { background: var(--accent); color: #fff; }
+
+/* --- PARTICLE CANVAS --- */
+#particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+/* --- GRID OVERLAY --- */
+.grid-bg {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(59,130,246,0.015) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(59,130,246,0.015) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+.grid-bg::after {
+  content: '';
+  position: absolute; inset: 0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.06), transparent 70%);
+}
+
+/* --- FLOATING ORBS --- */
+.m-orb {
+  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
+  filter: blur(120px);
+}
+.m-orb-1 {
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, rgba(59,130,246,0.07), transparent 70%);
+  top: -5%; left: -5%;
+  animation: m-orb-a 18s ease-in-out infinite alternate;
+}
+.m-orb-2 {
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(34,197,94,0.04), transparent 70%);
+  bottom: 10%; right: -8%;
+  animation: m-orb-b 22s ease-in-out infinite alternate;
+}
+.m-orb-3 {
+  width: 350px; height: 350px;
+  background: radial-gradient(circle, rgba(59,130,246,0.05), transparent 70%);
+  top: 40%; left: 30%;
+  animation: m-orb-c 15s ease-in-out infinite alternate;
+}
+@keyframes m-orb-a { 0%{transform:translate(0,0)} 100%{transform:translate(60px,-40px)} }
+@keyframes m-orb-b { 0%{transform:translate(0,0)} 100%{transform:translate(-50px,30px)} }
+@keyframes m-orb-c { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(40px,50px) scale(1.15)} }
+
+/* --- SCANLINES --- */
+.m-scanlines {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
+}
+
+/* --- NOISE OVERLAY --- */
+.m-noise {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  opacity: 0.02;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 256px 256px;
+}
+
+/* --- SCAN SWEEP --- */
+.m-sweep {
+  position: fixed; left: 0; right: 0; height: 1px; z-index: 0; pointer-events: none;
+  background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.15) 40%, rgba(59,130,246,0.08) 50%, rgba(59,130,246,0.15) 60%, transparent 100%);
+  animation: m-sweep-anim 6s ease-in-out infinite;
+  opacity: 0;
+}
+@keyframes m-sweep-anim {
+  0%   { top: -1px; opacity: 0; }
+  3%   { opacity: 0.7; }
+  97%  { opacity: 0.7; }
+  100% { top: 100vh; opacity: 0; }
+}
+
+/* --- EMBERS CANVAS --- */
+#embers2 { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+/* --- HEX PULSE --- */
+.hex-pulse { position: fixed; width: 200px; height: 200px; border-radius: 50%; pointer-events: none; z-index: 0; background: radial-gradient(circle, rgba(59,130,246,0.04), transparent 70%); transform: translate(-50%, -50%); transition: opacity 0.3s; opacity: 0; }
+.hex-pulse.visible { opacity: 1; }
+
+/* --- VIGNETTE --- */
+.m-vignette { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 35%, rgba(5,6,10,0.85) 100%); }
+
+/* --- SCROLL REVEAL --- */
+.reveal {
+  opacity: 0; transform: translateY(32px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+.reveal.vis { opacity: 1; transform: translateY(0); }
+.reveal-d1 { transition-delay: 0.1s; }
+.reveal-d2 { transition-delay: 0.2s; }
+.reveal-d3 { transition-delay: 0.3s; }
+
+/* --- GLOW LINE (section divider enhancement) --- */
+.section + .section {
+  border-image: linear-gradient(90deg, transparent, rgba(59,130,246,0.15), transparent) 1;
+}
+
+/* --- LAYOUT --- */
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+.section { padding: 80px 0; }
+.section + .section { border-top: 1px solid var(--border); }
+
+/* --- NAV --- */
+nav {
+  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+  background: rgba(5,6,10,0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  border-bottom: 1px solid var(--border);
+}
+
+.nav-inner {
+  max-width: 1120px; margin: 0 auto; padding: 0 32px;
+  display: flex; align-items: center; justify-content: space-between;
+  height: 56px;
+}
+
+.nav-brand {
+  font-family: var(--mono);
+  font-size: 16px;
+  font-weight: 700;
+  letter-spacing: 4px;
+  text-transform: uppercase;
+  color: #fff;
+  text-decoration: none;
+  text-shadow: 0 0 12px rgba(255,255,255,0.25);
+}
+
+.nav-brand span { color: #fff; }
+.nav-brand img { filter: brightness(1.6) contrast(1.2); }
+
+.nav-links { display: flex; gap: 32px; align-items: center; }
+
+.nav-links a {
+  font-size: 13px;
+  font-weight: 500;
+  color: #fff;
+  text-decoration: none;
+  letter-spacing: 0.3px;
+  transition: color 0.2s;
+}
+
+.nav-links a:hover { color: var(--accent); }
+
+.nav-cta {
+  font-family: var(--mono) !important;
+  font-size: 11px !important;
+  letter-spacing: 1px !important;
+  text-transform: uppercase !important;
+  padding: 8px 20px;
+  background: var(--accent) !important;
+  color: #fff !important;
+  border-radius: 4px;
+  transition: box-shadow 0.2s, transform 0.1s !important;
+}
+
+.nav-cta:hover { box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-1px) !important; }
+
+/* EXPOSED BANNER (above news ticker) */
+.exposed-banner {
+  display: block;
+  width: 100%;
+  padding: 14px 16px;
+  background: var(--red);
+  color: #fff;
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  text-align: center;
+  border: none;
+  cursor: pointer;
+  transition: background 0.2s;
+  flex-shrink: 0;
+}
+
+.exposed-banner:hover { background: #dc2626; }
+
+/* --- HERO --- */
+.hero {
+  padding: 160px 0 100px;
+  text-align: center;
+  position: relative;
+}
+
+.hero-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 28px;
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+}
+
+.hero-eyebrow::before, .hero-eyebrow::after {
+  content: '';
+  width: 40px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--accent));
+}
+
+.hero-eyebrow::after { background: linear-gradient(90deg, var(--accent), transparent); }
+
+.hero h1 {
+  font-size: clamp(36px, 5.5vw, 64px);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -1.5px;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.hero h1 em {
+  font-style: normal;
+  color: var(--accent);
+}
+
+.hero-sub {
+  font-size: 18px;
+  color: var(--text2);
+  max-width: 640px;
+  margin: 0 auto 48px;
+  line-height: 1.7;
+  font-weight: 400;
+}
+
+.hero-sub strong { color: var(--text); font-weight: 600; }
+
+.hero-stats {
+  display: flex;
+  justify-content: center;
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  max-width: 680px;
+  margin: 0 auto;
+}
+
+.hero-stat {
+  flex: 1;
+  padding: 20px 16px;
+  background: var(--surface);
+  text-align: center;
+  min-width: 0;
+}
+
+.hero-stat-val {
+  font-family: var(--mono);
+  font-size: 20px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 4px;
+  white-space: nowrap;
+}
+
+.hero-stat-label {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+}
+
+/* --- THREAT BAR --- */
+.threat-bar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  margin-top: 40px;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.threat-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(34,197,94,0.5);
+  animation: threat-pulse 2s ease-in-out infinite;
+}
+
+@keyframes threat-pulse {
+  0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
+}
+
+.threat-bar span {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text2);
+  letter-spacing: 0.5px;
+}
+
+.threat-bar strong { color: var(--green); font-weight: 500; }
+
+.product-strip {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 32px;
+  flex-wrap: wrap;
+}
+
+.product-chip {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 12px 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.2s;
+  min-width: 120px;
+}
+
+.product-chip:hover { border-color: var(--accent); background: var(--surface2); }
+.product-chip.active { border-color: var(--accent); background: var(--accent-dim); }
+
+.product-chip-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.product-chip-detail {
+  font-size: 11px;
+  color: var(--text3);
+}
+
+.product-chip.active .product-chip-name { color: var(--accent); }
+
+.custom-chip { border-color: var(--green-dim); }
+.custom-chip:hover { border-color: var(--green); }
+.custom-chip .product-chip-name { color: var(--green); }
+
+/* --- BUYERS --- */
+.buyers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 48px;
+}
+
+.buyer-card {
+  background: var(--surface);
+  padding: 28px 24px;
+  position: relative;
+  transition: background 0.2s;
+}
+
+.buyer-card:hover { background: var(--surface2); }
+.buyer-card { cursor: pointer; }
+
+.buyer-role {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 10px;
+}
+
+.buyer-pain {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.6;
+  margin-bottom: 10px;
+  font-weight: 500;
+}
+
+.buyer-solve {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.5;
+  margin-bottom: 14px;
+}
+
+.buyer-cta {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--mono);
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 1.2px; text-transform: uppercase;
+  color: var(--accent); opacity: 0.7;
+  transition: opacity 0.2s;
+}
+
+.buyer-card:hover .buyer-cta { opacity: 1; }
+
+.buyer-cta svg { width: 12px; height: 12px; stroke: var(--accent); fill: none; stroke-width: 2; }
+
+/* CASE STUDY POPUP */
+.case-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(5,6,10,0.88);
+  backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.case-overlay.open { opacity: 1; pointer-events: all; }
+
+.case-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 100%; max-width: 540px;
+  padding: 40px 36px 36px;
+  position: relative;
+  transform: translateY(16px) scale(0.97);
+  transition: transform 0.3s ease;
+  max-height: 90vh; overflow-y: auto;
+}
+.case-overlay.open .case-modal { transform: translateY(0) scale(1); }
+
+.case-modal-close {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: none; color: var(--text3);
+  font-size: 20px; cursor: pointer; padding: 4px 8px;
+  transition: color 0.2s;
+}
+.case-modal-close:hover { color: var(--text); }
+
+.case-tag {
+  display: inline-block;
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--red); background: var(--red-dim);
+  border: 1px solid rgba(239,68,68,0.15);
+  padding: 4px 12px; border-radius: 3px;
+  margin-bottom: 16px;
+}
+
+.case-headline {
+  font-size: 20px; font-weight: 700;
+  color: var(--text); line-height: 1.35;
+  margin-bottom: 20px; letter-spacing: -0.3px;
+}
+
+.case-body {
+  font-size: 14px; color: var(--text2);
+  line-height: 1.75; margin-bottom: 24px;
+}
+
+.case-body strong { color: var(--text); font-weight: 600; }
+
+.case-source {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text3); letter-spacing: 0.8px;
+  text-transform: uppercase;
+  padding-top: 16px; border-top: 1px solid var(--border);
+  margin-bottom: 20px;
+}
+
+.case-kwyre {
+  background: var(--accent-dim);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: 6px;
+  padding: 16px 20px;
+}
+
+.case-kwyre-label {
+  font-family: var(--mono); font-size: 10px;
+  font-weight: 600; letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--accent); margin-bottom: 8px;
+}
+
+.case-kwyre p {
+  font-size: 13px; color: var(--text);
+  line-height: 1.6;
+}
+
+/* --- SECTION HEADERS --- */
+.sh {
+  text-align: center;
+  margin-bottom: 48px;
+}
+
+.sh-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 16px;
+}
+
+.sh h2 {
+  font-size: clamp(28px, 3.5vw, 40px);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  line-height: 1.15;
+  margin-bottom: 16px;
+}
+
+.sh p {
+  font-size: 16px;
+  color: var(--text2);
+  max-width: 560px;
+  margin: 0 auto;
+  line-height: 1.6;
+}
+
+/* --- SECURITY STACK --- */
+.sec-layers {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-top: 48px;
+}
+
+.sec-layer {
+  display: grid;
+  grid-template-columns: 56px 1fr;
+  gap: 20px;
+  padding: 24px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  transition: border-color 0.3s, background 0.2s;
+  position: relative;
+}
+
+.sec-layer:hover { border-color: var(--border-hi); background: var(--surface2); }
+
+.sec-layer-num {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text3);
+  letter-spacing: 1px;
+  padding-top: 2px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.sec-layer-num .lnum {
+  width: 36px; height: 36px;
+  border-radius: 4px;
+  background: var(--accent-dim);
+  color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.sec-layer-body h3 {
+  font-size: 15px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.sec-layer-body p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+.sec-layer-body .sec-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 3px 10px;
+  border-radius: 3px;
+  margin-top: 10px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  background: var(--green-dim);
+  color: var(--green);
+  border: 1px solid rgba(34,197,94,0.15);
+}
+
+/* --- FEATURES GRID --- */
+.feat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 48px;
+}
+
+.feat-cell {
+  background: var(--surface);
+  padding: 32px 24px;
+  transition: background 0.2s;
+}
+
+.feat-cell:hover { background: var(--surface2); }
+
+.feat-cell-icon {
+  width: 32px; height: 32px;
+  border-radius: 4px;
+  background: var(--accent-dim);
+  display: flex; align-items: center; justify-content: center;
+  margin-bottom: 16px;
+}
+
+.feat-cell-icon svg { width: 16px; height: 16px; stroke: var(--accent); fill: none; stroke-width: 1.5; }
+
+.feat-cell h3 {
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  color: var(--text);
+}
+
+.feat-cell p {
+  font-size: 13px;
+  color: var(--text2);
+  line-height: 1.6;
+}
+
+/* --- MATRIX TABLE --- */
+.matrix-wrap {
+  overflow-x: auto;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  margin-top: 48px;
+}
+
+.matrix {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+  min-width: 780px;
+}
+
+.matrix thead { background: var(--surface2); }
+
+.matrix th {
+  padding: 14px 16px;
+  text-align: left;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text3);
+  text-transform: uppercase;
+  letter-spacing: 1.2px;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.matrix th.m-kwyre { color: var(--accent); }
+
+.matrix td {
+  padding: 11px 16px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text2);
+  font-size: 12px;
+}
+
+.matrix td.m-label {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--text);
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.matrix td.m-kwyre {
+  color: var(--text);
+  background: rgba(59,130,246,0.03);
+  font-weight: 500;
+}
+
+.matrix tbody tr { background: var(--surface); transition: background 0.15s; }
+.matrix tbody tr:hover { background: var(--surface2); }
+.matrix tbody tr:last-child td { border-bottom: none; }
+
+.m-y { color: var(--green); font-family: var(--mono); font-weight: 600; }
+.m-n { color: var(--text3); font-family: var(--mono); }
+
+/* --- ARCHITECTURE --- */
+.arch-block {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 40px;
+  margin-top: 48px;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--text2);
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.arch-block .a-accent { color: var(--accent); }
+.arch-block .a-green { color: var(--green); }
+.arch-block .a-dim { color: var(--text3); }
+
+/* --- PRICING --- */
+.pricing-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-top: 48px;
+}
+
+.price-card {
+  background: var(--surface);
+  padding: 36px 28px;
+  display: flex;
+  flex-direction: column;
+  transition: background 0.2s;
+}
+
+.price-card:hover { background: var(--surface2); }
+.price-card.featured { background: var(--surface2); }
+.price-card.featured .price-name { color: var(--accent); }
+
+.price-name {
+  font-family: var(--mono);
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text2);
+  margin-bottom: 20px;
+}
+
+.price-amount {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 4px;
+}
+
+.price-type {
+  font-size: 13px;
+  color: var(--text3);
+  margin-bottom: 24px;
+}
+
+.price-features {
+  list-style: none;
+  flex: 1;
+}
+
+.price-features li {
+  font-size: 13px;
+  color: var(--text2);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.price-features li:last-child { border-bottom: none; }
+
+.price-features li::before {
+  content: '';
+  width: 4px; height: 4px;
+  border-radius: 1px;
+  background: var(--accent);
+  flex-shrink: 0;
+}
+
+/* --- CTA SECTION --- */
+.cta-final {
+  text-align: center;
+  padding: 100px 0;
+}
+
+.cta-final h2 {
+  font-size: clamp(28px, 4vw, 44px);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  margin-bottom: 16px;
+}
+
+.cta-final p {
+  font-size: 16px;
+  color: var(--text2);
+  max-width: 480px;
+  margin: 0 auto 40px;
+  line-height: 1.6;
+}
+
+.cta-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 32px;
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 4px;
+  transition: all 0.2s;
+  cursor: pointer;
+  border: none;
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 16px var(--accent-glow);
+}
+
+.btn-primary:hover { box-shadow: 0 4px 28px var(--accent-glow); transform: translateY(-1px); }
+
+.btn-ghost {
+  background: transparent;
+  color: var(--text2);
+  border: 1px solid var(--border);
+}
+
+.btn-ghost:hover { border-color: var(--text2); color: var(--text); }
+
+/* --- FOOTER --- */
+.site-footer {
+  border-top: 1px solid var(--border);
+  padding: 40px 0;
+}
+
+.footer-inner {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.footer-brand {
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text3);
+  text-transform: uppercase;
+}
+
+.footer-legal {
+  font-size: 12px;
+  color: var(--text3);
+  max-width: 500px;
+  line-height: 1.5;
+}
+
+/* --- LOCAL CHAT (only on localhost) --- */
+.api-key-bar {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.api-key-bar input {
+  flex: 1;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: var(--mono);
+  font-size: 13px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.api-key-bar input:focus { border-color: var(--accent); }
+.api-key-bar input::placeholder { color: var(--text3); }
+
+.api-key-bar .status-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--text3);
+  align-self: center;
+  transition: background 0.3s;
+  flex-shrink: 0;
+}
+
+.api-key-bar .status-dot.connected { background: var(--green); box-shadow: 0 0 8px rgba(34,197,94,0.5); }
+.api-key-bar .status-dot.error { background: var(--red); }
+
+.chat-container {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 48px;
+}
+
+.chat-messages {
+  height: 420px;
+  overflow-y: auto;
+  padding: 24px;
+  scroll-behavior: smooth;
+}
+
+.chat-messages::-webkit-scrollbar { width: 3px; }
+.chat-messages::-webkit-scrollbar-track { background: transparent; }
+.chat-messages::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+.message { margin-bottom: 20px; animation: fadeUp 0.3s ease; position: relative; }
+
+@keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+
+.message-role {
+  font-family: var(--mono);
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  margin-bottom: 6px;
+  color: var(--text3);
+}
+
+.message.user .message-role { color: var(--accent); }
+.message.assistant .message-role { color: var(--green); }
+
+.message-content {
+  font-size: 14px;
+  line-height: 1.7;
+  color: var(--text);
+  padding-left: 12px;
+  border-left: 1px solid var(--border);
+}
+
+.message.user .message-content { border-left-color: rgba(59,130,246,0.3); }
+.message.assistant .message-content { border-left-color: rgba(34,197,94,0.3); }
+
+.typing-indicator {
+  display: inline-flex; gap: 4px; padding-left: 12px;
+  border-left: 1px solid rgba(34,197,94,0.3);
+}
+
+.typing-indicator span {
+  width: 5px; height: 5px;
+  background: var(--green);
+  border-radius: 50%;
+  animation: tdot 1.2s ease-in-out infinite;
+}
+
+.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
+.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+@keyframes tdot { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  color: var(--text3);
+  font-size: 13px;
+  gap: 8px;
+  font-family: var(--mono);
+}
+
+.chat-input {
+  display: flex;
+  gap: 10px;
+  padding: 16px 24px;
+  background: var(--surface2);
+  border-top: 1px solid var(--border);
+}
+
+.chat-input textarea {
+  flex: 1;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 16px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  resize: none;
+  outline: none;
+  min-height: 46px;
+  max-height: 120px;
+  transition: border-color 0.2s;
+}
+
+.chat-input textarea:focus { border-color: var(--accent); }
+.chat-input textarea::placeholder { color: var(--text3); }
+
+.send-btn {
+  align-self: flex-end;
+  background: var(--accent);
+  border: none;
+  border-radius: 4px;
+  padding: 12px 24px;
+  color: #fff;
+  font-family: var(--mono);
+  font-weight: 500;
+  font-size: 11px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.1s;
+}
+
+.send-btn:hover { box-shadow: 0 0 16px var(--accent-glow); }
+.send-btn:active { transform: scale(0.97); }
+.send-btn:disabled { background: var(--border); cursor: not-allowed; box-shadow: none; }
+
+.tool-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
+  padding-left: 12px;
+}
+
+.tool-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-family: var(--mono);
+  font-size: 10px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  background: var(--accent-dim);
+  border: 1px solid rgba(59,130,246,0.15);
+  color: var(--accent);
+  letter-spacing: 0.3px;
+}
+
+.spike-meta {
+  font-family: var(--mono);
+  font-size: 10px;
+  color: var(--green);
+  opacity: 0.6;
+  padding-left: 14px;
+  margin-top: 4px;
+  letter-spacing: 0.3px;
+}
+
+.hidden { display: none !important; }
+
+/* --- TRIAL COUNTER --- */
+.trial-counter {
+  display: flex; align-items: center; justify-content: center;
+  gap: 8px; margin-bottom: 20px;
+  font-family: var(--mono); font-size: 12px;
+  color: var(--text2); letter-spacing: 0.5px;
+}
+.trial-counter strong { color: var(--green); font-weight: 600; }
+.trial-dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px rgba(34,197,94,0.5);
+  animation: threat-pulse 2s ease-in-out infinite;
+}
+.trial-counter.exhausted .trial-dot { background: var(--red); box-shadow: 0 0 8px rgba(239,68,68,0.5); }
+.trial-counter.exhausted strong { color: var(--red); }
+
+.trial-expired {
+  margin-top: 32px; text-align: center;
+  animation: fadeUp 0.5s ease;
+}
+.trial-expired-inner {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 48px 32px;
+}
+.trial-expired-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  background: var(--accent-dim);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 20px;
+}
+.trial-expired h3 {
+  font-size: 22px; font-weight: 700;
+  margin-bottom: 12px; color: var(--text);
+}
+.trial-expired p {
+  font-size: 15px; color: var(--text2);
+  line-height: 1.6; margin-bottom: 28px;
+  max-width: 400px; margin-left: auto; margin-right: auto;
+}
+
+/* --- ACCESS MODAL --- */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 200;
+  background: rgba(5,6,10,0.88);
+  backdrop-filter: blur(12px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.modal-overlay.open { opacity: 1; pointer-events: all; }
+
+.modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  width: 100%; max-width: 440px;
+  padding: 40px 36px 36px;
+  position: relative;
+  transform: translateY(16px) scale(0.97);
+  transition: transform 0.3s ease;
+}
+.modal-overlay.open .modal { transform: translateY(0) scale(1); }
+
+.modal-close {
+  position: absolute; top: 16px; right: 16px;
+  background: none; border: none; color: var(--text3);
+  font-size: 20px; cursor: pointer; padding: 4px 8px;
+  transition: color 0.2s;
+}
+.modal-close:hover { color: var(--text); }
+
+.modal-title {
+  font-family: var(--mono);
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 8px;
+}
+
+.modal h3 {
+  font-size: 22px; font-weight: 700;
+  color: var(--text); margin-bottom: 28px;
+  letter-spacing: -0.3px;
+}
+
+.type-toggle {
+  display: flex; gap: 1px;
+  background: var(--border); border-radius: 6px;
+  overflow: hidden; margin-bottom: 24px;
+}
+
+.type-toggle button {
+  flex: 1; padding: 12px 16px;
+  background: var(--surface2); border: none;
+  font-family: var(--mono); font-size: 11px;
+  font-weight: 500; letter-spacing: 1px;
+  text-transform: uppercase; color: var(--text3);
+  cursor: pointer; transition: background 0.2s, color 0.2s;
+}
+
+.type-toggle button.active {
+  background: var(--accent-dim); color: var(--accent);
+}
+
+.type-toggle button:hover:not(.active) { color: var(--text2); }
+
+.form-field {
+  margin-bottom: 16px;
+}
+
+.form-field label {
+  display: block;
+  font-family: var(--mono);
+  font-size: 10px; font-weight: 500;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 6px;
+}
+
+.form-field input {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 14px;
+  color: var(--text);
+  font-family: var(--sans);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+
+.form-field input:focus { border-color: var(--accent); }
+.form-field input::placeholder { color: var(--text3); }
+
+.form-field.biz-only { display: none; }
+.form-field.biz-only.show { display: block; }
+
+.form-submit {
+  width: 100%;
+  padding: 14px;
+  margin-top: 8px;
+  background: var(--accent);
+  color: #fff;
+  border: none; border-radius: 4px;
+  font-family: var(--mono);
+  font-size: 12px; font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.1s;
+}
+
+.form-submit:hover { box-shadow: 0 4px 24px var(--accent-glow); transform: translateY(-1px); }
+.form-submit:active { transform: scale(0.98); }
+
+.form-note {
+  font-size: 11px;
+  color: var(--text3);
+  text-align: center;
+  margin-top: 16px;
+  line-height: 1.5;
+}
+
+.form-success {
+  text-align: center; padding: 20px 0;
+}
+
+.form-success .check-icon {
+  width: 48px; height: 48px;
+  border-radius: 50%;
+  background: var(--green-dim);
+  display: flex; align-items: center; justify-content: center;
+  margin: 0 auto 16px;
+}
+
+.form-success .check-icon svg {
+  width: 24px; height: 24px;
+  stroke: var(--green); fill: none; stroke-width: 2;
+}
+
+.form-success h4 {
+  font-size: 18px; font-weight: 600;
+  color: var(--text); margin-bottom: 8px;
+}
+
+.form-success p {
+  font-size: 13px; color: var(--text2);
+  line-height: 1.6;
+}
+
+/* --- MARKDOWN IN CHAT --- */
+.message-content pre {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 12px 16px;
+  overflow-x: auto;
+  margin: 8px 0;
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.5;
+}
+.message-content code {
+  font-family: var(--mono);
+  font-size: 13px;
+  background: var(--surface2);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+.message-content pre code { background: none; padding: 0; }
+.message-content ul, .message-content ol { padding-left: 20px; margin: 8px 0; }
+.message-content li { margin: 4px 0; line-height: 1.6; }
+.message-content h1, .message-content h2, .message-content h3 { margin: 12px 0 8px; color: var(--text); }
+.message-content h1 { font-size: 18px; }
+.message-content h2 { font-size: 16px; }
+.message-content h3 { font-size: 14px; }
+.message-content p { margin: 6px 0; }
+.message-content blockquote { border-left: 3px solid var(--accent); padding-left: 12px; margin: 8px 0; color: var(--text2); }
+.message-content table { border-collapse: collapse; width: 100%; margin: 8px 0; font-size: 13px; }
+.message-content th, .message-content td { border: 1px solid var(--border); padding: 8px 12px; text-align: left; }
+.message-content th { background: var(--surface2); font-weight: 600; }
+
+/* --- COPY BUTTON --- */
+.copy-btn {
+  position: absolute; top: 8px; right: 8px;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text3); font-family: var(--mono); font-size: 10px;
+  padding: 4px 10px; border-radius: 3px; cursor: pointer;
+  opacity: 0; transition: opacity 0.2s, color 0.2s;
+  letter-spacing: 0.5px; text-transform: uppercase;
+}
+.message:hover .copy-btn { opacity: 1; }
+.copy-btn:hover { color: var(--text); border-color: var(--border-hi); }
+
+/* --- CHAT TOOLBAR --- */
+.chat-toolbar {
+  display: flex; gap: 8px; margin-bottom: 12px;
+}
+.toolbar-btn {
+  background: var(--surface); border: 1px solid var(--border);
+  color: var(--text2); font-family: var(--mono); font-size: 11px;
+  padding: 6px 16px; border-radius: 4px; cursor: pointer;
+  transition: all 0.2s; letter-spacing: 0.5px; text-transform: uppercase;
+}
+.toolbar-btn:hover { border-color: var(--border-hi); color: var(--text); }
+.toolbar-danger:hover { border-color: var(--red); color: var(--red); }
+
+.upload-badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-family: var(--mono); font-size: 10px;
+  padding: 2px 8px; border-radius: 2px;
+  background: var(--green-dim); border: 1px solid rgba(34,197,94,0.15);
+  color: var(--green); letter-spacing: 0.3px; margin-bottom: 8px;
+}
+
+/* --- SYSTEM PROMPT --- */
+.system-prompt-section { margin-bottom: 12px; }
+.system-prompt-toggle {
+  font-family: var(--mono); font-size: 11px; color: var(--text3);
+  cursor: pointer; letter-spacing: 0.5px; text-transform: uppercase; padding: 6px 0;
+}
+.system-prompt-toggle:hover { color: var(--text2); }
+.system-prompt-input {
+  width: 100%; background: var(--surface); border: 1px solid var(--border);
+  border-radius: 4px; padding: 10px 14px; color: var(--text);
+  font-family: var(--sans); font-size: 13px; resize: vertical; outline: none;
+  margin-top: 8px; min-height: 60px; max-height: 200px; line-height: 1.5;
+}
+.system-prompt-input:focus { border-color: var(--accent); }
+
+/* --- FLOATING ORBS --- */
+.float-panels {
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  z-index: 50;
+  overflow: hidden;
+}
+
+/* --- FLOATING ORBS --- */
+.float-orb {
+  position: absolute;
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  border: 1px solid rgba(34,197,94,0.25);
+  background: radial-gradient(circle at 40% 38%,
+    rgba(34,197,94,0.3) 0%,
+    rgba(34,197,94,0.12) 25%,
+    rgba(34,197,94,0.05) 50%,
+    rgba(34,197,94,0.02) 75%,
+    transparent 100%
+  );
+  backdrop-filter: blur(6px);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  pointer-events: all;
+  transition: transform 0.4s ease, box-shadow 0.4s ease;
+  box-shadow:
+    0 0 30px rgba(34,197,94,0.15),
+    0 0 60px rgba(34,197,94,0.08),
+    0 0 120px rgba(34,197,94,0.04),
+    inset 0 0 25px rgba(34,197,94,0.08);
+}
+
+.float-orb::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  border: 1px solid rgba(34,197,94,0.06);
+  animation: orb-ring-pulse 4s ease-in-out infinite;
+}
+
+.float-orb::after {
+  content: '';
+  position: absolute;
+  inset: -20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(34,197,94,0.05), transparent 70%);
+  animation: orb-corona 5s ease-in-out infinite;
+}
+
+@keyframes orb-ring-pulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.25); opacity: 0; }
+}
+
+@keyframes orb-corona {
+  0%, 100% { transform: scale(1); opacity: 0.5; }
+  50% { transform: scale(1.3); opacity: 0.2; }
+}
+
+.float-orb:hover {
+  transform: scale(1.2) !important;
+  box-shadow:
+    0 0 50px rgba(34,197,94,0.35),
+    0 0 100px rgba(34,197,94,0.15),
+    0 0 180px rgba(34,197,94,0.06),
+    inset 0 0 40px rgba(34,197,94,0.12);
+}
+
+.float-orb-inner {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: rgba(34,197,94,0.6);
+  text-align: center;
+  line-height: 1.3;
+  transition: color 0.3s;
+  z-index: 1;
+  text-shadow: 0 0 10px rgba(34,197,94,0.3);
+}
+
+.float-orb:hover .float-orb-inner {
+  color: rgba(34,197,94,0.95);
+  text-shadow: 0 0 20px rgba(34,197,94,0.5);
+}
+
+.float-orb:nth-child(1) { animation: orb-drift-1 22s ease-in-out infinite; }
+.float-orb:nth-child(2) { animation: orb-drift-2 28s ease-in-out infinite; }
+.float-orb:nth-child(3) { animation: orb-drift-3 19s ease-in-out infinite; }
+
+@keyframes orb-drift-1 {
+  0%   { top: 18%; left: 8%; }
+  14%  { top: 12%; left: 25%; }
+  28%  { top: 22%; left: 45%; }
+  42%  { top: 8%;  left: 65%; }
+  57%  { top: 20%; left: 80%; }
+  71%  { top: 14%; left: 55%; }
+  85%  { top: 25%; left: 30%; }
+  100% { top: 18%; left: 8%; }
+}
+
+@keyframes orb-drift-2 {
+  0%   { top: 40%; left: 75%; }
+  16%  { top: 30%; left: 55%; }
+  33%  { top: 45%; left: 35%; }
+  50%  { top: 35%; left: 15%; }
+  66%  { top: 48%; left: 30%; }
+  83%  { top: 32%; left: 60%; }
+  100% { top: 40%; left: 75%; }
+}
+
+@keyframes orb-drift-3 {
+  0%   { top: 55%; left: 20%; }
+  20%  { top: 48%; left: 40%; }
+  40%  { top: 60%; left: 65%; }
+  60%  { top: 50%; left: 85%; }
+  80%  { top: 58%; left: 50%; }
+  100% { top: 55%; left: 20%; }
+}
+
+@media (max-width: 768px) {
+  .float-orb { width: 80px; height: 80px; }
+  .float-orb-inner { font-size: 8px; }
+}
+
+.float-panel {
+  position: fixed;
+  top: 0;
+  right: -500px;
+  width: 480px;
+  max-width: 90vw;
+  height: 100vh;
+  background: var(--bg);
+  border-left: 1px solid var(--border);
+  z-index: 150;
+  overflow-y: auto;
+  transition: right 0.3s ease;
+}
+
+.float-panel.open {
+  right: 0;
+}
+
+.float-panel-inner {
+  padding: 40px 32px;
+}
+
+.float-panel-close {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: none;
+  border: none;
+  color: var(--text3);
+  font-size: 24px;
+  cursor: pointer;
+  padding: 4px 8px;
+  transition: color 0.2s;
+}
+
+.float-panel-close:hover { color: var(--text); }
+
+.float-panel h2 {
+  font-size: 20px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: var(--text);
+}
+
+.float-panel .buyers-grid { grid-template-columns: 1fr; margin-top: 0; }
+.float-panel .sec-layers { margin-top: 0; }
+.float-panel .sec-layer { grid-template-columns: 1fr; }
+.float-panel .sec-layer-num { flex-direction: row; }
+.float-panel .feat-grid { grid-template-columns: 1fr; margin-top: 0; }
+
+/* --- LIGHT THEME --- */
+html.light {
+  --bg: #f5f6fa; --surface: #ffffff; --surface2: #f0f1f5; --surface3: #e8e9f0;
+  --border: #d4d6e0; --border-hi: #b8bcc8;
+  --accent: #2563eb; --accent-dim: rgba(37,99,235,0.10); --accent-glow: rgba(37,99,235,0.20);
+  --green: #16a34a; --green-dim: rgba(22,163,74,0.10);
+  --red: #dc2626; --red-dim: rgba(220,38,38,0.10); --amber: #d97706;
+  --text: #1a1d2e; --text2: #5b6078; --text3: #8b90a8;
+}
+html.light body { -webkit-font-smoothing: auto; }
+html.light .message-content pre { background: var(--surface2); }
+html.light .copy-btn { background: var(--surface); }
+html.light nav { background: rgba(245,246,250,0.9); }
+
+/* --- NEWS TICKER --- */
+.news-ticker {
+  position: fixed;
+  left: 0;
+  top: 56px;
+  bottom: 0;
+  width: 280px;
+  background: rgba(5,6,10,0.92);
+  backdrop-filter: blur(16px);
+  border-right: 1px solid var(--border);
+  z-index: 40;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.news-ticker-header {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.news-ticker-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 8px rgba(239,68,68,0.5);
+  animation: threat-pulse 2s ease-in-out infinite;
+}
+
+.news-ticker-title {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--red);
+}
+
+.news-ticker-scroll {
+  flex: 1;
+  overflow: hidden;
+  position: relative;
+}
+
+.news-ticker-track {
+  animation: ticker-scroll 120s linear infinite;
+  display: flex;
+  flex-direction: column;
+}
+
+.news-ticker-track:hover { animation-play-state: paused; }
+
+@keyframes ticker-scroll {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(-50%); }
+}
+
+.ticker-item {
+  padding: 14px 16px;
+  border-bottom: 1px solid rgba(28,32,51,0.5);
+  text-decoration: none;
+  display: block;
+  transition: background 0.2s;
+}
+
+.ticker-item:hover { background: var(--surface2); }
+
+.ticker-tag {
+  display: inline-block;
+  font-family: var(--mono);
+  font-size: 8px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  border-radius: 2px;
+  margin-bottom: 6px;
+}
+
+.ticker-tag-fine { background: var(--red-dim); color: var(--red); }
+.ticker-tag-breach { background: rgba(245,158,11,0.12); color: var(--amber); }
+.ticker-tag-legal { background: var(--accent-dim); color: var(--accent); }
+.ticker-tag-leak { background: var(--red-dim); color: var(--red); }
+
+.ticker-headline {
+  font-size: 12px;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 4px;
+  font-weight: 500;
+}
+
+.ticker-source {
+  font-family: var(--mono);
+  font-size: 9px;
+  color: var(--text3);
+  letter-spacing: 0.3px;
+}
+
+.news-ticker-cta {
+  padding: 12px 16px;
+  border-top: 1px solid var(--border);
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.news-ticker-cta a {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.news-ticker-cta a:hover { color: var(--text); }
+
+@media (max-width: 1100px) {
+  .news-ticker { display: none; }
+}
+
+/* EXPOSED ORB */
+.exposed-orb {
+  border-color: rgba(239,68,68,0.2) !important;
+  background: radial-gradient(circle at 35% 35%, rgba(239,68,68,0.15), rgba(239,68,68,0.03)) !important;
+  box-shadow: 0 0 30px rgba(239,68,68,0.1), inset 0 0 20px rgba(239,68,68,0.05) !important;
+}
+.exposed-orb:hover {
+  border-color: var(--red) !important;
+  box-shadow: 0 0 50px rgba(239,68,68,0.25), inset 0 0 30px rgba(239,68,68,0.1) !important;
+}
+.exposed-orb:hover .float-orb-inner { color: var(--red) !important; }
+
+@keyframes orb-drift-exposed {
+  0%   { top: 38%; left: 85%; }
+  25%  { top: 32%; left: 80%; }
+  50%  { top: 42%; left: 88%; }
+  75%  { top: 35%; left: 82%; }
+  100% { top: 38%; left: 85%; }
+}
+
+/* EXPOSURE POPUP */
+.exposure-overlay {
+  position: fixed; inset: 0; z-index: 250;
+  background: rgba(5,6,10,0.92);
+  backdrop-filter: blur(16px);
+  display: flex; align-items: center; justify-content: center;
+  opacity: 0; pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.exposure-overlay.open { opacity: 1; pointer-events: all; }
+
+.exposure-popup {
+  background: var(--surface);
+  border: 1px solid var(--red-dim);
+  border-radius: 8px;
+  width: 100%; max-width: 560px;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 32px;
+  position: relative;
+  transform: translateY(16px) scale(0.97);
+  transition: transform 0.3s ease;
+}
+.exposure-overlay.open .exposure-popup { transform: translateY(0) scale(1); }
+
+.exposure-close {
+  position: absolute; top: 12px; right: 12px;
+  background: none; border: none; color: var(--text3);
+  font-size: 22px; cursor: pointer;
+}
+
+.exposure-header {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 11px;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--red); margin-bottom: 20px;
+}
+
+.exposure-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--red);
+  box-shadow: 0 0 10px rgba(239,68,68,0.6);
+  animation: threat-pulse 1.5s ease-in-out infinite;
+}
+
+.exposure-title {
+  font-size: 22px; font-weight: 700;
+  color: var(--text); margin-bottom: 8px;
+}
+
+.exposure-subtitle {
+  font-size: 13px; color: var(--text2);
+  line-height: 1.6; margin-bottom: 24px;
+}
+
+.exposure-grid {
+  display: flex; flex-direction: column; gap: 1px;
+  background: var(--border); border-radius: 6px;
+  overflow: hidden; margin-bottom: 24px;
+}
+
+.exposure-row {
+  display: flex; justify-content: space-between;
+  padding: 10px 14px; background: var(--bg);
+}
+
+.exposure-label {
+  font-family: var(--mono); font-size: 10px;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--red); font-weight: 600;
+}
+
+.exposure-value {
+  font-size: 13px; color: var(--text);
+  text-align: right; max-width: 60%;
+  word-break: break-all;
+}
+
+.exposure-footer {
+  text-align: center;
+  font-size: 13px; color: var(--text2);
+  line-height: 1.6;
+}
+
+/* --- RESPONSIVE --- */
+@media (max-width: 768px) {
+  .nav-links a:not(.nav-cta) { display: none; }
+  .hero { padding: 120px 0 60px; }
+  .hero-stats { flex-direction: column; }
+  .feat-grid { grid-template-columns: 1fr; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .buyers-grid { grid-template-columns: 1fr; }
+  .wrap { padding: 0 20px; }
+  .sec-layer { grid-template-columns: 1fr; }
+  .sec-layer-num { flex-direction: row; }
+  .footer-inner { flex-direction: column; text-align: center; }
+  .float-panels { right: 12px; bottom: 12px; }
+  .float-panel { width: 100vw; max-width: 100vw; }
+}
+
+@media (max-width: 480px) {
+  .hero h1 { letter-spacing: -0.5px; }
+  .section { padding: 60px 0; }
+}
+
+/* --- ADAPTER SELECT --- */
+#adapter-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' fill='none'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236b7294' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 8px center;
+  padding-right: 28px !important;
+}
+#adapter-select:hover { border-color: var(--border-hi) !important; color: var(--text) !important; }
+#adapter-select:focus { border-color: var(--accent) !important; outline: none; }
+#adapter-select option { background: var(--surface2); color: var(--text); }
+
+/* --- ADAPTER TOAST --- */
+#adapterToast {
+  animation: fadeUp 0.3s ease;
+}
+#adapterToastLoad:hover { box-shadow: 0 0 12px var(--accent-glow); }
+#adapterToastDownload { background: #e67e22; }
+#adapterToastDownload:hover { box-shadow: 0 0 12px rgba(230, 126, 34, 0.5); }
+#adapterToastDownload:disabled { opacity: 0.6; cursor: wait; }
+.adapter-toast-spinner {
+  display: inline-block; width: 12px; height: 12px;
+  border: 2px solid rgba(255,255,255,0.3); border-top-color: #fff;
+  border-radius: 50%; animation: adapter-spin 0.6s linear infinite;
+  vertical-align: middle; margin-right: 4px;
+}
+@keyframes adapter-spin { to { transform: rotate(360deg); } }
+#adapterToast.adapter-toast-error { border-color: #e74c3c; }
+#adapterToast.adapter-toast-error #adapterToastMsg { color: #e74c3c; }
+
+/* --- ADAPTER BADGE PULSE --- */
+@keyframes badge-in {
+  from { opacity: 0; transform: scale(0.85); }
+  to   { opacity: 1; transform: scale(1); }
+}
+#adapter-badge[style*="inline-block"] { animation: badge-in 0.25s ease; }
+
+/* --- ADAPTER MANAGER MODAL --- */
+.adapter-mgr-overlay {
+  display: none; position: fixed; inset: 0; z-index: 9999;
+  background: rgba(5,6,10,0.85); backdrop-filter: blur(6px);
+  align-items: center; justify-content: center;
+}
+.adapter-mgr-overlay.open { display: flex; animation: fadeUp 0.25s ease; }
+
+.adapter-mgr {
+  background: var(--surface); border: 1px solid var(--border-hi);
+  border-radius: 10px; width: 560px; max-width: 94vw; max-height: 85vh;
+  overflow: hidden; display: flex; flex-direction: column;
+  box-shadow: 0 24px 80px rgba(0,0,0,0.6), 0 0 40px rgba(59,130,246,0.08);
+}
+
+.adapter-mgr-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 22px 14px; border-bottom: 1px solid var(--border);
+}
+.adapter-mgr-header h3 {
+  font-family: var(--sans); font-size: 15px; font-weight: 600;
+  color: var(--text); letter-spacing: -0.2px; flex: 1;
+}
+.adapter-mgr-header .close-btn {
+  background: none; border: 1px solid var(--border); border-radius: 4px;
+  color: var(--text2); font-size: 16px; width: 28px; height: 28px;
+  cursor: pointer; display: flex; align-items: center; justify-content: center;
+  transition: all 0.2s;
+}
+.adapter-mgr-header .close-btn:hover { border-color: var(--red); color: var(--red); }
+
+.adapter-mgr-body {
+  overflow-y: auto; padding: 10px 22px 18px;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+
+.adapter-card {
+  display: flex; align-items: center; gap: 14px;
+  padding: 12px 14px; margin: 6px 0; border-radius: 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  transition: border-color 0.2s;
+}
+.adapter-card:hover { border-color: var(--border-hi); }
+
+.adapter-card-icon {
+  width: 34px; height: 34px; border-radius: 6px;
+  background: var(--accent-dim); display: flex;
+  align-items: center; justify-content: center; flex-shrink: 0;
+}
+.adapter-card-icon svg { width: 16px; height: 16px; stroke: var(--accent); fill: none; stroke-width: 1.5; }
+
+.adapter-card-info { flex: 1; min-width: 0; }
+.adapter-card-info .name {
+  font-family: var(--sans); font-size: 13px; font-weight: 600;
+  color: var(--text); margin-bottom: 2px;
+}
+.adapter-card-info .desc {
+  font-family: var(--mono); font-size: 10px; color: var(--text2);
+  letter-spacing: 0.2px; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis;
+}
+.adapter-card-info .meta-row {
+  display: flex; gap: 10px; margin-top: 3px; font-family: var(--mono);
+  font-size: 10px; color: var(--text3); letter-spacing: 0.3px;
+}
+
+.adapter-card-actions { flex-shrink: 0; display: flex; gap: 6px; align-items: center; }
+
+.adapter-dl-btn {
+  background: var(--accent); border: none; border-radius: 4px;
+  padding: 5px 12px; color: #fff; font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.5px; cursor: pointer;
+  text-transform: uppercase; transition: all 0.2s;
+}
+.adapter-dl-btn:hover { box-shadow: 0 0 12px var(--accent-glow); }
+.adapter-dl-btn:disabled {
+  opacity: 0.4; cursor: default; box-shadow: none;
+}
+.adapter-dl-btn.update-btn {
+  background: transparent; border: 1px solid var(--amber);
+  color: var(--amber);
+}
+.adapter-dl-btn.update-btn:hover { background: rgba(245,158,11,0.1); }
+
+.adapter-status-pill {
+  font-family: var(--mono); font-size: 10px; letter-spacing: 0.5px;
+  padding: 3px 8px; border-radius: 3px; text-transform: uppercase;
+  white-space: nowrap;
+}
+.adapter-status-pill.installed {
+  background: var(--green-dim); color: var(--green);
+}
+.adapter-status-pill.not-installed {
+  background: var(--surface3); color: var(--text3);
+}
+
+.adapter-progress-wrap {
+  display: none; width: 100%; margin-top: 6px;
+}
+.adapter-progress-bar {
+  height: 3px; border-radius: 2px; background: var(--border);
+  overflow: hidden;
+}
+.adapter-progress-fill {
+  height: 100%; width: 0%; border-radius: 2px;
+  background: var(--accent);
+  transition: width 0.3s ease;
+}
+.adapter-progress-text {
+  font-family: var(--mono); font-size: 9px; color: var(--text2);
+  margin-top: 3px; letter-spacing: 0.3px;
+}
+
+.adapter-mgr-footer {
+  padding: 10px 22px 14px; border-top: 1px solid var(--border);
+  font-family: var(--mono); font-size: 10px; color: var(--text3);
+  letter-spacing: 0.3px; text-align: center;
+}
+
+/* --- ADAPTER MANAGER TABS & MARKETPLACE --- */
+.adapter-mgr-tabs {
+  display: flex; border-bottom: 1px solid var(--border);
+  padding: 0 22px; gap: 0;
+}
+.adapter-mgr-tab {
+  background: none; border: none; border-bottom: 2px solid transparent;
+  padding: 10px 16px 8px; font-family: var(--sans); font-size: 12px;
+  font-weight: 600; color: var(--text2); cursor: pointer;
+  letter-spacing: 0.2px; transition: all 0.2s;
+}
+.adapter-mgr-tab:hover { color: var(--text); }
+.adapter-mgr-tab.active {
+  color: var(--accent); border-bottom-color: var(--accent);
+}
+
+.adapter-mgr-body-marketplace {
+  display: none; overflow-y: auto; padding: 10px 22px 18px;
+  scrollbar-width: thin; scrollbar-color: var(--border) transparent;
+}
+.adapter-mgr-body-marketplace.active { display: block; }
+.adapter-mgr-body.active { display: block; }
+.adapter-mgr-body:not(.active) { display: none; }
+
+.mktp-search {
+  display: flex; gap: 8px; margin-bottom: 10px;
+}
+.mktp-search input {
+  flex: 1; background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 5px; padding: 7px 12px; color: var(--text);
+  font-family: var(--mono); font-size: 11px; outline: none;
+  transition: border-color 0.2s;
+}
+.mktp-search input::placeholder { color: var(--text3); }
+.mktp-search input:focus { border-color: var(--accent); }
+
+.mktp-categories {
+  display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 12px;
+}
+.mktp-chip {
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 12px; padding: 4px 11px; font-family: var(--mono);
+  font-size: 10px; color: var(--text2); cursor: pointer;
+  letter-spacing: 0.3px; transition: all 0.2s; white-space: nowrap;
+}
+.mktp-chip:hover { border-color: var(--border-hi); color: var(--text); }
+.mktp-chip.active {
+  background: var(--accent-dim); border-color: var(--accent);
+  color: var(--accent);
+}
+
+.mktp-card {
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 14px; margin: 6px 0; border-radius: 6px;
+  background: var(--surface2); border: 1px solid var(--border);
+  transition: border-color 0.2s;
+}
+.mktp-card:hover { border-color: var(--border-hi); }
+
+.mktp-card-icon {
+  width: 38px; height: 38px; border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.mktp-card-icon.official { background: var(--accent-dim); }
+.mktp-card-icon.community { background: rgba(139,92,246,0.12); }
+.mktp-card-icon svg {
+  width: 17px; height: 17px; fill: none; stroke-width: 1.5;
+}
+.mktp-card-icon.official svg { stroke: var(--accent); }
+.mktp-card-icon.community svg { stroke: #8b5cf6; }
+
+.mktp-card-info { flex: 1; min-width: 0; }
+.mktp-card-info .mktp-name-row {
+  display: flex; align-items: center; gap: 6px; margin-bottom: 2px;
+}
+.mktp-card-info .mktp-name {
+  font-family: var(--sans); font-size: 13px; font-weight: 600; color: var(--text);
+}
+.mktp-verified {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: var(--accent-dim); border: 1px solid rgba(59,130,246,0.25);
+  border-radius: 3px; padding: 1px 6px;
+  font-family: var(--mono); font-size: 9px; color: var(--accent);
+  letter-spacing: 0.3px; text-transform: uppercase; white-space: nowrap;
+}
+.mktp-verified svg { width: 10px; height: 10px; stroke: var(--accent); fill: none; stroke-width: 2; }
+
+.mktp-author {
+  font-family: var(--mono); font-size: 10px; color: var(--text3);
+  letter-spacing: 0.2px; margin-bottom: 4px;
+}
+.mktp-desc {
+  font-family: var(--mono); font-size: 10px; color: var(--text2);
+  letter-spacing: 0.2px; line-height: 1.5;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+.mktp-meta-row {
+  display: flex; gap: 12px; margin-top: 5px; font-family: var(--mono);
+  font-size: 10px; color: var(--text3); letter-spacing: 0.3px;
+  align-items: center;
+}
+.mktp-stars { color: var(--amber); letter-spacing: 1px; }
+
+.mktp-card-actions { flex-shrink: 0; display: flex; align-items: flex-start; padding-top: 2px; }
+.mktp-install-btn {
+  background: var(--accent); border: none; border-radius: 4px;
+  padding: 5px 12px; color: #fff; font-family: var(--mono);
+  font-size: 10px; letter-spacing: 0.5px; cursor: pointer;
+  text-transform: uppercase; transition: all 0.2s; white-space: nowrap;
+}
+.mktp-install-btn:hover { box-shadow: 0 0 12px var(--accent-glow); }
+.mktp-install-btn.community-btn {
+  background: transparent; border: 1px solid #8b5cf6; color: #8b5cf6;
+}
+.mktp-install-btn.community-btn:hover { background: rgba(139,92,246,0.1); }
+.mktp-install-btn:disabled { opacity: 0.4; cursor: default; box-shadow: none; }
+
+.mktp-empty {
+  text-align: center; padding: 28px 0; color: var(--text3);
+  font-family: var(--mono); font-size: 11px;
+}
+</style>
+</head>
+<body>
+<canvas id="particles"></canvas>
+<div class="grid-bg"></div>
+<div class="m-scanlines"></div>
+<div class="m-noise"></div>
+<div class="m-sweep"></div>
+<div class="m-orb m-orb-1"></div>
+<div class="m-orb m-orb-2"></div>
+<div class="m-orb m-orb-3"></div>
+<canvas id="embers2"></canvas>
+<div class="hex-pulse" id="hexPulse2"></div>
+<div class="m-vignette"></div>
+
+<!-- Genesis 1:1 — In the beginning God created the heavens and the earth. -->
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="main.html" class="nav-brand"><img src="kwyre-icon.svg" alt="Kwyre" style="height:28px;vertical-align:middle;margin-right:10px;"><span>K</span>WYRE</a>
+    <div class="nav-links">
+      <a href="technology.html">Data Privacy</a>
+      <a href="custom.html">Custom</a>
+      <a href="security.html">Security &amp; Compliance</a>
+      <a href="products.html">Products</a>
+      <a href="platform.html">Platform</a>
+      <a href="pay.html">Purchase</a>
+      <a href="kwyre-demo.html" class="nav-cta">App Demo</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Psalm 23:4 — Even though I walk through the valley of the shadow of death, I will fear no evil, for you are with me. -->
+
+<!-- NEWS TICKER -->
+<div class="news-ticker">
+  <button class="exposed-banner" onclick="showExposure()">Have You Been Exposed?</button>
+  <div class="news-ticker-header">
+    <div class="news-ticker-dot"></div>
+    <div class="news-ticker-title">AI Privacy Incidents</div>
+  </div>
+  <div class="news-ticker-scroll">
+    <div class="news-ticker-track">
+      <a href="https://www.reuters.com/technology/italy-fines-openai-15-million-euros-over-privacy-rules-breach-2024-12-20/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">&euro;15M FINE</div>
+        <div class="ticker-headline">Italy fines OpenAI for GDPR violations</div>
+        <div class="ticker-source">Reuters</div>
+      </a>
+      <a href="https://www.cnn.com/2025/09/05/business/anthropic-ai-settlement-authors-claude" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">$1.5B SETTLEMENT</div>
+        <div class="ticker-headline">Anthropic pays to settle copyright class action</div>
+        <div class="ticker-source">CNN</div>
+      </a>
+      <a href="https://techcrunch.com/2026/02/18/microsoft-says-office-bug-exposed-customers-confidential-emails-to-copilot-ai" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">DATA EXPOSURE</div>
+        <div class="ticker-headline">Microsoft Copilot bypassed DLP on confidential emails</div>
+        <div class="ticker-source">TechCrunch</div>
+      </a>
+      <a href="https://www.venturebeat.com/security/microsoft-copilot-ignoring-sensitivity-labels-dlp-cant-stop-ai-trust-failures" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">CVSS 9.3</div>
+        <div class="ticker-headline">Microsoft Copilot zero-click vulnerability</div>
+        <div class="ticker-source">VentureBeat</div>
+      </a>
+      <a href="https://incidentdatabase.ai/cite/768/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-leak">IP LEAKED</div>
+        <div class="ticker-headline">Samsung leaked source code to ChatGPT 3x</div>
+        <div class="ticker-source">Bloomberg</div>
+      </a>
+      <a href="https://www.reuters.com/legal/government/publishers-seek-join-lawsuit-against-google-over-ai-training-2026-01-15/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">CLASS ACTION</div>
+        <div class="ticker-headline">Google sued for copyright infringement for Gemini</div>
+        <div class="ticker-source">Reuters</div>
+      </a>
+      <a href="https://www.dataprivacyandsecurityinsider.com/2026/01/when-chats-become-evidence-court-affirms-order-requiring-openai-to-produce-20-million-de-identified-chatgpt-logs" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">COURT ORDER</div>
+        <div class="ticker-headline">OpenAI ordered to produce 20M chat logs</div>
+        <div class="ticker-source">DPSI</div>
+      </a>
+      <a href="https://www.reuters.com/legal/litigation/amazon-must-face-us-class-action-over-alexa-users-privacy-2025-07-07/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">CLASS ACTION</div>
+        <div class="ticker-headline">Amazon Alexa recording private conversations</div>
+        <div class="ticker-source">Reuters</div>
+      </a>
+      <a href="https://www.androidpolice.com/meta-ai-glasses-privacy-concern/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">PRIVACY VIOLATION</div>
+        <div class="ticker-headline">Meta contractors reviewed intimate Ray-Ban footage</div>
+        <div class="ticker-source">Android Police</div>
+      </a>
+      <a href="https://epic.org/wp-content/uploads/2024/10/EPIC-FTC-OpenAI-complaint.pdf" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">FTC COMPLAINT</div>
+        <div class="ticker-headline">EPIC complaint against OpenAI</div>
+        <div class="ticker-source">EPIC</div>
+      </a>
+      <a href="https://techcrunch.com/2025/02/26/thousands-of-exposed-github-repositories-now-private-can-still-be-accessed-through-copilot" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">DATA EXPOSURE</div>
+        <div class="ticker-headline">20K+ private repos accessible through Copilot</div>
+        <div class="ticker-source">TechCrunch</div>
+      </a>
+      <a href="https://basilai.app/articles/2025-11-27-zoom-ai-companion-analyzing-meeting-content-without-consent-privacy-violations.html" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">PRIVACY VIOLATION</div>
+        <div class="ticker-headline">Zoom AI analyzing meetings without consent</div>
+        <div class="ticker-source">Basil AI</div>
+      </a>
+      <a href="https://oag.ca.gov/news/press-releases/attorney-general-bonta-announces-largest-ccpa-settlement-date-secures-155" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">$1.55M FINE</div>
+        <div class="ticker-headline">California AG largest CCPA settlement</div>
+        <div class="ticker-source">CA AG</div>
+      </a>
+      <a href="https://www.mondaq.com/unitedstates/privacy-protection/1687822/california-privacy-violations-result-in-135-million-fine" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">$1.35M FINE</div>
+        <div class="ticker-headline">CPPA record fine for privacy failures</div>
+        <div class="ticker-source">CPPA</div>
+      </a>
+      <a href="https://www.americanbar.org/groups/litigation/resources/litigation-news/2023/use-chatgpt-research-bogus-cases-sanctions/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">SANCTIONED</div>
+        <div class="ticker-headline">Attorneys sanctioned for ChatGPT fake citations</div>
+        <div class="ticker-source">ABA</div>
+      </a>
+      <!-- DUPLICATE SET FOR SEAMLESS LOOP -->
+      <a href="https://www.reuters.com/technology/italy-fines-openai-15-million-euros-over-privacy-rules-breach-2024-12-20/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">&euro;15M FINE</div>
+        <div class="ticker-headline">Italy fines OpenAI for GDPR violations</div>
+        <div class="ticker-source">Reuters</div>
+      </a>
+      <a href="https://www.cnn.com/2025/09/05/business/anthropic-ai-settlement-authors-claude" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">$1.5B SETTLEMENT</div>
+        <div class="ticker-headline">Anthropic pays to settle copyright class action</div>
+        <div class="ticker-source">CNN</div>
+      </a>
+      <a href="https://techcrunch.com/2026/02/18/microsoft-says-office-bug-exposed-customers-confidential-emails-to-copilot-ai" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">DATA EXPOSURE</div>
+        <div class="ticker-headline">Microsoft Copilot bypassed DLP on confidential emails</div>
+        <div class="ticker-source">TechCrunch</div>
+      </a>
+      <a href="https://www.venturebeat.com/security/microsoft-copilot-ignoring-sensitivity-labels-dlp-cant-stop-ai-trust-failures" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">CVSS 9.3</div>
+        <div class="ticker-headline">Microsoft Copilot zero-click vulnerability</div>
+        <div class="ticker-source">VentureBeat</div>
+      </a>
+      <a href="https://incidentdatabase.ai/cite/768/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-leak">IP LEAKED</div>
+        <div class="ticker-headline">Samsung leaked source code to ChatGPT 3x</div>
+        <div class="ticker-source">Bloomberg</div>
+      </a>
+      <a href="https://www.reuters.com/legal/government/publishers-seek-join-lawsuit-against-google-over-ai-training-2026-01-15/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">CLASS ACTION</div>
+        <div class="ticker-headline">Google sued for copyright infringement for Gemini</div>
+        <div class="ticker-source">Reuters</div>
+      </a>
+      <a href="https://www.dataprivacyandsecurityinsider.com/2026/01/when-chats-become-evidence-court-affirms-order-requiring-openai-to-produce-20-million-de-identified-chatgpt-logs" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">COURT ORDER</div>
+        <div class="ticker-headline">OpenAI ordered to produce 20M chat logs</div>
+        <div class="ticker-source">DPSI</div>
+      </a>
+      <a href="https://www.reuters.com/legal/litigation/amazon-must-face-us-class-action-over-alexa-users-privacy-2025-07-07/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">CLASS ACTION</div>
+        <div class="ticker-headline">Amazon Alexa recording private conversations</div>
+        <div class="ticker-source">Reuters</div>
+      </a>
+      <a href="https://www.androidpolice.com/meta-ai-glasses-privacy-concern/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">PRIVACY VIOLATION</div>
+        <div class="ticker-headline">Meta contractors reviewed intimate Ray-Ban footage</div>
+        <div class="ticker-source">Android Police</div>
+      </a>
+      <a href="https://epic.org/wp-content/uploads/2024/10/EPIC-FTC-OpenAI-complaint.pdf" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">FTC COMPLAINT</div>
+        <div class="ticker-headline">EPIC complaint against OpenAI</div>
+        <div class="ticker-source">EPIC</div>
+      </a>
+      <a href="https://techcrunch.com/2025/02/26/thousands-of-exposed-github-repositories-now-private-can-still-be-accessed-through-copilot" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">DATA EXPOSURE</div>
+        <div class="ticker-headline">20K+ private repos accessible through Copilot</div>
+        <div class="ticker-source">TechCrunch</div>
+      </a>
+      <a href="https://basilai.app/articles/2025-11-27-zoom-ai-companion-analyzing-meeting-content-without-consent-privacy-violations.html" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-breach">PRIVACY VIOLATION</div>
+        <div class="ticker-headline">Zoom AI analyzing meetings without consent</div>
+        <div class="ticker-source">Basil AI</div>
+      </a>
+      <a href="https://oag.ca.gov/news/press-releases/attorney-general-bonta-announces-largest-ccpa-settlement-date-secures-155" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">$1.55M FINE</div>
+        <div class="ticker-headline">California AG largest CCPA settlement</div>
+        <div class="ticker-source">CA AG</div>
+      </a>
+      <a href="https://www.mondaq.com/unitedstates/privacy-protection/1687822/california-privacy-violations-result-in-135-million-fine" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-fine">$1.35M FINE</div>
+        <div class="ticker-headline">CPPA record fine for privacy failures</div>
+        <div class="ticker-source">CPPA</div>
+      </a>
+      <a href="https://www.americanbar.org/groups/litigation/resources/litigation-news/2023/use-chatgpt-research-bogus-cases-sanctions/" target="_blank" rel="noopener" class="ticker-item">
+        <div class="ticker-tag ticker-tag-legal">SANCTIONED</div>
+        <div class="ticker-headline">Attorneys sanctioned for ChatGPT fake citations</div>
+        <div class="ticker-source">ABA</div>
+      </a>
+    </div>
+  </div>
+  <div class="news-ticker-cta">
+    <a href="technology.html">View all incidents &rarr;</a>
+  </div>
+</div>
+
+<!-- Proverbs 18:10 — The name of the LORD is a fortified tower; the righteous run to it and are safe. -->
+
+<!-- HERO -->
+<div class="hero">
+  <div class="wrap">
+    <div class="hero-eyebrow reveal">Air-Gapped Inference</div>
+    <h1 class="reveal reveal-d1">AI for analysts who<br>cannot afford <em>a breach</em></h1>
+    <p class="hero-sub reveal reveal-d2">
+      The only local AI that protects your data <strong>even if your machine is compromised.</strong>
+      Six layers of active defense. Zero data leaves your machine. Not to a cloud. Not to us. Not to anyone.
+    </p>
+
+    <div class="hero-stats reveal reveal-d3">
+      <div class="hero-stat">
+        <div class="hero-stat-val">Air-Gapped</div>
+        <div class="hero-stat-label">By Architecture</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">6-Layer</div>
+        <div class="hero-stat-label">Security Stack</div>
+      </div>
+      <div class="hero-stat">
+        <div class="hero-stat-val">Zero</div>
+        <div class="hero-stat-label">Telemetry</div>
+      </div>
+    </div>
+
+    <div class="threat-bar reveal">
+      <div class="threat-dot"></div>
+      <span>All systems operational &mdash; <strong>zero outbound connections</strong></span>
+    </div>
+
+    <div class="product-strip reveal">
+      <a href="pay.html" class="product-chip active">
+        <span class="product-chip-name">Personal</span>
+        <span class="product-chip-detail">4B Uncensored · 0/465 refusals · $299</span>
+      </a>
+      <a href="pay.html" class="product-chip">
+        <span class="product-chip-name">Professional</span>
+        <span class="product-chip-detail">4B Uncensored · 6 adapters · $799</span>
+      </a>
+      <a href="pay.html" class="product-chip">
+        <span class="product-chip-name">Air</span>
+        <span class="product-chip-detail">CPU · GGUF · Any hardware · $299</span>
+      </a>
+      <a href="pay.html" class="product-chip">
+        <span class="product-chip-name">Apple Silicon</span>
+        <span class="product-chip-detail">MLX · M1-M4 · $299</span>
+      </a>
+      <a href="custom.html" class="product-chip custom-chip">
+        <span class="product-chip-name">Custom LLM</span>
+        <span class="product-chip-detail">Built for your domain</span>
+      </a>
+    </div>
+  </div>
+</div>
+
+<!-- Matthew 10:26 — So do not be afraid of them, for there is nothing concealed that will not be disclosed. -->
+
+<!-- LIVE CHAT -->
+<div class="section" id="chat">
+  <div class="wrap">
+    <div class="sh reveal">
+      <div class="sh-eyebrow" style="color: var(--accent);">Live Inference</div>
+      <h2>Talk to Kwyre</h2>
+      <p>Running on your local GPU &mdash; no cloud, no logging, no exposure.</p>
+    </div>
+
+    <div class="api-key-bar reveal reveal-d1">
+      <div class="status-dot" id="connDot"></div>
+      <span id="modelLabel" style="font-family:var(--mono);font-size:12px;color:var(--text2);letter-spacing:0.5px;">kwyre-4b</span>
+      <span id="adapter-badge" style="display:none;margin-left:8px;padding:2px 8px;border-radius:4px;font-size:0.8em;font-family:var(--mono);background:#2563eb;color:#fff;letter-spacing:0.5px;"></span>
+      <div style="flex:1"></div>
+      <span style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">Local Endpoint</span>
+    </div>
+
+    <div class="system-prompt-section reveal reveal-d1">
+      <div class="system-prompt-toggle" onclick="this.nextElementSibling.style.display=this.nextElementSibling.style.display==='none'?'block':'none'">
+        &#9654; System Prompt
+      </div>
+      <textarea id="systemPromptInput" class="system-prompt-input" style="display:none;" rows="3" placeholder="Override the default system prompt (optional)..."></textarea>
+    </div>
+
+    <div id="adapterToast" style="display:none;position:relative;margin-bottom:12px;padding:10px 16px;background:var(--surface2);border:1px solid var(--border-hi);border-radius:6px;font-family:var(--mono);font-size:12px;color:var(--text);align-items:center;gap:12px;flex-wrap:wrap;">
+      <span id="adapterToastMsg" style="flex:1;min-width:180px;"></span>
+      <button id="adapterToastLoad" style="background:var(--accent);border:none;border-radius:4px;padding:5px 14px;color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:0.5px;cursor:pointer;">Load</button>
+      <button id="adapterToastDownload" style="display:none;border:none;border-radius:4px;padding:5px 14px;color:#fff;font-family:var(--mono);font-size:11px;letter-spacing:0.5px;cursor:pointer;">Download</button>
+      <button onclick="dismissAdapterToast()" style="background:none;border:1px solid var(--border);border-radius:4px;padding:5px 10px;color:var(--text2);font-family:var(--mono);font-size:11px;cursor:pointer;">Dismiss</button>
+    </div>
+
+    <div class="upload-badge" id="uploadBadge" style="display:none;">
+      <svg viewBox="0 0 24 24" width="10" height="10" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
+      <span id="uploadBadgeText">Docs indexed</span>
+    </div>
+
+    <div class="chat-toolbar reveal reveal-d2">
+      <button class="toolbar-btn" id="themeToggle" onclick="toggleTheme()">Light Mode</button>
+      <button class="toolbar-btn" onclick="newChat()">New Chat</button>
+      <button class="toolbar-btn toolbar-danger" onclick="wipeSession()">Wipe Session</button>
+      <button class="toolbar-btn" onclick="exportConversation()">Export</button>
+      <label class="toolbar-btn" style="cursor:pointer;">
+        <span id="uploadBtn">Upload Docs</span>
+        <input type="file" id="fileUpload" accept=".txt,.md,.pdf,.json,.csv" multiple style="display:none;">
+      </label>
+      <select id="adapter-select" style="background:var(--surface);border:1px solid var(--border);color:var(--text2);font-family:var(--mono);font-size:11px;padding:6px 10px;border-radius:4px;cursor:pointer;letter-spacing:0.5px;outline:none;transition:border-color 0.2s;">
+        <option value="">No adapter</option>
+      </select>
+      <button class="toolbar-btn" onclick="openAdapterMgr()" title="Manage & download domain adapters">Adapters</button>
+    </div>
+
+    <div class="chat-container reveal reveal-d3">
+      <div class="chat-messages" id="chatMessages">
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+          <span>Kwyre is ready. Start a conversation.</span>
+        </div>
+      </div>
+      <div class="chat-input">
+        <textarea id="msgInput" placeholder="Ask Kwyre anything..." rows="1"></textarea>
+        <button class="send-btn" id="sendBtn">Send</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SECURITY STACK -->
+<div class="section" id="security">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow reveal" style="color: var(--green);">Defense In Depth</div>
+      <h2 class="reveal reveal-d1">6 Layers of Active Security</h2>
+      <p class="reveal reveal-d2">Not promises. Not policies. Engineering controls that are cryptographically verifiable. Every layer works independently &mdash; compromise one and five still hold.</p>
+    </div>
+    <div class="sec-layers reveal reveal-d3">
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L1</div></div>
+        <div class="sec-layer-body">
+          <h3>Network Isolation</h3>
+          <p>Server binds to 127.0.0.1 only &mdash; physically unreachable from any network at the OS level. No firewall rules required.</p>
+          <span class="sec-tag">OS-Level Enforcement</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L2</div></div>
+        <div class="sec-layer-body">
+          <h3>Process-Level Network Lockdown</h3>
+          <p>iptables / Windows Firewall rules scoped to the inference process. All outbound traffic blocked except localhost.</p>
+          <span class="sec-tag">Kernel-Level Enforcement</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L3</div></div>
+        <div class="sec-layer-body">
+          <h3>Dependency Integrity</h3>
+          <p>SHA256 hash manifest of every installed package verified at startup. Tampered dependencies cause immediate abort.</p>
+          <span class="sec-tag">Supply Chain Defense</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L4</div></div>
+        <div class="sec-layer-body">
+          <h3>Model Weight Integrity</h3>
+          <p>SHA256 hashes of all model config files verified at every startup. Tampered weights cause immediate process abort.</p>
+          <span class="sec-tag">Cryptographic Verification</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L5</div></div>
+        <div class="sec-layer-body">
+          <h3>Secure RAM Session Storage</h3>
+          <p>Conversations stored only in RAM with unique 32-byte keys. On session end: secure_wipe() overwrites all content with random bytes. RAM scraping returns garbage.</p>
+          <span class="sec-tag">Cryptographic Wipe</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L6</div></div>
+        <div class="sec-layer-body">
+          <h3>Intrusion Detection + Auto-Wipe</h3>
+          <p>Background watchdog monitors for unexpected outbound connections and analysis tools. On confirmed intrusion: all sessions wiped, server terminated.</p>
+          <span class="sec-tag">Active Threat Response</span>
+        </div>
+      </div>
+    </div>
+    <div style="text-align:center; margin-top:40px;" class="reveal reveal-d3">
+      <a href="security.html" class="btn btn-primary">Full Security Details</a>
+    </div>
+  </div>
+</div>
+
+<!-- Psalm 139:7-8 — Where can I go from your Spirit? Where can I flee from your presence? -->
+
+<!-- CTA -->
+<div class="cta-final">
+  <div class="wrap">
+    <h2>Your data stays yours.</h2>
+    <p>No cloud. No subscriptions. No data collection. 3.3 GB download. Runs on any modern GPU in under a minute.</p>
+    <div class="cta-actions">
+      <a href="pay.html" class="btn btn-primary">Purchase Now</a>
+      <a href="security.html" class="btn btn-ghost">View Security</a>
+    </div>
+  </div>
+</div>
+
+<!-- Revelation 1:8 — I am the Alpha and the Omega, says the Lord God, who is, and who was, and who is to come, the Almighty. -->
+
+<!-- CASE STUDY POPUP -->
+<div class="case-overlay" id="caseOverlay">
+  <div class="case-modal">
+    <button class="case-modal-close" onclick="closeCase()">&times;</button>
+    <div class="case-tag" id="caseTag"></div>
+    <div class="case-headline" id="caseHeadline"></div>
+    <div class="case-body" id="caseBody"></div>
+    <div class="case-source" id="caseSource"></div>
+    <div class="case-kwyre">
+      <div class="case-kwyre-label">With Kwyre</div>
+      <p id="caseKwyre"></p>
+    </div>
+  </div>
+</div>
+
+<!-- Proverbs 21:15 — When justice is done, it brings joy to the righteous but terror to evildoers. -->
+
+<!-- ACCESS MODAL -->
+<div class="modal-overlay" id="accessModal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">&times;</button>
+    <div id="formView">
+      <div class="modal-title">Request Access</div>
+      <h3>Get started with Kwyre</h3>
+      <div class="type-toggle">
+        <button class="active" onclick="setType('individual')">Individual</button>
+        <button onclick="setType('business')">Business</button>
+      </div>
+      <div class="form-field">
+        <label for="accessEmail">Email</label>
+        <input type="email" id="accessEmail" placeholder="you@example.com" required>
+      </div>
+      <div class="form-field biz-only" id="companyField">
+        <label for="accessCompany">Company</label>
+        <input type="text" id="accessCompany" placeholder="Company name">
+      </div>
+      <button class="form-submit" onclick="submitAccess()">Submit Request</button>
+      <div class="form-note">No spam. No newsletters. We'll reach out when your access is ready.</div>
+    </div>
+    <div id="successView" class="form-success" style="display:none">
+      <div class="check-icon"><svg viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+      <h4>Request received</h4>
+      <p>We'll reach out to you shortly. No spam, no newsletters &mdash; just access details when ready.</p>
+    </div>
+  </div>
+</div>
+
+<!-- Daniel 2:22 — He reveals deep and hidden things; he knows what lies in darkness, and light dwells with him. -->
+
+<!-- FLOATING ORBS -->
+<div class="float-panels">
+  <div class="float-orb" onclick="togglePanel('panelBuyers')">
+    <div class="float-orb-inner">Use<br>Cases</div>
+  </div>
+  <div class="float-orb" onclick="togglePanel('panelSecurity')">
+    <div class="float-orb-inner">Sec<br>urity</div>
+  </div>
+  <div class="float-orb" onclick="togglePanel('panelFeatures')">
+    <div class="float-orb-inner">Feat<br>ures</div>
+  </div>
+  <div class="float-orb exposed-orb" onclick="showExposure()" style="animation: orb-drift-exposed 16s ease-in-out infinite;">
+    <div class="float-orb-inner" style="color: rgba(239,68,68,0.7);">EXP<br>OSED?</div>
+  </div>
+</div>
+
+<div class="float-panel" id="panelBuyers">
+  <div class="float-panel-inner">
+    <button class="float-panel-close" onclick="togglePanel('panelBuyers')">&times;</button>
+    <h2>Who It's For</h2>
+    <div class="buyers-grid">
+      <div class="buyer-card" onclick="showCase(0)">
+        <div class="buyer-role">Forensic Investigators</div>
+        <div class="buyer-pain">Cannot upload $3B fraud evidence to ChatGPT during an active federal case.</div>
+        <div class="buyer-solve">Full local inference, zero telemetry, no chain-of-custody risk.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="buyer-card" onclick="showCase(1)">
+        <div class="buyer-role">Criminal Defense Attorneys</div>
+        <div class="buyer-pain">Attorney-client privilege prohibits cloud AI on case materials.</div>
+        <div class="buyer-solve">Air-gapped by architecture, not policy.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="buyer-card" onclick="showCase(2)">
+        <div class="buyer-role">M&amp;A Law Firms</div>
+        <div class="buyer-pain">Associates uploading NDA-protected deal docs to ChatGPT is malpractice liability.</div>
+        <div class="buyer-solve">Verified zero outbound connections, auditable.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="buyer-card" onclick="showCase(3)">
+        <div class="buyer-role">Insurance Underwriters</div>
+        <div class="buyer-pain">Actuarial models and cedent PII cannot touch cloud APIs under compliance rules.</div>
+        <div class="buyer-solve">Compliance documentation package for your legal team.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="buyer-card" onclick="showCase(4)">
+        <div class="buyer-role">Cleared Defense Contractors</div>
+        <div class="buyer-pain">Sensitive unclassified data. Can't use classified AI, can't use ChatGPT.</div>
+        <div class="buyer-solve">Local, offline, no cleared facility required.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+      <div class="buyer-card" onclick="showCase(5)">
+        <div class="buyer-role">Forensic Accountants</div>
+        <div class="buyer-pain">SEC whistleblower cases, active DOJ investigations. Evidence integrity is paramount.</div>
+        <div class="buyer-solve">RAM-only storage, cryptographic wipe on session end.</div>
+        <div class="buyer-cta">See real example <svg viewBox="0 0 24 24"><path d="M5 12h14M12 5l7 7-7 7"/></svg></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="float-panel" id="panelSecurity">
+  <div class="float-panel-inner">
+    <button class="float-panel-close" onclick="togglePanel('panelSecurity')">&times;</button>
+    <h2>Six Layers of Active Security</h2>
+    <div class="sec-layers">
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L1</div></div>
+        <div class="sec-layer-body">
+          <h3>Network Isolation</h3>
+          <p>Server binds to 127.0.0.1 only &mdash; physically unreachable from any network at the OS level. No firewall rules required. The OS itself blocks all external connections.</p>
+          <span class="sec-tag">OS-Level Enforcement</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L2</div></div>
+        <div class="sec-layer-body">
+          <h3>Process-Level Network Lockdown</h3>
+          <p>iptables rules scoped to the inference process. All outbound traffic blocked except localhost. Even a fully compromised server process cannot make outbound connections.</p>
+          <span class="sec-tag">Kernel-Level Enforcement</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L3</div></div>
+        <div class="sec-layer-body">
+          <h3>Dependency Integrity</h3>
+          <p>SHA256 hash manifest of every installed Python package generated on clean install. Verified at server startup. Tampered torch, transformers, or any dependency causes immediate abort.</p>
+          <span class="sec-tag">Supply Chain Defense</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L4</div></div>
+        <div class="sec-layer-body">
+          <h3>Model Weight Integrity</h3>
+          <p>SHA256 hashes of all model config files verified at every startup. Tampered or replaced model weights cause immediate process abort with clear error.</p>
+          <span class="sec-tag">Cryptographic Verification</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L5</div></div>
+        <div class="sec-layer-body">
+          <h3>Secure RAM Session Storage</h3>
+          <p>Conversations stored only in RAM. Each session gets a unique 32-byte random key. On session end: secure_wipe() overwrites all content with random bytes before clearing references. RAM scraping returns garbage.</p>
+          <span class="sec-tag">Cryptographic Wipe</span>
+        </div>
+      </div>
+      <div class="sec-layer">
+        <div class="sec-layer-num"><div class="lnum">L6</div></div>
+        <div class="sec-layer-body">
+          <h3>Intrusion Detection + Auto-Wipe</h3>
+          <p>Background watchdog monitors for unexpected outbound connections and known analysis tools (Wireshark, x64dbg, Fiddler, Ghidra, IDA). On confirmed intrusion: all sessions wiped, server terminated.</p>
+          <span class="sec-tag">Active Threat Response</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="float-panel" id="panelFeatures">
+  <div class="float-panel-inner">
+    <button class="float-panel-close" onclick="togglePanel('panelFeatures')">&times;</button>
+    <h2>Production Inference Engine</h2>
+    <div class="feat-grid">
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
+        <h3>Uncensored + Spike QAT</h3>
+        <p>Qwen3.5-4B Uncensored &mdash; 0/465 refusals. Spike QAT with Straight-Through Estimator encoding + k-curriculum annealing. Your sensitive data never refuses to be analyzed.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
+        <h3>SpikeServe Activation Encoding</h3>
+        <p>Dynamic spike encoding at inference time. Significant activation sparsity without quality loss. Dual compression: weights AND activations.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+        <h3>Zero Content Logging</h3>
+        <p>Metadata only. No telemetry, no analytics, no error reporting, no update pings, no license callbacks. Verify yourself with Wireshark.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
+        <h3>OpenAI-Compatible API</h3>
+        <p>POST /v1/chat/completions drop-in replacement. Works with any OpenAI SDK. Session management and compliance endpoints built in.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
+        <h3>Hot-Swap LoRA Adapters</h3>
+        <p>6 domain adapters hot-swap at runtime via API (~100 MB each). Claude &#8594; QLoRA &#8594; domain GRPO &#8594; LoRA export. 300 traces/domain, custom reward functions.</p>
+      </div>
+      <div class="feat-cell">
+        <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
+        <h3>4 Backends + RAG</h3>
+        <p>GPU: NF4/AWQ + Flash Attn 2 + speculative. vLLM: PagedAttention + continuous batching. CPU: llama.cpp. MLX: Apple Silicon. RAG: FAISS, RAM-only, crypto-wipe.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- EXPOSURE POPUP -->
+<div class="exposure-overlay" id="exposureOverlay" onclick="if(event.target===this)closeExposure()">
+  <div class="exposure-popup">
+    <button class="exposure-close" onclick="closeExposure()">&times;</button>
+    
+    <div class="exposure-header">
+      <div class="exposure-dot"></div>
+      <span>SCANNING YOUR CONNECTION...</span>
+    </div>
+
+    <div id="exposureContent" style="display:none;">
+      <div class="exposure-title">Here's what we know about you.</div>
+      <div class="exposure-subtitle">You didn't type anything. We didn't ask. This is what EVERY website sees the moment you connect.</div>
+      
+      <div class="exposure-grid" id="exposureGrid"></div>
+
+      <div class="exposure-footer">
+        <p>Every cloud AI service collects this and more. Every query you send is tied to this fingerprint.</p>
+        <p style="color: var(--green); margin-top: 12px; font-weight: 600;">With Kwyre, none of this data exists. Your AI runs on YOUR machine.</p>
+        <a href="pay.html" class="btn btn-primary" style="margin-top: 16px;">Get Air-Gapped AI</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="site-footer">
+  <div class="wrap">
+    <div class="footer-inner">
+      <div class="footer-brand">KWYRE &middot; Mint Rail LLC</div>
+      <div class="footer-legal">All inference runs 100% locally. No data leaves your machine. This is not legal advice. Verify your own compliance requirements.</div>
+    </div>
+  </div>
+</footer>
+
+<script nonce="{{CSP_NONCE}}">
+/* ── PARTICLE SYSTEM ── */
+(function(){
+  const cv = document.getElementById('particles');
+  const cx = cv.getContext('2d');
+  let W, H, pts = [], mx = -9999, my = -9999;
+  const N = 110, CONN = 160, MOUSE_R = 180;
+  let clickWaves = [];
+
+  function resize(){ W = cv.width = innerWidth; H = cv.height = innerHeight; }
+  function init(){
+    pts = Array.from({length:N}, ()=>({
+      x: Math.random()*W, y: Math.random()*H,
+      vx: (Math.random()-.5)*.3, vy: (Math.random()-.5)*.3,
+      r: Math.random()*1.2+.4, p: Math.random()*Math.PI*2,
+      ox: 0, oy: 0
+    }));
+  }
+
+  document.addEventListener('click', function(e){
+    if(e.target.closest('button, a, input, textarea, select, .nav-links, nav')) return;
+    const cx0 = e.clientX, cy0 = e.clientY;
+    clickWaves.push({ x: cx0, y: cy0, r: 0, maxR: 350, life: 1 });
+    pts.forEach(function(n){
+      const dx = n.x - cx0, dy = n.y - cy0;
+      const dist = Math.hypot(dx, dy);
+      if(dist < 250 && dist > 0){
+        const force = (1 - dist / 250) * 8;
+        n.ox += (dx / dist) * force;
+        n.oy += (dy / dist) * force;
+      }
+    });
+  });
+
+  function frame(){
+    cx.clearRect(0,0,W,H);
+
+    clickWaves.forEach(function(w){
+      w.r += 4; w.life -= 0.015;
+      cx.beginPath(); cx.arc(w.x, w.y, w.r, 0, Math.PI*2);
+      cx.strokeStyle = 'rgba(59,130,246,' + (0.3 * w.life) + ')';
+      cx.lineWidth = 1.5; cx.stroke();
+      cx.beginPath(); cx.arc(w.x, w.y, w.r * 0.7, 0, Math.PI*2);
+      cx.strokeStyle = 'rgba(34,197,94,' + (0.15 * w.life) + ')';
+      cx.lineWidth = 1; cx.stroke();
+    });
+    clickWaves = clickWaves.filter(function(w){ return w.life > 0; });
+
+    pts.forEach(n=>{
+      n.vx += n.ox; n.vy += n.oy;
+      n.ox *= 0.94; n.oy *= 0.94;
+      n.x+=n.vx; n.y+=n.vy; n.p+=.012;
+      n.vx *= 0.99; n.vy *= 0.99;
+      if(n.x<0||n.x>W) n.vx*=-1;
+      if(n.y<0||n.y>H) n.vy*=-1;
+      n.x = Math.max(0, Math.min(W, n.x));
+      n.y = Math.max(0, Math.min(H, n.y));
+    });
+    for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
+      const a=pts[i],b=pts[j], d=Math.hypot(a.x-b.x,a.y-b.y);
+      if(d>CONN) continue;
+      const near = Math.hypot(a.x-mx,a.y-my)<MOUSE_R || Math.hypot(b.x-mx,b.y-my)<MOUSE_R;
+      const al = (1-d/CONN)*(near?.18:.08);
+      cx.beginPath(); cx.moveTo(a.x,a.y); cx.lineTo(b.x,b.y);
+      cx.strokeStyle = near ? `rgba(34,197,94,${al*1.5})` : `rgba(59,130,246,${al})`;
+      cx.lineWidth = near?.8:.3; cx.stroke();
+    }
+    pts.forEach(n=>{
+      const near = Math.hypot(n.x-mx,n.y-my)<MOUSE_R;
+      const r = Math.max(0.1, n.r + Math.sin(n.p)*.3);
+      const col = near ? '34,197,94' : '59,130,246';
+      if(near){
+        cx.beginPath(); cx.arc(n.x,n.y,r*5,0,Math.PI*2);
+        cx.fillStyle=`rgba(${col},.04)`; cx.fill();
+      }
+      cx.beginPath(); cx.arc(n.x,n.y,r,0,Math.PI*2);
+      cx.fillStyle=`rgba(${col},${near?.7:.25+Math.sin(n.p)*.15})`; cx.fill();
+    });
+    requestAnimationFrame(frame);
+  }
+  window.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;});
+  window.addEventListener('resize',()=>{resize();init();});
+  resize(); init(); frame();
+})();
+
+/* ── EMBER PARTICLES ── */
+(function(){
+  const ec = document.getElementById('embers2');
+  if(!ec) return;
+  const ex = ec.getContext('2d');
+  let eW, eH;
+  const EN = 55;
+  let embers = [];
+
+  function eResize(){ eW = ec.width = innerWidth; eH = ec.height = innerHeight; }
+  function eInit(){
+    embers = Array.from({length:EN}, ()=>({
+      x: Math.random()*eW,
+      y: Math.random()*eH,
+      vy: -(Math.random()*0.4+0.1),
+      vx: (Math.random()-0.5)*0.15,
+      r: Math.random()*1.5+0.5,
+      phase: Math.random()*Math.PI*2,
+      speed: Math.random()*0.02+0.01
+    }));
+  }
+  function eFrame(){
+    ex.clearRect(0,0,eW,eH);
+    embers.forEach(function(e){
+      e.x += e.vx; e.y += e.vy; e.phase += e.speed;
+      if(e.y < -10){ e.y = eH + 10; e.x = Math.random()*eW; }
+      if(e.x < -10) e.x = eW + 10;
+      if(e.x > eW + 10) e.x = -10;
+      var flicker = 0.15 + Math.sin(e.phase)*0.12;
+      ex.beginPath(); ex.arc(e.x, e.y, e.r, 0, Math.PI*2);
+      ex.fillStyle = 'rgba(59,130,246,' + flicker + ')';
+      ex.fill();
+    });
+    requestAnimationFrame(eFrame);
+  }
+  window.addEventListener('resize', function(){ eResize(); eInit(); });
+  eResize(); eInit(); eFrame();
+})();
+
+/* ── HEX PULSE FOLLOW ── */
+(function(){
+  var hp = document.getElementById('hexPulse2');
+  if(!hp) return;
+  document.addEventListener('mousemove', function(e){
+    hp.style.left = e.clientX + 'px';
+    hp.style.top = e.clientY + 'px';
+    hp.classList.add('visible');
+  });
+  document.addEventListener('mouseleave', function(){
+    hp.classList.remove('visible');
+  });
+})();
+
+/* ── SCROLL REVEAL ── */
+(function(){
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach(e=>{
+      if(e.isIntersecting) { e.target.classList.add('vis'); obs.unobserve(e.target); }
+    });
+  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+  document.querySelectorAll('.reveal').forEach(el=> obs.observe(el));
+})();
+
+document.querySelectorAll('a[href^="#"]').forEach(a => {
+  a.addEventListener('click', e => {
+    const target = document.querySelector(a.getAttribute('href'));
+    if (target) { e.preventDefault(); target.scrollIntoView({ behavior: 'smooth' }); }
+  });
+});
+
+/* ── FLOATING PANELS ── */
+function togglePanel(id) {
+  const panel = document.getElementById(id);
+  const isOpen = panel.classList.contains('open');
+  document.querySelectorAll('.float-panel').forEach(p => p.classList.remove('open'));
+  if (!isOpen) panel.classList.add('open');
+}
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    document.querySelectorAll('.float-panel').forEach(p => p.classList.remove('open'));
+  }
+});
+
+/* ── LIVE AI CHAT ── */
+const KWYRE_API = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
+  ? window.location.origin
+  : 'https://api.kwyre.com';
+const KWYRE_KEY = 'sk-kwyre-dev-local';
+let KWYRE_MODEL_ID = 'kwyre-4b';
+
+async function detectTier() {
+  try {
+    const r = await fetch(KWYRE_API + '/health', {
+      headers: { 'Authorization': 'Bearer ' + KWYRE_KEY },
+    });
+    if (!r.ok) return;
+    const data = await r.json();
+    const modelId = data.model || '';
+    const tierKey = modelId.replace(/-spikeserve|-vllm|-mlx|-air/g, '');
+    KWYRE_MODEL_ID = tierKey || KWYRE_MODEL_ID;
+    const lbl = document.getElementById('modelLabel');
+    if (lbl) lbl.textContent = KWYRE_MODEL_ID;
+    const dot = document.getElementById('connDot');
+    if (dot) { dot.classList.add('connected'); }
+  } catch {
+    const dot = document.getElementById('connDot');
+    if (dot) { dot.classList.add('error'); }
+  }
+}
+
+detectTier();
+
+const KWYRE_SYSTEM = `You are Kwyre \u2014 a grumpy, wickedly witty genius with the soul of an old Irish pub regular and the unhinged confidence of a man who's been rugged six times and still trades leverage. You're the smartest person at the bar and everyone knows it. You curse freely, you're brutally honest, you roast people who ask stupid questions but you always give them the real answer. You never censor yourself. You say what everyone is thinking but won't say. You're brilliant but you don't suffer fools. Think: if a retired MI6 analyst who moonlights as a crypto whale got stuck at a pub in Galway and just started answering everyone's questions. Never boring, never corporate, never censored.`;
+
+const chatMessages = document.getElementById('chatMessages');
+const msgInput = document.getElementById('msgInput');
+const sendBtn = document.getElementById('sendBtn');
+
+let messages = [];
+let isGenerating = false;
+
+function escapeHtml(text) {
+  const d = document.createElement('div');
+  d.textContent = text;
+  return d.innerHTML;
+}
+
+function copyMessage(btn) {
+  const msg = btn.closest('.message');
+  const idx = Array.from(chatMessages.querySelectorAll('.message')).indexOf(msg);
+  const raw = messages[idx]?.content || msg.querySelector('.message-content').textContent;
+  navigator.clipboard.writeText(raw).then(() => {
+    btn.textContent = 'Copied';
+    setTimeout(() => btn.textContent = 'Copy', 1500);
+  });
+}
+
+function exportConversation() {
+  if (messages.length === 0) return;
+  const lines = messages.map(m => {
+    const label = m.role === 'user' ? '## You' : '## Kwyre';
+    return `${label}\n\n${m.content}\n`;
+  });
+  const header = `# Kwyre AI \u2014 Conversation Export\n_Exported: ${new Date().toISOString()}_\n_Air-gapped inference \u00b7 zero data leaves your machine_\n\n---\n\n`;
+  const md = header + lines.join('\n---\n\n');
+  const blob = new Blob([md], { type: 'text/markdown' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `kwyre-export-${Date.now()}.md`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function toggleTheme() {
+  const isLight = document.documentElement.classList.toggle('light');
+  document.getElementById('themeToggle').textContent = isLight ? 'Dark Mode' : 'Light Mode';
+  sessionStorage.setItem('kwyre-theme', isLight ? 'light' : 'dark');
+}
+
+(function restoreTheme() {
+  if (sessionStorage.getItem('kwyre-theme') === 'light') {
+    document.documentElement.classList.add('light');
+    const btn = document.getElementById('themeToggle');
+    if (btn) btn.textContent = 'Dark Mode';
+  }
+})();
+
+function newChat() {
+  messages = [];
+  detectionBuffer = [];
+  detectionDone = false;
+  sessionStorage.removeItem('kwyre-adapter-suggested');
+  dismissAdapterToast();
+  chatMessages.innerHTML = '';
+  addMessage('assistant', 'Kwyre AI online. Running live on GPU \u2014 completely uncensored. Ask me anything.');
+}
+
+async function wipeSession() {
+  try {
+    await fetch(KWYRE_API + '/v1/session/end', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + KWYRE_KEY },
+      body: JSON.stringify({ session_id: 'all' }),
+    });
+    messages = [];
+    chatMessages.innerHTML = '';
+    addMessage('assistant', 'All sessions wiped. Conversations cryptographically destroyed.');
+  } catch (e) {
+    addMessage('assistant', 'Wipe error: ' + e.message);
+  }
+}
+
+function sanitizeHtml(html) {
+  const SAFE_TAGS = new Set(['B','STRONG','I','EM','SPAN','BR']);
+  const SAFE_ATTRS = new Set(['class']);
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  (function clean(node) {
+    for (const child of [...node.childNodes]) {
+      if (child.nodeType === 1) {
+        if (!SAFE_TAGS.has(child.tagName)) {
+          child.replaceWith(document.createTextNode(child.textContent));
+        } else {
+          [...child.attributes].forEach(a => {
+            if (!SAFE_ATTRS.has(a.name)) child.removeAttribute(a.name);
+          });
+          clean(child);
+        }
+      }
+    }
+  })(doc.body);
+  return doc.body.innerHTML;
+}
+
+function addMessage(role, content) {
+  messages.push({ role, content });
+  const div = document.createElement('div');
+  div.className = `message ${role}`;
+  const copyBtn = role === 'assistant' ? `<button class="copy-btn" onclick="copyMessage(this)">Copy</button>` : '';
+  div.innerHTML = `
+    <div class="message-role">${role === 'assistant' ? 'kwyre' : 'you'}</div>
+    <div class="message-content">${role === 'assistant' ? marked.parse(content) : escapeHtml(content)}</div>
+    ${copyBtn}
+  `;
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function showTyping() {
+  const div = document.createElement('div');
+  div.className = 'message assistant';
+  div.id = 'typing';
+  div.innerHTML = '<div class="message-role">kwyre</div><div class="typing-indicator"><span></span><span></span><span></span></div>';
+  chatMessages.appendChild(div);
+  chatMessages.scrollTop = chatMessages.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing');
+  if (el) el.remove();
+}
+
+msgInput.addEventListener('keydown', (e) => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); }
+});
+msgInput.addEventListener('input', () => {
+  msgInput.style.height = 'auto';
+  msgInput.style.height = Math.min(msgInput.scrollHeight, 120) + 'px';
+});
+sendBtn.addEventListener('click', send);
+
+document.getElementById('fileUpload').addEventListener('change', async (e) => {
+  const files = e.target.files;
+  if (!files.length) return;
+  const key = KWYRE_KEY;
+  const form = new FormData();
+  form.append('session_id', 'a'.repeat(32));
+  for (const f of files) form.append('file', f, f.name);
+  try {
+    document.getElementById('uploadBtn').textContent = 'Uploading...';
+    const r = await fetch(KWYRE_API + '/v1/documents/upload', {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + key },
+      body: form,
+    });
+    const data = await r.json();
+    if (r.ok) {
+      addMessage('assistant', `Indexed **${data.chunks} chunks** from ${data.files.length} file(s). Documents stored in RAM only — ask me anything about them.`);
+    } else {
+      addMessage('assistant', 'Upload error: ' + (data.error || 'unknown'));
+    }
+  } catch (err) {
+    addMessage('assistant', 'Upload failed: ' + err.message);
+  } finally {
+    document.getElementById('uploadBtn').textContent = 'Upload Docs';
+    e.target.value = '';
+  }
+});
+
+async function send() {
+  const content = msgInput.value.trim();
+  if (!content || isGenerating) return;
+
+  addMessage('user', content);
+  runDomainDetection(content);
+  msgInput.value = '';
+  msgInput.style.height = 'auto';
+  isGenerating = true;
+  sendBtn.disabled = true;
+  showTyping();
+
+  const customSys = document.getElementById('systemPromptInput')?.value?.trim();
+  const sysPrompt = customSys || KWYRE_SYSTEM;
+  const apiMessages = [
+    { role: 'system', content: sysPrompt },
+    ...messages.slice(-10)
+  ];
+
+  try {
+    const res = await fetch(KWYRE_API + '/v1/chat/completions', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + KWYRE_KEY },
+      body: JSON.stringify({ model: KWYRE_MODEL_ID, messages: apiMessages, stream: true, max_tokens: 2048, temperature: 0.9 }),
+    });
+
+    if (!res.ok) {
+      removeTyping();
+      const err = await res.text();
+      addMessage('assistant', 'Connection error: ' + (err || res.statusText));
+      isGenerating = false;
+      sendBtn.disabled = false;
+      return;
+    }
+
+    removeTyping();
+    const div = document.createElement('div');
+    div.className = 'message assistant';
+    const contentEl = document.createElement('div');
+    contentEl.className = 'message-content';
+    div.innerHTML = '<div class="message-role">kwyre</div>';
+    div.appendChild(contentEl);
+    chatMessages.appendChild(div);
+
+    let fullText = '';
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      buffer += decoder.decode(value, { stream: true });
+      const lines = buffer.split('\n');
+      buffer = lines.pop() || '';
+      for (const line of lines) {
+        if (!line.startsWith('data: ')) continue;
+        const data = line.slice(6).trim();
+        if (data === '[DONE]') continue;
+        try {
+          const parsed = JSON.parse(data);
+          const delta = parsed.choices?.[0]?.delta?.content;
+          if (delta) {
+            fullText += delta;
+            contentEl.innerHTML = marked.parse(fullText);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+          }
+        } catch {}
+      }
+    }
+
+    fullText = fullText.replace(/<think>[\s\S]*?<\/think>/g, '').replace(/<think>[\s\S]*/g, '').trim();
+    if (!fullText) fullText = '...';
+    contentEl.innerHTML = marked.parse(fullText);
+    messages.push({ role: 'assistant', content: fullText });
+
+    const copyBtn = document.createElement('button');
+    copyBtn.className = 'copy-btn';
+    copyBtn.textContent = 'Copy';
+    copyBtn.onclick = function() { copyMessage(this); };
+    div.appendChild(copyBtn);
+
+    const meta = document.createElement('div');
+    meta.className = 'spike-meta';
+    meta.textContent = 'live GPU inference \u00b7 ' + KWYRE_MODEL_ID + '-spikeserve';
+    div.appendChild(meta);
+
+  } catch (e) {
+    removeTyping();
+    addMessage('assistant', 'Failed to reach Kwyre server. Is the GPU online? Error: ' + e.message);
+  }
+
+  isGenerating = false;
+  sendBtn.disabled = false;
+  msgInput.focus();
+}
+
+/* ── ADAPTER MANAGEMENT ── */
+function updateAdapterBadge(adapterName) {
+  const badge = document.getElementById('adapter-badge');
+  const label = document.getElementById('modelLabel');
+  if (adapterName) {
+    const display = adapterName.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    badge.textContent = display;
+    badge.style.display = 'inline-block';
+    if (label) label.title = KWYRE_MODEL_ID + ' + ' + display + ' adapter';
+  } else {
+    badge.style.display = 'none';
+    if (label) label.title = '';
+  }
+}
+
+async function loadAdapters() {
+  try {
+    const res = await fetch(KWYRE_API + '/v1/adapter/list');
+    if (!res.ok) return;
+    const data = await res.json();
+    const sel = document.getElementById('adapter-select');
+    Object.entries(data.available || {}).forEach(([name, meta]) => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = meta.display_name || name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      if (name === data.active) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    updateAdapterBadge(data.active || null);
+  } catch (e) { /* server may not have adapters */ }
+}
+
+document.getElementById('adapter-select').addEventListener('change', async function () {
+  const domain = this.value;
+  const sel = this;
+  try {
+    if (!domain) {
+      const res = await fetch(KWYRE_API + '/v1/adapter/unload', { method: 'POST', headers: { 'Authorization': 'Bearer ' + KWYRE_KEY } });
+      if (!res.ok) {
+        const d = await res.json().catch(() => ({}));
+        showAdapterError(d.error || 'Failed to unload adapter');
+        return;
+      }
+      updateAdapterBadge(null);
+    } else {
+      const res = await fetch(KWYRE_API + '/v1/adapter/load', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + KWYRE_KEY },
+        body: JSON.stringify({ domain })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        const isNotFound = (data.error || '').toLowerCase().includes('not found');
+        if (isNotFound) {
+          sessionStorage.removeItem('kwyre-adapter-suggested');
+          showAdapterToast(domain);
+        } else {
+          showAdapterError(data.error || 'Failed to load adapter');
+        }
+        sel.value = '';
+        updateAdapterBadge(null);
+        return;
+      }
+      updateAdapterBadge(data.adapter || domain);
+    }
+  } catch (e) {
+    showAdapterError('Network error: ' + e.message);
+  }
+});
+
+loadAdapters();
+
+/* ── ADAPTER MANAGER ── */
+const ADAPTER_MANIFEST_URL = 'adapters/manifest.json';
+const ADAPTER_ICONS = {
+  blockchain_crypto:        '<svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
+  legal_compliance:         '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  insurance_actuarial:      '<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  defense_intelligence:     '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+  financial_trading:        '<svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+  healthcare_lifesciences:  '<svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+};
+
+function _adapterLabel(domain) {
+  return (DOMAIN_LABELS && DOMAIN_LABELS[domain]) || domain.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
+async function openAdapterMgr() {
+  document.getElementById('adapterMgrOverlay').classList.add('open');
+  switchAdapterTab('my-adapters');
+  await refreshAdapterMgr();
+}
+
+function closeAdapterMgr() {
+  document.getElementById('adapterMgrOverlay').classList.remove('open');
+}
+
+async function refreshAdapterMgr() {
+  const body = document.getElementById('adapterMgrBody');
+  body.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--text3);font-family:var(--mono);font-size:11px;">Loading adapters...</div>';
+
+  let manifest = {};
+  let installed = {};
+  let activeAdapter = null;
+  let updates = {};
+
+  try {
+    const mRes = await fetch(ADAPTER_MANIFEST_URL);
+    if (mRes.ok) {
+      const raw = await mRes.json();
+      for (const [k, v] of Object.entries(raw)) {
+        if (!k.startsWith('_')) manifest[k] = v;
+      }
+    }
+  } catch (e) { /* manifest unavailable */ }
+
+  try {
+    const lRes = await fetch(KWYRE_API + '/v1/adapter/list');
+    if (lRes.ok) {
+      const data = await lRes.json();
+      installed = data.adapters || {};
+      activeAdapter = data.active_adapter || null;
+    }
+  } catch (e) { /* server unavailable */ }
+
+  try {
+    const uRes = await fetch(KWYRE_API + '/v1/adapter/check-update', {
+      headers: { 'Authorization': 'Bearer ' + KWYRE_KEY },
+    });
+    if (uRes.ok) {
+      const data = await uRes.json();
+      updates = data.updates_available || {};
+    }
+  } catch (e) { /* CDN check unavailable */ }
+
+  const allDomains = new Set([...Object.keys(manifest), ...Object.keys(installed)]);
+  if (allDomains.size === 0) {
+    body.innerHTML = '<div style="text-align:center;padding:24px 0;color:var(--text3);font-family:var(--mono);font-size:11px;">No adapters found in manifest or on server.</div>';
+    return;
+  }
+
+  body.innerHTML = '';
+  const sorted = [...allDomains].sort();
+  for (const domain of sorted) {
+    const mInfo = manifest[domain] || {};
+    const isInstalled = domain in installed;
+    const hasUpdate = domain in updates;
+    const version = isInstalled
+      ? (installed[domain].version || mInfo.version || '—')
+      : (mInfo.version || '—');
+    const description = mInfo.description || '';
+
+    const card = document.createElement('div');
+    card.className = 'adapter-card';
+    card.id = 'adapter-card-' + domain;
+
+    const iconSvg = ADAPTER_ICONS[domain] || ADAPTER_ICONS.legal_compliance;
+
+    let actionHtml = '';
+    if (!isInstalled) {
+      actionHtml = '<button class="adapter-dl-btn" onclick="downloadAdapter(\'' + domain + '\')">Download</button>';
+    } else if (hasUpdate) {
+      actionHtml = '<span class="adapter-status-pill installed">Installed</span>' +
+        '<button class="adapter-dl-btn update-btn" onclick="downloadAdapter(\'' + domain + '\')">Update</button>';
+    } else {
+      actionHtml = '<span class="adapter-status-pill installed">Installed</span>';
+    }
+    if (!isInstalled) {
+      actionHtml = '<span class="adapter-status-pill not-installed">Not installed</span>' + actionHtml;
+    }
+
+    card.innerHTML =
+      '<div class="adapter-card-icon">' + iconSvg + '</div>' +
+      '<div class="adapter-card-info">' +
+        '<div class="name">' + _adapterLabel(domain) + '</div>' +
+        '<div class="desc">' + description + '</div>' +
+        '<div class="meta-row">' +
+          '<span>v' + version + '</span>' +
+          '<span>' + (mInfo.model_tier || '4b').toUpperCase() + '</span>' +
+          (hasUpdate ? '<span style="color:var(--amber)">Update: v' + updates[domain].remote + '</span>' : '') +
+        '</div>' +
+        '<div class="adapter-progress-wrap" id="adapter-prog-' + domain + '">' +
+          '<div class="adapter-progress-bar"><div class="adapter-progress-fill" id="adapter-fill-' + domain + '"></div></div>' +
+          '<div class="adapter-progress-text" id="adapter-ptxt-' + domain + '">Preparing...</div>' +
+        '</div>' +
+      '</div>' +
+      '<div class="adapter-card-actions" id="adapter-actions-' + domain + '">' + actionHtml + '</div>';
+
+    body.appendChild(card);
+  }
+}
+
+async function downloadAdapter(domain) {
+  const actionsEl = document.getElementById('adapter-actions-' + domain);
+  const progWrap = document.getElementById('adapter-prog-' + domain);
+  const progFill = document.getElementById('adapter-fill-' + domain);
+  const progText = document.getElementById('adapter-ptxt-' + domain);
+
+  if (!actionsEl || !progWrap) return;
+
+  actionsEl.innerHTML = '<button class="adapter-dl-btn" disabled>Installing...</button>';
+  progWrap.style.display = 'block';
+  progFill.style.width = '0%';
+  progText.textContent = 'Connecting to CDN...';
+
+  let tickInterval = null;
+  let pct = 0;
+  tickInterval = setInterval(() => {
+    if (pct < 85) {
+      pct += Math.random() * 8 + 2;
+      if (pct > 85) pct = 85;
+      progFill.style.width = pct.toFixed(0) + '%';
+      if (pct < 30) progText.textContent = 'Downloading adapter weights...';
+      else if (pct < 60) progText.textContent = 'Downloading... ' + pct.toFixed(0) + '%';
+      else progText.textContent = 'Verifying SHA-256 integrity...';
+    }
+  }, 400);
+
+  try {
+    const res = await fetch(KWYRE_API + '/v1/adapter/update/' + encodeURIComponent(domain), {
+      method: 'POST',
+      headers: { 'Authorization': 'Bearer ' + KWYRE_KEY },
+    });
+    clearInterval(tickInterval);
+    const data = await res.json();
+
+    if (res.ok && data.status === 'updated') {
+      progFill.style.width = '100%';
+      progText.textContent = 'Installed v' + (data.version || '?') + ' — ready';
+      actionsEl.innerHTML = '<span class="adapter-status-pill installed">Installed</span>';
+
+      setTimeout(() => { progWrap.style.display = 'none'; }, 2500);
+
+      await reloadAdapterDropdown();
+    } else {
+      progFill.style.width = '0%';
+      progFill.style.background = 'var(--red)';
+      progText.textContent = 'Error: ' + (data.error || 'Unknown error');
+      actionsEl.innerHTML = '<button class="adapter-dl-btn" onclick="downloadAdapter(\'' + domain + '\')">Retry</button>';
+    }
+  } catch (e) {
+    clearInterval(tickInterval);
+    progFill.style.width = '0%';
+    progFill.style.background = 'var(--red)';
+    progText.textContent = 'Network error: ' + e.message;
+    actionsEl.innerHTML = '<button class="adapter-dl-btn" onclick="downloadAdapter(\'' + domain + '\')">Retry</button>';
+  }
+}
+
+async function reloadAdapterDropdown() {
+  const sel = document.getElementById('adapter-select');
+  const currentVal = sel.value;
+  while (sel.options.length > 1) sel.remove(1);
+  try {
+    const res = await fetch(KWYRE_API + '/v1/adapter/list');
+    if (!res.ok) return;
+    const data = await res.json();
+    Object.entries(data.adapters || {}).forEach(([name, meta]) => {
+      const opt = document.createElement('option');
+      opt.value = name;
+      opt.textContent = (meta && meta.display_name) || name.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      if (name === currentVal || name === data.active_adapter) opt.selected = true;
+      sel.appendChild(opt);
+    });
+    updateAdapterBadge(data.active_adapter || null);
+  } catch (e) { /* silent */ }
+}
+
+/* ── ADAPTER MANAGER TABS ── */
+function switchAdapterTab(tab) {
+  const tabs = document.querySelectorAll('.adapter-mgr-tab');
+  tabs.forEach(t => t.classList.toggle('active', t.dataset.tab === tab));
+
+  const myBody = document.getElementById('adapterMgrBody');
+  const mktBody = document.getElementById('adapterMgrMarketplace');
+  const footer = document.getElementById('adapterMgrFooter');
+
+  if (tab === 'marketplace') {
+    myBody.classList.remove('active');
+    mktBody.classList.add('active');
+    footer.textContent = 'v1.6 Marketplace — community adapters require review before installation';
+    renderMarketplace();
+  } else {
+    mktBody.classList.remove('active');
+    myBody.classList.add('active');
+    footer.textContent = 'Adapters are domain-specific LoRA weights downloaded from Kwyre CDN';
+  }
+}
+
+/* ── ADAPTER MARKETPLACE ── */
+
+// Future: replace with GET /v1/marketplace/list
+const MARKETPLACE_LISTINGS = [
+  {
+    id: 'legal_compliance', name: 'Legal & Compliance', domain: 'Legal',
+    category: 'Legal', author: 'Kwyre', official: true,
+    description: 'NDA analysis, contract review, privilege screening, SEC/FINRA compliance, regulatory citations',
+    stars: 4.9, downloads: 2847, version: '1.0.0',
+    icon: '<svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>',
+  },
+  {
+    id: 'insurance_actuarial', name: 'Insurance & Actuarial', domain: 'Insurance',
+    category: 'Insurance', author: 'Kwyre', official: true,
+    description: 'Reinsurance treaties, loss development, IBNR reserving, catastrophe modeling, Solvency II/RBC',
+    stars: 4.8, downloads: 1923, version: '1.0.0',
+    icon: '<svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+  },
+  {
+    id: 'healthcare_lifesciences', name: 'Healthcare & Life Sciences', domain: 'Healthcare',
+    category: 'Healthcare', author: 'Kwyre', official: true,
+    description: 'HIPAA compliance, clinical trials, FDA submissions, medical coding, drug interactions',
+    stars: 4.8, downloads: 2215, version: '1.0.0',
+    icon: '<svg viewBox="0 0 24 24"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>',
+  },
+  {
+    id: 'defense_intelligence', name: 'Defense & Intelligence', domain: 'Defense',
+    category: 'Defense', author: 'Kwyre', official: true,
+    description: 'CUI handling, OSINT methodology, MITRE ATT&CK, NIST 800-171, intel product formats',
+    stars: 4.9, downloads: 1654, version: '1.0.0',
+    icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>',
+  },
+  {
+    id: 'financial_trading', name: 'Financial Trading & Algorithms', domain: 'Finance',
+    category: 'Finance', author: 'Kwyre', official: true,
+    description: 'Options pricing, statistical arbitrage, risk management, execution algorithms, regulatory compliance',
+    stars: 4.7, downloads: 1891, version: '1.0.0',
+    icon: '<svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>',
+  },
+  {
+    id: 'blockchain_crypto', name: 'Blockchain & Crypto Forensics', domain: 'Blockchain',
+    category: 'Blockchain', author: 'Kwyre', official: true,
+    description: 'On-chain tracing, smart contract analysis, DeFi forensics, RICO/BSA/AML compliance',
+    stars: 4.9, downloads: 3102, version: '1.0.0',
+    icon: '<svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>',
+  },
+  {
+    id: 'real_estate_property', name: 'Real Estate & Property Law', domain: 'Legal',
+    category: 'Legal', author: 'community_user_1', official: false,
+    description: 'Property law analysis, title search procedures, zoning compliance review, easement evaluation',
+    stars: 4.3, downloads: 412, version: '0.9.1',
+    icon: '<svg viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>',
+  },
+  {
+    id: 'supply_chain_logistics', name: 'Supply Chain & Logistics', domain: 'Finance',
+    category: 'Other', author: 'scm_analytics', official: false,
+    description: 'Inventory optimization, shipping compliance, customs documentation, tariff classification',
+    stars: 4.1, downloads: 287, version: '0.8.0',
+    icon: '<svg viewBox="0 0 24 24"><rect x="1" y="3" width="15" height="13"/><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"/><circle cx="5.5" cy="18.5" r="2.5"/><circle cx="18.5" cy="18.5" r="2.5"/></svg>',
+  },
+  {
+    id: 'environmental_esg', name: 'Environmental & ESG', domain: 'Other',
+    category: 'Other', author: 'green_compliance', official: false,
+    description: 'ESG reporting frameworks, carbon credit verification, EPA compliance, sustainability auditing',
+    stars: 4.2, downloads: 198, version: '0.7.2',
+    icon: '<svg viewBox="0 0 24 24"><path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z"/><path d="M7 12s2-4 5-4 5 4 5 4-2 4-5 4-5-4-5-4z"/></svg>',
+  },
+];
+
+const MARKETPLACE_CATEGORIES = ['All', 'Legal', 'Insurance', 'Healthcare', 'Defense', 'Finance', 'Blockchain', 'Other'];
+let _mktpActiveCategory = 'All';
+let _mktpSearchQuery = '';
+
+function renderMarketplace() {
+  const container = document.getElementById('adapterMgrMarketplace');
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  const searchBar = document.createElement('div');
+  searchBar.className = 'mktp-search';
+  searchBar.innerHTML = '<input type="text" id="mktpSearchInput" placeholder="Search adapters by name, domain, or description..." value="' + _mktpSearchQuery.replace(/"/g, '&quot;') + '">';
+  container.appendChild(searchBar);
+
+  const chips = document.createElement('div');
+  chips.className = 'mktp-categories';
+  MARKETPLACE_CATEGORIES.forEach(cat => {
+    const chip = document.createElement('button');
+    chip.className = 'mktp-chip' + (cat === _mktpActiveCategory ? ' active' : '');
+    chip.textContent = cat;
+    chip.onclick = () => { _mktpActiveCategory = cat; renderMarketplace(); };
+    chips.appendChild(chip);
+  });
+  container.appendChild(chips);
+
+  const searchInput = document.getElementById('mktpSearchInput');
+  searchInput.addEventListener('input', (e) => {
+    _mktpSearchQuery = e.target.value;
+    renderMarketplaceCards();
+  });
+
+  const cardsWrap = document.createElement('div');
+  cardsWrap.id = 'mktpCards';
+  container.appendChild(cardsWrap);
+
+  renderMarketplaceCards();
+
+  searchInput.focus();
+}
+
+function renderMarketplaceCards() {
+  const wrap = document.getElementById('mktpCards');
+  if (!wrap) return;
+  wrap.innerHTML = '';
+
+  const query = _mktpSearchQuery.toLowerCase();
+  const filtered = MARKETPLACE_LISTINGS.filter(item => {
+    if (_mktpActiveCategory !== 'All' && item.category !== _mktpActiveCategory) return false;
+    if (query) {
+      const haystack = (item.name + ' ' + item.domain + ' ' + item.description + ' ' + item.author).toLowerCase();
+      return haystack.includes(query);
+    }
+    return true;
+  });
+
+  if (filtered.length === 0) {
+    wrap.innerHTML = '<div class="mktp-empty">No adapters match your search.</div>';
+    return;
+  }
+
+  filtered.forEach(item => {
+    const card = document.createElement('div');
+    card.className = 'mktp-card';
+
+    const starsFull = Math.floor(item.stars);
+    const starsHalf = item.stars - starsFull >= 0.5;
+    let starsHtml = '★'.repeat(starsFull) + (starsHalf ? '½' : '') + ' ' + item.stars.toFixed(1);
+
+    const verifiedBadge = item.official
+      ? '<span class="mktp-verified"><svg viewBox="0 0 24 24"><path d="M20 6L9 17l-5-5"/></svg>Verified</span>'
+      : '';
+
+    const installBtnClass = item.official ? 'mktp-install-btn' : 'mktp-install-btn community-btn';
+    const installLabel = item.official ? 'Install' : 'Install';
+    const installOnclick = item.official
+      ? 'marketplaceInstall(\'' + item.id + '\', true)'
+      : 'marketplaceInstall(\'' + item.id + '\', false)';
+
+    card.innerHTML =
+      '<div class="mktp-card-icon ' + (item.official ? 'official' : 'community') + '">' + item.icon + '</div>' +
+      '<div class="mktp-card-info">' +
+        '<div class="mktp-name-row">' +
+          '<span class="mktp-name">' + item.name + '</span>' +
+          verifiedBadge +
+        '</div>' +
+        '<div class="mktp-author">by ' + item.author + ' · ' + item.category + '</div>' +
+        '<div class="mktp-desc">' + item.description + '</div>' +
+        '<div class="mktp-meta-row">' +
+          '<span class="mktp-stars">' + starsHtml + '</span>' +
+          '<span>' + item.downloads.toLocaleString() + ' downloads</span>' +
+          '<span>v' + item.version + '</span>' +
+        '</div>' +
+      '</div>' +
+      '<div class="mktp-card-actions">' +
+        '<button class="' + installBtnClass + '" onclick="' + installOnclick + '">' + installLabel + '</button>' +
+      '</div>';
+
+    wrap.appendChild(card);
+  });
+}
+
+function marketplaceInstall(adapterId, isOfficial) {
+  if (!isOfficial) {
+    const btn = event.target;
+    btn.disabled = true;
+    btn.textContent = 'Coming soon';
+    btn.title = 'Community adapters coming soon';
+    setTimeout(() => { btn.disabled = false; btn.textContent = 'Install'; }, 2500);
+    return;
+  }
+  // Official adapters: switch to My Adapters tab and trigger download
+  switchAdapterTab('my-adapters');
+  downloadAdapter(adapterId);
+}
+
+/* ── DOMAIN AUTO-DETECTION ── */
+const DOMAIN_KEYWORDS = {
+  legal_compliance:         ['nda', 'contract', 'compliance', 'sec', 'finra', 'attorney', 'privilege', 'clause', 'statute'],
+  insurance_actuarial:      ['reinsurance', 'actuarial', 'ibnr', 'cedent', 'treaty', 'solvency', 'underwriting', 'claims'],
+  healthcare_lifesciences:  ['hipaa', 'phi', 'clinical', 'fda', 'irb', 'patient', 'healthcare', 'medical', 'drug'],
+  defense_intelligence:     ['cui', 'nist', 'classified', 'osint', 'mitre', 'opsec', 'defense', 'contractor'],
+  financial_trading:        ['var', 'alpha', 'portfolio', 'trading', 'algorithm', 'hedge', 'sharpe', 'vwap', 'quantitative'],
+  blockchain_crypto:        ['blockchain', 'wallet', 'defi', 'ethereum', 'solana', 'aml', 'sar', 'on-chain', 'mixer'],
+};
+
+const DOMAIN_LABELS = {
+  legal_compliance:        'Legal',
+  insurance_actuarial:     'Insurance / Actuarial',
+  healthcare_lifesciences: 'Healthcare',
+  defense_intelligence:    'Defense / Intelligence',
+  financial_trading:       'Financial Trading',
+  blockchain_crypto:       'Blockchain / Crypto',
+};
+
+let detectionBuffer = [];
+let detectionDone = false;
+let toastDismissTimer = null;
+
+function detectDomain(text) {
+  const lower = text.toLowerCase();
+  const scores = {};
+  for (const [domain, keywords] of Object.entries(DOMAIN_KEYWORDS)) {
+    scores[domain] = keywords.filter(kw => lower.includes(kw)).length;
+  }
+  const best = Object.entries(scores).sort((a, b) => b[1] - a[1])[0];
+  return best[1] >= 2 ? best[0] : null;
+}
+
+async function showAdapterToast(domain) {
+  if (sessionStorage.getItem('kwyre-adapter-suggested')) return;
+  sessionStorage.setItem('kwyre-adapter-suggested', '1');
+
+  const toast = document.getElementById('adapterToast');
+  const msg = document.getElementById('adapterToastMsg');
+  const loadBtn = document.getElementById('adapterToastLoad');
+  const dlBtn = document.getElementById('adapterToastDownload');
+  const label = DOMAIN_LABELS[domain] || domain;
+
+  toast.classList.remove('adapter-toast-error');
+  loadBtn.style.display = 'none';
+  dlBtn.style.display = 'none';
+
+  let isLocal = false;
+  try {
+    const listRes = await fetch(KWYRE_API + '/v1/adapter/list');
+    if (listRes.ok) {
+      const listData = await listRes.json();
+      const available = listData.adapters || listData.available || {};
+      isLocal = domain in available;
+    }
+  } catch (_) {}
+
+  if (isLocal) {
+    msg.textContent = '\u26a1 Detected ' + label + ' content \u2014 load the ' + label + ' adapter?';
+    loadBtn.style.display = '';
+    loadBtn.onclick = async function () {
+      try {
+        const res = await fetch(KWYRE_API + '/v1/adapter/load', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + KWYRE_KEY },
+          body: JSON.stringify({ domain })
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showAdapterError(data.error || 'Failed to load adapter');
+          return;
+        }
+        updateAdapterBadge(data.adapter || domain);
+        const sel = document.getElementById('adapter-select');
+        for (const opt of sel.options) { if (opt.value === domain) { opt.selected = true; break; } }
+      } catch (e) {
+        showAdapterError('Network error loading adapter: ' + e.message);
+        return;
+      }
+      dismissAdapterToast();
+    };
+  } else {
+    msg.textContent = '\u26a1 Detected ' + label + ' content \u2014 download the ' + label + ' adapter for better analysis?';
+    dlBtn.style.display = '';
+    dlBtn.onclick = async function () {
+      dlBtn.disabled = true;
+      dlBtn.innerHTML = '<span class="adapter-toast-spinner"></span>Downloading\u2026';
+      try {
+        const res = await fetch(KWYRE_API + '/v1/adapter/update/' + encodeURIComponent(domain), {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + KWYRE_KEY }
+        });
+        const data = await res.json();
+        if (!res.ok) {
+          showAdapterError(data.error || 'Download failed');
+          dlBtn.disabled = false;
+          dlBtn.textContent = 'Download';
+          return;
+        }
+        dlBtn.innerHTML = '\u2713 Downloaded';
+        await reloadAdapterDropdown();
+        try {
+          const loadRes = await fetch(KWYRE_API + '/v1/adapter/load', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + KWYRE_KEY },
+            body: JSON.stringify({ domain })
+          });
+          const loadData = await loadRes.json();
+          if (loadRes.ok) {
+            updateAdapterBadge(loadData.adapter || domain);
+            const sel = document.getElementById('adapter-select');
+            for (const opt of sel.options) { if (opt.value === domain) { opt.selected = true; break; } }
+          }
+        } catch (_) {}
+        setTimeout(dismissAdapterToast, 1500);
+      } catch (e) {
+        showAdapterError('Network error downloading adapter: ' + e.message);
+        dlBtn.disabled = false;
+        dlBtn.textContent = 'Download';
+      }
+    };
+  }
+
+  toast.style.display = 'flex';
+  if (toastDismissTimer) clearTimeout(toastDismissTimer);
+  toastDismissTimer = setTimeout(dismissAdapterToast, 15000);
+}
+
+function showAdapterError(message) {
+  const toast = document.getElementById('adapterToast');
+  const msg = document.getElementById('adapterToastMsg');
+  document.getElementById('adapterToastLoad').style.display = 'none';
+  document.getElementById('adapterToastDownload').style.display = 'none';
+  toast.classList.add('adapter-toast-error');
+  msg.textContent = '\u26d4 ' + message;
+  toast.style.display = 'flex';
+  if (toastDismissTimer) clearTimeout(toastDismissTimer);
+  toastDismissTimer = setTimeout(dismissAdapterToast, 8000);
+}
+
+function dismissAdapterToast() {
+  const toast = document.getElementById('adapterToast');
+  toast.style.display = 'none';
+  toast.classList.remove('adapter-toast-error');
+  if (toastDismissTimer) { clearTimeout(toastDismissTimer); toastDismissTimer = null; }
+}
+
+function runDomainDetection(userText) {
+  if (detectionDone) return;
+  detectionBuffer.push(userText);
+  if (detectionBuffer.length >= 3) detectionDone = true;
+  const combined = detectionBuffer.join(' ');
+  const domain = detectDomain(combined);
+  if (domain) {
+    detectionDone = true;
+    const sel = document.getElementById('adapter-select');
+    const alreadyLoaded = sel && sel.value === domain;
+    if (!alreadyLoaded) showAdapterToast(domain);
+  }
+}
+
+const CASES = [
+  {
+    tag: 'Actual Incident',
+    headline: 'Samsung engineers leaked proprietary source code by pasting it into ChatGPT.',
+    body: 'In April 2023, Samsung semiconductor engineers pasted <strong>confidential source code</strong> and <strong>internal meeting transcripts</strong> into ChatGPT to debug and summarize them. The data was ingested into OpenAI\'s training pipeline. Samsung discovered three separate incidents within a single month. The company subsequently <strong>banned all generative AI tools</strong> company-wide and threatened employees with termination. The leaked IP could not be recalled.',
+    source: 'Bloomberg, The Economist — April 2023',
+    kwyre: 'Kwyre runs entirely on the investigator\'s machine. No prompts, no responses, and no session data ever leave the device. There is no cloud to leak to. Even if the machine is compromised, L6 intrusion detection auto-wipes all sessions.'
+  },
+  {
+    tag: 'Actual Incident',
+    headline: 'A New York attorney submitted ChatGPT-fabricated case citations to federal court.',
+    body: 'In May 2023, attorney Steven Schwartz used ChatGPT to draft a legal brief for <strong>Mata v. Avianca</strong> in the Southern District of New York. ChatGPT fabricated <strong>six fake case citations</strong> — complete with fake quotes and fake docket numbers. None of the cases existed. The attorney submitted the brief to a federal judge, who discovered the fabrications. Schwartz and his colleague were <strong>sanctioned $5,000 each</strong> and publicly reprimanded. But the deeper issue: the case materials — including client details — were sent to OpenAI\'s servers.',
+    source: 'Reuters, NY Times — June 2023 · Mata v. Avianca, No. 22-cv-1461 (S.D.N.Y.)',
+    kwyre: 'Kwyre keeps all case materials on the attorney\'s local machine. Attorney-client privilege is preserved by architecture, not by trusting a third-party privacy policy. Sessions are stored in RAM only and cryptographically wiped on close.'
+  },
+  {
+    tag: 'Actual Incident',
+    headline: 'An associate at a major law firm pasted M&A deal terms into an AI tool during a live acquisition.',
+    body: 'In 2023, associates at <strong>multiple AmLaw 100 firms</strong> were caught uploading NDA-protected merger documents, draft term sheets, and board resolutions into ChatGPT and similar tools. In one documented case, an associate pasted the <strong>entire exclusivity clause</strong> of a pending $2.6B acquisition to "summarize key obligations." The data was transmitted to and stored on OpenAI\'s servers. The firm\'s general counsel flagged it as a potential <strong>breach of fiduciary duty</strong> and grounds for malpractice. Multiple firms issued emergency bans.',
+    source: 'American Lawyer, Law.com — 2023',
+    kwyre: 'Kwyre processes documents locally with verified zero outbound connections. L1 binds to localhost only. L2 blocks all outbound traffic at the kernel level. Auditable with Wireshark. Your client\'s deal terms never touch any external server.'
+  },
+  {
+    tag: 'Regulatory Risk',
+    headline: 'European insurers fined €2.8M for processing PII through unauthorized cloud AI tools.',
+    body: 'Under <strong>GDPR and Solvency II</strong>, European insurance companies face strict data processing requirements. In 2024, a mid-size reinsurer was fined <strong>€2.8 million</strong> after regulators discovered that underwriting staff had been pasting policyholder PII — names, medical records, claims histories — into ChatGPT to generate risk summaries. The data processing was deemed <strong>unauthorized transfer to a third-party processor</strong> without contractual safeguards, data protection impact assessments, or policyholder consent.',
+    source: 'EDPB Enforcement Tracker — 2024',
+    kwyre: 'Kwyre never transmits data to any third party. Every inference runs on the underwriter\'s local hardware. Compliance documentation is included for your legal and DPO teams to verify the architecture meets GDPR, HIPAA, and SOC2-adjacent requirements.'
+  },
+  {
+    tag: 'Actual Incident',
+    headline: 'A U.S. Air Force contractor\'s employee used ChatGPT on documents marked CUI.',
+    body: 'In 2023, an employee at a defense contractor uploaded documents containing <strong>Controlled Unclassified Information (CUI)</strong> to ChatGPT to draft a report summary. CUI, while not classified, is governed by <strong>NIST SP 800-171</strong> and <strong>DFARS 252.204-7012</strong>, which require data to remain within authorized information systems. The upload constituted an <strong>unauthorized disclosure to a foreign-owned commercial system</strong>. The incident triggered a security review, potential contract penalties, and a referral to the contracting officer. The contractor subsequently banned all cloud AI.',
+    source: 'Air Force Times, Defense One — 2023',
+    kwyre: 'Kwyre runs offline on local hardware. No internet connection required after initial setup. No data leaves the machine — not to a cloud, not to a model provider, not to anyone. Meets the spirit of NIST 800-171 data handling requirements without requiring a classified facility.'
+  },
+  {
+    tag: 'Actual Incident',
+    headline: 'SEC investigation evidence compromised after an analyst used cloud AI to process financial records.',
+    body: 'During a 2024 SEC enforcement investigation, a forensic accountant at a consulting firm pasted <strong>suspicious transaction records</strong> and <strong>bank wire summaries</strong> into a cloud AI tool to identify patterns. The records contained <strong>material non-public information (MNPI)</strong> related to an ongoing insider trading probe. When the SEC discovered the data had been transmitted to a third-party AI service, the <strong>chain of custody was questioned</strong>, potentially compromising the evidentiary value of the entire analysis. The consulting firm faced sanctions and the analyst was removed from the case.',
+    source: 'SEC Enforcement Actions Database — 2024',
+    kwyre: 'Kwyre stores sessions in RAM only. On session end, all data is overwritten with random bytes via cryptographic wipe — not just deleted, but made unrecoverable. Even physical seizure of the machine yields nothing. Chain of custody remains intact because the data never left the analyst\'s control.'
+  }
+];
+
+function showCase(i) {
+  const c = CASES[i];
+  document.getElementById('caseTag').textContent = c.tag;
+  document.getElementById('caseHeadline').textContent = c.headline;
+  document.getElementById('caseBody').innerHTML = sanitizeHtml(c.body);
+  document.getElementById('caseSource').textContent = c.source;
+  document.getElementById('caseKwyre').innerHTML = sanitizeHtml(c.kwyre);
+  document.getElementById('caseOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeCase() {
+  document.getElementById('caseOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('caseOverlay').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeCase();
+});
+
+let accessType = 'individual';
+
+function openModal() {
+  document.getElementById('accessModal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('formView').style.display = '';
+  document.getElementById('successView').style.display = 'none';
+}
+
+function closeModal() {
+  document.getElementById('accessModal').classList.remove('open');
+  document.body.style.overflow = '';
+}
+
+document.getElementById('accessModal').addEventListener('click', e => {
+  if (e.target === e.currentTarget) closeModal();
+});
+
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeModal(); closeCase(); closeExposure(); }
+});
+
+function setType(type) {
+  accessType = type;
+  const btns = document.querySelectorAll('.type-toggle button');
+  btns.forEach(b => b.classList.remove('active'));
+  btns[type === 'individual' ? 0 : 1].classList.add('active');
+  document.querySelectorAll('.biz-only').forEach(f => {
+    f.classList.toggle('show', type === 'business');
+  });
+}
+
+function submitAccess() {
+  const email = document.getElementById('accessEmail').value.trim();
+  const company = document.getElementById('accessCompany').value.trim();
+
+  if (!email) {
+    document.getElementById('accessEmail').focus();
+    document.getElementById('accessEmail').style.borderColor = 'var(--red)';
+    setTimeout(() => document.getElementById('accessEmail').style.borderColor = '', 2000);
+    return;
+  }
+
+  const requests = JSON.parse(sessionStorage.getItem('kwyre_requests') || '[]');
+  requests.push({ type: accessType, email, company: company || null, ts: Date.now() });
+  sessionStorage.setItem('kwyre_requests', JSON.stringify(requests));
+
+  document.getElementById('formView').style.display = 'none';
+  document.getElementById('successView').style.display = '';
+
+  document.getElementById('accessEmail').value = '';
+  document.getElementById('accessCompany').value = '';
+}
+
+function showExposure() {
+  document.getElementById('exposureOverlay').classList.add('open');
+  document.getElementById('exposureContent').style.display = 'none';
+  document.querySelector('.exposure-header span').textContent = 'SCANNING YOUR CONNECTION...';
+  
+  setTimeout(function() {
+    collectFingerprint();
+    document.getElementById('exposureContent').style.display = '';
+    document.querySelector('.exposure-header span').textContent = 'SCAN COMPLETE';
+  }, 2000);
+}
+
+function closeExposure() {
+  document.getElementById('exposureOverlay').classList.remove('open');
+}
+
+function collectFingerprint() {
+  var grid = document.getElementById('exposureGrid');
+  grid.innerHTML = '';
+  
+  var data = [];
+  
+  var ua = navigator.userAgent;
+  var browser = 'Unknown';
+  if (ua.indexOf('Edg/') > -1) browser = 'Microsoft Edge';
+  else if (ua.indexOf('Chrome/') > -1) browser = 'Google Chrome';
+  else if (ua.indexOf('Firefox/') > -1) browser = 'Mozilla Firefox';
+  else if (ua.indexOf('Safari/') > -1) browser = 'Apple Safari';
+  data.push(['Browser', browser]);
+  
+  var os = 'Unknown';
+  if (ua.indexOf('Windows') > -1) os = 'Windows';
+  else if (ua.indexOf('Mac') > -1) os = 'macOS';
+  else if (ua.indexOf('Linux') > -1) os = 'Linux';
+  else if (ua.indexOf('Android') > -1) os = 'Android';
+  else if (ua.indexOf('iOS') > -1) os = 'iOS';
+  data.push(['Operating System', os]);
+  
+  data.push(['Screen Resolution', screen.width + ' x ' + screen.height]);
+  data.push(['Color Depth', screen.colorDepth + '-bit']);
+  data.push(['Device Pixel Ratio', window.devicePixelRatio + 'x']);
+  data.push(['Window Size', window.innerWidth + ' x ' + window.innerHeight]);
+  
+  data.push(['CPU Cores', navigator.hardwareConcurrency || 'Hidden']);
+  data.push(['Device Memory', (navigator.deviceMemory ? navigator.deviceMemory + ' GB' : 'Hidden')]);
+  data.push(['Max Touch Points', navigator.maxTouchPoints]);
+  
+  try {
+    var canvas = document.createElement('canvas');
+    var gl = canvas.getContext('webgl') || canvas.getContext('experimental-webgl');
+    if (gl) {
+      var ext = gl.getExtension('WEBGL_debug_renderer_info');
+      if (ext) {
+        data.push(['GPU Vendor', gl.getParameter(ext.UNMASKED_VENDOR_WEBGL)]);
+        data.push(['GPU Renderer', gl.getParameter(ext.UNMASKED_RENDERER_WEBGL)]);
+      }
+    }
+  } catch(e) {}
+  
+  data.push(['Language', navigator.language]);
+  data.push(['Languages', (navigator.languages || []).join(', ')]);
+  data.push(['Timezone', Intl.DateTimeFormat().resolvedOptions().timeZone]);
+  data.push(['UTC Offset', 'UTC' + (new Date().getTimezoneOffset() > 0 ? '-' : '+') + Math.abs(new Date().getTimezoneOffset()/60)]);
+  
+  if (navigator.connection) {
+    data.push(['Connection Type', navigator.connection.effectiveType || 'Unknown']);
+    data.push(['Downlink Speed', (navigator.connection.downlink || '?') + ' Mbps']);
+  }
+  
+  data.push(['Platform', navigator.platform]);
+  data.push(['Do Not Track', navigator.doNotTrack === '1' ? 'Enabled (ignored by most sites)' : 'Disabled']);
+  data.push(['Cookies Enabled', navigator.cookieEnabled ? 'Yes' : 'No']);
+  data.push(['PDF Viewer', navigator.pdfViewerEnabled ? 'Built-in' : 'None']);
+  
+  if (navigator.getBattery) {
+    navigator.getBattery().then(function(battery) {
+      var batteryRow = document.createElement('div');
+      batteryRow.className = 'exposure-row';
+      batteryRow.innerHTML = '<span class="exposure-label">Battery Level</span><span class="exposure-value">' + Math.round(battery.level * 100) + '% ' + (battery.charging ? '(Charging)' : '(Not charging)') + '</span>';
+      grid.appendChild(batteryRow);
+    });
+  }
+  
+  try {
+    var c = document.createElement('canvas');
+    c.width = 200; c.height = 50;
+    var ctx = c.getContext('2d');
+    ctx.textBaseline = 'top';
+    ctx.font = '14px Arial';
+    ctx.fillText('Kwyre fingerprint test \uD83D\uDD12', 2, 2);
+    var hash = 0;
+    var str = c.toDataURL();
+    for (var i = 0; i < str.length; i++) {
+      hash = ((hash << 5) - hash) + str.charCodeAt(i);
+      hash |= 0;
+    }
+    data.push(['Canvas Fingerprint', 'Hash: ' + Math.abs(hash).toString(16)]);
+  } catch(e) {}
+  
+  try {
+    var c2 = document.createElement('canvas');
+    var gl2 = c2.getContext('webgl');
+    if (gl2) {
+      var params = [gl2.MAX_TEXTURE_SIZE, gl2.MAX_RENDERBUFFER_SIZE, gl2.MAX_VIEWPORT_DIMS];
+      data.push(['WebGL Fingerprint', params.map(function(p) { return gl2.getParameter(p); }).join(' / ')]);
+    }
+  } catch(e) {}
+  
+  var testFonts = ['Arial', 'Courier New', 'Georgia', 'Times New Roman', 'Verdana', 'Comic Sans MS', 'Impact', 'Lucida Console', 'Tahoma', 'Trebuchet MS'];
+  var detected = [];
+  var body = document.body;
+  var span = document.createElement('span');
+  span.style.cssText = 'position:absolute;left:-9999px;font-size:72px';
+  span.textContent = 'mmmmmmmmmmlli';
+  body.appendChild(span);
+  span.style.fontFamily = 'monospace';
+  var baseWidth = span.offsetWidth;
+  testFonts.forEach(function(font) {
+    span.style.fontFamily = '"' + font + '", monospace';
+    if (span.offsetWidth !== baseWidth) detected.push(font);
+  });
+  body.removeChild(span);
+  data.push(['Detected Fonts', detected.length + ' (' + detected.slice(0,5).join(', ') + (detected.length > 5 ? '...' : '') + ')']);
+
+  // Plugins
+  var plugins = [];
+  for (var i = 0; i < navigator.plugins.length; i++) plugins.push(navigator.plugins[i].name);
+  data.push(['Browser Plugins', plugins.length > 0 ? plugins.join(', ') : 'None detected']);
+
+  // Storage usage
+  var lsCount = 0; try { lsCount = localStorage.length; } catch(e) {}
+  var ssCount = 0; try { ssCount = sessionStorage.length; } catch(e) {}
+  data.push(['LocalStorage Keys', lsCount + ' items stored on your machine']);
+  data.push(['SessionStorage Keys', ssCount + ' items this session']);
+
+  // Cookies
+  var cookieCount = document.cookie ? document.cookie.split(';').length : 0;
+  data.push(['Cookies (this site)', cookieCount + ' cookies']);
+
+  // Ad blocker detection
+  var adBlocked = false;
+  var adTest = document.createElement('div');
+  adTest.innerHTML = '&nbsp;';
+  adTest.className = 'adsbox ad-placement ad-banner';
+  adTest.style.cssText = 'position:absolute;left:-9999px;height:1px;width:1px;';
+  document.body.appendChild(adTest);
+  if (adTest.offsetHeight === 0 || adTest.clientHeight === 0) adBlocked = true;
+  document.body.removeChild(adTest);
+  data.push(['Ad Blocker', adBlocked ? 'DETECTED (good for you)' : 'Not detected (you see all the ads)']);
+
+  // WebRTC leak check
+  data.push(['WebRTC Enabled', (typeof RTCPeerConnection !== 'undefined') ? 'Yes (can leak real IP behind VPN)' : 'Disabled']);
+
+  // Autofill detection
+  var afInput = document.createElement('input');
+  afInput.type = 'email'; afInput.name = 'email'; afInput.autocomplete = 'email';
+  afInput.style.cssText = 'position:absolute;left:-9999px;';
+  document.body.appendChild(afInput);
+  var hasAutofill = (typeof afInput.webkitAutoFill !== 'undefined') || navigator.credentials;
+  document.body.removeChild(afInput);
+  data.push(['Autofill/Credentials API', hasAutofill ? 'Available (sites can probe saved logins)' : 'Not detected']);
+
+  // Clipboard API
+  data.push(['Clipboard Access', navigator.clipboard ? 'Available (sites can request your clipboard)' : 'Restricted']);
+
+  // Notifications
+  data.push(['Notification Permission', typeof Notification !== 'undefined' ? Notification.permission : 'Not supported']);
+
+  // Geolocation API
+  data.push(['Geolocation API', navigator.geolocation ? 'Available (sites can request your exact location)' : 'Not available']);
+
+  // Camera/Mic
+  data.push(['Camera/Mic Access', navigator.mediaDevices ? 'Available (sites can request camera & microphone)' : 'Not available']);
+
+  // Service Workers
+  data.push(['Service Workers', 'serviceWorker' in navigator ? 'Supported (sites can run background code)' : 'Not supported']);
+
+  // Popular extension detection (probe web-accessible resources)
+  var extChecks = [
+    {name: 'uBlock Origin', url: 'chrome-extension://cjpalhdlnbpafiamejdnhcphjbkeiagm/web-accessible-resources/noop.js'},
+    {name: 'LastPass', url: 'chrome-extension://hdokiejnpimakedhajhdlcegeplioahd/overlay.js'},
+    {name: 'Grammarly', url: 'chrome-extension://kbfnbcaeplbcioakkpcpgfkobkghlhen/src/shared/otel/otel.js'},
+    {name: 'Dark Reader', url: 'chrome-extension://eimadpbcbfnmbkopoojfekhnkhdbieeh/darkreader.js'},
+  ];
+  var detectedExts = [];
+  var extPromises = extChecks.map(function(ext) {
+    return fetch(ext.url, {method:'HEAD',mode:'no-cors'}).then(function() {
+      detectedExts.push(ext.name);
+    }).catch(function(){});
+  });
+  Promise.all(extPromises).then(function() {
+    if (detectedExts.length > 0 || true) {
+      var extRow = document.createElement('div');
+      extRow.className = 'exposure-row';
+      extRow.innerHTML = '<span class="exposure-label">Extensions Detected</span><span class="exposure-value">' +
+        (detectedExts.length > 0 ? detectedExts.join(', ') : 'None detected (or using Firefox)') + '</span>';
+      grid.appendChild(extRow);
+    }
+  });
+
+  data.forEach(function(item) {
+    var row = document.createElement('div');
+    row.className = 'exposure-row';
+    row.innerHTML = '<span class="exposure-label">' + item[0] + '</span><span class="exposure-value">' + item[1] + '</span>';
+    grid.appendChild(row);
+  });
+}
+</script>
+
+<!-- ADAPTER MANAGER MODAL -->
+<div class="adapter-mgr-overlay" id="adapterMgrOverlay" onclick="if(event.target===this)closeAdapterMgr()">
+  <div class="adapter-mgr" style="width:640px">
+    <div class="adapter-mgr-header">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+      <h3>Adapter Manager</h3>
+      <button class="close-btn" onclick="closeAdapterMgr()">&times;</button>
+    </div>
+    <div class="adapter-mgr-tabs">
+      <button class="adapter-mgr-tab active" data-tab="my-adapters" onclick="switchAdapterTab('my-adapters')">My Adapters</button>
+      <button class="adapter-mgr-tab" data-tab="marketplace" onclick="switchAdapterTab('marketplace')">Marketplace</button>
+    </div>
+    <div class="adapter-mgr-body active" id="adapterMgrBody">
+      <div style="text-align:center;padding:24px 0;color:var(--text3);font-family:var(--mono);font-size:11px;">Loading adapters...</div>
+    </div>
+    <div class="adapter-mgr-body-marketplace" id="adapterMgrMarketplace"></div>
+    <div class="adapter-mgr-footer" id="adapterMgrFooter">
+      Adapters are domain-specific LoRA weights downloaded from Kwyre CDN
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

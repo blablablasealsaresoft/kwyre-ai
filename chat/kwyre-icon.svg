@@ -1,0 +1,224 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <linearGradient id="beam" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="50%" stop-color="#f0f0ff"/>
+      <stop offset="100%" stop-color="#e0e4ff"/>
+    </linearGradient>
+    <linearGradient id="beamV" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#e8ecff" stop-opacity="0.85"/>
+    </linearGradient>
+    <linearGradient id="beamDiag1" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#e8ecff" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="beamDiag2" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#e8ecff" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0.95"/>
+    </linearGradient>
+    <linearGradient id="fieldS" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#8AAAFF" stop-opacity="0.5"/>
+      <stop offset="30%" stop-color="#6E8FFF" stop-opacity="0.15"/>
+      <stop offset="70%" stop-color="#6E8FFF" stop-opacity="0.1"/>
+      <stop offset="100%" stop-color="#8AAAFF" stop-opacity="0.4"/>
+    </linearGradient>
+    <linearGradient id="spiralG" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#AABBFF" stop-opacity="0.45"/>
+      <stop offset="50%" stop-color="#6E8FFF" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#5577EE" stop-opacity="0.06"/>
+    </linearGradient>
+    <linearGradient id="orbG" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6E8FFF" stop-opacity="0"/>
+      <stop offset="30%" stop-color="#8AAAFF" stop-opacity="0.25"/>
+      <stop offset="70%" stop-color="#8AAAFF" stop-opacity="0.25"/>
+      <stop offset="100%" stop-color="#6E8FFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="orbG2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6E8FFF" stop-opacity="0"/>
+      <stop offset="30%" stop-color="#8AAAFF" stop-opacity="0.18"/>
+      <stop offset="70%" stop-color="#8AAAFF" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#6E8FFF" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="waveG" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#6E8FFF" stop-opacity="0"/>
+      <stop offset="20%" stop-color="#8AAAFF" stop-opacity="0.18"/>
+      <stop offset="80%" stop-color="#8AAAFF" stop-opacity="0.18"/>
+      <stop offset="100%" stop-color="#6E8FFF" stop-opacity="0"/>
+    </linearGradient>
+    
+    <filter id="beamGlow" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/>
+      <feColorMatrix in="b" type="matrix" values="0 0 0 0 0.43  0 0 0 0 0.56  0 0 0 0 1  0 0 0 0.45 0" result="gb"/>
+      <feMerge><feMergeNode in="gb"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="nGlow" x="-150%" y="-150%" width="400%" height="400%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="4"/>
+    </filter>
+    <filter id="qBlur" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="1.5"/>
+    </filter>
+    <filter id="hotG" x="-200%" y="-200%" width="500%" height="500%">
+      <feGaussianBlur in="SourceGraphic" stdDeviation="6"/>
+    </filter>
+  </defs>
+  
+  <!-- Background -->
+  <rect width="512" height="512" fill="#0B1120" rx="48"/>
+  <radialGradient id="amb" cx="44%" cy="44%" r="52%">
+    <stop offset="0%" stop-color="#111d38"/><stop offset="100%" stop-color="#0B1120"/>
+  </radialGradient>
+  <rect width="512" height="512" fill="url(#amb)" rx="48"/>
+  
+  <!-- ============================================================ -->
+  <!-- QUANTUM ORBITALS — these paths partially form the K          -->
+  <!-- The orbital ellipses are the "background" science            -->
+  <!-- ============================================================ -->
+  
+  <!-- Orbital 1 — tilted, passes through composition -->
+  <ellipse cx="256" cy="260" rx="200" ry="72" fill="none" stroke="url(#orbG)" stroke-width="0.8" transform="rotate(-22 256 260)"/>
+  
+  <!-- Orbital 2 -->
+  <ellipse cx="256" cy="260" rx="188" ry="62" fill="none" stroke="url(#orbG2)" stroke-width="0.7" transform="rotate(42 256 260)"/>
+  
+  <!-- Orbital 3 — steeper -->
+  <ellipse cx="256" cy="260" rx="178" ry="52" fill="none" stroke="url(#orbG)" stroke-width="0.55" transform="rotate(-68 256 260)"/>
+  
+  <!-- Electron probability dots -->
+  <circle cx="104" cy="185" r="2.5" fill="#AABBFF" opacity="0.45" filter="url(#qBlur)"/>
+  <circle cx="104" cy="185" r="2.5" fill="#AABBFF" opacity="0.5"/>
+  <circle cx="398" cy="316" r="2" fill="#AABBFF" opacity="0.35"/>
+  <circle cx="318" cy="106" r="2" fill="#AABBFF" opacity="0.3"/>
+  <circle cx="175" cy="405" r="1.8" fill="#8AAAFF" opacity="0.25"/>
+  <circle cx="405" cy="195" r="1.8" fill="#6E8FFF" opacity="0.2"/>
+  
+  <!-- Wave function interference -->
+  <path d="M 52,260 Q 82,232 112,260 T 172,260 T 232,260 T 292,260 T 352,260 T 412,260 T 460,260" 
+        fill="none" stroke="url(#waveG)" stroke-width="0.7" opacity="0.35"/>
+  <path d="M 52,260 Q 82,280 112,260 T 172,260 T 232,260 T 292,260 T 352,260 T 412,260 T 460,260" 
+        fill="none" stroke="url(#waveG)" stroke-width="0.5" opacity="0.18"/>
+  
+  <!-- ============================================================ -->
+  <!-- GOLDEN RATIO SPIRAL — from the nexus point outward           -->
+  <!-- The nexus is where the K's strokes converge                  -->
+  <!-- ============================================================ -->
+  
+  <g opacity="0.32">
+    <path d="M 220,272 A 8,8 0 0,1 220,258 A 13,13 0 0,1 233,258 A 21,21 0 0,1 233,279 A 34,34 0 0,1 199,279 A 55,55 0 0,1 199,224 A 89,89 0 0,1 288,224 A 144,144 0 0,1 288,368"
+          fill="none" stroke="#6E8FFF" stroke-width="2" filter="url(#qBlur)"/>
+  </g>
+  <path d="M 220,272 A 8,8 0 0,1 220,258 A 13,13 0 0,1 233,258 A 21,21 0 0,1 233,279 A 34,34 0 0,1 199,279 A 55,55 0 0,1 199,224 A 89,89 0 0,1 288,224 A 144,144 0 0,1 288,368"
+        fill="none" stroke="url(#spiralG)" stroke-width="1.1"/>
+  
+  <!-- Phi markers -->
+  <circle cx="220" cy="258" r="1.3" fill="#AABBFF" opacity="0.45"/>
+  <circle cx="233" cy="258" r="1.3" fill="#8AAAFF" opacity="0.4"/>
+  <circle cx="233" cy="279" r="1.3" fill="#8AAAFF" opacity="0.35"/>
+  <circle cx="199" cy="224" r="1.5" fill="#6E8FFF" opacity="0.3"/>
+  <circle cx="288" cy="224" r="1.8" fill="#6E8FFF" opacity="0.25"/>
+  <circle cx="288" cy="368" r="2" fill="#6E8FFF" opacity="0.2"/>
+  
+  <!-- ============================================================ -->
+  <!-- HEX FORCEFIELD                                                -->
+  <!-- ============================================================ -->
+  
+  <polygon points="256,42 438,148 438,370 256,476 74,370 74,148" 
+           fill="#6E8FFF" fill-opacity="0.02" stroke="url(#fieldS)" stroke-width="1.6"/>
+  <polygon points="256,74 412,168 412,350 256,444 100,350 100,168" 
+           fill="none" stroke="#6E8FFF" stroke-width="0.7" opacity="0.08"/>
+  <polygon points="256,104 388,188 388,330 256,414 124,330 124,188" 
+           fill="none" stroke="#6E8FFF" stroke-width="0.5" opacity="0.05"/>
+  <circle cx="256" cy="260" r="222" fill="none" stroke="#6E8FFF" stroke-width="0.5" stroke-dasharray="3 10" opacity="0.04"/>
+  
+  <!-- Hex vertex nodes -->
+  <circle cx="256" cy="42" r="3.5" fill="#8AAAFF" opacity="0.5"/>
+  <circle cx="438" cy="148" r="3" fill="#8AAAFF" opacity="0.4"/>
+  <circle cx="438" cy="370" r="2.5" fill="#6E8FFF" opacity="0.22"/>
+  <circle cx="256" cy="476" r="3" fill="#6E8FFF" opacity="0.3"/>
+  <circle cx="74" cy="370" r="2.5" fill="#6E8FFF" opacity="0.18"/>
+  <circle cx="74" cy="148" r="3" fill="#8AAAFF" opacity="0.4"/>
+  
+  <!-- ============================================================ -->
+  <!-- THE HIDDEN K                                                  -->
+  <!-- Built from "energy beams" — same visual language as the       -->
+  <!-- orbital paths and forcefield lines. The K is three beams:     -->
+  <!-- a vertical energy conduit and two diagonal force vectors.     -->
+  <!-- They look like part of the quantum geometry until you see     -->
+  <!-- the letter emerge. Thinner than before, more integrated.      -->
+  <!-- ============================================================ -->
+  
+  <!-- Beam glow layer (subtle) -->
+  <g filter="url(#beamGlow)" opacity="0.85">
+    
+    <!-- VERTICAL BEAM — looks like an energy conduit / particle accelerator channel -->
+    <!-- Thinner than before, same weight as orbital lines but brighter -->
+    <line x1="178" y1="110" x2="178" y2="410" stroke="url(#beamV)" stroke-width="11" stroke-linecap="round"/>
+    
+    <!-- UPPER DIAGONAL — energy vector shooting to top-right -->
+    <!-- Could be a force diagram line or orbital path -->
+    <line x1="186" y1="270" x2="365" y2="115" stroke="url(#beamDiag1)" stroke-width="11" stroke-linecap="round"/>
+    
+    <!-- LOWER DIAGONAL — energy vector shooting to bottom-right -->
+    <line x1="186" y1="270" x2="365" y2="408" stroke="url(#beamDiag2)" stroke-width="11" stroke-linecap="round"/>
+  </g>
+  
+  <!-- Energy nexus nodes — where beams intersect/terminate -->
+  <!-- These look like quantum measurement points or force origins -->
+  
+  <!-- Top of vertical -->
+  <circle cx="178" cy="110" r="6" fill="#6E8FFF" filter="url(#nGlow)"/>
+  <circle cx="178" cy="110" r="6" fill="#8AAAFF"/>
+  <circle cx="178" cy="110" r="10" fill="none" stroke="#6E8FFF" stroke-width="0.6" opacity="0.3"/>
+  
+  <!-- Bottom of vertical -->
+  <circle cx="178" cy="410" r="6" fill="#6E8FFF" filter="url(#nGlow)"/>
+  <circle cx="178" cy="410" r="6" fill="#8AAAFF"/>
+  <circle cx="178" cy="410" r="10" fill="none" stroke="#6E8FFF" stroke-width="0.6" opacity="0.3"/>
+  
+  <!-- Top-right terminus — brightest (energy source) -->
+  <circle cx="365" cy="115" r="7" fill="#6E8FFF" filter="url(#hotG)"/>
+  <circle cx="365" cy="115" r="7" fill="#AABBFF"/>
+  <circle cx="365" cy="115" r="12" fill="none" stroke="#8AAAFF" stroke-width="0.8" opacity="0.35"/>
+  
+  <!-- Bottom-right terminus -->
+  <circle cx="365" cy="408" r="6" fill="#6E8FFF" filter="url(#nGlow)"/>
+  <circle cx="365" cy="408" r="6" fill="#8AAAFF"/>
+  <circle cx="365" cy="408" r="10" fill="none" stroke="#6E8FFF" stroke-width="0.6" opacity="0.3"/>
+  
+  <!-- NEXUS POINT — where all three beams converge -->
+  <!-- This is the keyhole / golden spiral origin -->
+  <circle cx="186" cy="270" r="14" fill="#0B1120"/>
+  <circle cx="186" cy="270" r="14" fill="none" stroke="#6E8FFF" stroke-width="1.2" opacity="0.5"/>
+  <circle cx="186" cy="270" r="9" fill="none" stroke="#6E8FFF" stroke-width="0.4" opacity="0.15"/>
+  <!-- Inner glow dot — the "eye" -->
+  <circle cx="186" cy="270" r="4" fill="#8AAAFF" opacity="0.7"/>
+  <circle cx="186" cy="270" r="4" fill="#6E8FFF" filter="url(#nGlow)" opacity="0.5"/>
+  
+  <!-- Measurement lines extending from nodes (looks like force diagrams) -->
+  <line x1="365" y1="115" x2="400" y2="95" stroke="#6E8FFF" stroke-width="1.5" stroke-linecap="round" opacity="0.3"/>
+  <circle cx="400" cy="95" r="2.5" fill="#6E8FFF" opacity="0.3"/>
+  
+  <line x1="365" y1="408" x2="400" y2="425" stroke="#6E8FFF" stroke-width="1.5" stroke-linecap="round" opacity="0.25"/>
+  <circle cx="400" cy="425" r="2.5" fill="#6E8FFF" opacity="0.25"/>
+  
+  <line x1="178" y1="110" x2="178" y2="78" stroke="#6E8FFF" stroke-width="1.5" stroke-linecap="round" opacity="0.2"/>
+  <circle cx="178" cy="78" r="2" fill="#6E8FFF" opacity="0.2"/>
+  
+  <line x1="178" y1="410" x2="178" y2="442" stroke="#6E8FFF" stroke-width="1.5" stroke-linecap="round" opacity="0.2"/>
+  <circle cx="178" cy="442" r="2" fill="#6E8FFF" opacity="0.2"/>
+  
+  <line x1="178" y1="270" x2="130" y2="270" stroke="#6E8FFF" stroke-width="1.5" stroke-linecap="round" opacity="0.2"/>
+  <circle cx="130" cy="270" r="2" fill="#6E8FFF" opacity="0.2"/>
+  
+  <!-- φ near spiral origin -->
+  <text x="204" y="258" font-family="Georgia, 'Times New Roman', serif" font-style="italic" 
+        font-size="10" fill="#6E8FFF" opacity="0.18">φ</text>
+  
+  <!-- ψ near wave -->
+  <text x="48" y="254" font-family="Georgia, 'Times New Roman', serif" font-style="italic" 
+        font-size="9" fill="#6E8FFF" opacity="0.12">ψ</text>
+  
+  <!-- Status dot -->
+  <circle cx="466" cy="466" r="4.5" fill="#5BBE6A" opacity="0.6"/>
+  <circle cx="466" cy="466" r="8" fill="none" stroke="#5BBE6A" stroke-width="0.5" opacity="0.18"/>
+</svg>

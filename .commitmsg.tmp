@@ -1,0 +1,11 @@
+docs: complete README overhaul for v1.6
+
+Rewritten from scratch to announce all v1.6 features:
+- Predictive analytics engine (VaR, CVaR, time series, Monte Carlo)
+- Adaptive speculative decoding (dynamic exit threshold 2-8)
+- Adaptive per-layer k (10-pass calibration, per-layer sparsity)
+- Harder sparsity targets (k=3.0, max_spike=15)
+- QAT for both 4B and 9B models (LoRA rank 128)
+- Linux x86_64 + AMD ROCm platform focus
+- New analytics API endpoints documented
+- Updated technical specs, project structure, roadmap

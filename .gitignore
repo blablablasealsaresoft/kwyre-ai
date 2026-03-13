@@ -1,5 +1,6 @@
 *.safetensors
 *.bin
+.cache/
 qat_output/
 qat_output_v1/
 __pycache__/
@@ -14,3 +15,7 @@ build/
 server_out.txt
 alpaca_data.json
 .wrangler/
+.keys/
+*.license
+kwyre.license
+temp-apollo/
