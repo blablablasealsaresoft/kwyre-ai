@@ -75,6 +75,9 @@
   --red: #ef4444;
   --red-dim: rgba(239,68,68,0.12);
   --amber: #f59e0b;
+  --gold: #eab308;
+  --gold-dim: rgba(234,179,8,0.12);
+  --gold-glow: rgba(234,179,8,0.25);
   --text: #e2e4ea;
   --text2: #6b7294;
   --text3: #3d4466;
@@ -161,6 +164,21 @@ body {
   100% { top: 100vh; opacity: 0; }
 }
 
+.m-vignette {
+  position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 35%, rgba(5,6,10,0.85) 100%);
+}
+#embers { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.hex-pulse {
+  position: fixed; width: 200px; height: 200px;
+  border-radius: 50%; pointer-events: none; z-index: 0;
+  background: radial-gradient(circle, rgba(59,130,246,0.04), transparent 70%);
+  transform: translate(-50%, -50%);
+  transition: opacity 0.3s;
+  opacity: 0;
+}
+.hex-pulse.visible { opacity: 1; }
+
 .reveal {
   opacity: 0; transform: translateY(32px);
   transition: opacity 0.7s ease, transform 0.7s ease;
@@ -169,11 +187,8 @@ body {
 .reveal-d1 { transition-delay: 0.1s; }
 .reveal-d2 { transition-delay: 0.2s; }
 .reveal-d3 { transition-delay: 0.3s; }
-.reveal-d4 { transition-delay: 0.4s; }
 
 .wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
-.section { padding: 80px 0; }
-.section + .section { border-top: 1px solid var(--border); }
 
 /* --- NAV --- */
 nav {
@@ -223,16 +238,15 @@ nav {
 
 /* --- HERO --- */
 .hero {
-  padding: 160px 0 80px;
+  padding: 140px 0 40px;
   text-align: center;
-  position: relative;
 }
 
 .hero-eyebrow {
   font-family: var(--mono);
   font-size: 11px; font-weight: 500;
   letter-spacing: 3px; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 28px;
+  color: var(--accent); margin-bottom: 20px;
   display: flex; align-items: center; justify-content: center; gap: 12px;
 }
 .hero-eyebrow::before, .hero-eyebrow::after {
@@ -242,170 +256,358 @@ nav {
 .hero-eyebrow::after { background: linear-gradient(90deg, var(--accent), transparent); }
 
 .hero h1 {
-  font-size: clamp(36px, 5.5vw, 64px);
-  font-weight: 700; line-height: 1.08;
-  letter-spacing: -1.5px; margin-bottom: 24px;
-  color: var(--text);
+  font-size: clamp(32px, 5vw, 52px);
+  font-weight: 700; line-height: 1.1;
+  letter-spacing: -1.5px; margin-bottom: 16px;
 }
 .hero h1 em { font-style: normal; color: var(--accent); }
 
 .hero-sub {
-  font-size: 18px; color: var(--text2);
-  max-width: 640px; margin: 0 auto;
-  line-height: 1.7; font-weight: 400;
+  font-size: 17px; color: var(--text2);
+  max-width: 580px; margin: 0 auto;
+  line-height: 1.7;
 }
 .hero-sub strong { color: var(--text); font-weight: 600; }
 
-.coming-soon-bar {
+/* --- STEP INDICATOR --- */
+.step-bar {
   display: flex; align-items: center; justify-content: center;
-  gap: 10px; padding: 14px 24px;
-  background: rgba(245,158,11,0.06);
-  border: 1px solid rgba(245,158,11,0.18);
-  border-radius: 6px; margin-top: 32px;
-  max-width: 560px; margin-left: auto; margin-right: auto;
+  gap: 0; margin: 36px auto 0;
+  max-width: 560px;
 }
-.coming-soon-bar span {
-  font-family: var(--mono); font-size: 12px;
-  color: var(--text2); letter-spacing: 0.3px;
+.step-item {
+  display: flex; align-items: center; gap: 10px;
+  cursor: pointer; padding: 8px 4px;
+  transition: opacity 0.2s;
+  opacity: 0.35;
 }
-.coming-soon-bar strong { color: var(--amber); font-weight: 600; }
-.coming-soon-bar a { color: var(--accent); text-decoration: none; }
-.coming-soon-bar a:hover { text-decoration: underline; }
+.step-item.active { opacity: 1; }
+.step-item.completed { opacity: 0.7; }
+.step-item.completed .step-num { background: var(--green); border-color: var(--green); color: #fff; }
+.step-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 12px; font-weight: 600;
+  background: var(--surface2); border: 1px solid var(--border);
+  color: var(--text3); transition: all 0.3s;
+  flex-shrink: 0;
+}
+.step-item.active .step-num {
+  background: var(--accent); border-color: var(--accent); color: #fff;
+  box-shadow: 0 0 12px var(--accent-glow);
+}
+.step-label {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 1px; text-transform: uppercase;
+  color: var(--text3); white-space: nowrap;
+}
+.step-item.active .step-label { color: var(--text); }
+.step-line {
+  width: 48px; height: 1px; flex-shrink: 0;
+  background: var(--border); margin: 0 4px;
+}
+.step-line.done { background: var(--green); }
 
-/* --- PRICING GRID --- */
-.pricing-grid {
+/* --- TRUST BAR --- */
+.trust-bar {
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  padding: 14px 0; background: var(--surface);
+}
+.trust-items {
+  display: flex; align-items: center; justify-content: center;
+  gap: 40px; flex-wrap: wrap;
+}
+.trust-item {
+  display: flex; align-items: center; gap: 8px;
+  font-family: var(--mono); font-size: 11px;
+  color: var(--text2); letter-spacing: 0.5px; white-space: nowrap;
+}
+
+/* --- SECTIONS --- */
+.pay-step {
+  padding: 64px 0;
+  border-top: 1px solid var(--border);
+}
+.pay-step.hidden { display: none; }
+
+.sh { margin-bottom: 36px; }
+.sh-eyebrow {
+  font-family: var(--mono);
+  font-size: 11px; font-weight: 500;
+  letter-spacing: 3px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 12px;
+}
+.sh h2 {
+  font-size: clamp(24px, 3vw, 32px);
+  font-weight: 700; letter-spacing: -0.5px;
+  line-height: 1.15; margin-bottom: 8px;
+}
+.sh p { font-size: 14px; color: var(--text2); line-height: 1.6; }
+
+/* --- PRODUCT GRID --- */
+.prod-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 1px;
-  background: var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-  margin-top: 48px;
+  gap: 16px;
 }
 
-.price-card {
+.prod-card {
   background: var(--surface);
-  padding: 36px 28px;
-  display: flex;
-  flex-direction: column;
-  transition: background 0.2s;
+  border: 2px solid var(--border);
+  border-radius: 10px;
+  padding: 28px 24px;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.3s, box-shadow 0.3s, transform 0.2s;
+  display: flex; flex-direction: column;
   position: relative;
 }
-.price-card:hover { background: var(--surface2); }
-
-.price-card.featured {
+.prod-card:hover {
   background: var(--surface2);
-  box-shadow: inset 0 2px 0 var(--accent);
+  border-color: var(--border-hi);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
 }
-.price-card.featured::before {
-  content: 'MOST POPULAR';
-  position: absolute; top: 0; left: 0; right: 0;
-  font-family: var(--mono);
-  font-size: 9px; font-weight: 600;
-  letter-spacing: 2px; text-align: center;
-  color: var(--accent); padding: 6px;
+.prod-card.featured {
+  border-color: var(--accent);
+  background: var(--surface2);
+}
+.prod-card.selected {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 0 1px var(--gold), 0 8px 32px var(--gold-glow) !important;
+  background: var(--surface2);
+}
+.prod-badge {
+  position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
+  font-family: var(--mono); font-size: 9px; font-weight: 700;
+  letter-spacing: 2px; padding: 4px 12px;
+  border-radius: 0 0 6px 6px; white-space: nowrap;
+}
+.prod-badge.blue { background: var(--accent); color: #fff; }
+.prod-badge.green { background: var(--green); color: #fff; }
+
+.prod-name {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 8px;
+}
+.prod-card.featured .prod-name { margin-top: 12px; }
+.prod-card.cloud-card .prod-name { color: var(--green); }
+
+.prod-price {
+  font-size: 32px; font-weight: 700;
+  color: var(--text); letter-spacing: -0.5px;
+  margin-bottom: 4px; line-height: 1;
+}
+.prod-price-sub {
+  font-family: var(--mono); font-size: 10px;
+  color: var(--text3); letter-spacing: 0.5px;
+  margin-bottom: 16px;
 }
 
-.price-name {
-  font-family: var(--mono);
-  font-size: 11px; font-weight: 600;
+.prod-features { list-style: none; flex: 1; }
+.prod-features li {
+  font-size: 12px; color: var(--text2);
+  padding: 5px 0; display: flex; align-items: center; gap: 7px;
+}
+.prod-features li::before {
+  content: ''; width: 4px; height: 4px;
+  border-radius: 1px; background: var(--accent); flex-shrink: 0;
+}
+.prod-card.cloud-card .prod-features li::before { background: var(--green); }
+
+.prod-select-btn {
+  display: block; width: 100%;
+  margin-top: 16px; padding: 11px;
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  border: 1px solid var(--border); border-radius: 4px;
+  background: transparent; color: var(--text2);
+  cursor: pointer; transition: all 0.2s;
+  text-decoration: none; text-align: center;
+}
+.prod-select-btn:hover {
+  border-color: var(--accent); color: var(--accent); background: var(--accent-dim);
+}
+.prod-card.selected .prod-select-btn {
+  background: var(--gold); color: #000; border-color: var(--gold);
+  font-weight: 700; box-shadow: 0 2px 12px var(--gold-glow);
+}
+.prod-card.cloud-card .prod-select-btn {
+  border-color: rgba(34,197,94,0.3); color: var(--green);
+}
+.prod-card.cloud-card .prod-select-btn:hover {
+  background: var(--green-dim); border-color: var(--green);
+}
+
+/* --- CONTINUE BUTTON --- */
+.continue-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  margin: 32px auto 0; padding: 14px 48px;
+  font-family: var(--mono); font-size: 12px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  background: var(--accent); color: #fff; border: none;
+  border-radius: 6px; cursor: pointer; transition: all 0.2s;
+}
+.continue-btn:hover {
+  box-shadow: 0 4px 24px var(--accent-glow); transform: translateY(-1px);
+}
+.continue-btn:disabled {
+  opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none;
+}
+.continue-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+/* --- ADD-ONS --- */
+.addons-list {
+  max-width: 640px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+
+.addon-row {
+  display: flex; align-items: center; gap: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px 24px;
+  transition: border-color 0.2s, background 0.2s;
+}
+.addon-row:hover { background: var(--surface2); }
+.addon-row.active { border-color: var(--gold); background: var(--surface2); }
+.addon-row.disabled {
+  opacity: 0.35; pointer-events: none;
+}
+
+.addon-info { flex: 1; }
+.addon-name {
+  font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px;
+}
+.addon-desc {
+  font-size: 12px; color: var(--text2); line-height: 1.5;
+}
+.addon-price {
+  font-family: var(--mono); font-size: 13px; font-weight: 600;
+  color: var(--gold); white-space: nowrap; margin-right: 8px;
+}
+.addon-price.contact { color: var(--text2); font-size: 11px; }
+
+/* Toggle Switch */
+.toggle-switch {
+  position: relative; width: 44px; height: 24px; flex-shrink: 0;
+}
+.toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
+.toggle-slider {
+  position: absolute; cursor: pointer; inset: 0;
+  background: var(--surface3); border: 1px solid var(--border);
+  border-radius: 24px; transition: 0.3s;
+}
+.toggle-slider::before {
+  content: ''; position: absolute;
+  height: 18px; width: 18px; left: 2px; bottom: 2px;
+  background: var(--text3); border-radius: 50%; transition: 0.3s;
+}
+input:checked + .toggle-slider {
+  background: var(--gold); border-color: var(--gold);
+}
+input:checked + .toggle-slider::before {
+  transform: translateX(20px); background: #fff;
+}
+
+/* Number input for extra machines */
+.addon-number-wrap {
+  display: flex; align-items: center; gap: 0; flex-shrink: 0;
+}
+.addon-num-btn {
+  width: 32px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface3); border: 1px solid var(--border);
+  color: var(--text2); font-size: 16px; cursor: pointer;
+  transition: all 0.15s; font-family: var(--mono);
+}
+.addon-num-btn:first-child { border-radius: 4px 0 0 4px; }
+.addon-num-btn:last-child { border-radius: 0 4px 4px 0; }
+.addon-num-btn:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
+.addon-num-val {
+  width: 40px; height: 32px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  font-family: var(--mono); font-size: 14px; font-weight: 600;
+  color: var(--text);
+}
+
+.addon-contact-btn {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase;
+  padding: 8px 16px; border-radius: 4px;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text2); cursor: pointer; transition: all 0.2s;
+  text-decoration: none; white-space: nowrap;
+}
+.addon-contact-btn:hover {
+  border-color: var(--accent); color: var(--accent); background: var(--accent-dim);
+}
+
+/* Running total */
+.running-total {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-top: 20px; padding: 20px 24px;
+  background: var(--surface2); border: 1px solid var(--border);
+  border-radius: 8px;
+  max-width: 640px;
+}
+.running-total-label {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2);
+}
+.running-total-amount {
+  font-size: 28px; font-weight: 700; color: var(--text);
+  letter-spacing: -0.5px;
+}
+
+/* --- PAYMENT SECTION --- */
+.pay-layout {
+  display: grid; grid-template-columns: 1fr 400px;
+  gap: 48px; align-items: start;
+}
+
+.pay-breakdown {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 28px;
+}
+.pay-breakdown h3 {
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
   letter-spacing: 2px; text-transform: uppercase;
   color: var(--text2); margin-bottom: 20px;
 }
-.price-card.featured .price-name { color: var(--accent); margin-top: 12px; }
-
-.price-amount {
-  font-size: 40px; font-weight: 700;
-  color: var(--text); margin-bottom: 4px;
-  letter-spacing: -1px;
+.breakdown-item {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 0; border-bottom: 1px solid var(--border);
+  font-size: 13px;
+}
+.breakdown-item:last-child { border-bottom: none; }
+.breakdown-item-label { color: var(--text2); }
+.breakdown-item-price { font-family: var(--mono); font-weight: 600; color: var(--text); }
+.breakdown-item.total {
+  border-top: 2px solid var(--border); border-bottom: none;
+  margin-top: 4px; padding-top: 16px;
+}
+.breakdown-item.total .breakdown-item-label {
+  font-weight: 700; color: var(--text); font-size: 15px;
+}
+.breakdown-item.total .breakdown-item-price {
+  font-size: 22px; color: var(--gold); font-weight: 700;
 }
 
-.price-type {
-  font-size: 13px; color: var(--text3);
-  margin-bottom: 6px;
-}
-
-.price-license {
-  font-family: var(--mono);
-  font-size: 11px; color: var(--text2);
-  margin-bottom: 24px;
-  display: flex; align-items: center; gap: 6px;
-}
-.price-license .dot {
-  width: 5px; height: 5px; border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 6px rgba(34,197,94,0.4);
-}
-
-.price-features {
-  list-style: none; flex: 1;
-}
-
-.price-features li {
-  font-size: 13px; color: var(--text2);
-  padding: 7px 0;
-  border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 8px;
-}
-.price-features li:last-child { border-bottom: none; }
-
-.price-features li::before {
-  content: '';
-  width: 4px; height: 4px;
-  border-radius: 1px;
-  background: var(--accent);
-  flex-shrink: 0;
-}
-
-.price-select-btn {
-  display: block; width: 100%;
-  margin-top: 24px; padding: 14px;
-  font-family: var(--mono);
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  background: transparent;
-  color: var(--text2);
-  cursor: pointer;
-  transition: all 0.2s;
-}
-.price-select-btn:hover {
-  border-color: var(--accent);
-  color: var(--accent);
-  background: var(--accent-dim);
-}
-.price-select-btn.active {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-  box-shadow: 0 2px 16px var(--accent-glow);
-}
-.price-card.featured .price-select-btn {
-  background: var(--accent);
-  color: #fff;
-  border-color: var(--accent);
-  box-shadow: 0 2px 16px var(--accent-glow);
-}
-.price-card.featured .price-select-btn:hover {
-  box-shadow: 0 4px 28px var(--accent-glow);
-  transform: translateY(-1px);
-}
-
-/* --- PAYMENT METHOD --- */
-.pay-section { padding: 80px 0; }
-
+/* Payment method toggle & panels */
 .pay-method-toggle {
   display: flex; gap: 1px;
   background: var(--border); border-radius: 6px;
-  overflow: hidden; margin-bottom: 32px;
-  max-width: 400px; margin-left: auto; margin-right: auto;
+  overflow: hidden; margin-bottom: 24px;
 }
-
 .pay-method-toggle button {
-  flex: 1; padding: 14px 20px;
+  flex: 1; padding: 12px 16px;
   background: var(--surface2); border: none;
-  font-family: var(--mono); font-size: 12px;
+  font-family: var(--mono); font-size: 11px;
   font-weight: 500; letter-spacing: 1px;
   text-transform: uppercase; color: var(--text3);
   cursor: pointer; transition: background 0.2s, color 0.2s;
@@ -415,646 +617,45 @@ nav {
   background: var(--accent-dim); color: var(--accent);
 }
 .pay-method-toggle button:hover:not(.active) { color: var(--text2); }
-
 .pay-method-toggle .recommended {
   font-size: 8px; letter-spacing: 1.5px;
-  background: var(--green-dim);
-  color: var(--green);
+  background: var(--green-dim); color: var(--green);
   border: 1px solid rgba(34,197,94,0.15);
   padding: 2px 6px; border-radius: 2px;
   text-transform: uppercase; font-weight: 600;
 }
 
-.pay-panel {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 36px 32px;
-  max-width: 560px;
-  margin: 0 auto;
-}
-
+.pay-panel { max-width: none; }
 .pay-panel-hidden { display: none; }
 
-.xmr-panel { text-align: center; }
-
-.xmr-selected-tier {
-  font-family: var(--mono);
-  font-size: 11px; font-weight: 500;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 8px;
+/* Email field */
+.email-field {
+  margin-bottom: 20px;
 }
-
-.xmr-amount-usd {
-  font-size: 32px; font-weight: 700;
-  color: var(--text); margin-bottom: 4px;
-}
-
-.xmr-rate-note {
-  font-size: 12px; color: var(--text3);
-  margin-bottom: 28px;
-  font-family: var(--mono);
-  letter-spacing: 0.3px;
-}
-
-.qr-container {
-  display: inline-block;
-  background: #fff;
-  padding: 12px;
-  border-radius: 8px;
-  margin-bottom: 24px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
-}
-
-.qr-container canvas,
-.qr-container img {
-  display: block;
-}
-
-.xmr-address-wrap {
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 16px;
-  margin-bottom: 16px;
-  position: relative;
-}
-
-.xmr-address-label {
-  font-family: var(--mono);
-  font-size: 10px; font-weight: 600;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--text3); margin-bottom: 10px;
-  text-align: left;
-}
-
-.xmr-address {
-  font-family: var(--mono);
-  font-size: 11px; color: var(--text);
-  word-break: break-all;
-  line-height: 1.7;
-  text-align: left;
-  user-select: all;
-}
-
-.copy-btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 28px;
-  font-family: var(--mono);
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  background: var(--accent);
-  color: #fff; border: none;
-  border-radius: 4px; cursor: pointer;
-  transition: all 0.2s;
-  margin-top: 4px;
-}
-.copy-btn:hover {
-  box-shadow: 0 4px 24px var(--accent-glow);
-  transform: translateY(-1px);
-}
-.copy-btn.copied {
-  background: var(--green);
-  box-shadow: 0 4px 24px rgba(34,197,94,0.25);
-}
-
-.copy-btn svg {
-  width: 14px; height: 14px;
-  stroke: currentColor; fill: none; stroke-width: 2;
-}
-
-.cc-panel {
-  text-align: center;
-  padding: 40px 20px;
-}
-
-.cc-panel .cc-icon {
-  width: 56px; height: 56px;
-  border-radius: 50%;
-  background: var(--surface2);
-  border: 1px solid var(--border);
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 20px;
-}
-
-.cc-panel .cc-icon svg {
-  width: 24px; height: 24px;
-  stroke: var(--text3); fill: none; stroke-width: 1.5;
-}
-
-.cc-panel h3 {
-  font-size: 18px; font-weight: 600;
-  color: var(--text); margin-bottom: 12px;
-}
-
-.cc-panel p {
-  font-size: 14px; color: var(--text2);
-  line-height: 1.6;
-}
-
-.cc-panel .cc-highlight {
-  color: var(--green); font-weight: 500;
-}
-
-/* --- CREDIT CARD FORM --- */
-.cc-form { text-align: left; }
-
-.cc-form-header {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 24px;
-}
-
-.cc-form-tier {
-  font-family: var(--mono);
-  font-size: 11px; font-weight: 500;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--accent);
-}
-
-.cc-card-brands {
-  display: flex; gap: 8px; align-items: center;
-}
-
-.cc-card-brands svg {
-  width: 32px; height: 22px;
-  opacity: 0.35; transition: opacity 0.2s;
-}
-.cc-card-brands svg.detected { opacity: 1; }
-
-.cc-field {
-  margin-bottom: 16px;
-}
-
-.cc-field-row {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.cc-label {
-  display: block;
-  font-family: var(--mono);
+.email-label {
+  display: block; font-family: var(--mono);
   font-size: 10px; font-weight: 600;
   letter-spacing: 1.5px; text-transform: uppercase;
   color: var(--text3); margin-bottom: 8px;
 }
-
-.cc-input {
-  width: 100%; padding: 14px 16px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  font-family: var(--mono);
-  font-size: 14px; line-height: 1.5;
+.email-input {
+  width: 100%; padding: 12px 14px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text);
+  font-family: var(--mono); font-size: 13px;
   transition: border-color 0.2s, box-shadow 0.2s;
-  -webkit-appearance: none;
-  appearance: none;
 }
-.cc-input:focus {
-  outline: none;
-  border-color: var(--accent);
+.email-input:focus {
+  outline: none; border-color: var(--accent);
   box-shadow: 0 0 0 3px var(--accent-dim);
 }
-.cc-input::placeholder { color: var(--text3); }
-.cc-input.invalid {
-  border-color: var(--red);
-  box-shadow: 0 0 0 3px var(--red-dim);
-}
-.cc-input.valid {
-  border-color: var(--green);
-}
+.email-input::placeholder { color: var(--text3); }
 
-.cc-error-msg {
-  font-family: var(--mono);
-  font-size: 10px; color: var(--red);
-  letter-spacing: 0.5px;
-  margin-top: 6px;
-  min-height: 14px;
-}
-
-.cc-pay-btn {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  width: 100%;
-  margin-top: 24px; padding: 16px;
-  font-family: var(--mono);
-  font-size: 12px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  background: var(--accent);
-  color: #fff; border: none;
-  border-radius: 6px; cursor: pointer;
-  transition: all 0.2s;
-}
-.cc-pay-btn:hover {
-  box-shadow: 0 4px 24px var(--accent-glow);
-  transform: translateY(-1px);
-}
-.cc-pay-btn:disabled {
-  opacity: 0.5; cursor: not-allowed;
-  transform: none; box-shadow: none;
-}
-
-.cc-pay-btn svg {
-  width: 16px; height: 16px;
-  stroke: currentColor; fill: none; stroke-width: 2;
-}
-
-.cc-secure-note {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  margin-top: 16px;
-  font-family: var(--mono);
-  font-size: 10px; color: var(--text3);
-  letter-spacing: 0.5px;
-}
-
-.cc-secure-note svg {
-  width: 12px; height: 12px;
-  stroke: var(--text3); fill: none; stroke-width: 2;
-}
-
-.cc-coming-soon-msg {
-  display: flex; align-items: center; gap: 12px;
-  margin-top: 20px; padding: 16px 20px;
-  background: rgba(245,158,11,0.06);
-  border: 1px solid rgba(245,158,11,0.18);
-  border-radius: 6px;
-  font-size: 13px; color: var(--text2);
-  line-height: 1.5;
-  animation: dl-fade-in 0.4s ease;
-}
-.cc-coming-soon-msg svg {
-  flex-shrink: 0;
-  width: 18px; height: 18px;
-  stroke: var(--amber); fill: none; stroke-width: 2;
-}
-.cc-coming-soon-msg strong { color: var(--amber); }
-
-/* --- AFTER PAYMENT --- */
-.after-pay {
-  max-width: 560px;
-  margin: 48px auto 0;
-  text-align: center;
-}
-
-.after-pay-box {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 32px;
-}
-
-.after-pay-step {
-  display: flex; align-items: flex-start; gap: 16px;
-  text-align: left;
-  padding: 16px 0;
-}
-.after-pay-step + .after-pay-step {
-  border-top: 1px solid var(--border);
-}
-
-.after-pay-num {
-  width: 32px; height: 32px; flex-shrink: 0;
-  border-radius: 4px;
-  background: var(--accent-dim);
-  color: var(--accent);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono);
-  font-size: 13px; font-weight: 600;
-}
-
-.after-pay-text h4 {
-  font-size: 14px; font-weight: 600;
-  color: var(--text); margin-bottom: 4px;
-}
-
-.after-pay-text p {
-  font-size: 13px; color: var(--text2);
-  line-height: 1.5;
-}
-
-.after-pay-text a {
-  color: var(--accent);
-  text-decoration: none;
-  font-weight: 500;
-}
-.after-pay-text a:hover { text-decoration: underline; }
-
-.after-pay-note {
-  margin-top: 20px;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  font-family: var(--mono);
-  font-size: 11px; color: var(--text2);
-  letter-spacing: 0.5px;
-}
-
-.after-pay-note .dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--green);
-  box-shadow: 0 0 8px rgba(34,197,94,0.5);
-  animation: pulse 2s ease-in-out infinite;
-}
-
-@keyframes pulse {
-  0%, 100% { opacity: 1; } 50% { opacity: 0.4; }
-}
-
-/* --- SECTION HEADERS --- */
-.sh { text-align: center; margin-bottom: 48px; }
-
-.sh-eyebrow {
-  font-family: var(--mono);
-  font-size: 11px; font-weight: 500;
-  letter-spacing: 3px; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 16px;
-}
-
-.sh h2 {
-  font-size: clamp(28px, 3.5vw, 40px);
-  font-weight: 700; letter-spacing: -0.5px;
-  line-height: 1.15; margin-bottom: 16px;
-}
-
-.sh p {
-  font-size: 16px; color: var(--text2);
-  max-width: 560px; margin: 0 auto;
-  line-height: 1.6;
-}
-
-/* --- FOOTER --- */
-.site-footer {
-  border-top: 1px solid var(--border);
-  padding: 40px 0;
-}
-
-.footer-inner {
-  display: flex; justify-content: space-between;
-  align-items: center; flex-wrap: wrap; gap: 16px;
-}
-
-.footer-brand {
-  font-family: var(--mono);
-  font-size: 11px; letter-spacing: 2px;
-  color: var(--text3); text-transform: uppercase;
-}
-
-.footer-legal {
-  font-size: 12px; color: var(--text3);
-  max-width: 500px; line-height: 1.5;
-}
-
-/* --- DOWNLOAD GATE --- */
-.dl-gate {
-  max-width: 640px;
-  margin: 0 auto;
-}
-
-.dl-input-wrap {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 28px;
-}
-
-.dl-label {
-  display: block;
-  font-family: var(--mono);
-  font-size: 10px; font-weight: 600;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--text3); margin-bottom: 12px;
-}
-
-.dl-input {
-  width: 100%; padding: 14px 16px;
-  background: var(--bg);
-  border: 1px solid var(--border);
-  border-radius: 6px;
-  color: var(--text);
-  font-family: var(--mono);
-  font-size: 12px; line-height: 1.6;
-  resize: vertical;
-  transition: border-color 0.2s;
-}
-.dl-input:focus {
-  outline: none;
-  border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim);
-}
-.dl-input::placeholder { color: var(--text3); }
-
-.dl-verify-btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  margin-top: 16px; padding: 14px 32px;
-  font-family: var(--mono);
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  background: var(--accent);
-  color: #fff; border: none;
-  border-radius: 4px; cursor: pointer;
-  transition: all 0.2s;
-}
-.dl-verify-btn:hover {
-  box-shadow: 0 4px 24px var(--accent-glow);
-  transform: translateY(-1px);
-}
-.dl-verify-btn:disabled {
-  opacity: 0.5; cursor: not-allowed;
-  transform: none; box-shadow: none;
-}
-
-.dl-error {
-  display: flex; align-items: center; gap: 10px;
-  margin-top: 16px; padding: 14px 20px;
-  background: var(--red-dim);
-  border: 1px solid rgba(239,68,68,0.2);
-  border-radius: 6px;
-  font-family: var(--mono);
-  font-size: 12px; color: var(--red);
-}
-
-.dl-success {
-  margin-top: 28px;
-  animation: dl-fade-in 0.5s ease;
-}
-
-@keyframes dl-fade-in {
-  from { opacity: 0; transform: translateY(16px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-
-.dl-badge {
-  display: flex; align-items: center; gap: 10px;
-  padding: 16px 20px;
-  background: var(--green-dim);
-  border: 1px solid rgba(34,197,94,0.2);
-  border-radius: 6px;
-  margin-bottom: 24px;
-  font-family: var(--mono);
-  font-size: 13px; color: var(--green);
-  font-weight: 600;
-}
-
-.dl-machines {
-  margin-left: auto;
-  font-size: 11px; font-weight: 400;
-  color: var(--text2);
-  letter-spacing: 0.5px;
-}
-
-.dl-grid {
-  display: flex; flex-direction: column;
-  gap: 1px;
-  background: var(--border);
-  border-radius: 8px;
-  overflow: hidden;
-}
-
-.dl-card {
-  display: flex; align-items: center; gap: 20px;
-  padding: 20px 24px;
-  background: var(--surface);
-  text-decoration: none;
-  color: var(--text);
-  transition: background 0.2s;
-}
-.dl-card:hover {
-  background: var(--surface2);
-}
-
-.dl-card-icon {
-  width: 48px; height: 48px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--surface3);
-  border-radius: 8px;
-  color: var(--text2);
-  flex-shrink: 0;
-}
-.dl-card:hover .dl-card-icon { color: var(--accent); }
-
-.dl-card-info { flex: 1; }
-
-.dl-card-platform {
-  font-size: 15px; font-weight: 600;
-  margin-bottom: 2px;
-}
-
-.dl-card-file {
-  font-family: var(--mono);
-  font-size: 11px; color: var(--text3);
-  letter-spacing: 0.3px;
-}
-
-.dl-card-arrow {
-  color: var(--text3);
-  transition: color 0.2s, transform 0.2s;
-}
-.dl-card:hover .dl-card-arrow {
-  color: var(--accent);
-  transform: translateY(2px);
-}
-
-.dl-note {
-  display: flex; align-items: center; gap: 8px;
-  margin-top: 16px;
-  font-family: var(--mono);
-  font-size: 11px; color: var(--text3);
-  letter-spacing: 0.3px;
-}
-
-/* --- PRODUCT ROWS --- */
-.product-row {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 24px 28px;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.3s, box-shadow 0.3s;
-  position: relative;
-}
-
-.product-row:hover { background: var(--surface2); border-color: var(--border-hi); box-shadow: 0 4px 24px rgba(0,0,0,0.15); }
-.product-row.featured { border-color: var(--accent); background: var(--surface2); box-shadow: 0 0 0 1px var(--accent), 0 8px 32px rgba(59,130,246,0.12); }
-
-.product-row-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
-}
-
-.product-row-name {
-  font-family: var(--mono);
-  font-size: 10px;
-  font-weight: 600;
-  letter-spacing: 2.5px;
-  text-transform: uppercase;
-  color: var(--accent);
-  margin-bottom: 6px;
-}
-
-.product-row-price {
-  font-size: 26px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -0.5px;
-  line-height: 1;
-}
-
-.product-row.featured .product-row-price { color: var(--accent); }
-
-.product-row-features {
-  list-style: none;
-  padding: 0;
-}
-
-.product-row-features li {
-  font-size: 13px;
-  color: var(--text2);
-  padding: 5px 0;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.product-row-features li::before {
-  content: '';
-  width: 4px;
-  height: 4px;
-  border-radius: 1px;
-  background: var(--accent);
-  flex-shrink: 0;
-}
-
-@media (max-width: 900px) {
-  #products-payment .wrap > div { grid-template-columns: 1fr !important; }
-}
-
-/* --- RESPONSIVE --- */
-@media (max-width: 768px) {
-  .nav-links a:not(.nav-cta) { display: none; }
-  .hero { padding: 120px 0 60px; }
-  .pricing-grid { grid-template-columns: 1fr; }
-  .wrap { padding: 0 20px; }
-  .pay-panel { padding: 28px 20px; }
-  .footer-inner { flex-direction: column; text-align: center; }
-  .cc-field-row { grid-template-columns: 1fr 1fr; }
-  .cc-form-header { flex-wrap: wrap; gap: 12px; }
-  .cc-card-brands svg { width: 28px; height: 19px; }
-}
-
-@media (max-width: 480px) {
-  .hero h1 { letter-spacing: -0.5px; }
-  .section { padding: 60px 0; }
-  .pay-section { padding: 60px 0; }
-  .cc-field-row { grid-template-columns: 1fr 1fr; }
-  .cc-input { font-size: 16px; padding: 12px 14px; }
-  .cc-pay-btn { font-size: 11px; padding: 14px; }
-}
-
-/* --- STRIPE PAYMENT ELEMENT --- */
+/* Stripe */
 .stripe-loading {
   display: flex; align-items: center; justify-content: center; gap: 12px;
   padding: 40px 20px;
   font-family: var(--mono); font-size: 12px; color: var(--text3);
-  letter-spacing: 0.5px;
 }
 .stripe-loading-dot {
   width: 6px; height: 6px; border-radius: 50%;
@@ -1077,35 +678,261 @@ nav {
 }
 .stripe-error svg { flex-shrink: 0; }
 
-/* Payment success overlay */
-.pay-success {
-  text-align: center; padding: 60px 32px;
-  animation: dl-fade-in 0.5s ease;
+.cc-pay-btn {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; margin-top: 20px; padding: 16px;
+  font-family: var(--mono); font-size: 12px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  background: var(--accent); color: #fff; border: none;
+  border-radius: 6px; cursor: pointer; transition: all 0.2s;
+}
+.cc-pay-btn:hover {
+  box-shadow: 0 4px 24px var(--accent-glow); transform: translateY(-1px);
+}
+.cc-pay-btn:disabled {
+  opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;
+}
+.cc-pay-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+.cc-secure-note {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  margin-top: 14px;
+  font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.5px;
+}
+.cc-secure-note svg { width: 12px; height: 12px; stroke: var(--text3); fill: none; stroke-width: 2; }
+
+/* XMR Panel */
+.xmr-panel { text-align: center; }
+.xmr-selected-tier {
+  font-family: var(--mono); font-size: 11px; font-weight: 500;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  color: var(--accent); margin-bottom: 8px;
+}
+.xmr-amount-usd {
+  font-size: 32px; font-weight: 700; color: var(--text); margin-bottom: 4px;
+}
+.xmr-rate-note {
+  font-size: 12px; color: var(--text3); margin-bottom: 24px;
+  font-family: var(--mono); letter-spacing: 0.3px;
+}
+.qr-container {
+  display: inline-block; background: #fff; padding: 12px;
+  border-radius: 8px; margin-bottom: 20px;
+  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
+}
+.qr-container canvas, .qr-container img { display: block; }
+.xmr-address-wrap {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 14px; margin-bottom: 14px;
+}
+.xmr-address-label {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 8px; text-align: left;
+}
+.xmr-address {
+  font-family: var(--mono); font-size: 11px; color: var(--text);
+  word-break: break-all; line-height: 1.7; text-align: left; user-select: all;
+}
+.copy-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 10px 24px; font-family: var(--mono);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  background: var(--accent); color: #fff; border: none;
+  border-radius: 4px; cursor: pointer; transition: all 0.2s;
+}
+.copy-btn:hover {
+  box-shadow: 0 4px 24px var(--accent-glow); transform: translateY(-1px);
+}
+.copy-btn.copied { background: var(--green); box-shadow: 0 4px 24px rgba(34,197,94,0.25); }
+.copy-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
+
+.xmr-after-steps {
+  margin-top: 24px; text-align: left;
+}
+.xmr-after-step {
+  display: flex; align-items: flex-start; gap: 12px;
+  padding: 12px 0;
+}
+.xmr-after-step + .xmr-after-step { border-top: 1px solid var(--border); }
+.xmr-after-num {
+  width: 28px; height: 28px; flex-shrink: 0; border-radius: 4px;
+  background: var(--accent-dim); color: var(--accent);
+  display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 12px; font-weight: 600;
+}
+.xmr-after-text h4 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.xmr-after-text p { font-size: 12px; color: var(--text2); line-height: 1.5; }
+.xmr-after-text a { color: var(--accent); text-decoration: none; }
+.xmr-after-text a:hover { text-decoration: underline; }
+
+/* --- SUCCESS --- */
+@keyframes fade-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+
+.pay-success-section {
+  padding: 80px 0; text-align: center;
+  animation: fade-in 0.5s ease;
 }
 .pay-success-icon {
-  width: 64px; height: 64px; border-radius: 50%;
-  background: var(--green-dim); border: 1px solid rgba(34,197,94,0.25);
+  width: 72px; height: 72px; border-radius: 50%;
+  background: var(--green-dim); border: 2px solid rgba(34,197,94,0.3);
   display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 24px;
+  margin: 0 auto 28px;
 }
-.pay-success h2 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
-.pay-success p { font-size: 14px; color: var(--text2); line-height: 1.6; }
+.pay-success-section h2 {
+  font-size: 28px; font-weight: 700; margin-bottom: 12px;
+}
+.pay-success-section p {
+  font-size: 15px; color: var(--text2); line-height: 1.6; max-width: 480px; margin: 0 auto;
+}
+.license-key-box {
+  max-width: 560px; margin: 28px auto;
+  background: var(--surface); border: 1px solid var(--green);
+  border-radius: 8px; padding: 20px;
+  text-align: left;
+}
+.license-key-label {
+  font-family: var(--mono); font-size: 10px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--green); margin-bottom: 10px;
+}
+.license-key-value {
+  font-family: var(--mono); font-size: 12px;
+  color: var(--text); word-break: break-all;
+  line-height: 1.7; user-select: all;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 4px; padding: 12px;
+}
+.success-actions {
+  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+  margin-top: 28px;
+}
+.success-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 28px; font-family: var(--mono);
+  font-size: 11px; font-weight: 600;
+  letter-spacing: 1px; text-transform: uppercase;
+  border-radius: 4px; cursor: pointer; transition: all 0.2s;
+  text-decoration: none; border: none;
+}
+.success-btn.primary { background: var(--accent); color: #fff; }
+.success-btn.primary:hover { box-shadow: 0 4px 20px var(--accent-glow); transform: translateY(-1px); }
+.success-btn.ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
+.success-btn.ghost:hover { border-color: var(--text2); color: var(--text); }
 
-/* ENHANCED COSMIC LAYERS */
-.m-vignette {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 35%, rgba(5,6,10,0.85) 100%);
+/* --- DOWNLOAD SECTION --- */
+.dl-section { padding: 80px 0; border-top: 1px solid var(--border); }
+
+.dl-gate { max-width: 640px; margin: 0 auto; }
+.dl-input-wrap {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 8px; padding: 28px;
 }
-#embers { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-.hex-pulse {
-  position: fixed; width: 200px; height: 200px;
-  border-radius: 50%; pointer-events: none; z-index: 0;
-  background: radial-gradient(circle, rgba(59,130,246,0.04), transparent 70%);
-  transform: translate(-50%, -50%);
-  transition: opacity 0.3s;
-  opacity: 0;
+.dl-label {
+  display: block; font-family: var(--mono);
+  font-size: 10px; font-weight: 600;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--text3); margin-bottom: 12px;
 }
-.hex-pulse.visible { opacity: 1; }
+.dl-input {
+  width: 100%; padding: 14px 16px;
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; color: var(--text);
+  font-family: var(--mono); font-size: 12px; line-height: 1.6;
+  resize: vertical; transition: border-color 0.2s;
+}
+.dl-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
+.dl-input::placeholder { color: var(--text3); }
+
+.dl-verify-btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  margin-top: 16px; padding: 14px 32px;
+  font-family: var(--mono); font-size: 11px; font-weight: 600;
+  letter-spacing: 1.5px; text-transform: uppercase;
+  background: var(--accent); color: #fff; border: none;
+  border-radius: 4px; cursor: pointer; transition: all 0.2s;
+}
+.dl-verify-btn:hover { box-shadow: 0 4px 24px var(--accent-glow); transform: translateY(-1px); }
+.dl-verify-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+.dl-error {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 16px; padding: 14px 20px;
+  background: var(--red-dim); border: 1px solid rgba(239,68,68,0.2);
+  border-radius: 6px; font-family: var(--mono); font-size: 12px; color: var(--red);
+}
+.dl-success { margin-top: 28px; animation: fade-in 0.5s ease; }
+.dl-badge {
+  display: flex; align-items: center; gap: 10px;
+  padding: 16px 20px;
+  background: var(--green-dim); border: 1px solid rgba(34,197,94,0.2);
+  border-radius: 6px; margin-bottom: 24px;
+  font-family: var(--mono); font-size: 13px; color: var(--green); font-weight: 600;
+}
+.dl-machines {
+  margin-left: auto; font-size: 11px; font-weight: 400;
+  color: var(--text2); letter-spacing: 0.5px;
+}
+.dl-grid {
+  display: flex; flex-direction: column; gap: 1px;
+  background: var(--border); border-radius: 8px; overflow: hidden;
+}
+.dl-card {
+  display: flex; align-items: center; gap: 20px;
+  padding: 20px 24px; background: var(--surface);
+  text-decoration: none; color: var(--text); transition: background 0.2s;
+}
+.dl-card:hover { background: var(--surface2); }
+.dl-card-icon {
+  width: 48px; height: 48px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--surface3); border-radius: 8px;
+  color: var(--text2); flex-shrink: 0;
+}
+.dl-card:hover .dl-card-icon { color: var(--accent); }
+.dl-card-info { flex: 1; }
+.dl-card-platform { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
+.dl-card-file { font-family: var(--mono); font-size: 11px; color: var(--text3); letter-spacing: 0.3px; }
+.dl-card-arrow { color: var(--text3); transition: color 0.2s, transform 0.2s; }
+.dl-card:hover .dl-card-arrow { color: var(--accent); transform: translateY(2px); }
+.dl-note {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 16px; font-family: var(--mono);
+  font-size: 11px; color: var(--text3); letter-spacing: 0.3px;
+}
+
+/* --- FOOTER --- */
+.site-footer { border-top: 1px solid var(--border); padding: 40px 0; }
+.footer-inner {
+  display: flex; justify-content: space-between;
+  align-items: center; flex-wrap: wrap; gap: 16px;
+}
+.footer-brand {
+  font-family: var(--mono); font-size: 11px; letter-spacing: 2px;
+  color: var(--text3); text-transform: uppercase;
+}
+.footer-legal { font-size: 12px; color: var(--text3); max-width: 500px; line-height: 1.5; }
+
+/* --- RESPONSIVE --- */
+@media (max-width: 900px) {
+  .pay-layout { grid-template-columns: 1fr; }
+}
+@media (max-width: 768px) {
+  .nav-links a:not(.nav-cta) { display: none; }
+  .hero { padding: 120px 0 30px; }
+  .prod-grid { grid-template-columns: repeat(2, 1fr); }
+  .wrap { padding: 0 20px; }
+  .step-label { display: none; }
+  .footer-inner { flex-direction: column; text-align: center; }
+  .trust-items { gap: 20px; }
+}
+@media (max-width: 480px) {
+  .prod-grid { grid-template-columns: 1fr; }
+  .pay-step { padding: 48px 0; }
+  .addon-row { flex-wrap: wrap; gap: 12px; }
+  .addon-price { order: 3; width: 100%; text-align: right; }
+}
 </style>
 </head>
 <body>
@@ -1143,196 +970,260 @@ nav {
 <div class="hero">
   <div class="wrap">
     <div class="hero-eyebrow reveal">Secure Payment</div>
-    <h1 class="reveal reveal-d1">Pay once. <em>No subscription.</em></h1>
+    <h1 class="reveal reveal-d1">Pay once. <em>Own forever.</em></h1>
     <p class="hero-sub reveal reveal-d2">
-      Pay once, own your inference server forever. <strong>No recurring fees.</strong>
+      One payment, lifetime ownership. <strong>No subscriptions.</strong>
       No usage caps. No data collection. Your machine, your AI.
     </p>
-    <div class="coming-soon-bar reveal reveal-d3" id="heroNotice">
-      <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--amber)" fill="none" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
-      <span>XMR payments active now. Credit card payments via Stripe are live — select a tier and click Credit Card.</span>
+
+    <div class="step-bar reveal reveal-d3">
+      <div class="step-item active" data-step="1" onclick="goToStep(1)">
+        <div class="step-num">1</div>
+        <div class="step-label">Select Product</div>
+      </div>
+      <div class="step-line" id="stepLine1"></div>
+      <div class="step-item" data-step="2" onclick="goToStep(2)">
+        <div class="step-num">2</div>
+        <div class="step-label">Add-ons</div>
+      </div>
+      <div class="step-line" id="stepLine2"></div>
+      <div class="step-item" data-step="3" onclick="goToStep(3)">
+        <div class="step-num">3</div>
+        <div class="step-label">Payment</div>
+      </div>
     </div>
   </div>
 </div>
 
 <!-- Malachi 3:10 — Bring the whole tithe into the storehouse, that there may be food in my house. Test me in this, says the LORD. -->
 
-<!-- TRUST SIGNALS -->
-<div style="border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:16px 0;background:var(--surface);">
+<!-- TRUST BAR -->
+<div class="trust-bar">
   <div class="wrap">
-    <div style="display:flex;align-items:center;justify-content:center;gap:48px;flex-wrap:wrap;">
-      <div style="display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--text2);letter-spacing:0.5px;">
+    <div class="trust-items">
+      <div class="trust-item">
         <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--green)" fill="none" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        100% LOCAL · NO CLOUD
+        100% LOCAL &middot; NO CLOUD
       </div>
-      <div style="display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--text2);letter-spacing:0.5px;">
+      <div class="trust-item">
         <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--accent)" fill="none" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
         ED25519 OFFLINE LICENSE
       </div>
-      <div style="display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--text2);letter-spacing:0.5px;">
+      <div class="trust-item">
         <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--accent)" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
         XMR ANONYMOUS PAYMENT
       </div>
-      <div style="display:flex;align-items:center;gap:10px;font-family:var(--mono);font-size:11px;color:var(--text2);letter-spacing:0.5px;">
+      <div class="trust-item">
         <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--green)" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        ONE-TIME PAYMENT · NO SUBSCRIPTION
+        ONE-TIME &middot; NO SUBSCRIPTION
       </div>
     </div>
   </div>
 </div>
 
-<!-- PRODUCTS + PAYMENT -->
-<div class="section" id="products-payment">
+<!-- ═══════════════════ STEP 1: SELECT PRODUCT ═══════════════════ -->
+<div class="pay-step" id="step1">
   <div class="wrap">
-    <div style="display: grid; grid-template-columns: 1fr 400px; gap: 56px; align-items: start;">
+    <div class="sh">
+      <div class="sh-eyebrow">Step 1</div>
+      <h2>Choose your product</h2>
+      <p>Six deployment options. Same 6-layer security stack.</p>
+    </div>
 
-      <!-- LEFT: PRODUCTS -->
-      <div>
-        <div class="sh" style="text-align: left; margin-bottom: 24px;">
-          <div class="sh-eyebrow">Choose Your Product</div>
-          <h2 style="font-size: 22px; font-weight: 700; letter-spacing: -0.3px;">Six ways to deploy Kwyre</h2>
+    <div class="prod-grid" id="productGrid">
+
+      <div class="prod-card" data-tier="personal" onclick="selectProduct('personal')">
+        <div class="prod-name">Personal</div>
+        <div class="prod-price">$299</div>
+        <div class="prod-price-sub">One-time &middot; 1 machine</div>
+        <ul class="prod-features">
+          <li>Qwen3.5-4B Uncensored (0/465 refusals)</li>
+          <li>1 domain LoRA adapter + Spike QAT</li>
+          <li>3.3 GB download &middot; 6-layer security</li>
+        </ul>
+        <button class="prod-select-btn">Select</button>
+      </div>
+
+      <div class="prod-card featured" data-tier="professional" onclick="selectProduct('professional')">
+        <div class="prod-badge blue">MOST POPULAR</div>
+        <div class="prod-name">Professional</div>
+        <div class="prod-price">$799</div>
+        <div class="prod-price-sub">One-time &middot; 3 machines</div>
+        <ul class="prod-features">
+          <li>All 6 LoRA adapters hot-swap</li>
+          <li>All 4 backends &middot; SOC2/HIPAA/FINRA</li>
+          <li>White-glove setup &middot; Priority support</li>
+        </ul>
+        <button class="prod-select-btn">Select</button>
+      </div>
+
+      <div class="prod-card" data-tier="air" onclick="selectProduct('air')">
+        <div class="prod-name">Air</div>
+        <div class="prod-price">$299</div>
+        <div class="prod-price-sub">One-time &middot; CPU only</div>
+        <ul class="prod-features">
+          <li>llama.cpp &mdash; any GGUF model</li>
+          <li>No GPU required</li>
+          <li>6-layer security &middot; 1 machine</li>
+        </ul>
+        <button class="prod-select-btn">Select</button>
+      </div>
+
+      <div class="prod-card" data-tier="apple_silicon" onclick="selectProduct('apple_silicon')">
+        <div class="prod-name">Apple Silicon</div>
+        <div class="prod-price">$299</div>
+        <div class="prod-price-sub">One-time &middot; M1&ndash;M4</div>
+        <ul class="prod-features">
+          <li>Native Metal / MLX acceleration</li>
+          <li>M1/M2/M3/M4 optimized</li>
+          <li>6-layer security &middot; 1 machine</li>
+        </ul>
+        <button class="prod-select-btn">Select</button>
+      </div>
+
+      <div class="prod-card cloud-card" data-tier="cloud" onclick="selectProduct('cloud')">
+        <div class="prod-badge green">CLOUD</div>
+        <div class="prod-name">Cloud</div>
+        <div class="prod-price" style="font-size:22px;color:var(--green);">Contact Us</div>
+        <div class="prod-price-sub">Usage-based pricing</div>
+        <ul class="prod-features">
+          <li>32B/72B models on GPU clusters</li>
+          <li>No hardware management</li>
+          <li>Usage-based &middot; API access</li>
+        </ul>
+        <a href="custom.html" class="prod-select-btn" onclick="event.stopPropagation()">Contact</a>
+      </div>
+
+      <div class="prod-card cloud-card" data-tier="cloud_pro" onclick="selectProduct('cloud_pro')">
+        <div class="prod-badge green">CLOUD PRO</div>
+        <div class="prod-name">Cloud Pro</div>
+        <div class="prod-price" style="font-size:22px;color:var(--green);">Contact Us</div>
+        <div class="prod-price-sub">Dedicated infrastructure</div>
+        <ul class="prod-features">
+          <li>Dedicated GPU infrastructure</li>
+          <li>Custom model deployment</li>
+          <li>SLA guarantee &middot; Priority support</li>
+        </ul>
+        <a href="custom.html" class="prod-select-btn" onclick="event.stopPropagation()">Contact</a>
+      </div>
+
+    </div>
+
+    <button class="continue-btn" id="continueToAddons" disabled onclick="goToStep(2)">
+      Continue to Add-ons
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════ STEP 2: ADD-ONS ═══════════════════ -->
+<div class="pay-step hidden" id="step2">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow">Step 2</div>
+      <h2>Customize with add-ons</h2>
+      <p>Enhance your deployment. Toggle what you need.</p>
+    </div>
+
+    <div class="addons-list" id="addonsList">
+
+      <div class="addon-row" id="addonAirgap">
+        <div class="addon-info">
+          <div class="addon-name">Air-Gapped Kit</div>
+          <div class="addon-desc">Network lockdown, intrusion detection, compliance docs</div>
         </div>
+        <div class="addon-price">+$1,499</div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggleAirgap" onchange="updateAddons()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
 
-        <div style="display: flex; flex-direction: column; gap: 12px;">
+      <div class="addon-row" id="addonCloud">
+        <div class="addon-info">
+          <div class="addon-name">Cloud Access</div>
+          <div class="addon-desc">32B/72B models on GPU clusters</div>
+        </div>
+        <div class="addon-price">+$49/mo</div>
+        <label class="toggle-switch">
+          <input type="checkbox" id="toggleCloud" onchange="updateAddons()">
+          <span class="toggle-slider"></span>
+        </label>
+      </div>
 
-          <div class="product-row" data-tier="personal" onclick="selectTier('personal')">
-            <div class="product-row-header">
-              <div>
-                <div class="product-row-name">Kwyre Personal</div>
-                <div class="product-row-price">$499</div>
-              </div>
-              <button class="price-select-btn" onclick="event.stopPropagation();selectTier('personal')">Select</button>
-            </div>
-            <ul class="product-row-features">
-              <li>Qwen3.5-4B Uncensored (0/465 refusals) + 0.8B draft</li>
-              <li>1 domain LoRA adapter hot-swap &middot; Spike QAT</li>
-              <li>3.3 GB download &middot; 6-layer security &middot; RAG &middot; 1 machine</li>
-            </ul>
-          </div>
+      <div class="addon-row" id="addonTraining">
+        <div class="addon-info">
+          <div class="addon-name">Custom Training</div>
+          <div class="addon-desc">We fine-tune a model on your data</div>
+        </div>
+        <div class="addon-price contact">Contact</div>
+        <a href="custom.html" class="addon-contact-btn">Request</a>
+      </div>
 
-          <div class="product-row featured" data-tier="professional" onclick="selectTier('professional')">
-            <div style="position:absolute;top:-1px;left:50%;transform:translateX(-50%);background:var(--accent);color:#fff;font-family:var(--mono);font-size:9px;font-weight:700;letter-spacing:2px;padding:4px 12px;border-radius:0 0 6px 6px;">MOST POPULAR</div>
-            <div class="product-row-header">
-              <div>
-                <div class="product-row-name">Kwyre Professional</div>
-                <div class="product-row-price">$1,499</div>
-              </div>
-              <button class="price-select-btn active" onclick="event.stopPropagation();selectTier('professional')">Select</button>
-            </div>
-            <ul class="product-row-features">
-              <li>Qwen3.5-4B Uncensored (0/465 refusals) &middot; 6 LoRA adapters hot-swap</li>
-              <li>Pipeline: Claude &#8594; QLoRA &#8594; GRPO &middot; All 4 backends</li>
-              <li>Offline installer &middot; SOC2/HIPAA/FINRA &middot; White-glove setup</li>
-              <li>3 machine licenses &middot; Priority support &lt;24hr</li>
-            </ul>
-          </div>
-
-          <div class="product-row" data-tier="airgapped" onclick="selectTier('airgapped')">
-            <div class="product-row-header">
-              <div>
-                <div class="product-row-name">Kwyre Air-Gapped Kit</div>
-                <div class="product-row-price">$3,499</div>
-              </div>
-              <button class="price-select-btn" onclick="event.stopPropagation();selectTier('airgapped')">Select</button>
-            </div>
-            <ul class="product-row-features">
-              <li>Uncensored (0/465 refusals) &middot; All 6 LoRA adapters hot-swap</li>
-              <li>Offline installer &middot; All 4 backends &middot; Full compliance</li>
-              <li>White-glove setup &middot; 5 machine licenses</li>
-            </ul>
-          </div>
-
-          <div class="product-row" data-tier="air" onclick="selectTier('air')">
-            <div class="product-row-header">
-              <div>
-                <div class="product-row-name">Kwyre Air</div>
-                <div class="product-row-price">$349</div>
-              </div>
-              <button class="price-select-btn" onclick="event.stopPropagation();selectTier('air')">Select</button>
-            </div>
-            <ul class="product-row-features">
-              <li>llama.cpp (any GGUF) &middot; No GPU required</li>
-              <li>1 domain adapter &middot; 6-layer security</li>
-              <li>1 machine license</li>
-            </ul>
-          </div>
-
-          <div class="product-row" data-tier="mlx" onclick="selectTier('mlx')">
-            <div class="product-row-header">
-              <div>
-                <div class="product-row-name">Kwyre Apple Silicon</div>
-                <div class="product-row-price">$299</div>
-              </div>
-              <button class="price-select-btn" onclick="event.stopPropagation();selectTier('mlx')">Select</button>
-            </div>
-            <ul class="product-row-features">
-              <li>Native Metal acceleration &middot; mlx-lm</li>
-              <li>M1/M2/M3/M4 support &middot; Unified memory</li>
-              <li>1 domain adapter &middot; 6-layer security &middot; 1 machine license</li>
-            </ul>
-          </div>
-
-          <div class="product-row" style="border-color: var(--green-dim);" onclick="window.location='custom.html'">
-            <div class="product-row-header">
-              <div>
-                <div class="product-row-name" style="color: var(--green);">Custom LLM</div>
-                <div class="product-row-price" style="color: var(--green);">$25K+</div>
-              </div>
-              <a href="custom.html" class="price-select-btn" style="background:var(--green);border-color:var(--green);" onclick="event.stopPropagation()">Request</a>
-            </div>
-            <ul class="product-row-features">
-              <li>Uncensored base &middot; Claude &#8594; QLoRA &#8594; GRPO pipeline</li>
-              <li>All 4 backends &middot; Hot-swap adapters &middot; Full compliance</li>
-            </ul>
-          </div>
-
+      <div class="addon-row" id="addonMachines">
+        <div class="addon-info">
+          <div class="addon-name">Extra Machine Licenses</div>
+          <div class="addon-desc">Additional machine licenses for your team</div>
+        </div>
+        <div class="addon-price" id="machinesPrice">+$0</div>
+        <div class="addon-number-wrap">
+          <button class="addon-num-btn" onclick="changeMachines(-1)">&minus;</button>
+          <div class="addon-num-val" id="machinesCount">0</div>
+          <button class="addon-num-btn" onclick="changeMachines(1)">+</button>
         </div>
       </div>
 
-      <!-- RIGHT: PAYMENT METHOD -->
-      <div id="payment">
-        <div class="sh" style="text-align: left; margin-bottom: 24px;">
-          <div class="sh-eyebrow">Payment Method</div>
-          <h2 style="font-size: 24px;">How would you like to pay?</h2>
-        </div>
+    </div>
 
-        <div class="pay-method-toggle" style="max-width:none;margin-left:0;margin-right:0;">
-          <button class="active" onclick="setPayMethod('xmr')">
+    <div class="running-total">
+      <div class="running-total-label">Estimated Total</div>
+      <div class="running-total-amount" id="runningTotal">$299</div>
+    </div>
+
+    <button class="continue-btn" id="continueToPayment" onclick="goToStep(3)">
+      Continue to Payment
+      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+    </button>
+  </div>
+</div>
+
+<!-- Luke 16:10 — Whoever can be trusted with very little can also be trusted with much. -->
+<!-- Proverbs 11:1 — The LORD detests dishonest scales, but accurate weights find favor with him. -->
+
+<!-- ═══════════════════ STEP 3: PAYMENT ═══════════════════ -->
+<div class="pay-step hidden" id="step3">
+  <div class="wrap">
+    <div class="sh">
+      <div class="sh-eyebrow">Step 3</div>
+      <h2>Complete your purchase</h2>
+    </div>
+
+    <div class="pay-layout">
+
+      <!-- LEFT: Payment Form -->
+      <div>
+        <div class="pay-method-toggle">
+          <button class="active" onclick="setPayMethod('cc')">
+            Credit Card
+          </button>
+          <button onclick="setPayMethod('xmr')">
             Monero (XMR)
-            <span class="recommended">Recommended</span>
-          </button>
-          <button onclick="setPayMethod('cc')">Credit Card</button>
-        </div>
-
-        <div class="pay-panel xmr-panel" id="xmrPanel" style="max-width:none;">
-          <div class="xmr-selected-tier" id="xmrTierLabel">Professional</div>
-          <div class="xmr-rate-note">XMR rate available on request</div>
-
-          <div id="qrCode" class="qr-container"></div>
-
-          <div class="xmr-address-wrap">
-            <div class="xmr-address-label">Monero (XMR) Address</div>
-            <div class="xmr-address" id="xmrAddress">84GhsVq5sQ3RE9DxMaRrmaX8L3am6VpJdfjz3KG3PFEiMVMjnFqYEochJCWBwREmUPNi7mYbSabKvP3kCB1oG4uiKxvpTvH</div>
-          </div>
-
-          <button class="copy-btn" id="copyBtn" onclick="copyAddress()">
-            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            <span id="copyLabel">Copy Address</span>
+            <span class="recommended">Anonymous</span>
           </button>
         </div>
 
-        <div class="pay-panel pay-panel-hidden" id="ccPanel" style="max-width:none;">
-          <div class="cc-form-header">
-            <div class="cc-form-tier" id="ccTierLabel">Professional</div>
-            <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.5px;">SECURED BY STRIPE</div>
+        <!-- CC / Stripe Panel -->
+        <div class="pay-panel" id="ccPanel">
+          <div class="email-field" id="emailFieldWrap">
+            <label class="email-label" for="payEmail">Email Address</label>
+            <input type="email" id="payEmail" class="email-input" placeholder="you@example.com" required>
           </div>
 
-          <!-- Stripe Payment Element mounts here -->
           <div id="stripeLoadingEl" class="stripe-loading">
             <div class="stripe-loading-dot"></div>
             <div class="stripe-loading-dot"></div>
             <div class="stripe-loading-dot"></div>
-            <span>Initializing secure payment form…</span>
+            <span>Initializing secure payment&hellip;</span>
           </div>
 
           <div id="stripe-payment-element"></div>
@@ -1349,52 +1240,94 @@ nav {
 
           <div class="cc-secure-note">
             <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            256-bit TLS · PCI-DSS compliant · Powered by Stripe
+            256-bit TLS &middot; PCI-DSS &middot; Powered by Stripe
           </div>
         </div>
 
-        <div class="after-pay">
-          <div class="after-pay-box">
-            <div class="after-pay-step">
-              <div class="after-pay-num">1</div>
-              <div class="after-pay-text">
-                <h4>Send payment</h4>
-                <p>Send the XMR amount to the address above. Double-check the address before confirming.</p>
-              </div>
-            </div>
-            <div class="after-pay-step">
-              <div class="after-pay-num">2</div>
-              <div class="after-pay-text">
-                <h4>Email your Transaction ID</h4>
-                <p>After sending payment, email your Transaction ID to <a href="mailto:payments@kwyre.com">payments@kwyre.com</a></p>
-              </div>
-            </div>
-            <div class="after-pay-step">
-              <div class="after-pay-num">3</div>
-              <div class="after-pay-text">
-                <h4>Receive your license key</h4>
-                <p>You'll receive your license key within 24 hours.</p>
-              </div>
-            </div>
+        <!-- XMR Panel -->
+        <div class="pay-panel pay-panel-hidden xmr-panel" id="xmrPanel">
+          <div class="xmr-selected-tier" id="xmrTierLabel">Professional</div>
+          <div class="xmr-amount-usd" id="xmrAmountUsd">$799</div>
+          <div class="xmr-rate-note">XMR rate available on request</div>
+
+          <div id="qrCode" class="qr-container"></div>
+
+          <div class="xmr-address-wrap">
+            <div class="xmr-address-label">Monero (XMR) Address</div>
+            <div class="xmr-address" id="xmrAddress">84GhsVq5sQ3RE9DxMaRrmaX8L3am6VpJdfjz3KG3PFEiMVMjnFqYEochJCWBwREmUPNi7mYbSabKvP3kCB1oG4uiKxvpTvH</div>
           </div>
-          <div class="after-pay-note">
-            <span class="dot"></span>
-            All transactions verified manually for your security
+
+          <button class="copy-btn" id="copyBtn" onclick="copyAddress()">
+            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+            <span id="copyLabel">Copy Address</span>
+          </button>
+
+          <div class="xmr-after-steps">
+            <div class="xmr-after-step">
+              <div class="xmr-after-num">1</div>
+              <div class="xmr-after-text">
+                <h4>Send payment</h4>
+                <p>Send the XMR amount to the address above.</p>
+              </div>
+            </div>
+            <div class="xmr-after-step">
+              <div class="xmr-after-num">2</div>
+              <div class="xmr-after-text">
+                <h4>Email your Transaction ID</h4>
+                <p>Email your TX ID to <a href="mailto:payments@kwyre.com">payments@kwyre.com</a></p>
+              </div>
+            </div>
+            <div class="xmr-after-step">
+              <div class="xmr-after-num">3</div>
+              <div class="xmr-after-text">
+                <h4>Receive your license key</h4>
+                <p>License key delivered within 24 hours.</p>
+              </div>
+            </div>
           </div>
         </div>
+      </div>
+
+      <!-- RIGHT: Breakdown -->
+      <div class="pay-breakdown" id="payBreakdown">
+        <h3>Order Summary</h3>
+        <div id="breakdownItems"></div>
       </div>
 
     </div>
   </div>
 </div>
 
-<!-- Luke 16:10 — Whoever can be trusted with very little can also be trusted with much. -->
-<!-- Proverbs 11:1 — The LORD detests dishonest scales, but accurate weights find favor with him. -->
+<!-- ═══════════════════ SUCCESS (hidden) ═══════════════════ -->
+<div class="pay-step hidden" id="successSection">
+  <div class="wrap">
+    <div class="pay-success-section">
+      <div class="pay-success-icon">
+        <svg viewBox="0 0 24 24" width="36" height="36" stroke="var(--green)" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      </div>
+      <h2>Payment Confirmed</h2>
+      <p id="successMessage">Your license key has been generated.</p>
+
+      <div class="license-key-box" id="licenseKeyBox" style="display:none;">
+        <div class="license-key-label">Your License Key</div>
+        <div class="license-key-value" id="licenseKeyDisplay"></div>
+      </div>
+
+      <div class="success-actions">
+        <a href="#download" class="success-btn primary">Download Installer</a>
+        <a href="kwyre-demo.html" class="success-btn ghost">Go to Dashboard</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 1 Timothy 6:10 — For the love of money is a root of all kinds of evil. -->
+<!-- Matthew 6:21 — For where your treasure is, there your heart will be also. -->
 
 <!-- DOWNLOAD SECTION -->
-<div class="section" id="download">
+<div class="dl-section" id="download">
   <div class="wrap">
-    <div class="sh">
+    <div class="sh" style="text-align:center;">
       <div class="sh-eyebrow reveal">Download</div>
       <h2 class="reveal reveal-d1">Already purchased?</h2>
       <p class="reveal reveal-d2">Enter your license key to access your installer downloads.</p>
@@ -1435,20 +1368,16 @@ nav {
               <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
             </div>
           </a>
-
         </div>
 
         <div class="dl-note">
           <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          Compiled binary — source code is not included. All 6 security layers active.
+          Compiled binary &mdash; source code is not included. All 6 security layers active.
         </div>
       </div>
     </div>
   </div>
 </div>
-
-<!-- 1 Timothy 6:10 — For the love of money is a root of all kinds of evil. -->
-<!-- Matthew 6:21 — For where your treasure is, there your heart will be also. -->
 
 <!-- FOOTER -->
 <footer class="site-footer">
@@ -1461,7 +1390,9 @@ nav {
 </footer>
 
 <script nonce="{{CSP_NONCE}}">
-/* ── PARTICLE SYSTEM ── */
+/* ══════════════════════════════════════════════════════════════════
+   PARTICLE SYSTEM
+   ══════════════════════════════════════════════════════════════════ */
 (function(){
   const cv = document.getElementById('particles');
   const cx = cv.getContext('2d');
@@ -1480,7 +1411,7 @@ nav {
   }
 
   window.addEventListener('click', e => {
-    if(e.target.closest('button, a, .product-row, .pay-method-toggle, input, textarea, select, .dl-card')) return;
+    if(e.target.closest('button, a, .prod-card, .pay-method-toggle, input, textarea, select, .dl-card, .addon-row, label')) return;
     clickWaves.push({ x: e.clientX, y: e.clientY, r: 0, maxR: 350, life: 1 });
     pts.forEach(n => {
       const d = Math.hypot(n.x - e.clientX, n.y - e.clientY);
@@ -1495,25 +1426,16 @@ nav {
 
   function frame(){
     cx.clearRect(0,0,W,H);
-
     clickWaves.forEach(w => {
-      w.r += 4;
-      w.life -= 0.015;
+      w.r += 4; w.life -= 0.015;
       if(w.life > 0) {
-        cx.beginPath();
-        cx.arc(w.x, w.y, w.r, 0, Math.PI*2);
-        cx.strokeStyle = `rgba(59,130,246,${w.life * 0.3})`;
-        cx.lineWidth = 1.5;
-        cx.stroke();
-        cx.beginPath();
-        cx.arc(w.x, w.y, w.r * 0.7, 0, Math.PI*2);
-        cx.strokeStyle = `rgba(34,197,94,${w.life * 0.15})`;
-        cx.lineWidth = 0.8;
-        cx.stroke();
+        cx.beginPath(); cx.arc(w.x, w.y, w.r, 0, Math.PI*2);
+        cx.strokeStyle = `rgba(59,130,246,${w.life * 0.3})`; cx.lineWidth = 1.5; cx.stroke();
+        cx.beginPath(); cx.arc(w.x, w.y, w.r * 0.7, 0, Math.PI*2);
+        cx.strokeStyle = `rgba(34,197,94,${w.life * 0.15})`; cx.lineWidth = 0.8; cx.stroke();
       }
     });
     clickWaves = clickWaves.filter(w => w.life > 0);
-
     pts.forEach(n=>{
       n.ox *= 0.94; n.oy *= 0.94;
       n.x += n.vx + n.ox; n.y += n.vy + n.oy; n.p += .015;
@@ -1522,7 +1444,6 @@ nav {
       n.x = Math.max(0, Math.min(W, n.x));
       n.y = Math.max(0, Math.min(H, n.y));
     });
-
     for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
       const a=pts[i],b=pts[j],d=Math.hypot(a.x-b.x,a.y-b.y);
       if(d>CONN)continue;
@@ -1532,7 +1453,6 @@ nav {
       cx.strokeStyle=near?`rgba(34,197,94,${al*2})`:`rgba(59,130,246,${al})`;
       cx.lineWidth=near?1.2:.4;cx.stroke();
     }
-
     pts.forEach(n=>{
       const near=Math.hypot(n.x-mx,n.y-my)<MOUSE_R;
       const r=Math.max(0.1,n.r+Math.sin(n.p)*.5);
@@ -1555,12 +1475,10 @@ nav {
   window.addEventListener('resize',()=>{resize();init();emberResize();});
   resize(); init(); frame();
 
-  /* EMBER PARTICLES */
   const ecv = document.getElementById('embers');
   const ecx = ecv.getContext('2d');
   let eW, eH, embers = [];
   const EC = 50;
-
   function emberResize() { eW = ecv.width = innerWidth; eH = ecv.height = innerHeight; }
   function mkEmbers() {
     embers = Array.from({length: EC}, () => ({
@@ -1576,23 +1494,14 @@ nav {
     ecx.clearRect(0,0,eW,eH);
     embers.forEach(e => {
       e.x += e.vx + Math.sin(e.flicker)*.1;
-      e.y += e.vy;
-      e.flicker += .025;
-      e.life -= e.decay;
-      if(e.life<=0 || e.y<-10) {
-        e.x=Math.random()*eW; e.y=eH+10;
-        e.life=1; e.r=Math.random()*1.6+.3;
-      }
+      e.y += e.vy; e.flicker += .025; e.life -= e.decay;
+      if(e.life<=0 || e.y<-10) { e.x=Math.random()*eW; e.y=eH+10; e.life=1; e.r=Math.random()*1.6+.3; }
       const a = e.life * (.45 + Math.sin(e.flicker)*.2);
-      ecx.beginPath();
-      ecx.arc(e.x, e.y, e.r, 0, Math.PI*2);
-      ecx.fillStyle=`rgba(${e.color},${a})`;
-      ecx.fill();
+      ecx.beginPath(); ecx.arc(e.x, e.y, e.r, 0, Math.PI*2);
+      ecx.fillStyle=`rgba(${e.color},${a})`; ecx.fill();
       if(e.r > 1) {
-        ecx.beginPath();
-        ecx.arc(e.x, e.y, e.r*3.5, 0, Math.PI*2);
-        ecx.fillStyle=`rgba(${e.color},${a*.07})`;
-        ecx.fill();
+        ecx.beginPath(); ecx.arc(e.x, e.y, e.r*3.5, 0, Math.PI*2);
+        ecx.fillStyle=`rgba(${e.color},${a*.07})`; ecx.fill();
       }
     });
     requestAnimationFrame(emberFrame);
@@ -1600,7 +1509,9 @@ nav {
   emberResize(); mkEmbers(); emberFrame();
 })();
 
-/* ── SCROLL REVEAL ── */
+/* ══════════════════════════════════════════════════════════════════
+   SCROLL REVEAL
+   ══════════════════════════════════════════════════════════════════ */
 (function(){
   const obs = new IntersectionObserver((entries)=>{
     entries.forEach(e=>{
@@ -1610,93 +1521,219 @@ nav {
   document.querySelectorAll('.reveal').forEach(el=> obs.observe(el));
 })();
 
-/* ── TIER SELECTION ── */
-const TIERS = {
-  personal:     { label: 'Personal', price: 499 },
-  professional: { label: 'Professional', price: 1499 },
-  airgapped:    { label: 'Air-Gapped Kit', price: 3499 },
-  air:          { label: 'Air (CPU)', price: 349 },
-  mlx:          { label: 'Apple Silicon', price: 299 }
+/* ══════════════════════════════════════════════════════════════════
+   STATE + DATA
+   ══════════════════════════════════════════════════════════════════ */
+const PRODUCTS = {
+  personal:      { name: 'Kwyre Personal',      price: 299,  isLocal: true },
+  professional:  { name: 'Kwyre Professional',   price: 799,  isLocal: true },
+  air:           { name: 'Kwyre Air',            price: 299,  isLocal: true },
+  apple_silicon: { name: 'Kwyre Apple Silicon',  price: 299,  isLocal: true },
+  cloud:         { name: 'Kwyre Cloud',          price: null, isLocal: false },
+  cloud_pro:     { name: 'Kwyre Cloud Pro',      price: null, isLocal: false },
 };
-let selectedTier = 'professional';
 
-function selectTier(tier) {
-  selectedTier = tier;
+const ADDON_PRICES = { airgap: 1499, cloud: 49, extra_machine: 99 };
 
-  document.querySelectorAll('.product-row .price-select-btn').forEach(btn => {
-    btn.classList.remove('active');
-    btn.textContent = 'Select';
+let state = {
+  step: 1,
+  selectedTier: null,
+  addons: { airgap: false, cloud: false, extraMachines: 0 },
+};
+
+/* ══════════════════════════════════════════════════════════════════
+   STEP NAVIGATION
+   ══════════════════════════════════════════════════════════════════ */
+function goToStep(step) {
+  if (step > 1 && !state.selectedTier) return;
+  if (step > 3) return;
+  state.step = step;
+
+  document.querySelectorAll('.step-item').forEach(el => {
+    const s = parseInt(el.dataset.step);
+    el.classList.toggle('active', s === step);
+    el.classList.toggle('completed', s < step);
   });
+  document.getElementById('stepLine1').classList.toggle('done', step > 1);
+  document.getElementById('stepLine2').classList.toggle('done', step > 2);
 
-  const card = document.querySelector(`.product-row[data-tier="${tier}"]`);
-  if (!card) return;
-  const btn = card.querySelector('.price-select-btn');
-  btn.classList.add('active');
-  btn.textContent = 'Selected';
+  document.getElementById('step2').classList.toggle('hidden', step < 2);
+  document.getElementById('step3').classList.toggle('hidden', step < 3);
 
-  document.getElementById('xmrTierLabel').textContent = TIERS[tier].label;
-  document.getElementById('ccTierLabel').textContent = TIERS[tier].label;
-
-  // If already on CC tab, reinitialise Stripe for the new tier amount
-  const ccPanel = document.getElementById('ccPanel');
-  if (!ccPanel.classList.contains('pay-panel-hidden')) {
-    initStripePanel(tier);
+  if (step === 2) {
+    document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    updateCloudAddonVisibility();
   }
-
-  document.getElementById('payment').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  if (step === 3) {
+    renderBreakdown();
+    updatePayLabels();
+    document.getElementById('step3').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    const ccPanel = document.getElementById('ccPanel');
+    if (!ccPanel.classList.contains('pay-panel-hidden')) {
+      initStripePanel();
+    }
+  }
 }
 
-/* ── PAYMENT METHOD TOGGLE ── */
+/* ══════════════════════════════════════════════════════════════════
+   PRODUCT SELECTION
+   ══════════════════════════════════════════════════════════════════ */
+function selectProduct(tier) {
+  const prod = PRODUCTS[tier];
+  if (!prod || !prod.isLocal) return;
+
+  state.selectedTier = tier;
+
+  document.querySelectorAll('.prod-card').forEach(card => {
+    const t = card.dataset.tier;
+    const btn = card.querySelector('.prod-select-btn');
+    if (t === tier) {
+      card.classList.add('selected');
+      if (btn && btn.tagName === 'BUTTON') btn.textContent = 'Selected';
+    } else {
+      card.classList.remove('selected');
+      if (btn && btn.tagName === 'BUTTON') btn.textContent = 'Select';
+    }
+  });
+
+  document.getElementById('continueToAddons').disabled = false;
+  updateAddons();
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   ADD-ONS
+   ══════════════════════════════════════════════════════════════════ */
+function updateCloudAddonVisibility() {
+  const prod = PRODUCTS[state.selectedTier];
+  const cloudRow = document.getElementById('addonCloud');
+  if (prod && prod.isLocal) {
+    cloudRow.classList.remove('disabled');
+  } else {
+    cloudRow.classList.add('disabled');
+    document.getElementById('toggleCloud').checked = false;
+    state.addons.cloud = false;
+  }
+}
+
+function updateAddons() {
+  state.addons.airgap = document.getElementById('toggleAirgap').checked;
+  state.addons.cloud = document.getElementById('toggleCloud').checked;
+
+  document.getElementById('addonAirgap').classList.toggle('active', state.addons.airgap);
+  document.getElementById('addonCloud').classList.toggle('active', state.addons.cloud);
+
+  const machinePrice = state.addons.extraMachines * ADDON_PRICES.extra_machine;
+  document.getElementById('machinesPrice').textContent = machinePrice > 0 ? '+$' + machinePrice.toLocaleString() : '+$0';
+  document.getElementById('addonMachines').classList.toggle('active', state.addons.extraMachines > 0);
+
+  updateRunningTotal();
+}
+
+function changeMachines(delta) {
+  state.addons.extraMachines = Math.max(0, Math.min(10, state.addons.extraMachines + delta));
+  document.getElementById('machinesCount').textContent = state.addons.extraMachines;
+  updateAddons();
+}
+
+function calculateTotal() {
+  const prod = PRODUCTS[state.selectedTier];
+  if (!prod || !prod.price) return 0;
+
+  let total = prod.price;
+  if (state.addons.airgap) total += ADDON_PRICES.airgap;
+  total += state.addons.extraMachines * ADDON_PRICES.extra_machine;
+  return total;
+}
+
+function updateRunningTotal() {
+  const total = calculateTotal();
+  document.getElementById('runningTotal').textContent = '$' + total.toLocaleString();
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   BREAKDOWN + PAY LABELS
+   ══════════════════════════════════════════════════════════════════ */
+function renderBreakdown() {
+  const prod = PRODUCTS[state.selectedTier];
+  if (!prod) return;
+  const container = document.getElementById('breakdownItems');
+  let html = '';
+
+  html += `<div class="breakdown-item"><span class="breakdown-item-label">${prod.name}</span><span class="breakdown-item-price">$${prod.price.toLocaleString()}</span></div>`;
+
+  if (state.addons.airgap) {
+    html += `<div class="breakdown-item"><span class="breakdown-item-label">Air-Gapped Kit</span><span class="breakdown-item-price">$${ADDON_PRICES.airgap.toLocaleString()}</span></div>`;
+  }
+  if (state.addons.cloud) {
+    html += `<div class="breakdown-item"><span class="breakdown-item-label">Cloud Access</span><span class="breakdown-item-price">$${ADDON_PRICES.cloud}/mo</span></div>`;
+  }
+  if (state.addons.extraMachines > 0) {
+    const machTotal = state.addons.extraMachines * ADDON_PRICES.extra_machine;
+    html += `<div class="breakdown-item"><span class="breakdown-item-label">Extra Licenses &times;${state.addons.extraMachines}</span><span class="breakdown-item-price">$${machTotal.toLocaleString()}</span></div>`;
+  }
+
+  const total = calculateTotal();
+  html += `<div class="breakdown-item total"><span class="breakdown-item-label">Total</span><span class="breakdown-item-price">$${total.toLocaleString()}</span></div>`;
+
+  if (state.addons.cloud) {
+    html += `<div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px;letter-spacing:0.3px;">+ $${ADDON_PRICES.cloud}/mo for Cloud Access (billed separately)</div>`;
+  }
+
+  container.innerHTML = html;
+}
+
+function updatePayLabels() {
+  const prod = PRODUCTS[state.selectedTier];
+  if (!prod) return;
+  const total = calculateTotal();
+
+  document.getElementById('ccPayLabel').textContent = 'Pay $' + total.toLocaleString();
+  document.getElementById('xmrTierLabel').textContent = prod.name;
+  document.getElementById('xmrAmountUsd').textContent = '$' + total.toLocaleString();
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   PAYMENT METHOD TOGGLE
+   ══════════════════════════════════════════════════════════════════ */
 function setPayMethod(method) {
   const btns = document.querySelectorAll('.pay-method-toggle button');
   btns.forEach(b => b.classList.remove('active'));
-  btns[method === 'xmr' ? 0 : 1].classList.add('active');
+  btns[method === 'cc' ? 0 : 1].classList.add('active');
 
-  document.getElementById('xmrPanel').classList.toggle('pay-panel-hidden', method !== 'xmr');
   document.getElementById('ccPanel').classList.toggle('pay-panel-hidden', method !== 'cc');
+  document.getElementById('xmrPanel').classList.toggle('pay-panel-hidden', method !== 'xmr');
 
-  const afterPay = document.querySelector('.after-pay');
-  if (afterPay) afterPay.style.display = method === 'xmr' ? '' : 'none';
-
-  if (method === 'cc') initStripePanel(selectedTier);
+  if (method === 'cc') initStripePanel();
 }
 
-/* ── QR CODE GENERATION ── */
+/* ══════════════════════════════════════════════════════════════════
+   QR CODE
+   ══════════════════════════════════════════════════════════════════ */
 (function(){
   const addr = '84GhsVq5sQ3RE9DxMaRrmaX8L3am6VpJdfjz3KG3PFEiMVMjnFqYEochJCWBwREmUPNi7mYbSabKvP3kCB1oG4uiKxvpTvH';
   const qr = qrcode(0, 'L');
   qr.addData('monero:' + addr);
   qr.make();
-
   const container = document.getElementById('qrCode');
-  const cellSize = 4;
-  const modules = qr.getModuleCount();
-  const size = modules * cellSize;
-
+  const cellSize = 4, modules = qr.getModuleCount(), size = modules * cellSize;
   const canvas = document.createElement('canvas');
-  canvas.width = size;
-  canvas.height = size;
+  canvas.width = size; canvas.height = size;
   canvas.style.width = (size * 1.5) + 'px';
   canvas.style.height = (size * 1.5) + 'px';
   canvas.style.imageRendering = 'pixelated';
-
   const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, size, size);
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
   ctx.fillStyle = '#05060a';
-
-  for (let row = 0; row < modules; row++) {
-    for (let col = 0; col < modules; col++) {
-      if (qr.isDark(row, col)) {
+  for (let row = 0; row < modules; row++)
+    for (let col = 0; col < modules; col++)
+      if (qr.isDark(row, col))
         ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
-      }
-    }
-  }
-
   container.appendChild(canvas);
 })();
 
-/* ── COPY ADDRESS ── */
+/* ══════════════════════════════════════════════════════════════════
+   COPY ADDRESS
+   ══════════════════════════════════════════════════════════════════ */
 function copyAddress() {
   const addr = document.getElementById('xmrAddress').textContent;
   navigator.clipboard.writeText(addr).then(() => {
@@ -1704,14 +1741,13 @@ function copyAddress() {
     const label = document.getElementById('copyLabel');
     btn.classList.add('copied');
     label.textContent = 'Copied!';
-    setTimeout(() => {
-      btn.classList.remove('copied');
-      label.textContent = 'Copy Address';
-    }, 2000);
+    setTimeout(() => { btn.classList.remove('copied'); label.textContent = 'Copy Address'; }, 2000);
   });
 }
 
-/* ── LICENSE VERIFICATION ── */
+/* ══════════════════════════════════════════════════════════════════
+   LICENSE VERIFICATION
+   ══════════════════════════════════════════════════════════════════ */
 async function verifyLicense() {
   const keyInput = document.getElementById('licenseKeyInput');
   const errorEl = document.getElementById('dlError');
@@ -1719,36 +1755,21 @@ async function verifyLicense() {
   const successEl = document.getElementById('dlSuccess');
   const btn = document.getElementById('verifyBtn');
   const label = document.getElementById('verifyLabel');
-
   const key = keyInput.value.trim();
-  if (!key) {
-    showError('Please enter a license key.');
-    return;
-  }
 
-  if (!key.startsWith('KWYRE-')) {
-    showError('Invalid format. License keys start with KWYRE-');
-    return;
-  }
+  if (!key) { showDlError('Please enter a license key.'); return; }
+  if (!key.startsWith('KWYRE-')) { showDlError('Invalid format. License keys start with KWYRE-'); return; }
 
-  btn.disabled = true;
-  label.textContent = 'Verifying...';
-  errorEl.style.display = 'none';
-  successEl.style.display = 'none';
+  btn.disabled = true; label.textContent = 'Verifying...';
+  errorEl.style.display = 'none'; successEl.style.display = 'none';
 
   try {
     const result = await verifyKeyLocally(key);
-    if (result.valid) {
-      showSuccess(result);
-    } else {
-      showError(result.error || 'Invalid license key.');
-    }
-  } catch (e) {
-    showError('Verification failed: ' + (e.message || 'Unknown error'));
-  }
+    if (result.valid) { showDlSuccess(result); }
+    else { showDlError(result.error || 'Invalid license key.'); }
+  } catch (e) { showDlError('Verification failed: ' + (e.message || 'Unknown error')); }
 
-  btn.disabled = false;
-  label.textContent = 'Verify License';
+  btn.disabled = false; label.textContent = 'Verify License';
 }
 
 function verifyKeyLocally(key) {
@@ -1757,99 +1778,66 @@ function verifyKeyLocally(key) {
       const clean = key.replace('KWYRE-', '').replace(/-/g, '').replace(/\s/g, '');
       const tokenJson = atob(clean);
       const tokenData = JSON.parse(tokenJson);
-
-      if (!tokenData.p || !tokenData.s) {
-        resolve({ valid: false, error: 'Malformed license key structure.' });
-        return;
-      }
-
+      if (!tokenData.p || !tokenData.s) { resolve({ valid: false, error: 'Malformed license key structure.' }); return; }
       const payloadStr = atob(tokenData.p);
       const payload = JSON.parse(payloadStr);
-
-      if (!payload.tier || !payload.label) {
-        resolve({ valid: false, error: 'Malformed license payload.' });
-        return;
-      }
-
-      const validTiers = ['personal', 'professional', 'airgapped', 'unlimited'];
-      if (!validTiers.includes(payload.tier)) {
-        resolve({ valid: false, error: 'Unknown license tier.' });
-        return;
-      }
-
+      if (!payload.tier || !payload.label) { resolve({ valid: false, error: 'Malformed license payload.' }); return; }
+      const validTiers = ['personal', 'professional', 'airgapped', 'unlimited', 'air', 'apple_silicon'];
+      if (!validTiers.includes(payload.tier)) { resolve({ valid: false, error: 'Unknown license tier.' }); return; }
       if (payload.expires_at && payload.expires_at < Date.now() / 1000) {
-        const exp = new Date(payload.expires_at * 1000).toISOString().split('T')[0];
-        resolve({ valid: false, error: 'License expired on ' + exp + '.' });
-        return;
+        resolve({ valid: false, error: 'License expired on ' + new Date(payload.expires_at * 1000).toISOString().split('T')[0] + '.' }); return;
       }
-
-      resolve({
-        valid: true,
-        tier: payload.tier,
-        label: payload.label,
-        machines: payload.machines || 1,
-      });
-    } catch (e) {
-      resolve({ valid: false, error: 'Invalid license key format.' });
-    }
+      resolve({ valid: true, tier: payload.tier, label: payload.label, machines: payload.machines || 1 });
+    } catch (e) { resolve({ valid: false, error: 'Invalid license key format.' }); }
   });
 }
 
-function showError(msg) {
-  const errorEl = document.getElementById('dlError');
-  const errorMsg = document.getElementById('dlErrorMsg');
-  errorMsg.textContent = msg;
-  errorEl.style.display = 'flex';
+function showDlError(msg) {
+  document.getElementById('dlErrorMsg').textContent = msg;
+  document.getElementById('dlError').style.display = 'flex';
   document.getElementById('dlSuccess').style.display = 'none';
 }
 
-function showSuccess(result) {
+function showDlSuccess(result) {
   document.getElementById('dlError').style.display = 'none';
   document.getElementById('dlSuccess').style.display = 'block';
   document.getElementById('dlTierLabel').textContent = result.label + ' License';
   document.getElementById('dlMachines').textContent = result.machines + ' machine' + (result.machines !== 1 ? 's' : '');
 }
 
-/* ── STRIPE INTEGRATION ── */
-// Replace pk_live_REPLACE_WITH_YOUR_PUBLISHABLE_KEY with your Stripe publishable key
-// from https://dashboard.stripe.com/apikeys
+/* ══════════════════════════════════════════════════════════════════
+   STRIPE INTEGRATION
+   ══════════════════════════════════════════════════════════════════ */
 const STRIPE_PUBLISHABLE_KEY = 'pk_live_REPLACE_WITH_YOUR_PUBLISHABLE_KEY';
 
-let _stripe = null;
-let _elements = null;
-let _paymentElement = null;
-let _stripeInitTier = null;
-let _stripeInitializing = false;
+let _stripe = null, _elements = null, _paymentElement = null;
+let _stripeInitKey = null, _stripeInitializing = false;
 
 function _getStripe() {
-  if (!_stripe && typeof Stripe !== 'undefined') {
-    _stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
-  }
+  if (!_stripe && typeof Stripe !== 'undefined') _stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
   return _stripe;
 }
 
-async function initStripePanel(tier) {
-  // Don't reinitialise if already showing the same tier
-  if (_stripeInitTier === tier && _paymentElement) return;
+async function initStripePanel() {
+  const cacheKey = state.selectedTier + JSON.stringify(state.addons);
+  if (_stripeInitKey === cacheKey && _paymentElement) return;
   if (_stripeInitializing) return;
   _stripeInitializing = true;
-  _stripeInitTier = tier;
+  _stripeInitKey = cacheKey;
 
   const loadingEl = document.getElementById('stripeLoadingEl');
   const mountEl   = document.getElementById('stripe-payment-element');
   const errorEl   = document.getElementById('stripeError');
   const payBtn    = document.getElementById('ccPayBtn');
-  const payLabel  = document.getElementById('ccPayLabel');
 
-  // Reset
   if (_paymentElement) { try { _paymentElement.unmount(); } catch(e) {} _paymentElement = null; }
   mountEl.innerHTML = '';
   loadingEl.style.display = 'flex';
   errorEl.style.display = 'none';
   payBtn.disabled = true;
 
-  const tierData = TIERS[tier];
-  payLabel.textContent = 'Pay $' + tierData.price.toLocaleString('en-US', { minimumFractionDigits: 2 });
+  const total = calculateTotal();
+  document.getElementById('ccPayLabel').textContent = 'Pay $' + total.toLocaleString();
 
   const stripe = _getStripe();
   if (!stripe) {
@@ -1861,19 +1849,28 @@ async function initStripePanel(tier) {
   }
 
   try {
+    const email = document.getElementById('payEmail').value.trim();
     const resp = await fetch('/api/create-payment-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ tier }),
+      body: JSON.stringify({
+        tier: state.selectedTier,
+        addons: {
+          airgap: state.addons.airgap,
+          cloud: state.addons.cloud,
+          extraMachines: state.addons.extraMachines,
+        },
+        email: email || undefined,
+      }),
     });
     const data = await resp.json();
 
-    if (!resp.ok || !data.client_secret) {
-      throw new Error(data.error || 'Could not initialise payment. Please try again.');
+    if (!resp.ok || !data.clientSecret) {
+      throw new Error(data.error || 'Could not initialise payment.');
     }
 
     _elements = stripe.elements({
-      clientSecret: data.client_secret,
+      clientSecret: data.clientSecret,
       appearance: {
         theme: 'night',
         variables: {
@@ -1898,23 +1895,17 @@ async function initStripePanel(tier) {
     _paymentElement = _elements.create('payment', { layout: 'tabs' });
     _paymentElement.mount('#stripe-payment-element');
 
-    _paymentElement.on('ready', () => {
-      loadingEl.style.display = 'none';
-      payBtn.disabled = false;
-    });
-
+    _paymentElement.on('ready', () => { loadingEl.style.display = 'none'; payBtn.disabled = false; });
     _paymentElement.on('loaderror', (e) => {
       loadingEl.style.display = 'none';
       document.getElementById('stripeErrorMsg').textContent = e.error?.message || 'Failed to load payment form.';
       errorEl.style.display = 'flex';
     });
-
   } catch (err) {
     loadingEl.style.display = 'none';
     document.getElementById('stripeErrorMsg').textContent = err.message;
     errorEl.style.display = 'flex';
   }
-
   _stripeInitializing = false;
 }
 
@@ -1922,73 +1913,102 @@ async function handleStripePayment() {
   const stripe = _getStripe();
   if (!stripe || !_elements) return;
 
+  const email = document.getElementById('payEmail').value.trim();
+  if (!email) {
+    document.getElementById('stripeErrorMsg').textContent = 'Please enter your email address.';
+    document.getElementById('stripeError').style.display = 'flex';
+    document.getElementById('payEmail').focus();
+    return;
+  }
+
   const payBtn   = document.getElementById('ccPayBtn');
   const payLabel = document.getElementById('ccPayLabel');
   const errorEl  = document.getElementById('stripeError');
 
   payBtn.disabled = true;
-  payLabel.textContent = 'Processing…';
+  payLabel.textContent = 'Processing\u2026';
   errorEl.style.display = 'none';
 
-  const returnUrl = window.location.origin + '/pay.html?payment_success=true&tier=' + encodeURIComponent(selectedTier);
-
-  const { error } = await stripe.confirmPayment({
+  const { error, paymentIntent } = await stripe.confirmPayment({
     elements: _elements,
-    confirmParams: { return_url: returnUrl },
+    redirect: 'if_required',
+    confirmParams: {
+      receipt_email: email,
+      return_url: window.location.origin + '/pay.html?payment_success=true&tier=' + encodeURIComponent(state.selectedTier),
+    },
   });
 
   if (error) {
     document.getElementById('stripeErrorMsg').textContent = error.message;
     errorEl.style.display = 'flex';
     payBtn.disabled = false;
-    payLabel.textContent = 'Pay $' + TIERS[selectedTier].price.toLocaleString('en-US', { minimumFractionDigits: 2 });
+    payLabel.textContent = 'Pay $' + calculateTotal().toLocaleString();
+    return;
   }
-  // On success Stripe redirects to return_url automatically
+
+  if (paymentIntent && paymentIntent.status === 'succeeded') {
+    await handlePaymentSuccess(paymentIntent.id);
+  }
 }
 
-/* ── PAYMENT SUCCESS PAGE ── */
-(function() {
+async function handlePaymentSuccess(paymentIntentId) {
+  try {
+    const resp = await fetch('/api/license/activate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ paymentIntentId }),
+    });
+    const data = await resp.json();
+
+    if (data.licenseKey) {
+      document.getElementById('licenseKeyDisplay').textContent = data.licenseKey;
+      document.getElementById('licenseKeyBox').style.display = 'block';
+    }
+  } catch (e) {
+    /* License activation failed — user can contact support */
+  }
+
+  document.getElementById('step1').classList.add('hidden');
+  document.getElementById('step2').classList.add('hidden');
+  document.getElementById('step3').classList.add('hidden');
+  document.getElementById('successSection').classList.remove('hidden');
+  document.querySelector('.step-bar').style.display = 'none';
+
+  const prod = PRODUCTS[state.selectedTier];
+  document.getElementById('successMessage').textContent =
+    'You purchased ' + (prod ? prod.name : 'Kwyre AI') + '. Your license key will be emailed within 24 hours if not shown above.';
+
+  document.getElementById('successSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+/* ══════════════════════════════════════════════════════════════════
+   AUTH PRE-FILL + QUERY PARAMS + INIT
+   ══════════════════════════════════════════════════════════════════ */
+(function init() {
+  const token = localStorage.getItem('kwyre_token');
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.email) {
+        document.getElementById('payEmail').value = payload.email;
+      }
+    } catch(e) {}
+  }
+
   const params = new URLSearchParams(window.location.search);
-  if (params.get('payment_success') !== 'true') return;
 
-  const tierKey = params.get('tier') || 'professional';
-  const tierData = {
-    personal: 'Personal', professional: 'Professional', airgapped: 'Air-Gapped Kit',
-    air: 'Air (CPU)', mlx: 'Apple Silicon'
-  }[tierKey] || 'Kwyre';
+  if (params.get('payment_success') === 'true') {
+    const tierKey = params.get('tier') || 'professional';
+    state.selectedTier = tierKey;
+    handlePaymentSuccess(params.get('payment_intent') || '');
+    return;
+  }
 
-  // Hide payment UI, show success
-  document.addEventListener('DOMContentLoaded', () => {
-    const notice = document.getElementById('heroNotice');
-    if (notice) {
-      notice.style.background = 'rgba(34,197,94,0.06)';
-      notice.style.borderColor = 'rgba(34,197,94,0.2)';
-      notice.innerHTML = `
-        <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--green)" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        <span style="color:var(--green)"><strong>Payment received!</strong> Your ${tierData} license key will be emailed within 24 hours.</span>`;
-    }
-
-    const paySection = document.getElementById('products-payment');
-    if (paySection) {
-      paySection.innerHTML = `
-        <div class="wrap">
-          <div class="pay-success">
-            <div class="pay-success-icon">
-              <svg viewBox="0 0 24 24" width="32" height="32" stroke="var(--green)" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-            </div>
-            <h2>Payment confirmed</h2>
-            <p style="margin-bottom:8px;">You purchased <strong style="color:var(--text)">Kwyre ${tierData}</strong>.</p>
-            <p>Your Ed25519 license key will be delivered to your email within 24 hours. Check your inbox (and spam folder).</p>
-            <p style="margin-top:20px;">Questions? <a href="mailto:payments@kwyre.com" style="color:var(--accent);">payments@kwyre.com</a></p>
-          </div>
-        </div>`;
-    }
-  });
+  const preselect = params.get('tier');
+  if (preselect && PRODUCTS[preselect] && PRODUCTS[preselect].isLocal) {
+    selectProduct(preselect);
+  }
 })();
-
-/* ── SET INITIAL STATE ── */
-selectTier('professional');
-document.querySelector('.product-row[data-tier="professional"] .price-select-btn').textContent = 'Selected';
 </script>
 </body>
 </html>

@@ -935,6 +935,8 @@ a.incident:hover {
       <a href="products.html">Products</a>
       <a href="platform.html">Platform</a>
       <a href="pay.html">Purchase</a>
+      <a href="login.html" id="navSignIn">Login</a>
+      <a href="dashboard.html" id="navDashboard" style="display:none;">Dashboard</a>
       <a href="kwyre-demo.html" class="nav-cta">App Demo</a>
     </div>
   </div>
@@ -1439,6 +1441,15 @@ function closeCompanyPopup() {
 document.addEventListener('keydown', function(e) {
   if (e.key === 'Escape') closeCompanyPopup();
 });
+
+(function(){
+  if (localStorage.getItem('kwyre_token') || localStorage.getItem('kwyre_license_key')) {
+    var s = document.getElementById('navSignIn');
+    var d = document.getElementById('navDashboard');
+    if (s) s.style.display = 'none';
+    if (d) d.style.display = '';
+  }
+})();
 </script>
 </body>
 </html>

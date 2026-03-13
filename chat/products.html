@@ -423,6 +423,8 @@ nav {
       <a href="products.html" class="active">Products</a>
       <a href="platform.html">Platform</a>
       <a href="pay.html">Purchase</a>
+      <a href="login.html" id="navSignIn">Login</a>
+      <a href="dashboard.html" id="navDashboard" style="display:none;">Dashboard</a>
       <a href="kwyre-demo.html" class="nav-cta">App Demo</a>
     </div>
   </div>
@@ -457,6 +459,7 @@ nav {
         <div class="product-card-price">$499</div>
         <div class="product-sub">1 machine &middot; GPU &middot; NF4 Quantized &middot; 0/465 Refusals</div>
         <p>Qwen3.5-4B Uncensored &mdash; your sensitive data never refuses to be analyzed. Pre-quantized 4-bit NF4 (2.5 GB) with Spike QAT encoding and SpikeServe activation optimization.</p>
+        <div style="margin-bottom:16px;"><a href="pay.html?tier=personal" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px 20px;font-size:11px;">Buy Now &mdash; $499</a></div>
         <ul class="product-features">
           <li>Qwen3.5-4B Uncensored &mdash; 0/465 refusals</li>
           <li>Qwen3.5-0.8B draft &mdash; speculative decoding, 2&ndash;3&times; speed</li>
@@ -469,6 +472,7 @@ nav {
           <li>6-layer security &middot; SSE streaming &middot; KV cache &middot; RAG</li>
           <li>1 machine license</li>
         </ul>
+        <a href="pay.html?tier=personal" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;padding:12px 24px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;text-decoration:none;border-radius:4px;background:var(--accent);color:#fff;box-shadow:0 2px 16px var(--accent-glow);transition:all 0.2s;">Buy Now &mdash; $299</a>
       </div>
 
       <!-- Kwyre Professional (FEATURED) -->
@@ -479,6 +483,7 @@ nav {
         <div class="product-card-price">$1,499</div>
         <div class="product-sub">3 machines &middot; Offline Installer &middot; 0/465 Refusals &middot; All 6 Domain Adapters</div>
         <p>Our flagship product. Qwen3.5-4B Uncensored (0/465 refusals) with all six domain LoRA adapters hot-swappable at runtime, fully air-gapped offline installer, pipeline-trained via Claude &#8594; QLoRA &#8594; domain GRPO &#8594; LoRA export.</p>
+        <div style="margin-bottom:16px;"><a href="pay.html?tier=professional" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px 20px;font-size:11px;">Buy Now &mdash; $1,499</a></div>
         <ul class="product-features">
           <li>Qwen3.5-4B Uncensored + Qwen3.5-0.8B draft &mdash; 2&ndash;3&times; speculative speed</li>
           <li>6 domain LoRA adapters hot-swap at runtime via API (~100 MB each)</li>
@@ -492,6 +497,7 @@ nav {
           <li>White-glove setup call &mdash; 1&times; 90-min personal onboarding</li>
           <li>3 machine licenses &middot; Priority support</li>
         </ul>
+        <a href="pay.html?tier=professional" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;padding:12px 24px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;text-decoration:none;border-radius:4px;background:var(--accent);color:#fff;box-shadow:0 2px 16px var(--accent-glow);transition:all 0.2s;">Buy Now &mdash; $799</a>
       </div>
 
       <!-- Air-Gapped Kit -->
@@ -501,6 +507,7 @@ nav {
         <div class="product-card-price">$3,499</div>
         <div class="product-sub">5 machines &middot; Offline Installer &middot; White-Glove Setup</div>
         <p>Full compliance package for air-gapped environments. Offline installer, all 6 domain adapters, and white-glove deployment support.</p>
+        <div style="margin-bottom:16px;"><a href="pay.html?tier=airgapped" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px 20px;font-size:11px;">Buy Now &mdash; $3,499</a></div>
         <ul class="product-features">
           <li>Offline installer</li>
           <li>All 6 domain adapters</li>
@@ -510,6 +517,7 @@ nav {
           <li>6-layer security stack</li>
           <li>Priority support</li>
         </ul>
+        <a href="pay.html?tier=professional" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;padding:12px 24px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;text-decoration:none;border-radius:4px;background:transparent;color:var(--text2);border:1px solid var(--border);transition:all 0.2s;">Buy Now &mdash; $3,499</a>
       </div>
 
       <!-- Kwyre Air -->
@@ -519,6 +527,7 @@ nav {
         <div class="product-card-price">$349</div>
         <div class="product-sub">CPU-Only &middot; llama.cpp &middot; Any GGUF</div>
         <p>No GPU required. CPU-only inference via llama.cpp runs on any hardware &mdash; laptops, desktops, servers, embedded systems. Bring any GGUF model.</p>
+        <div style="margin-bottom:16px;"><a href="pay.html?tier=air" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px 20px;font-size:11px;">Buy Now &mdash; $349</a></div>
         <ul class="product-features">
           <li>llama.cpp (any GGUF)</li>
           <li>No GPU required</li>
@@ -528,6 +537,7 @@ nav {
           <li>Download: 2-4 GB (GGUF)</li>
           <li>1 machine license</li>
         </ul>
+        <a href="pay.html?tier=air" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;padding:12px 24px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;text-decoration:none;border-radius:4px;background:var(--accent);color:#fff;box-shadow:0 2px 16px var(--accent-glow);transition:all 0.2s;">Buy Now &mdash; $299</a>
       </div>
 
       <!-- Kwyre Apple Silicon -->
@@ -537,6 +547,7 @@ nav {
         <div class="product-card-price">$299</div>
         <div class="product-sub">Metal &middot; MLX &middot; M1/M2/M3/M4</div>
         <p>Runs natively on macOS with Metal acceleration via MLX. Optimized for Apple Silicon unified memory architecture &mdash; fast, quiet, and power-efficient inference on any M-series Mac.</p>
+        <div style="margin-bottom:16px;"><a href="pay.html?tier=apple" class="btn btn-primary" style="width:100%;justify-content:center;padding:12px 20px;font-size:11px;">Buy Now &mdash; $299</a></div>
         <ul class="product-features">
           <li>macOS 12+ (Monterey and later)</li>
           <li>Native Metal acceleration (MLX)</li>
@@ -547,6 +558,7 @@ nav {
           <li>SSE streaming</li>
           <li>1 machine license</li>
         </ul>
+        <a href="pay.html?tier=apple_silicon" style="display:flex;align-items:center;justify-content:center;gap:8px;margin-top:20px;padding:12px 24px;font-family:var(--mono);font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;text-decoration:none;border-radius:4px;background:var(--accent);color:#fff;box-shadow:0 2px 16px var(--accent-glow);transition:all 0.2s;">Buy Now &mdash; $299</a>
       </div>
 
       <!-- Custom LLM (full-width) -->
@@ -556,6 +568,7 @@ nav {
         <div class="product-card-price">$25K+</div>
         <div class="product-sub">Turnkey &middot; Your Domain Trained &middot; Benchmarked vs GPT-4o</div>
         <p>A custom-trained model built for your specific domain. Pipeline: Claude &#8594; QLoRA &#8594; domain GRPO &#8594; LoRA export with 300 traces/domain and custom reward functions. Delivered as turnkey appliance or self-hosted across all 4 backends (GPU, vLLM, CPU, MLX).</p>
+        <div style="margin-bottom:16px;"><a href="custom.html#request" class="btn btn-ghost" style="width:100%;justify-content:center;padding:12px 20px;font-size:11px;border-color:rgba(34,197,94,0.3);color:var(--green);">Request Custom Model</a></div>
         <ul class="product-features">
           <li>Your domain trained</li>
           <li>Benchmarked vs GPT-4o</li>
@@ -647,7 +660,7 @@ nav {
     <h2 style="font-size:clamp(28px,3.5vw,40px);font-weight:700;letter-spacing:-0.5px;margin-bottom:12px;">Own your AI. Own your data.</h2>
     <p style="font-size:16px;color:var(--text2);max-width:500px;margin:0 auto 32px;line-height:1.6;">One-time payment. No cloud. No subscription. Runs on your machine forever.</p>
     <div style="display:flex;gap:12px;justify-content:center;flex-wrap:wrap;">
-      <a href="pay.html" class="btn btn-primary">Purchase Now</a>
+      <a href="pay.html?tier=professional" class="btn btn-primary">Purchase Now</a>
       <a href="custom.html" class="btn btn-ghost">Request Custom Model</a>
     </div>
   </div>
@@ -809,6 +822,16 @@ nav {
 })();
 
 
+</script>
+<script nonce="{{CSP_NONCE}}">
+(function(){
+  if (localStorage.getItem('kwyre_token') || localStorage.getItem('kwyre_license_key')) {
+    var s = document.getElementById('navSignIn');
+    var d = document.getElementById('navDashboard');
+    if (s) s.style.display = 'none';
+    if (d) d.style.display = '';
+  }
+})();
 </script>
 </body>
 </html>

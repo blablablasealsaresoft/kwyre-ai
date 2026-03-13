@@ -172,6 +172,26 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
   background-size: 256px 256px;
 }
 
+/* AUTH LINK */
+.auth-link {
+  position: fixed; top: 24px; right: 72px; z-index: 12;
+  font-family: var(--mono); font-size: 10px; font-weight: 500;
+  letter-spacing: 2px; text-transform: uppercase;
+  color: var(--accent); text-decoration: none;
+  padding: 7px 16px;
+  border: 1px solid rgba(59,130,246,0.2);
+  border-radius: 3px;
+  background: rgba(5,6,10,0.6);
+  backdrop-filter: blur(8px);
+  transition: all 0.25s;
+  opacity: 0; animation: fade-in 0.5s ease 1.5s forwards;
+}
+.auth-link:hover {
+  color: #fff; border-color: var(--accent);
+  background: rgba(59,130,246,0.15);
+  box-shadow: 0 0 16px var(--accent-glow);
+}
+
 /* AR CORNERS */
 .corner { position: fixed; width: 44px; height: 44px; z-index: 6; pointer-events: none; opacity: 0; animation: corner-show 0.5s ease forwards; }
 .corner::before, .corner::after { content: ''; position: absolute; background: var(--accent); box-shadow: 0 0 10px var(--accent-glow); }
@@ -307,6 +327,9 @@ html, body { width: 100%; height: 100%; overflow: hidden; background: var(--bg);
 <div class="hud hud-tr">SECURITY STACK / ALL LAYERS ACTIVE</div>
 <div class="hud hud-bl">ZERO TELEMETRY / VERIFIED</div>
 <div class="hud hud-br">MINT RAIL LLC</div>
+
+<!-- Auth Link -->
+<a href="login.html" class="auth-link" id="authLink">Login</a>
 
 <!-- Psalm 121:7 — The LORD will keep you from all harm — he will watch over your life. -->
 
@@ -569,6 +592,15 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Enter'&&btn.classList.contains('vis')) enter();
 });
 
+
+/* ── AUTH LINK STATE ── */
+(function(){
+  const link = document.getElementById('authLink');
+  if (localStorage.getItem('kwyre_token')) {
+    link.textContent = 'Dashboard';
+    link.href = 'dashboard.html';
+  }
+})();
 
 /* ── ENTER TRANSITION ── */
 function enter() {

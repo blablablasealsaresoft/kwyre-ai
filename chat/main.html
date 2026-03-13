@@ -2150,6 +2150,70 @@ html.light nav { background: rgba(245,246,250,0.9); }
   text-align: center; padding: 28px 0; color: var(--text3);
   font-family: var(--mono); font-size: 11px;
 }
+
+/* AUTH GATE */
+.auth-gate {
+  position: fixed; inset: 0; z-index: 500;
+  background: rgba(5,6,10,0.95);
+  backdrop-filter: blur(20px);
+  display: flex; align-items: center; justify-content: center;
+}
+.auth-gate-box {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 12px; padding: 48px 40px; text-align: center;
+  max-width: 420px; width: 90%;
+}
+.auth-gate-box h2 {
+  font-size: 20px; font-weight: 700; margin-bottom: 8px;
+}
+.auth-gate-box p {
+  font-size: 14px; color: var(--text2); line-height: 1.6; margin-bottom: 28px;
+}
+.auth-gate-actions { display: flex; gap: 12px; justify-content: center; margin-bottom: 20px; }
+.auth-gate-actions .btn { padding: 12px 28px; font-size: 11px; }
+.auth-gate-license {
+  display: none; margin-top: 16px;
+}
+.auth-gate-license input {
+  width: 100%; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 4px; padding: 12px 14px; color: var(--text);
+  font-family: var(--mono); font-size: 13px; outline: none;
+  margin-bottom: 12px; transition: border-color 0.2s;
+}
+.auth-gate-license input:focus { border-color: var(--accent); }
+.auth-gate-error {
+  font-family: var(--mono); font-size: 11px; color: var(--red);
+  margin-top: 8px; display: none;
+}
+
+/* USER MENU */
+.nav-user {
+  position: relative; display: flex; align-items: center; gap: 8px; cursor: pointer;
+}
+.nav-user-avatar {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent); display: flex; align-items: center; justify-content: center;
+  font-family: var(--mono); font-size: 11px; font-weight: 700; color: #fff;
+  border: 1px solid rgba(255,255,255,0.1);
+}
+.nav-user-avatar img {
+  width: 100%; height: 100%; border-radius: 50%; object-fit: cover;
+}
+.nav-user-dropdown {
+  display: none; position: absolute; top: 40px; right: 0;
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: 6px; min-width: 160px; overflow: hidden;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 110;
+}
+.nav-user-dropdown.open { display: block; }
+.nav-user-dropdown a {
+  display: block; padding: 10px 16px; font-size: 12px; color: var(--text2);
+  text-decoration: none; transition: background 0.15s;
+  font-family: var(--mono); letter-spacing: 0.3px;
+}
+.nav-user-dropdown a:hover { background: var(--surface2); color: var(--text); }
+.nav-user-dropdown a.logout-link { color: var(--red); border-top: 1px solid var(--border); }
+.nav-user-dropdown a.logout-link:hover { background: var(--red-dim); }
 </style>
 </head>
 <body>
@@ -2178,10 +2242,37 @@ html.light nav { background: rgba(245,246,250,0.9); }
       <a href="products.html">Products</a>
       <a href="platform.html">Platform</a>
       <a href="pay.html">Purchase</a>
+      <a href="login.html" id="navSignIn">Login</a>
+      <a href="dashboard.html" id="navDashboard" style="display:none;">Dashboard</a>
+      <div class="nav-user" id="navUserMenu" style="display:none;" onclick="document.getElementById('userDropdown').classList.toggle('open')">
+        <div class="nav-user-avatar" id="navAvatar">K</div>
+        <div class="nav-user-dropdown" id="userDropdown">
+          <a href="dashboard.html">Dashboard</a>
+          <a href="dashboard.html#licenses">Licenses</a>
+          <a href="#" class="logout-link" onclick="event.preventDefault();kwyreLogout();">Logout</a>
+        </div>
+      </div>
       <a href="kwyre-demo.html" class="nav-cta">App Demo</a>
     </div>
   </div>
 </nav>
+
+<!-- AUTH GATE -->
+<div class="auth-gate" id="authGate" style="display:none;">
+  <div class="auth-gate-box">
+    <h2>Welcome to Kwyre AI</h2>
+    <p>Sign in or enter a license key to access the air-gapped inference engine.</p>
+    <div class="auth-gate-actions">
+      <a href="login.html" class="btn btn-primary">Sign In</a>
+      <button class="btn btn-ghost" onclick="document.getElementById('licenseEntry').style.display='block'">Enter License Key</button>
+    </div>
+    <div class="auth-gate-license" id="licenseEntry">
+      <input type="text" id="licenseKeyInput" placeholder="KWYRE-XXXX-XXXX-XXXX" spellcheck="false">
+      <button class="btn btn-primary" style="width:100%;" onclick="verifyLicenseKey()">Verify License</button>
+      <div class="auth-gate-error" id="licenseError"></div>
+    </div>
+  </div>
+</div>
 
 <!-- Psalm 23:4 — Even though I walk through the valley of the shadow of death, I will fear no evil, for you are with me. -->
 
@@ -2425,7 +2516,11 @@ html.light nav { background: rgba(245,246,250,0.9); }
       <span id="modelLabel" style="font-family:var(--mono);font-size:12px;color:var(--text2);letter-spacing:0.5px;">kwyre-4b</span>
       <span id="adapter-badge" style="display:none;margin-left:8px;padding:2px 8px;border-radius:4px;font-size:0.8em;font-family:var(--mono);background:#2563eb;color:#fff;letter-spacing:0.5px;"></span>
       <div style="flex:1"></div>
+      <span id="licenseLabel" style="display:none;font-family:var(--mono);font-size:10px;color:var(--green);letter-spacing:0.5px;margin-right:12px;">Licensed</span>
       <span style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:1px;text-transform:uppercase;">Local Endpoint</span>
+    </div>
+    <div id="licenseNote" style="display:none;margin-bottom:12px;padding:8px 14px;background:var(--surface);border:1px solid var(--border);border-radius:4px;font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:0.3px;">
+      Your API key is derived from your license. <a href="dashboard.html" style="color:var(--accent);text-decoration:none;">Manage at Dashboard</a>.
     </div>
 
     <div class="system-prompt-section reveal reveal-d1">
@@ -4246,6 +4341,107 @@ function collectFingerprint() {
     </div>
   </div>
 </div>
+
+<script nonce="{{CSP_NONCE}}">
+(function(){
+  var token = localStorage.getItem('kwyre_token');
+  var licenseKey = localStorage.getItem('kwyre_license_key');
+  var gate = document.getElementById('authGate');
+  var signInLink = document.getElementById('navSignIn');
+  var dashLink = document.getElementById('navDashboard');
+  var userMenu = document.getElementById('navUserMenu');
+  var licenseLabel = document.getElementById('licenseLabel');
+  var licenseNote = document.getElementById('licenseNote');
+
+  function showAuthenticated(profile) {
+    if (gate) gate.style.display = 'none';
+    if (signInLink) signInLink.style.display = 'none';
+    if (dashLink) dashLink.style.display = '';
+    if (userMenu) {
+      userMenu.style.display = 'flex';
+      var avatar = document.getElementById('navAvatar');
+      if (profile && profile.avatar) {
+        avatar.innerHTML = '<img src="' + profile.avatar + '" alt="">';
+      } else if (profile && profile.name) {
+        avatar.textContent = profile.name.charAt(0).toUpperCase();
+      }
+    }
+    if (licenseLabel) licenseLabel.style.display = '';
+    if (licenseNote) licenseNote.style.display = '';
+  }
+
+  function showGate() {
+    if (gate) gate.style.display = 'flex';
+  }
+
+  if (token) {
+    fetch('/api/user/profile', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    }).then(function(r) {
+      if (!r.ok) throw new Error('unauthorized');
+      return r.json();
+    }).then(function(data) {
+      if (data.licenses && data.licenses.length > 0) {
+        localStorage.setItem('kwyre_license_key', data.licenses[0].key);
+      }
+      showAuthenticated(data);
+    }).catch(function() {
+      localStorage.removeItem('kwyre_token');
+      if (licenseKey) {
+        showAuthenticated(null);
+      } else {
+        showGate();
+      }
+    });
+  } else if (licenseKey) {
+    showAuthenticated(null);
+  } else {
+    showGate();
+  }
+
+  document.addEventListener('click', function(e) {
+    var dropdown = document.getElementById('userDropdown');
+    if (dropdown && !e.target.closest('.nav-user')) {
+      dropdown.classList.remove('open');
+    }
+  });
+})();
+
+function verifyLicenseKey() {
+  var input = document.getElementById('licenseKeyInput');
+  var errEl = document.getElementById('licenseError');
+  var key = input.value.trim();
+  if (!key) { input.style.borderColor = 'var(--red)'; return; }
+  input.style.borderColor = 'var(--border)';
+  errEl.style.display = 'none';
+
+  fetch('/api/license/verify', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ key: key })
+  }).then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.valid) {
+        localStorage.setItem('kwyre_license_key', key);
+        document.getElementById('authGate').style.display = 'none';
+        location.reload();
+      } else {
+        errEl.textContent = data.error || 'Invalid license key';
+        errEl.style.display = 'block';
+      }
+    }).catch(function() {
+      errEl.textContent = 'Could not verify. Check your connection.';
+      errEl.style.display = 'block';
+    });
+}
+
+function kwyreLogout() {
+  localStorage.removeItem('kwyre_token');
+  localStorage.removeItem('kwyre_license_key');
+  localStorage.removeItem('kwyre_user');
+  location.reload();
+}
+</script>
 
 </body>
 </html>

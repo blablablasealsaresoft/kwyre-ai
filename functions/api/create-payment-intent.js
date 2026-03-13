@@ -1,79 +1,175 @@
 /**
  * Cloudflare Pages Function: POST /api/create-payment-intent
  *
- * Creates a Stripe PaymentIntent for the selected tier.
+ * Creates a Stripe PaymentIntent for the selected tier + add-ons.
+ * Accepts: { tier, addons: { airgap, cloud, extraMachines }, email }
+ * Returns: { clientSecret, amount, breakdown }
+ *
  * Set STRIPE_SECRET_KEY in Cloudflare Pages → Settings → Environment Variables.
  */
 
-const TIER_CONFIG = {
-  personal:     { amount: 49900,  description: 'Kwyre Personal — 1 machine license' },
-  professional: { amount: 149900, description: 'Kwyre Professional — 3 machine licenses' },
-  airgapped:    { amount: 349900, description: 'Kwyre Air-Gapped Kit — 5 machine licenses' },
-  air:          { amount: 34900,  description: 'Kwyre Air (CPU) — 1 machine license' },
-  mlx:          { amount: 29900,  description: 'Kwyre Apple Silicon — 1 machine license' },
+const BASE_PRICES = {
+  personal:      29900,
+  professional:  79900,
+  air:           29900,
+  apple_silicon: 29900,
 };
 
-const CORS_HEADERS = {
-  'Access-Control-Allow-Origin': 'https://kwyre.com',
-  'Access-Control-Allow-Methods': 'POST, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Max-Age': '86400',
+const ADDON_PRICES = {
+  airgap:        149900,
+  cloud_monthly: 4900,
+  extra_machine: 9900,
 };
 
-function json(data, status = 200) {
+const TIER_LABELS = {
+  personal:      'Kwyre Personal',
+  professional:  'Kwyre Professional',
+  air:           'Kwyre Air',
+  apple_silicon: 'Kwyre Apple Silicon',
+};
+
+const ALLOWED_ORIGINS = [
+  'https://kwyre.com',
+  'https://www.kwyre.com',
+  'http://localhost:8788',
+  'http://localhost:3000',
+];
+
+function getCorsHeaders(request) {
+  const origin = request.headers.get('Origin') || '';
+  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
+  return {
+    'Access-Control-Allow-Origin': allowed,
+    'Access-Control-Allow-Methods': 'POST, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type',
+    'Access-Control-Max-Age': '86400',
+  };
+}
+
+function json(data, status, corsHeaders) {
   return new Response(JSON.stringify(data), {
     status,
-    headers: { 'Content-Type': 'application/json', ...CORS_HEADERS },
+    headers: { 'Content-Type': 'application/json', ...corsHeaders },
   });
 }
 
-export async function onRequestOptions() {
-  return new Response(null, { status: 204, headers: CORS_HEADERS });
-}
-
-export async function onRequestPost(context) {
-  const { STRIPE_SECRET_KEY } = context.env;
-
-  if (!STRIPE_SECRET_KEY || STRIPE_SECRET_KEY.startsWith('sk_live_REPLACE')) {
-    return json({ error: 'Stripe secret key not configured. Set STRIPE_SECRET_KEY in Cloudflare Pages environment variables.' }, 503);
-  }
-
-  let tier;
-  try {
-    const body = await context.request.json();
-    tier = body.tier;
-  } catch {
-    return json({ error: 'Invalid request body' }, 400);
-  }
-
-  const tierConfig = TIER_CONFIG[tier];
-  if (!tierConfig) {
-    return json({ error: `Unknown tier: ${tier}` }, 400);
-  }
-
-  const params = new URLSearchParams({
-    amount: String(tierConfig.amount),
-    currency: 'usd',
-    description: tierConfig.description,
-    'metadata[tier]': tier,
-    'metadata[product]': 'kwyre-ai',
-    'automatic_payment_methods[enabled]': 'true',
-  });
-
-  const resp = await fetch('https://api.stripe.com/v1/payment_intents', {
+async function stripeRequest(path, params, secretKey) {
+  const resp = await fetch('https://api.stripe.com/v1' + path, {
     method: 'POST',
     headers: {
-      Authorization: `Bearer ${STRIPE_SECRET_KEY}`,
+      Authorization: `Bearer ${secretKey}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: params.toString(),
   });
+  return { ok: resp.ok, status: resp.status, data: await resp.json() };
+}
 
-  const data = await resp.json();
+async function findOrCreateCustomer(email, secretKey) {
+  if (!email) return null;
 
-  if (!resp.ok) {
-    return json({ error: data.error?.message || 'Stripe error' }, resp.status);
+  const searchResp = await fetch(
+    `https://api.stripe.com/v1/customers/search?query=${encodeURIComponent(`email:"${email}"`)}`,
+    { headers: { Authorization: `Bearer ${secretKey}` } }
+  );
+  const searchData = await searchResp.json();
+
+  if (searchData.data && searchData.data.length > 0) {
+    return searchData.data[0].id;
   }
 
-  return json({ client_secret: data.client_secret });
+  const createParams = new URLSearchParams({ email });
+  const { data } = await stripeRequest('/customers', createParams, secretKey);
+  return data.id || null;
+}
+
+export async function onRequestOptions(context) {
+  return new Response(null, {
+    status: 204,
+    headers: getCorsHeaders(context.request),
+  });
+}
+
+export async function onRequestPost(context) {
+  const cors = getCorsHeaders(context.request);
+  const { STRIPE_SECRET_KEY } = context.env;
+
+  if (!STRIPE_SECRET_KEY || STRIPE_SECRET_KEY.startsWith('sk_live_REPLACE')) {
+    return json({ error: 'Stripe secret key not configured.' }, 503, cors);
+  }
+
+  let tier, addons, email;
+  try {
+    const body = await context.request.json();
+    tier   = body.tier;
+    addons = body.addons || {};
+    email  = body.email || '';
+  } catch {
+    return json({ error: 'Invalid request body.' }, 400, cors);
+  }
+
+  const basePrice = BASE_PRICES[tier];
+  if (basePrice === undefined) {
+    return json({ error: `Unknown tier: ${tier}` }, 400, cors);
+  }
+
+  const airgap        = !!addons.airgap;
+  const cloud         = !!addons.cloud;
+  const extraMachines = Math.max(0, Math.min(10, parseInt(addons.extraMachines) || 0));
+
+  let total = basePrice;
+  const breakdown = [{ item: TIER_LABELS[tier], amount: basePrice }];
+
+  if (airgap) {
+    total += ADDON_PRICES.airgap;
+    breakdown.push({ item: 'Air-Gapped Kit', amount: ADDON_PRICES.airgap });
+  }
+
+  if (extraMachines > 0) {
+    const machineTotal = extraMachines * ADDON_PRICES.extra_machine;
+    total += machineTotal;
+    breakdown.push({ item: `Extra Licenses ×${extraMachines}`, amount: machineTotal });
+  }
+
+  if (total < 100) {
+    return json({ error: 'Invalid total amount.' }, 400, cors);
+  }
+
+  const description = breakdown.map(b => b.item).join(' + ');
+
+  let customerId = null;
+  if (email) {
+    try {
+      customerId = await findOrCreateCustomer(email, STRIPE_SECRET_KEY);
+    } catch {
+      /* Customer lookup failed; proceed without customer */
+    }
+  }
+
+  const params = new URLSearchParams({
+    amount: String(total),
+    currency: 'usd',
+    description,
+    'metadata[tier]': tier,
+    'metadata[product]': 'kwyre-ai',
+    'metadata[airgap]': String(airgap),
+    'metadata[cloud]': String(cloud),
+    'metadata[extra_machines]': String(extraMachines),
+    'automatic_payment_methods[enabled]': 'true',
+  });
+
+  if (email) params.set('receipt_email', email);
+  if (customerId) params.set('customer', customerId);
+
+  const { ok, status, data } = await stripeRequest('/payment_intents', params, STRIPE_SECRET_KEY);
+
+  if (!ok) {
+    return json({ error: data.error?.message || 'Stripe error' }, status, cors);
+  }
+
+  return json({
+    clientSecret: data.client_secret,
+    amount: total,
+    breakdown: breakdown.map(b => ({ ...b, amount: b.amount / 100 })),
+  }, 200, cors);
 }

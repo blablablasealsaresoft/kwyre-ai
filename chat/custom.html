@@ -709,6 +709,8 @@ select.form-input { cursor: pointer; }
       <a href="products.html">Products</a>
       <a href="platform.html">Platform</a>
       <a href="pay.html">Purchase</a>
+      <a href="login.html" id="navSignIn">Login</a>
+      <a href="dashboard.html" id="navDashboard" style="display:none;">Dashboard</a>
       <a href="kwyre-demo.html" class="nav-cta">App Demo</a>
     </div>
   </div>
@@ -1025,20 +1027,48 @@ document.addEventListener('keydown', function(e) {
 });
 
 function submitCustomRequest() {
-  const industry = document.getElementById('customIndustry').value;
-  const email = document.getElementById('customEmail').value.trim();
-  const useCase = document.getElementById('customUseCase').value.trim();
-  const company = document.getElementById('customCompany').value.trim();
+  var industry = document.getElementById('customIndustry').value;
+  var email = document.getElementById('customEmail').value.trim();
+  var useCase = document.getElementById('customUseCase').value.trim();
+  var company = document.getElementById('customCompany').value.trim();
   if (!email) { document.getElementById('customEmail').style.borderColor = 'var(--red)'; return; }
-  const requests = JSON.parse(sessionStorage.getItem('kwyre_custom_requests') || '[]');
-  requests.push({ industry, email, useCase, company, ts: Date.now() });
-  sessionStorage.setItem('kwyre_custom_requests', JSON.stringify(requests));
-  document.getElementById('customIndustry').value = '';
-  document.getElementById('customEmail').value = '';
-  document.getElementById('customUseCase').value = '';
-  document.getElementById('customCompany').value = '';
-  alert('Request submitted! We will contact you within 48 hours.');
+  document.getElementById('customEmail').style.borderColor = 'var(--border)';
+
+  var formData = { industry: industry, email: email, useCase: useCase, company: company, ts: Date.now() };
+  var submitBtn = document.querySelector('.form-submit');
+  submitBtn.textContent = 'Submitting...';
+  submitBtn.disabled = true;
+
+  fetch('/api/custom/request', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(formData)
+  }).then(function(r) { return r.json(); })
+    .then(function() {
+      document.getElementById('customIndustry').value = '';
+      document.getElementById('customEmail').value = '';
+      document.getElementById('customUseCase').value = '';
+      document.getElementById('customCompany').value = '';
+      submitBtn.textContent = 'Submit Request';
+      submitBtn.disabled = false;
+      var note = document.querySelector('.form-note');
+      note.innerHTML = '<span style="color:var(--green);font-weight:600;">Request submitted successfully.</span> We will contact you within 48 hours.';
+    }).catch(function() {
+      submitBtn.textContent = 'Submit Request';
+      submitBtn.disabled = false;
+      var note = document.querySelector('.form-note');
+      note.innerHTML = '<span style="color:var(--red);">Submission failed. Please try again or email us directly.</span>';
+    });
 }
+
+(function(){
+  if (localStorage.getItem('kwyre_token') || localStorage.getItem('kwyre_license_key')) {
+    var s = document.getElementById('navSignIn');
+    var d = document.getElementById('navDashboard');
+    if (s) s.style.display = 'none';
+    if (d) d.style.display = '';
+  }
+})();
 
 (function(){
   const obs = new IntersectionObserver((entries)=>{
