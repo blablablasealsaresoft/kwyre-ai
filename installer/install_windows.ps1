@@ -7,22 +7,82 @@
     via Windows Firewall rules. Supports both compiled binary and
     Python source installations.
 .PARAMETER InstallDir
-    Installation directory (default: $env:USERPROFILE\kwyre)
+    Installation directory (default: $env:LOCALAPPDATA\Kwyre)
 .PARAMETER ModelDir
     HuggingFace model cache directory
+.PARAMETER Uninstall
+    Reverse all installation steps and remove Kwyre AI
+.PARAMETER SkipService
+    Skip Windows Service registration
 #>
 
 param(
-    [string]$InstallDir = "$env:USERPROFILE\kwyre",
-    [string]$ModelDir = "$env:USERPROFILE\.cache\huggingface"
+    [string]$InstallDir = "$env:LOCALAPPDATA\Kwyre",
+    [string]$ModelDir = "$env:USERPROFILE\.cache\huggingface",
+    [switch]$Uninstall,
+    [switch]$SkipService
 )
 
 $ErrorActionPreference = "Stop"
 $ScriptRoot = Split-Path -Parent (Split-Path -Parent $MyInvocation.MyCommand.Path)
 
+# ---------------------------------------------------------------
+# Uninstall mode
+# ---------------------------------------------------------------
+if ($Uninstall) {
+    Write-Host ""
+    Write-Host "=============================================" -ForegroundColor Yellow
+    Write-Host "       Kwyre AI — Uninstalling               " -ForegroundColor Yellow
+    Write-Host "=============================================" -ForegroundColor Yellow
+    Write-Host ""
+
+    $svc = Get-Service -Name "KwyreAI" -ErrorAction SilentlyContinue
+    if ($svc) {
+        Stop-Service -Name "KwyreAI" -Force -ErrorAction SilentlyContinue
+        $nssm = Get-Command nssm -ErrorAction SilentlyContinue
+        if ($nssm) { & nssm remove KwyreAI confirm | Out-Null }
+        else { sc.exe delete KwyreAI | Out-Null }
+        Write-Host "[OK] Windows Service removed" -ForegroundColor Green
+    }
+
+    Remove-NetFirewallRule -DisplayName "Kwyre-BlockOutbound" -ErrorAction SilentlyContinue
+    Remove-NetFirewallRule -DisplayName "Kwyre-AllowLocalhost" -ErrorAction SilentlyContinue
+    Write-Host "[OK] Firewall rules removed" -ForegroundColor Green
+
+    $userPath = [Environment]::GetEnvironmentVariable("Path", "User")
+    if ($userPath -like "*$InstallDir*") {
+        $newPath = ($userPath -split ";" | Where-Object { $_ -ne $InstallDir }) -join ";"
+        [Environment]::SetEnvironmentVariable("Path", $newPath, "User")
+        Write-Host "[OK] Removed from PATH" -ForegroundColor Green
+    }
+
+    $startMenu = [Environment]::GetFolderPath("Programs")
+    $shortcutDir = Join-Path $startMenu "Kwyre AI"
+    if (Test-Path $shortcutDir) {
+        Remove-Item -Recurse -Force $shortcutDir
+        Write-Host "[OK] Start Menu shortcuts removed" -ForegroundColor Green
+    }
+
+    $desktopLnk = Join-Path ([Environment]::GetFolderPath("Desktop")) "Kwyre AI.lnk"
+    if (Test-Path $desktopLnk) {
+        Remove-Item -Force $desktopLnk
+        Write-Host "[OK] Desktop shortcut removed" -ForegroundColor Green
+    }
+
+    if (Test-Path $InstallDir) {
+        Remove-Item -Recurse -Force $InstallDir
+        Write-Host "[OK] Removed $InstallDir" -ForegroundColor Green
+    }
+
+    Write-Host ""
+    Write-Host "[OK] Kwyre AI has been uninstalled" -ForegroundColor Green
+    Write-Host ""
+    exit 0
+}
+
 Write-Host ""
 Write-Host "=============================================" -ForegroundColor Cyan
-Write-Host "       Kwyre AI — Windows Installer v0.3     " -ForegroundColor Cyan
+Write-Host "       Kwyre AI — Windows Installer v1.0     " -ForegroundColor Cyan
 Write-Host "=============================================" -ForegroundColor Cyan
 Write-Host ""
 Write-Host "Install directory: $InstallDir"
@@ -35,17 +95,39 @@ Write-Host ""
 
 $gpu = Get-WmiObject Win32_VideoController | Where-Object { $_.Name -like "*NVIDIA*" }
 if (-not $gpu) {
-    Write-Error "No NVIDIA GPU detected. Kwyre requires a CUDA-capable GPU with 4GB+ VRAM."
+    Write-Error "No NVIDIA GPU detected. Kwyre requires an NVIDIA CUDA-capable GPU with 4GB+ VRAM."
     exit 1
 }
-Write-Host "[OK] GPU detected: $($gpu.Name)" -ForegroundColor Green
+Write-Host "[OK] NVIDIA GPU: $($gpu.Name)" -ForegroundColor Green
 
 $nvidiaSmi = Get-Command nvidia-smi -ErrorAction SilentlyContinue
 if ($nvidiaSmi) {
-    $cudaInfo = nvidia-smi --query-gpu=driver_version,memory.total --format=csv,noheader 2>$null
-    Write-Host "[OK] CUDA driver: $cudaInfo" -ForegroundColor Green
+    $gpuName = (nvidia-smi --query-gpu=name --format=csv,noheader 2>$null).Trim()
+    $gpuVram = (nvidia-smi --query-gpu=memory.total --format=csv,noheader 2>$null).Trim()
+    $gpuDriver = (nvidia-smi --query-gpu=driver_version --format=csv,noheader 2>$null).Trim()
+    Write-Host "[OK] GPU:         $gpuName" -ForegroundColor Green
+    Write-Host "[OK] VRAM:        $gpuVram" -ForegroundColor Green
+    Write-Host "[OK] Driver:      $gpuDriver" -ForegroundColor Green
+
+    $vramDigits = $gpuVram -replace '[^\d]',''
+    if ($vramDigits -and [int]$vramDigits -lt 4096) {
+        Write-Warning "GPU has less than 4 GB VRAM. 4-bit quantized models require 4 GB+."
+    }
 } else {
-    Write-Warning "nvidia-smi not found. Ensure CUDA drivers are installed."
+    Write-Warning "nvidia-smi not found. Ensure NVIDIA CUDA drivers are installed."
+    Write-Warning "Download from: https://developer.nvidia.com/cuda-downloads"
+}
+
+# ---------------------------------------------------------------
+# CUDA Toolkit check
+# ---------------------------------------------------------------
+$nvcc = Get-Command nvcc -ErrorAction SilentlyContinue
+if ($nvcc) {
+    $cudaVer = (nvcc --version 2>$null | Select-String "release") -replace '.*release\s+([\d.]+).*','$1'
+    Write-Host "[OK] CUDA Toolkit: $cudaVer" -ForegroundColor Green
+} else {
+    Write-Warning "CUDA Toolkit (nvcc) not found."
+    Write-Warning "Some features require CUDA Toolkit: https://developer.nvidia.com/cuda-toolkit"
 }
 
 # ---------------------------------------------------------------
@@ -94,7 +176,10 @@ if ($useCompiled) {
         }
     }
 
-    $reqSrc = Join-Path $ScriptRoot "requirements-inference.txt"
+    $reqSrc = Join-Path $ScriptRoot "requirements-windows.txt"
+    if (-not (Test-Path $reqSrc)) {
+        $reqSrc = Join-Path $ScriptRoot "requirements-inference.txt"
+    }
     if (Test-Path $reqSrc) {
         Copy-Item $reqSrc -Destination $InstallDir -Force
     }
@@ -111,14 +196,18 @@ if ($useCompiled) {
     }
 
     $venvPython = Join-Path $venvPath "Scripts\python.exe"
+    $venvPip = Join-Path $venvPath "Scripts\pip.exe"
 
     # Install dependencies
-    $reqFile = Join-Path $InstallDir "requirements-inference.txt"
+    $reqFile = Join-Path $InstallDir "requirements-windows.txt"
+    if (-not (Test-Path $reqFile)) {
+        $reqFile = Join-Path $InstallDir "requirements-inference.txt"
+    }
     if (Test-Path $reqFile) {
         Write-Host ""
         Write-Host "Installing dependencies..." -ForegroundColor Yellow
-        & $venvPython -m pip install --upgrade pip -q | Out-Null
-        & $venvPython -m pip install -r $reqFile
+        & $venvPip install --upgrade pip -q | Out-Null
+        & $venvPip install -r $reqFile
         Write-Host "[OK] Dependencies installed" -ForegroundColor Green
     }
 
@@ -184,6 +273,41 @@ Write-Host "[OK] Firewall rules installed:" -ForegroundColor Green
 Get-NetFirewallRule -DisplayName "Kwyre-*" | Format-Table DisplayName, Direction, Action, Enabled -AutoSize
 
 # ---------------------------------------------------------------
+# Windows Service
+# ---------------------------------------------------------------
+if (-not $SkipService) {
+    Write-Host ""
+    Write-Host "Registering Windows Service..." -ForegroundColor Yellow
+
+    $existingSvc = Get-Service -Name "KwyreAI" -ErrorAction SilentlyContinue
+    if ($existingSvc) {
+        Stop-Service -Name "KwyreAI" -Force -ErrorAction SilentlyContinue
+        sc.exe delete KwyreAI | Out-Null
+        Start-Sleep -Seconds 2
+    }
+
+    $nssm = Get-Command nssm -ErrorAction SilentlyContinue
+    if ($nssm) {
+        & nssm install KwyreAI $kwyreExe | Out-Null
+        & nssm set KwyreAI DisplayName "Kwyre AI Inference Server" | Out-Null
+        & nssm set KwyreAI Description "Kwyre AI local inference with air-gapped security" | Out-Null
+        & nssm set KwyreAI AppDirectory $InstallDir | Out-Null
+        & nssm set KwyreAI AppEnvironmentExtra "HF_HUB_OFFLINE=1" "TRANSFORMERS_OFFLINE=1" "KWYRE_BIND_HOST=127.0.0.1" | Out-Null
+        & nssm set KwyreAI AppRestartDelay 5000 | Out-Null
+        Write-Host "[OK] Windows Service installed via NSSM" -ForegroundColor Green
+    } else {
+        New-Service -Name "KwyreAI" `
+            -BinaryPathName $kwyreExe `
+            -DisplayName "Kwyre AI Inference Server" `
+            -Description "Kwyre AI local inference with air-gapped security" `
+            -StartupType Manual | Out-Null
+        sc.exe failure KwyreAI reset= 86400 actions= restart/5000/restart/10000/restart/30000 | Out-Null
+        Write-Host "[OK] Windows Service registered (manual start)" -ForegroundColor Green
+    }
+    Write-Host "[INFO] Start with: Start-Service KwyreAI" -ForegroundColor Yellow
+}
+
+# ---------------------------------------------------------------
 # Create launch script
 # ---------------------------------------------------------------
 $launchScript = Join-Path $InstallDir "start_kwyre.bat"
@@ -228,6 +352,44 @@ $shortcut.WorkingDirectory = $InstallDir
 $shortcut.Description = "Start Kwyre AI Inference Server"
 $shortcut.Save()
 Write-Host "[OK] Start Menu shortcut created" -ForegroundColor Green
+
+# ---------------------------------------------------------------
+# Health check
+# ---------------------------------------------------------------
+Write-Host ""
+Write-Host "Running health check..." -ForegroundColor Yellow
+
+if ($useCompiled) {
+    $healthExe = Join-Path $InstallDir "kwyre-server.exe"
+    if (Test-Path $healthExe) {
+        $fileSize = [math]::Round((Get-Item $healthExe).Length / 1MB, 1)
+        Write-Host "[OK] Binary: $healthExe ($fileSize MB)" -ForegroundColor Green
+    } else {
+        Write-Warning "Binary not found at $healthExe"
+    }
+} else {
+    $venvPy = Join-Path $InstallDir "venv\Scripts\python.exe"
+    if (Test-Path $venvPy) {
+        try {
+            $torchCheck = & $venvPy -c "import torch; print(f'PyTorch {torch.__version__}, CUDA: {torch.cuda.is_available()}')" 2>$null
+            if ($torchCheck) {
+                Write-Host "[OK] $torchCheck" -ForegroundColor Green
+            }
+        } catch {
+            Write-Warning "Could not verify PyTorch installation"
+        }
+    }
+}
+
+$fwRules = Get-NetFirewallRule -DisplayName "Kwyre-*" -ErrorAction SilentlyContinue
+if ($fwRules) {
+    Write-Host "[OK] Firewall rules active: $($fwRules.Count) rules" -ForegroundColor Green
+}
+
+$svcStatus = Get-Service -Name "KwyreAI" -ErrorAction SilentlyContinue
+if ($svcStatus) {
+    Write-Host "[OK] Windows Service: $($svcStatus.Status)" -ForegroundColor Green
+}
 
 Write-Host ""
 Write-Host "=============================================" -ForegroundColor Green

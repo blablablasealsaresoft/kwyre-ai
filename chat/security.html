@@ -616,19 +616,24 @@ nav {
           <div class="sh-eyebrow sh-eyebrow-green">Verify It Yourself</div>
           <h2 style="font-size: 22px;">Don't trust us. Check.</h2>
         </div>
-        <div class="verify-grid" style="margin-top: 0;">
+        <div class="verify-grid" style="margin-top: 0; grid-template-columns: repeat(2, 1fr);">
           <div class="verify-card">
-            <h3>Network Sockets</h3>
+            <h3>Linux: Network Sockets</h3>
             <div class="verify-code">ss -tp | grep python</div>
             <div class="verify-expect">Confirm: only 127.0.0.1</div>
           </div>
           <div class="verify-card">
-            <h3>Live Monitor</h3>
+            <h3>Linux: Live Monitor</h3>
             <div class="verify-code">watch -n 1 "ss -tp | grep python"</div>
             <div class="verify-expect">Confirm: only localhost</div>
           </div>
           <div class="verify-card">
-            <h3>Wireshark</h3>
+            <h3>Windows: PowerShell</h3>
+            <div class="verify-code">Get-NetTCPConnection | Where-Object { $_.OwningProcess -eq (Get-Process kwyre-server).Id }</div>
+            <div class="verify-expect">Confirm: only 127.0.0.1</div>
+          </div>
+          <div class="verify-card">
+            <h3>Wireshark (Any OS)</h3>
             <div class="verify-code">Interface: loopback (lo) | Filter: tcp.port == 8000</div>
             <div class="verify-expect">Confirm: zero external traffic</div>
           </div>
@@ -694,7 +699,7 @@ nav {
       <a href="docs/security-architecture.html" class="compliance-card linked">
         <h3>Security Architecture</h3>
         <div class="cc-path">Technical Reference · 6-Layer Defense Model</div>
-        <p>Layer-by-layer technical breakdown: localhost binding, process isolation, dependency integrity, model weight verification, secure session buffer, and intrusion watchdog.</p>
+        <p>Layer-by-layer technical breakdown: localhost binding, process isolation (iptables on Linux, Windows Firewall on Windows), dependency integrity, model weight verification, secure session buffer, and intrusion watchdog.</p>
       </a>
       <a href="docs/data-residency.html" class="compliance-card linked">
         <h3>Data Residency &amp; Privacy</h3>

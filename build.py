@@ -62,6 +62,8 @@ DATA_FILES = [
 ]
 
 PLAT = platform.system().lower()
+IS_WINDOWS = sys.platform == "win32"
+IS_LINUX = sys.platform == "linux"
 
 
 def run(cmd, **kwargs):
@@ -334,8 +336,8 @@ def package_dist():
     print(f"\n[OK] Distribution staged at {DIST_BUILD_DIR}")
 
 
-def build_windows_installer():
-    """Generate Inno Setup script and build .exe installer."""
+def installer_windows():
+    """Generate Inno Setup .exe installer and portable ZIP for Windows."""
     print("\n=== Windows Installer (Inno Setup) ===")
 
     iss_path = os.path.join(BUILD_DIR, "kwyre-setup.iss")
@@ -358,7 +360,7 @@ AppVersion={{#MyAppVersion}}
 AppPublisher={{#MyAppPublisher}}
 AppPublisherURL={{#MyAppURL}}
 AppSupportURL={{#MyAppURL}}
-DefaultDirName={{autopf}}\\KwyreAI
+DefaultDirName={{localappdata}}\\Kwyre
 DefaultGroupName={{#MyAppName}}
 AllowNoIcons=yes
 LicenseFile={os.path.join(DIST_BUILD_DIR, "LICENSE").replace("/", chr(92))}
@@ -373,6 +375,7 @@ ArchitecturesInstallIn64BitMode=x64compatible
 SetupIconFile={{src}}\\assets\\kwyre.ico
 UninstallDisplayIcon={{app}}\\kwyre-server.exe
 MinVersion=10.0
+ChangesEnvironment=yes
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -380,6 +383,8 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 [Tasks]
 Name: "desktopicon"; Description: "Create a &desktop shortcut"; GroupDescription: "Additional shortcuts:"
 Name: "firewallrules"; Description: "Install Layer 2 network isolation (Windows Firewall rules)"; GroupDescription: "Security:"; Flags: checkedonce
+Name: "windowsservice"; Description: "Register as Windows Service (auto-start)"; GroupDescription: "Service:"; Flags: unchecked
+Name: "addtopath"; Description: "Add Kwyre to system PATH"; GroupDescription: "Configuration:"; Flags: checkedonce
 
 [Files]
 Source: "{DIST_BUILD_DIR.replace("/", chr(92))}\\kwyre-server.exe"; DestDir: "{{app}}"; Flags: ignoreversion
@@ -388,6 +393,9 @@ Source: "{DIST_BUILD_DIR.replace("/", chr(92))}\\docs\\*"; DestDir: "{{app}}\\do
 Source: "{DIST_BUILD_DIR.replace("/", chr(92))}\\security\\*"; DestDir: "{{app}}\\security"; Flags: ignoreversion recursesubdirs
 Source: "{DIST_BUILD_DIR.replace("/", chr(92))}\\.env.example"; DestDir: "{{app}}"; Flags: ignoreversion
 Source: "{DIST_BUILD_DIR.replace("/", chr(92))}\\requirements-inference.txt"; DestDir: "{{app}}"; Flags: ignoreversion
+
+[Registry]
+Root: HKLM; Subkey: "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"; ValueType: expandsz; ValueName: "Path"; ValueData: "{{olddata}};{{app}}"; Tasks: addtopath; Check: NeedsAddPath('{{app}}')
 
 [Icons]
 Name: "{{group}}\\Kwyre AI"; Filename: "{{app}}\\kwyre-server.exe"; Comment: "Start Kwyre AI Inference Server"
@@ -425,19 +433,58 @@ begin
     '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
 end;
 
+procedure InstallWindowsService;
+var
+  ResultCode: Integer;
+begin
+  Exec('sc.exe',
+    'create KwyreAI binPath= "' + ExpandConstant('{{app}}') + '\\kwyre-server.exe" start= auto DisplayName= "Kwyre AI Inference Server"',
+    '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec('sc.exe',
+    'description KwyreAI "Kwyre AI local inference server with air-gapped security"',
+    '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec('sc.exe',
+    'failure KwyreAI reset= 86400 actions= restart/5000/restart/10000/restart/30000',
+    '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+end;
+
+procedure RemoveWindowsService;
+var
+  ResultCode: Integer;
+begin
+  Exec('sc.exe', 'stop KwyreAI', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+  Exec('sc.exe', 'delete KwyreAI', '', SW_HIDE, ewWaitUntilTerminated, ResultCode);
+end;
+
+function NeedsAddPath(Param: string): boolean;
+var
+  OrigPath: string;
+begin
+  if not RegQueryStringValue(HKLM, 'SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment', 'Path', OrigPath) then begin
+    Result := True;
+    exit;
+  end;
+  Result := Pos(';' + ExpandConstant(Param) + ';', ';' + OrigPath + ';') = 0;
+end;
+
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
   if CurStep = ssPostInstall then
   begin
     if IsTaskSelected('firewallrules') then
       InstallFirewallRules;
+    if IsTaskSelected('windowsservice') then
+      InstallWindowsService;
   end;
 end;
 
 procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
 begin
   if CurUninstallStep = usPostUninstall then
+  begin
     RemoveFirewallRules;
+    RemoveWindowsService;
+  end;
 end;
 """
 
@@ -466,8 +513,20 @@ end;
         print(f"  [INFO] Then run: iscc \"{iss_path}\"")
         print(f"  [INFO] Or install via: winget install JRSoftware.InnoSetup")
 
+    print("\n=== Windows Portable ZIP ===")
+    import zipfile
+    zip_path = os.path.join(installer_out, f"kwyre-ai-{VERSION}-win64-portable.zip")
+    with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        for root, dirs, files in os.walk(DIST_BUILD_DIR):
+            for file in files:
+                full_path = os.path.join(root, file)
+                arc_name = os.path.join("kwyre-ai", os.path.relpath(full_path, DIST_BUILD_DIR))
+                zf.write(full_path, arc_name)
+    size_mb = os.path.getsize(zip_path) / (1024 * 1024)
+    print(f"  [OK] Portable ZIP: {zip_path} ({size_mb:.1f} MB)")
 
-def build_linux_installer():
+
+def installer_linux():
     """Generate .deb package and AppImage build script."""
     print("\n=== Linux Installer (.deb + AppImage) ===")
 
@@ -685,7 +744,7 @@ fi
     print(f"  [OK] AppImage build script: {appimage_script}")
 
 
-def build_macos_installer():
+def installer_macos():
     """Generate macOS .pkg installer build script and launchd plist."""
     print("\n=== macOS Installer (.pkg) ===")
 
@@ -845,13 +904,53 @@ echo "    -ov $INSTALLERS/kwyre-ai-{VERSION}-macos.dmg"
         print("  [INFO] Run build-macos-pkg.sh on macOS to generate the .pkg")
 
 
+def installer(target=None):
+    """Build platform-specific installer(s)."""
+    target = target or PLAT
+    if target in ("windows", "all"):
+        installer_windows()
+    if target in ("linux", "all"):
+        installer_linux()
+    if target in ("darwin", "macos", "all"):
+        installer_macos()
+
+
 def sign_release():
-    """Sign the distribution directory with Ed25519."""
+    """Sign the distribution directory with Ed25519, and optionally Authenticode on Windows."""
     print("\n=== Code Signing ===")
     if not os.path.isdir(DIST_BUILD_DIR):
         print(f"[FAIL] Distribution directory not found: {DIST_BUILD_DIR}")
         print("       Run 'python build.py package' first.")
         sys.exit(1)
+
+    if IS_WINDOWS:
+        signtool = shutil.which("signtool")
+        if signtool:
+            print("  [Authenticode] signtool.exe found, signing Windows binaries...")
+            exe_path = os.path.join(DIST_BUILD_DIR, "kwyre-server.exe")
+            if os.path.exists(exe_path):
+                try:
+                    run([signtool, "sign", "/a", "/tr", "http://timestamp.digicert.com",
+                         "/td", "sha256", "/fd", "sha256", exe_path])
+                    print("  [OK] Authenticode signed: kwyre-server.exe")
+                except SystemExit:
+                    print("  [WARN] Authenticode signing failed — continuing without it")
+                    print("         Ensure a valid code signing certificate is installed")
+            installer_dir = os.path.join(BUILD_DIR, "installers")
+            if os.path.isdir(installer_dir):
+                for f in os.listdir(installer_dir):
+                    if f.endswith(".exe"):
+                        try:
+                            run([signtool, "sign", "/a", "/tr", "http://timestamp.digicert.com",
+                                 "/td", "sha256", "/fd", "sha256",
+                                 os.path.join(installer_dir, f)])
+                            print(f"  [OK] Authenticode signed: {f}")
+                        except SystemExit:
+                            print(f"  [WARN] Authenticode signing failed for {f}")
+        else:
+            print("  [INFO] signtool.exe not found — skipping Authenticode signing")
+            print("         Install Windows SDK for Authenticode support")
+
     from security.codesign import sign_release as codesign_release
     codesign_release(DIST_BUILD_DIR, VERSION, PLAT)
 
@@ -936,13 +1035,7 @@ def main():
         package_dist()
 
     if args.command in ("installer", "all"):
-        target = args.platform or PLAT
-        if target in ("windows", "all"):
-            build_windows_installer()
-        if target in ("linux", "all"):
-            build_linux_installer()
-        if target in ("darwin", "macos", "all"):
-            build_macos_installer()
+        installer(args.platform)
 
     if args.command in ("sign", "all"):
         sign_release()

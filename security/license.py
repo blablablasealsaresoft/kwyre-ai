@@ -120,7 +120,20 @@ def keygen():  # generate new Ed25519 signing keypair
 
     with open(priv_path, "wb") as f:  # write private key to file
         f.write(priv.private_bytes(Encoding.PEM, PrivateFormat.PKCS8, NoEncryption()))  # serialize as PEM PKCS8
-    os.chmod(priv_path, 0o600)  # restrict private key to owner-only access
+    if sys.platform == "win32":
+        # os.chmod on Windows only controls the read-only flag, not ACLs.
+        # Use icacls to restrict the private key to the current user.
+        try:
+            import subprocess as _sp
+            _sp.run(
+                ["icacls", str(priv_path), "/inheritance:r",
+                 "/grant:r", f"{os.environ.get('USERNAME', 'SYSTEM')}:(R,W)"],
+                capture_output=True, timeout=10,
+            )
+        except Exception:
+            pass
+    else:
+        os.chmod(priv_path, 0o600)
 
     with open(pub_path, "wb") as f:  # write public key to file
         f.write(pub.public_bytes(Encoding.PEM, PublicFormat.SubjectPublicKeyInfo))  # serialize as PEM SPKI
@@ -151,19 +164,35 @@ def get_machine_fingerprint() -> str:  # generate unique hardware identifier
         if sys.platform == "win32":  # Windows-specific hardware identifiers
             uuid_val = None  # will hold system UUID
             try:
-                result = subprocess.run(  # query system product UUID via WMIC
+                result = subprocess.run(
                     ["wmic", "csproduct", "get", "uuid"],
                     capture_output=True, text=True, timeout=5
                 )
-                uuid_val = result.stdout.strip().split("\n")[-1].strip()  # extract UUID from output
-                if uuid_val and uuid_val.lower() not in ("", "ffffffff-ffff-ffff-ffff-ffffffffffff"):  # validate UUID
-                    parts.append(uuid_val)  # add valid UUID to fingerprint
+                uuid_val = result.stdout.strip().split("\n")[-1].strip()
+                if uuid_val and uuid_val.lower() not in ("", "ffffffff-ffff-ffff-ffff-ffffffffffff"):
+                    parts.append(uuid_val)
                 else:
-                    uuid_val = None  # invalid UUID, try fallback
+                    uuid_val = None
             except Exception:
-                uuid_val = None  # WMIC command failed
+                uuid_val = None
 
-            if not uuid_val:  # product UUID unavailable, try BIOS serial
+            # PowerShell/CIM fallback — WMIC is deprecated on Windows 11+
+            if not uuid_val:
+                try:
+                    result = subprocess.run(
+                        ["powershell", "-NoProfile", "-Command",
+                         "Get-CimInstance -ClassName Win32_ComputerSystemProduct"
+                         " | Select-Object -ExpandProperty UUID"],
+                        capture_output=True, text=True, timeout=10
+                    )
+                    ps_uuid = result.stdout.strip()
+                    if ps_uuid and ps_uuid.lower() not in ("", "ffffffff-ffff-ffff-ffff-ffffffffffff"):
+                        uuid_val = ps_uuid
+                        parts.append(uuid_val)
+                except Exception:
+                    pass
+
+            if not uuid_val:
                 try:
                     result = subprocess.run(  # query BIOS serial number via WMIC
                         ["wmic", "bios", "get", "serialnumber"],

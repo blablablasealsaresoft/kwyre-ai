@@ -1,0 +1,49 @@
+# Kwyre AI — Windows x86_64 + NVIDIA CUDA dependencies
+# Targets CUDA 12.4 toolkit. Requires an NVIDIA GPU with up-to-date drivers.
+
+--index-url https://download.pytorch.org/whl/cu124
+--extra-index-url https://pypi.org/simple/
+
+# --- PyTorch (CUDA 12.4 builds) ---
+torch>=2.6.0
+torchaudio
+torchvision
+
+# --- Core inference ---
+transformers>=5.3.0
+bitsandbytes>=0.49.0
+accelerate>=1.11.0
+safetensors>=0.6.0
+tokenizers>=0.22.0
+autoawq>=0.2.0
+
+# flash-attn: requires NVIDIA CUDA toolkit installed.
+# On Windows you may need: pip install flash-attn --no-build-isolation
+flash-attn
+
+# triton is Linux-only and is NOT supported on Windows.
+# If a dependency pulls it in, it will be skipped automatically.
+
+# --- Hugging Face ecosystem ---
+huggingface_hub>=1.6.0
+peft>=0.18.0
+sentence-transformers>=3.0.0
+
+# --- QAT training (not required for inference only) ---
+datasets>=4.6.0
+trl>=0.29.0
+
+# --- Retrieval / document loading ---
+faiss-cpu>=1.8.0
+pypdf>=4.0.0
+python-docx>=1.0.0
+
+# --- Numerics / utilities ---
+numpy>=1.24.0
+scipy>=1.14.0,<1.16.0
+psutil>=7.1.0
+cryptography>=44.0.0
+pyyaml>=6.0.0
+
+# --- Windows-specific extras ---
+pywin32

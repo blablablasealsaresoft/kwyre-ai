@@ -21,6 +21,9 @@ from collections import defaultdict
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig, TextIteratorStreamer
 from peft import PeftModel
 
+import platform_gpu
+import platform_paths
+
 from security_core import (
     BIND_HOST,
     SecureConversationBuffer,
@@ -214,8 +217,7 @@ elif os.path.isdir(_dist_path) and os.path.exists(os.path.join(_dist_path, "conf
     print(f"[Model] Using pre-quantized model at {_dist_path}")
 else:
     LOCAL_MODEL_PATH = os.path.join(
-        os.path.expanduser("~"),
-        ".cache", "huggingface", "hub",
+        str(platform_paths.get_cache_dir()), "hub",
         f"models--{MODEL_ID.replace('/', '--')}",
         "snapshots",
     )
@@ -410,7 +412,7 @@ else:
 # ---------------------------------------------------------------------------
 ADAPTER_DIR = os.environ.get(
     "KWYRE_ADAPTER_DIR",
-    os.path.join(os.path.expanduser("~"), ".kwyre", "adapters")
+    str(platform_paths.get_adapter_dir())
 )
 ALLOW_ADAPTER_SWAP = os.environ.get("KWYRE_ALLOW_ADAPTER_SWAP", "1") == "1"
 CDN_MANIFEST_URL = os.environ.get(
@@ -782,7 +784,13 @@ watchdog = IntrusionWatchdog(session_store, terminate_on_intrusion=True)
 watchdog.start()
 
 
+_shutdown_in_progress = False
+
 def _shutdown_handler(signum, frame):
+    global _shutdown_in_progress
+    if _shutdown_in_progress:
+        return
+    _shutdown_in_progress = True
     print("\n[Shutdown] Wiping all sessions, KV cache, and documents before exit...")
     watchdog.stop()
     rag_store.wipe_all(reason="server_shutdown")
@@ -791,8 +799,12 @@ def _shutdown_handler(signum, frame):
     _inference_queue.put(None)
     sys.exit(0)
 
-signal.signal(signal.SIGTERM, _shutdown_handler)
 signal.signal(signal.SIGINT, _shutdown_handler)
+if platform_gpu.IS_WINDOWS:
+    import atexit
+    atexit.register(lambda: _shutdown_handler(None, None))
+else:
+    signal.signal(signal.SIGTERM, _shutdown_handler)
 
 _trial_tracker: dict[str, int] = {}
 print(f"[Security] Bound to {BIND_HOST}:{PORT} — localhost only")
@@ -1638,7 +1650,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 "multi_user": MULTI_USER,
                 "security": {
                     "l1_network_binding": f"{BIND_HOST}:{PORT} (localhost only)",
-                    "l2_process_lockdown": "os-configured (iptables/firewall, not verified by server)",
+                    "l2_process_lockdown": f"os-configured ({'Windows Firewall' if platform_gpu.IS_WINDOWS else 'iptables/firewall'}, not verified by server)",
                     "l3_dependency_integrity": "verified",
                     "l4_weight_integrity": "configured" if KNOWN_WEIGHT_HASHES else "first-run",
                     "l5_conversation_storage": "RAM-only",
@@ -1686,7 +1698,7 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             "active_sessions": session_store.active_count(),
             "security_controls": {
                 "l1_network_binding": f"{BIND_HOST}:{PORT} (localhost only)",
-                "l2_process_lockdown": "os-configured (iptables/firewall)",
+                "l2_process_lockdown": f"os-configured ({'Windows Firewall' if platform_gpu.IS_WINDOWS else 'iptables/firewall'})",
                 "l3_dependency_integrity": "verified at startup",
                 "l4_weight_integrity": "enabled" if KNOWN_WEIGHT_HASHES else "unconfigured",
                 "l5_conversation_storage": "RAM-only",

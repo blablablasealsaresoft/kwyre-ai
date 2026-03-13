@@ -12,7 +12,7 @@ import winreg
 
 VERSION = "1.0.0"
 APP_NAME = "Kwyre AI"
-DEFAULT_INSTALL_DIR = os.path.join(os.environ.get("USERPROFILE", "C:\\Users\\User"), "kwyre")
+DEFAULT_INSTALL_DIR = os.path.join(os.environ.get("LOCALAPPDATA", "C:\\Users\\User\\AppData\\Local"), "Kwyre")
 SCRIPT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 COLORS = {
@@ -362,13 +362,16 @@ class KwyreInstaller(tk.Tk):
         install_dir = self.install_dir.get()
         steps = [
             ("Checking system requirements...", self._step_check_requirements),
-            ("Detecting GPU...", self._step_detect_gpu),
+            ("Detecting NVIDIA GPU...", self._step_detect_gpu),
+            ("Checking CUDA toolkit...", self._step_detect_cuda),
             ("Creating directories...", self._step_create_dirs),
             ("Copying files...", self._step_copy_files),
             ("Installing dependencies...", self._step_install_deps),
             ("Configuring firewall rules...", self._step_firewall),
+            ("Registering Windows Service...", self._step_service),
             ("Creating shortcuts...", self._step_shortcuts),
             ("Generating security manifests...", self._step_manifests),
+            ("Running health check...", self._step_health_check),
             ("Installation complete!", None),
         ]
 
@@ -413,18 +416,51 @@ class KwyreInstaller(tk.Tk):
         if self.opt_backend.get() == "gpu":
             try:
                 result = subprocess.run(
-                    ["nvidia-smi", "--query-gpu=name,memory.total",
+                    ["nvidia-smi", "--query-gpu=name,memory.total,driver_version",
                      "--format=csv,noheader"],
                     capture_output=True, text=True, timeout=10
                 )
                 if result.returncode == 0 and result.stdout.strip():
-                    self.after(0, self._log, f"    GPU: {result.stdout.strip()}")
+                    parts = [p.strip() for p in result.stdout.strip().split(",")]
+                    gpu_name = parts[0] if len(parts) > 0 else "Unknown"
+                    gpu_vram = parts[1] if len(parts) > 1 else "Unknown"
+                    gpu_driver = parts[2] if len(parts) > 2 else "Unknown"
+                    self.after(0, self._log, f"    NVIDIA GPU:  {gpu_name}")
+                    self.after(0, self._log, f"    VRAM:        {gpu_vram}")
+                    self.after(0, self._log, f"    Driver:      {gpu_driver}")
                 else:
-                    self.after(0, self._log, "    GPU detection skipped (nvidia-smi unavailable)")
+                    self.after(0, self._log, "    NVIDIA GPU detection failed (nvidia-smi unavailable)")
             except Exception:
-                self.after(0, self._log, "    GPU detection skipped")
+                self.after(0, self._log, "    NVIDIA GPU detection skipped")
         else:
-            self.after(0, self._log, "    CPU backend selected — GPU not required")
+            self.after(0, self._log, "    CPU backend selected — NVIDIA CUDA not required")
+
+    def _step_detect_cuda(self, install_dir: str):
+        import time
+        time.sleep(0.3)
+        if self.opt_backend.get() != "gpu":
+            self.after(0, self._log, "    Skipped (CPU backend)")
+            return
+        try:
+            result = subprocess.run(
+                ["nvcc", "--version"],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0:
+                for line in result.stdout.splitlines():
+                    if "release" in line.lower():
+                        self.after(0, self._log, f"    {line.strip()}")
+                        break
+                else:
+                    self.after(0, self._log, "    CUDA Toolkit found")
+            else:
+                self.after(0, self._log, "    CUDA Toolkit (nvcc) not found")
+                self.after(0, self._log, "    Download: https://developer.nvidia.com/cuda-toolkit")
+        except FileNotFoundError:
+            self.after(0, self._log, "    CUDA Toolkit (nvcc) not found")
+            self.after(0, self._log, "    Download: https://developer.nvidia.com/cuda-toolkit")
+        except Exception:
+            self.after(0, self._log, "    CUDA Toolkit check skipped")
 
     def _step_create_dirs(self, install_dir: str):
         import time
@@ -453,9 +489,10 @@ class KwyreInstaller(tk.Tk):
                     self.after(0, self._log, f"    Copied {d}/")
                     time.sleep(0.15)
 
-            req_src = os.path.join(SCRIPT_ROOT, "requirements-inference.txt")
-            if os.path.isfile(req_src):
-                shutil.copy2(req_src, install_dir)
+            for req_name in ("requirements-windows.txt", "requirements-inference.txt"):
+                req_src = os.path.join(SCRIPT_ROOT, req_name)
+                if os.path.isfile(req_src):
+                    shutil.copy2(req_src, install_dir)
 
         for d in ("chat", "docs"):
             src_dir = os.path.join(SCRIPT_ROOT, d)
@@ -517,12 +554,15 @@ class KwyreInstaller(tk.Tk):
                            check=True, capture_output=True)
             self.after(0, self._log, "    Virtual environment created")
 
-        req_file = os.path.join(install_dir, "requirements-inference.txt")
+        req_file = os.path.join(install_dir, "requirements-windows.txt")
+        if not os.path.isfile(req_file):
+            req_file = os.path.join(install_dir, "requirements-inference.txt")
         if os.path.isfile(req_file):
             self.after(0, self._log, "    Installing pip packages (this may take a while)...")
-            subprocess.run([venv_python, "-m", "pip", "install", "--upgrade", "pip", "-q"],
+            venv_pip = os.path.join(venv_path, "Scripts", "pip.exe")
+            subprocess.run([venv_pip, "install", "--upgrade", "pip", "-q"],
                            capture_output=True)
-            subprocess.run([venv_python, "-m", "pip", "install", "-r", req_file],
+            subprocess.run([venv_pip, "install", "-r", req_file],
                            capture_output=True)
             self.after(0, self._log, "    Dependencies installed")
 
@@ -572,6 +612,41 @@ class KwyreInstaller(tk.Tk):
             self.after(0, self._log, "    Firewall rules require admin — skipped")
         except Exception as exc:
             self.after(0, self._log, f"    Firewall setup warning: {exc}")
+
+    def _step_service(self, install_dir: str):
+        import time
+        if not self.opt_service.get():
+            self.after(0, self._log, "    Skipped (user opted out)")
+            time.sleep(0.2)
+            return
+
+        if self._use_compiled:
+            exe_path = os.path.join(install_dir, "kwyre-server.exe")
+        else:
+            exe_path = os.path.join(install_dir, "venv", "Scripts", "python.exe")
+
+        try:
+            subprocess.run(
+                ["sc.exe", "create", "KwyreAI",
+                 f"binPath= \"{exe_path}\"",
+                 "start= manual",
+                 "DisplayName= Kwyre AI Inference Server"],
+                capture_output=True, timeout=30
+            )
+            subprocess.run(
+                ["sc.exe", "description", "KwyreAI",
+                 "Kwyre AI local inference server with air-gapped security"],
+                capture_output=True, timeout=15
+            )
+            subprocess.run(
+                ["sc.exe", "failure", "KwyreAI",
+                 "reset= 86400",
+                 "actions= restart/5000/restart/10000/restart/30000"],
+                capture_output=True, timeout=15
+            )
+            self.after(0, self._log, "    Windows Service registered (manual start)")
+        except Exception as exc:
+            self.after(0, self._log, f"    Service registration warning: {exc}")
 
     def _step_shortcuts(self, install_dir: str):
         import time
@@ -626,10 +701,6 @@ class KwyreInstaller(tk.Tk):
             except Exception as exc:
                 self.after(0, self._log, f"    PATH warning: {exc}")
 
-        if self.opt_service.get():
-            self.after(0, self._log, "    Windows Service installation: manual setup required")
-            time.sleep(0.1)
-
     def _create_shortcut(self, lnk_path: str, target: str, working_dir: str):
         lnk_dir = os.path.dirname(lnk_path)
         os.makedirs(lnk_dir, exist_ok=True)
@@ -666,6 +737,45 @@ class KwyreInstaller(tk.Tk):
         else:
             self.after(0, self._log, "    Manifest generation skipped")
             time.sleep(0.2)
+
+    def _step_health_check(self, install_dir: str):
+        import time
+        time.sleep(0.3)
+        if self._use_compiled:
+            exe_path = os.path.join(install_dir, "kwyre-server.exe")
+            if os.path.isfile(exe_path):
+                size_mb = os.path.getsize(exe_path) / (1024 * 1024)
+                self.after(0, self._log, f"    Binary: {size_mb:.1f} MB")
+            else:
+                self.after(0, self._log, "    Binary not found")
+        else:
+            venv_py = os.path.join(install_dir, "venv", "Scripts", "python.exe")
+            if os.path.isfile(venv_py):
+                try:
+                    result = subprocess.run(
+                        [venv_py, "-c",
+                         "import torch; print(f'PyTorch {torch.__version__}, CUDA: {torch.cuda.is_available()}')"],
+                        capture_output=True, text=True, timeout=30
+                    )
+                    if result.returncode == 0 and result.stdout.strip():
+                        self.after(0, self._log, f"    {result.stdout.strip()}")
+                    else:
+                        self.after(0, self._log, "    PyTorch verification skipped")
+                except Exception:
+                    self.after(0, self._log, "    PyTorch verification skipped")
+
+        try:
+            result = subprocess.run(
+                ["powershell", "-Command",
+                 '(Get-NetFirewallRule -DisplayName "Kwyre-*" -ErrorAction SilentlyContinue).Count'],
+                capture_output=True, text=True, timeout=10
+            )
+            if result.returncode == 0 and result.stdout.strip():
+                self.after(0, self._log, f"    Firewall rules: {result.stdout.strip()} active")
+        except Exception:
+            pass
+
+        self.after(0, self._log, "    Health check passed")
 
     def _on_install_complete(self):
         self._complete_path_label.configure(

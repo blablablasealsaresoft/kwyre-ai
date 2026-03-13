@@ -28,6 +28,8 @@ from http.server import BaseHTTPRequestHandler  # Base class for HTTP request ha
 
 import psutil  # Cross-platform process and network monitoring
 
+import platform_gpu
+
 
 # ---------------------------------------------------------------------------
 # LAYER 1: Network binding
@@ -272,7 +274,10 @@ class IntrusionWatchdog(threading.Thread):
         if self.terminate_on_intrusion:  # Check if process kill is enabled
             print("[Watchdog] Terminating server process.")  # Log imminent termination
             time.sleep(0.5)  # Brief delay for log flush
-            os.kill(os.getpid(), signal.SIGTERM)  # Send SIGTERM to self
+            if platform_gpu.IS_WINDOWS:
+                sys.exit(1)
+            else:
+                os.kill(os.getpid(), signal.SIGTERM)
 
     def run(self):
         print(f"[Watchdog] Started — checking every {WATCHDOG_INTERVAL}s "

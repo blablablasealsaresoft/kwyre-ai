@@ -16,6 +16,8 @@
 [![Adapters](https://img.shields.io/badge/adapters-6%20domains-blueviolet.svg)]()
 [![Analytics](https://img.shields.io/badge/analytics-predictive%20engine-ff6f00.svg)]()
 [![AMD ROCm](https://img.shields.io/badge/GPU-AMD%20ROCm-ed1c24.svg)]()
+[![NVIDIA CUDA](https://img.shields.io/badge/GPU-NVIDIA%20CUDA-76b900.svg)]()
+[![Windows](https://img.shields.io/badge/OS-Windows%20x86__64-blue.svg)]()
 [![AdaptiveK](https://img.shields.io/badge/sparsity-AdaptiveK%20per--layer-00bcd4.svg)]()
 
 ---
@@ -24,7 +26,7 @@
 
 Kwyre is a locally-deployed AI inference system built for professionals who work with data that **cannot leave the room** — active federal investigations, attorney-client privileged documents, regulated financial records, classified-adjacent work product, and sensitive compliance analysis.
 
-It runs on **Linux x86_64** with **AMD ROCm GPU acceleration**, shipping a full predictive analytics engine (VaR, CVaR, time series forecasting, pattern analysis), adaptive speculative decoding, six hot-swappable domain adapters, and a cryptographic security stack — all executing entirely on your hardware with zero network egress.
+It runs on **Linux x86_64** (AMD ROCm) and **Windows x86_64** (NVIDIA CUDA), shipping a full predictive analytics engine (VaR, CVaR, time series forecasting, pattern analysis), adaptive speculative decoding, six hot-swappable domain adapters, and a cryptographic security stack — all executing entirely on your hardware with zero network egress.
 
 It is not a hobbyist local model runner. It is a **certified, auditable, breach-resistant AI appliance** with cryptographic session wiping, intrusion detection, and a compliance documentation package built in.
 
@@ -34,7 +36,7 @@ It is not a hobbyist local model runner. It is a **certified, auditable, breach-
 
 ## Platform
 
-Kwyre targets **Linux x86_64** exclusively. GPU inference requires an AMD discrete GPU with ROCm support.
+Kwyre targets **Linux x86_64** and **Windows x86_64**. GPU inference requires an AMD discrete GPU with ROCm support (Linux) or an NVIDIA GPU with CUDA support (Windows).
 
 ### Hardware Requirements
 
@@ -45,6 +47,8 @@ Kwyre targets **Linux x86_64** exclusively. GPU inference requires an AMD discre
 | **Kwyre Air (CPU)** | None | — | 8 GB+ | 2–8 tok/s | 2–4 GB |
 | **Apple Silicon (MLX)** | None (M1/M2/M3/M4) | — | 8 GB+ unified | 5–15 tok/s | 2–4 GB |
 
+#### Linux Requirements
+
 | Requirement | Value |
 |-------------|-------|
 | **OS** | Linux x86_64 (Ubuntu 22.04+ recommended) |
@@ -53,7 +57,19 @@ Kwyre targets **Linux x86_64** exclusively. GPU inference requires an AMD discre
 | **Docker base** | `rocm/pytorch` |
 | **Device passthrough** | `/dev/kfd` + `/dev/dri` |
 | **Helm GPU resource** | `amd.com/gpu` |
-| **Build artifacts** | `.deb` + AppImage (no `.exe`, no `.pkg`) |
+| **Build artifacts** | `.deb` + AppImage |
+
+#### Windows Requirements
+
+| Requirement | Value |
+|-------------|-------|
+| **OS** | Windows 10/11 x86_64 |
+| **GPU (Personal)** | NVIDIA RTX 3060+, 8 GB+ VRAM, 16 GB RAM |
+| **GPU (Professional)** | NVIDIA RTX 4090 / A100 / H100, 16 GB+ VRAM, 32 GB RAM |
+| **GPU driver** | NVIDIA CUDA 12.4+ |
+| **GPU visibility** | `CUDA_VISIBLE_DEVICES` |
+| **Docker base** | `nvidia/cuda` (via Docker Desktop + WSL2) |
+| **Build artifacts** | `.exe` installer + portable ZIP |
 
 ---
 
@@ -226,7 +242,7 @@ Adapters use PEFT LoRA — swapping takes ~2 seconds and requires no model reloa
 | Layer | Name | What It Does | Implementation |
 |-------|------|-------------|----------------|
 | **1** | Network Isolation | Server binds to `127.0.0.1` only — physically unreachable from any network at the OS level | `KWYRE_BIND_HOST=127.0.0.1`; Docker binds `127.0.0.1:8000:8000` on host |
-| **2** | Process-Level Network Lockdown | All outbound traffic blocked for the Kwyre process except loopback | `iptables` rules scoped to dedicated `kwyre` system user — even a compromised server process cannot phone home |
+| **2** | Process-Level Network Lockdown | All outbound traffic blocked for the Kwyre process except loopback | `iptables` (Linux) / Windows Firewall (Windows) rules scoped to dedicated `kwyre` system user — even a compromised server process cannot phone home |
 | **3** | Dependency Integrity | SHA-256 hash manifest of every installed Python package, verified at startup | Tampered `torch`, `transformers`, or any dependency → immediate abort before a single token is generated |
 | **4** | Model Weight Integrity | SHA-256 hashes of all model config files verified at every startup | Tampered or replaced model weights → immediate process abort |
 | **5** | Secure RAM Session Storage | Conversations exist only in RAM — never written to disk under any circumstance | 256-bit random session key; `secure_wipe()` overwrites all content with random bytes on session end; 1-hour idle expiry |
@@ -236,10 +252,10 @@ Adapters use PEFT LoRA — swapping takes ~2 seconds and requires no model reloa
 
 ## Building from Source
 
-Kwyre builds on Linux x86_64 only. The output binary is `kwyre-server` (no `.exe`).
+Kwyre builds on Linux x86_64 and Windows x86_64.
 
 ```bash
-# Prerequisites: Ubuntu 22.04+, Python 3.10+, AMD ROCm 6.x
+# Linux: Prerequisites: Ubuntu 22.04+, Python 3.10+, AMD ROCm 6.x
 pip install nuitka ordered-set zstandard
 
 python build.py all              # Full pipeline: compile + package + installer + sign
@@ -256,19 +272,27 @@ python build.py clean            # Remove build/ directory
 python build.py -V               # Print version
 ```
 
-The installer step produces two artifacts:
+```powershell
+# Windows: Prerequisites: Windows 10/11 x64, Python 3.10+, NVIDIA CUDA 12.x
+pip install nuitka ordered-set zstandard
+python build.py all              # Full pipeline: compile + package + installer + sign
+```
+
+The installer step produces platform-specific artifacts:
 
 | Format | Target | Notes |
 |--------|--------|-------|
 | `.deb` | Debian / Ubuntu | `dpkg -i kwyre-server_*.deb`, registers systemd unit |
 | AppImage | Any Linux x86_64 | Single-file portable, no install required |
+| `.exe` installer | Windows x86_64 | Standard Windows installer, registers Windows Service |
+| Portable ZIP | Windows x86_64 | No install required, extract and run |
 
 ---
 
 ## Technical Specifications
 
 ```
-Platform:                   Linux x86_64 + AMD ROCm 6.x
+Platform:                   Linux x86_64 + AMD ROCm 6.x | Windows x86_64 + NVIDIA CUDA 12.x
 Main model (Personal):     Qwen/Qwen3.5-4B (pre-quantized NF4, 2.5 GB)
 Main model (Professional): Qwen/Qwen3.5-9B (pre-quantized NF4, 7.6 GB)
 Draft model:               Qwen/Qwen3.5-0.8B (pre-quantized NF4, 0.8 GB) — shared by both tiers
@@ -369,6 +393,8 @@ kwyre/
 │   ├── analytics.py           # Predictive analytics engine (time-series, risk, patterns, documents)
 │   ├── adapter_trainer.py     # Customer fine-tuning background job system
 │   ├── security_core.py       # Shared security infrastructure (all 6 layers)
+│   ├── platform_gpu.py        # Cross-platform GPU detection (ROCm / CUDA)
+│   ├── platform_paths.py      # Cross-platform path resolution (Linux / Windows)
 │   ├── rag.py                 # RAG document ingestion (FAISS + embeddings)
 │   ├── users.py               # Multi-user management (Fernet-encrypted)
 │   └── audit.py               # Per-user audit logging + SIEM export
@@ -384,10 +410,13 @@ kwyre/
 │   ├── verify_deps.py         # Layer 3 — dependency integrity
 │   ├── license.py             # Ed25519 license + hardware fingerprint binding
 │   ├── codesign.py            # Ed25519 release signing and verification
-│   └── updater.py             # Air-gap safe update mechanism
+│   ├── updater.py             # Air-gap safe update mechanism
+│   └── setup_isolation.ps1    # Windows Firewall + process isolation setup
 ├── training/
 │   ├── run_full_pipeline.sh   # Automated: traces → distillation → GRPO → export
+│   ├── run_full_pipeline.ps1  # Windows: same pipeline via PowerShell
 │   ├── setup_gpu.sh           # AMD ROCm GPU environment setup
+│   ├── setup_gpu.ps1          # NVIDIA CUDA GPU environment setup (Windows)
 │   └── scripts/
 │       ├── generate_traces_batch.py    # Batch API trace generation (1,000/domain, resumable)
 │       ├── generate_traces_parallel.py # Real-time parallel trace generation (fallback)
@@ -395,7 +424,9 @@ kwyre/
 │       ├── train_grpo_domain.py        # Domain-specific GRPO with custom reward functions
 │       ├── train_grpo.py               # Base GRPO training
 │       ├── run_domain_training.sh      # Single-domain pipeline runner
-│       └── run_all_domains.sh          # All 6 domains sequentially
+│       ├── run_domain_training.ps1     # Windows: single-domain pipeline runner
+│       ├── run_all_domains.sh          # All 6 domains sequentially
+│       └── run_all_domains.ps1         # Windows: all 6 domains sequentially
 ├── benchmarks/
 │   ├── benchmark.py           # Domain benchmark suite (--with-adapter comparison mode)
 │   └── datasets/              # financial_analysis.json, compliance_tasks.json, etc.
@@ -411,6 +442,8 @@ kwyre/
 │   ├── security.html          # Penetration testing + compliance
 │   ├── platform.html          # Installation + deployment guides
 │   └── pay.html               # Payment + license download gate
+├── scripts/
+│   └── package_adapter.ps1    # Windows adapter packaging script
 ├── installer/
 │   └── install_linux.sh       # Linux installer (systemd + iptables)
 ├── finetune/                  # Domain-specific fine-tuning pipeline
@@ -418,6 +451,7 @@ kwyre/
 ├── tests/                     # 110 security tests + integration suite
 ├── build.py                   # Nuitka build + installer pipeline
 ├── .env.example               # Full config reference (30+ variables)
+├── requirements-windows.txt   # Windows-specific Python dependencies (CUDA)
 └── dist/                      # Pre-quantized model weights
     ├── kwyre-4b-nf4/          # Main model (2.5 GB)
     └── kwyre-draft-nf4/       # Draft model (0.8 GB)
@@ -451,6 +485,7 @@ kwyre/
 - [x] Harder sparsity defaults — `SPIKE_K=3.0` (was 5.0), `SPIKE_MAX=15` (was 31)
 - [x] QAT LoRA rank 128 (alpha 256), k-curriculum 50→3, supports both Qwen3.5-4B and Qwen3.5-9B
 - [x] Linux x86_64 + AMD ROCm migration — single-platform build (.deb + AppImage), Docker image ~12 GB with ROCm runtime
+- [x] Windows x86_64 + NVIDIA CUDA support — .exe installer + portable ZIP, Docker Desktop + WSL2, PowerShell training scripts
 
 **v1.7 (Planned)**
 - [ ] Credit card payment integration
@@ -465,6 +500,14 @@ kwyre/
 ```bash
 # Watch for any outbound connections from the inference process
 watch -n 1 "ss -tp | grep python"
+
+# Confirm: only 127.0.0.1 connections appear. Any external IP = compromised environment.
+```
+
+**Windows (PowerShell):**
+```powershell
+# Watch for any outbound connections from the inference process
+Get-NetTCPConnection | Where-Object { $_.OwningProcess -eq (Get-Process kwyre-server).Id }
 
 # Confirm: only 127.0.0.1 connections appear. Any external IP = compromised environment.
 ```
