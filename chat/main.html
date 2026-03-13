@@ -2387,15 +2387,15 @@ html.light nav { background: rgba(245,246,250,0.9); }
     <div class="product-strip reveal">
       <a href="pay.html" class="product-chip active">
         <span class="product-chip-name">Personal</span>
-        <span class="product-chip-detail">4B · 7-14 tok/s · $299</span>
+        <span class="product-chip-detail">4B Uncensored · 0/465 refusals · $299</span>
       </a>
       <a href="pay.html" class="product-chip">
         <span class="product-chip-name">Professional</span>
-        <span class="product-chip-detail">9B Custom · 3-5 tok/s · $799</span>
+        <span class="product-chip-detail">4B Uncensored · 6 adapters · $799</span>
       </a>
       <a href="pay.html" class="product-chip">
         <span class="product-chip-name">Air</span>
-        <span class="product-chip-detail">CPU · Any hardware · $299</span>
+        <span class="product-chip-detail">CPU · GGUF · Any hardware · $299</span>
       </a>
       <a href="pay.html" class="product-chip">
         <span class="product-chip-name">Apple Silicon</span>
@@ -2731,8 +2731,8 @@ html.light nav { background: rgba(245,246,250,0.9); }
     <div class="feat-grid">
       <div class="feat-cell">
         <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg></div>
-        <h3>Spike QAT Training</h3>
-        <p>Custom pipeline using Straight-Through Estimator spike encoding with k-curriculum annealing (k=50&#8594;5). The model learns to tolerate spike-encoded activations.</p>
+        <h3>Uncensored + Spike QAT</h3>
+        <p>Qwen3.5-4B Uncensored &mdash; 0/465 refusals. Spike QAT with Straight-Through Estimator encoding + k-curriculum annealing. Your sensitive data never refuses to be analyzed.</p>
       </div>
       <div class="feat-cell">
         <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg></div>
@@ -2751,13 +2751,13 @@ html.light nav { background: rgba(245,246,250,0.9); }
       </div>
       <div class="feat-cell">
         <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg></div>
-        <h3>LoRA Fine-Tuning</h3>
-        <p>Adapters targeting MLP layers (gate_proj, up_proj, down_proj). Fine-tuning with 0.2% trainable parameters. QLoRA rank 64, alpha 128.</p>
+        <h3>Hot-Swap LoRA Adapters</h3>
+        <p>6 domain adapters hot-swap at runtime via API (~100 MB each). Claude &#8594; QLoRA &#8594; domain GRPO &#8594; LoRA export. 300 traces/domain, custom reward functions.</p>
       </div>
       <div class="feat-cell">
         <div class="feat-cell-icon"><svg viewBox="0 0 24 24"><path d="M12 1v4M12 19v4M4.22 4.22l2.83 2.83M16.95 16.95l2.83 2.83M1 12h4M19 12h4M4.22 19.78l2.83-2.83M16.95 7.05l2.83-2.83"/></svg></div>
-        <h3>Compliance & Audit</h3>
-        <p>GET /audit for metadata-only compliance logs. GET /health for full security stack status. Architecture designed for HIPAA, FINRA, SOC2-adjacent requirements.</p>
+        <h3>4 Backends + RAG</h3>
+        <p>GPU: NF4/AWQ + Flash Attn 2 + speculative. vLLM: PagedAttention + continuous batching. CPU: llama.cpp. MLX: Apple Silicon. RAG: FAISS, RAM-only, crypto-wipe.</p>
       </div>
     </div>
   </div>

@@ -454,16 +454,16 @@ nav {
         <div class="product-card-name">Personal</div>
         <h3>Kwyre Personal</h3>
         <div class="product-card-price">$499</div>
-        <div class="product-sub">1 machine &middot; GPU &middot; NF4 Quantized &middot; Speculative Decoding</div>
-        <p>Fast local inference with speculative decoding. Pre-quantized NF4 weights keep VRAM low while SpikeServe activation encoding maximizes throughput.</p>
+        <div class="product-sub">1 machine &middot; GPU &middot; NF4 Quantized &middot; 0/465 Refusals</div>
+        <p>Qwen3.5-4B Uncensored &mdash; your sensitive data never refuses to be analyzed. Pre-quantized 4-bit NF4 (2.5 GB) with Spike QAT encoding and SpikeServe activation optimization.</p>
         <ul class="product-features">
-          <li>Qwen3.5-4B Uncensored + 1 domain adapter</li>
-          <li>Speculative decoding (2-3x throughput)</li>
-          <li>6-layer security + RAG</li>
+          <li>Qwen3.5-4B Uncensored &mdash; 0/465 refusals</li>
+          <li>Qwen3.5-0.8B draft &mdash; speculative decoding, 2&ndash;3&times; speed</li>
+          <li>3.3 GB total download from kwyre.com</li>
+          <li>1 domain LoRA adapter hot-swap via API (~100 MB)</li>
+          <li>Spike QAT &mdash; STE spike encoding + k-curriculum annealing</li>
           <li>4.1 GB VRAM &middot; 7-14 tok/s</li>
-          <li>Download: ~2.5 GB (4B quantized)</li>
-          <li>6-layer security stack</li>
-          <li>SSE streaming &middot; KV cache &middot; RAG</li>
+          <li>6-layer security &middot; SSE streaming &middot; KV cache &middot; RAG</li>
           <li>1 machine license</li>
         </ul>
       </div>
@@ -474,19 +474,19 @@ nav {
         <div class="product-card-name">Professional &mdash; Most Popular</div>
         <h3>Kwyre Professional</h3>
         <div class="product-card-price">$1,499</div>
-        <div class="product-sub">3 machines &middot; Offline Installer &middot; All 6 Domain Adapters</div>
-        <p>Our flagship product. Qwen3.5-4B Uncensored with all six domain adapters, fully air-gapped offline installer, every inference backend, and a personal white-glove setup call.</p>
+        <div class="product-sub">3 machines &middot; Offline Installer &middot; 0/465 Refusals &middot; All 6 Domain Adapters</div>
+        <p>Our flagship product. Qwen3.5-4B Uncensored (0/465 refusals) with all six domain LoRA adapters hot-swappable at runtime, fully air-gapped offline installer, pipeline-trained via Claude &#8594; QLoRA &#8594; domain GRPO &#8594; LoRA export.</p>
         <ul class="product-features">
-          <li>Qwen3.5-4B Uncensored + Qwen3.5-0.8B speculative draft</li>
-          <li>All 6 domain adapters — legal, insurance, healthcare, defense, trading, blockchain</li>
+          <li>Qwen3.5-4B Uncensored + Qwen3.5-0.8B draft &mdash; 2&ndash;3&times; speculative speed</li>
+          <li>6 domain LoRA adapters hot-swap at runtime via API (~100 MB each)</li>
+          <li>Pipeline: Claude &#8594; QLoRA &#8594; domain GRPO &#8594; LoRA export, 300 traces/domain</li>
           <li>Offline installer (.exe / .deb / .pkg) &mdash; fully air-gapped</li>
-          <li>All 4 backends: GGUF &middot; vLLM &middot; MLX &middot; Docker / Helm</li>
-          <li>Multi-user RBAC &middot; Enterprise audit endpoint</li>
-          <li>SOC2 &middot; HIPAA &middot; FINRA compliance documentation</li>
-          <li>6-layer security stack &middot; 4.1 GB VRAM &middot; 7&ndash;14 tok/s</li>
+          <li>All 4 backends: GPU (NF4/AWQ + Flash Attn 2) &middot; vLLM &middot; CPU (llama.cpp) &middot; MLX</li>
+          <li>RAG: FAISS, RAM-only, crypto-wipe</li>
+          <li>Spike QAT &mdash; STE spike encoding + k-curriculum annealing</li>
+          <li>Multi-user RBAC &middot; SOC2 &middot; HIPAA &middot; FINRA compliance</li>
           <li>White-glove setup call &mdash; 1&times; 90-min personal onboarding</li>
-          <li>Priority support &middot; &lt;24hr response</li>
-          <li>3 machine licenses</li>
+          <li>3 machine licenses &middot; Priority support</li>
         </ul>
       </div>
 
@@ -550,7 +550,7 @@ nav {
         <h3>Custom LLM</h3>
         <div class="product-card-price">$25K+</div>
         <div class="product-sub">Turnkey &middot; Your Domain Trained &middot; Benchmarked vs GPT-4o</div>
-        <p>A custom-trained model built for your specific domain. We distill reasoning from frontier models, apply GRPO reinforcement learning on your tasks, and deliver a turnkey appliance or self-hosted deployment that beats GPT-4o on your benchmarks.</p>
+        <p>A custom-trained model built for your specific domain. Pipeline: Claude &#8594; QLoRA &#8594; domain GRPO &#8594; LoRA export with 300 traces/domain and custom reward functions. Delivered as turnkey appliance or self-hosted across all 4 backends (GPU, vLLM, CPU, MLX).</p>
         <ul class="product-features">
           <li>Your domain trained</li>
           <li>Benchmarked vs GPT-4o</li>

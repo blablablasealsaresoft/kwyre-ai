@@ -533,14 +533,14 @@ nav {
           <tr>
             <td class="m-label">Kwyre Personal</td>
             <td>NVIDIA GPU (RTX 4060+)</td>
-            <td>Qwen3.5-4B NF4 + 0.8B draft (3.3 GB)</td>
+            <td>Qwen3.5-4B Uncensored NF4 + 0.8B draft (3.3 GB) &mdash; 0/465 refusals</td>
             <td><code>docker compose up</code> or installer</td>
             <td><span class="m-y">✓ Always</span></td>
           </tr>
           <tr>
             <td class="m-label">Kwyre Professional</td>
             <td>NVIDIA GPU (RTX 4090/3090)</td>
-            <td>Qwen3.5-9B GRPO-trained (6.2 GB)</td>
+            <td>Qwen3.5-4B Uncensored + 6 LoRA hot-swap adapters + GRPO (3.3 GB)</td>
             <td><code>docker compose up</code> or installer</td>
             <td><span class="m-y">✓ Always</span></td>
           </tr>
@@ -561,7 +561,7 @@ nav {
           <tr>
             <td class="m-label">vLLM Backend</td>
             <td>NVIDIA GPU (multi-GPU supported)</td>
-            <td>Qwen3.5-4B or custom</td>
+            <td>Qwen3.5-4B Uncensored or custom &mdash; PagedAttention + continuous batching</td>
             <td><code>KWYRE_BACKEND=vllm python server/serve_vllm.py</code></td>
             <td><span class="m-y">✓ Always</span></td>
           </tr>
@@ -574,6 +574,21 @@ nav {
           </tr>
         </tbody>
       </table>
+    </div>
+
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px;margin-top:32px;">
+      <div style="padding:16px;border:1px solid var(--border);border-radius:8px;background:var(--surface);">
+        <div style="font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:2px;color:rgba(59,130,246,0.6);margin-bottom:8px;">UNCENSORED + HOT-SWAP</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.5;margin:0;">Qwen3.5-4B Uncensored &mdash; 0/465 refusals. 6 domain LoRA adapters hot-swap at runtime via API (~100 MB each). Your sensitive data never refuses to be analyzed.</p>
+      </div>
+      <div style="padding:16px;border:1px solid var(--border);border-radius:8px;background:var(--surface);">
+        <div style="font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:2px;color:rgba(34,197,94,0.6);margin-bottom:8px;">PIPELINE + 4 BACKENDS</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.5;margin:0;">Claude &#8594; QLoRA &#8594; domain GRPO &#8594; LoRA export. 300 traces/domain. GPU: NF4/AWQ + Flash Attn 2 + speculative. vLLM: PagedAttention. CPU: llama.cpp. MLX: Apple Silicon.</p>
+      </div>
+      <div style="padding:16px;border:1px solid var(--border);border-radius:8px;background:var(--surface);">
+        <div style="font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:2px;color:rgba(245,158,11,0.6);margin-bottom:8px;">SPIKE QAT + RAG</div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.5;margin:0;">Straight-Through Estimator spike encoding + k-curriculum annealing. Qwen3.5-0.8B draft for 2&ndash;3&times; speculative speed. RAG: FAISS, RAM-only, crypto-wipe.</p>
+      </div>
     </div>
   </div>
 </div>

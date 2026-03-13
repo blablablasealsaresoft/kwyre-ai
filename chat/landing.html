@@ -316,9 +316,9 @@ const L=[
   'LAYER 6 / WATCHDOG ACTIVE','─────────────────────','STATUS / ALL CLEAR ✓',
 ];
 const R=[
-  'MODEL / QWEN3.5-9B','QUANT / 4-BIT NF4','SPIKE QAT / ENABLED',
-  'K-SCHED / 50 → 5','VRAM / LOCAL ONLY','TELEMETRY / ZERO',
-  'LOGS / NONE','─────────────────────','READY / AWAITING INPUT',
+  'MODEL / QWEN3.5-4B UNCENSORED','QUANT / 4-BIT NF4','SPIKE QAT / ENABLED',
+  'ADAPTERS / 6 DOMAIN HOT-SWAP','BACKENDS / GPU vLLM CPU MLX','REFUSALS / 0 OF 465',
+  'PIPELINE / CLAUDE → QLoRA → GRPO','─────────────────────','READY / AWAITING INPUT',
 ];
 function mkStream(id, arr) {
   const el = document.getElementById(id);

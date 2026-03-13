@@ -806,11 +806,11 @@ select.form-input { cursor: pointer; }
       <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px;">
         <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px;">
           <h4 style="font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px;">Domain-Specific Fine-Tuning</h4>
-          <p style="font-size: 13px; color: var(--text2); line-height: 1.6;">We fine-tune on YOUR domain data using our Claude distillation + GRPO pipeline. Legal, financial, forensic, medical, defense &mdash; the model speaks your industry's language.</p>
+          <p style="font-size: 13px; color: var(--text2); line-height: 1.6;">Pipeline: Claude &#8594; QLoRA &#8594; domain GRPO &#8594; LoRA export. 300 traces/domain with custom reward functions. Base model: Qwen3.5-4B Uncensored (0/465 refusals) &mdash; your sensitive data never refuses to be analyzed.</p>
         </div>
         <div style="background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 20px;">
-          <h4 style="font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px;">Benchmark Validation</h4>
-          <p style="font-size: 13px; color: var(--text2); line-height: 1.6;">Every custom model is benchmarked against GPT-4o on YOUR specific tasks before delivery. We provide a full comparison report so you can verify quality.</p>
+          <h4 style="font-family: var(--mono); font-size: 11px; font-weight: 600; letter-spacing: 1.5px; text-transform: uppercase; color: var(--accent); margin-bottom: 8px;">4 Backends + Hot-Swap Adapters</h4>
+          <p style="font-size: 13px; color: var(--text2); line-height: 1.6;">GPU: NF4/AWQ + Flash Attn 2 + speculative. vLLM: PagedAttention + continuous batching. CPU: llama.cpp. MLX: Apple Silicon. 6 domain LoRA adapters hot-swap at runtime via API (~100 MB each). RAG: FAISS, RAM-only, crypto-wipe.</p>
         </div>
       </div>
     </div>
