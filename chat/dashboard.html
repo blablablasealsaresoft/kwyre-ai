@@ -599,6 +599,21 @@ nav {
       </div>
     </div>
 
+    <!-- MY PRODUCTS -->
+    <div class="dash-section" id="sectionProducts">
+      <div class="dash-section-head">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+        <h2>My Products</h2>
+      </div>
+      <div class="dash-section-body" id="productsBody">
+        <div class="addon-grid">
+          <div class="skel" style="height:120px;border-radius:12px;"></div>
+          <div class="skel" style="height:120px;border-radius:12px;"></div>
+          <div class="skel" style="height:120px;border-radius:12px;"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- LICENSES -->
     <div class="dash-section" id="sectionLicenses">
       <div class="dash-section-head">
@@ -765,6 +780,7 @@ function copyText(text, btnEl) {
   })
   .then(function(data) {
     renderProfile(data.profile || data);
+    renderProducts(data.licenses || []);
     renderLicenses(data.licenses || []);
     renderAddons(data.addons || []);
     renderDownloads(data.licenses || []);
@@ -798,6 +814,62 @@ function renderProfile(p) {
         (since ? '<div class="profile-since">Member since ' + since + '</div>' : '') +
       '</div>' +
     '</div>';
+}
+
+var PRODUCT_META = {
+  personal:       { name: 'Kwyre Personal', icon: '\u26A1', color: '#3b82f6', launchUrl: 'main.html', desc: 'GPU inference with speculative decoding' },
+  professional:   { name: 'Kwyre Professional', icon: '\uD83C\uDFDB', color: '#8b5cf6', launchUrl: 'main.html', desc: 'Domain specialist with all 6 adapters' },
+  air:            { name: 'Kwyre Air', icon: '\uD83D\uDCA8', color: '#06b6d4', launchUrl: 'main.html', desc: 'CPU inference, any hardware' },
+  apple_silicon:  { name: 'Kwyre Apple Silicon', icon: '\uD83C\uDF4E', color: '#a3a3a3', launchUrl: 'main.html', desc: 'Native MLX on M-series Macs' },
+  quantedge:      { name: 'QuantEdge', icon: '\uD83D\uDCC8', color: '#eab308', launchUrl: '/products/quantedge/site/index.html', desc: 'Quant finance AI' },
+  labmind:        { name: 'LabMind', icon: '\uD83D\uDD2C', color: '#6366f1', launchUrl: '/products/labmind/site/index.html', desc: 'Scientific research AI' },
+  dentai:         { name: 'DentAI', icon: '\uD83E\uDDB7', color: '#14b8a6', launchUrl: '/products/dentai/site/index.html', desc: 'Dental practice AI' },
+  codeforge:      { name: 'CodeForge', icon: '\u2699\uFE0F', color: '#f97316', launchUrl: '/products/codeforge/site/index.html', desc: 'Codebase-aware AI' },
+  taxshield:      { name: 'TaxShield', icon: '\uD83D\uDEE1', color: '#22c55e', launchUrl: '/products/taxshield/site/index.html', desc: 'Tax strategy AI' },
+  launchpad:      { name: 'LaunchPad', icon: '\uD83D\uDE80', color: '#3b82f6', launchUrl: '/products/launchpad/site/index.html', desc: 'Job placement AI' },
+  soulsync:       { name: 'SoulSync', icon: '\uD83D\uDC95', color: '#ec4899', launchUrl: '/products/soulsync/site/index.html', desc: 'Soulmate matching AI' },
+  nfl_playcaller: { name: 'NFL PlayCaller', icon: '\uD83C\uDFC8', color: '#d4a843', launchUrl: '/products/nfl-playcaller/site/index.html', desc: 'NFL analysis AI' },
+};
+
+function renderProducts(lics) {
+  var el = document.getElementById('productsBody');
+  var activeLics = lics.filter(function(l) { return l.status === 'active'; });
+
+  if (!activeLics.length) {
+    el.innerHTML =
+      '<div class="empty-state">' +
+        '<p>No products yet. <a href="products.html">Browse products &rarr;</a></p>' +
+      '</div>';
+    return;
+  }
+
+  var seen = {};
+  var html = '<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;">';
+  activeLics.forEach(function(lic) {
+    var tier = lic.tier || lic.product || '';
+    if (seen[tier]) return;
+    seen[tier] = true;
+    var meta = PRODUCT_META[tier] || { name: tier, icon: '\uD83D\uDCE6', color: '#6b7294', launchUrl: '#', desc: '' };
+    var addonUrl = tier && !['personal','professional','air','apple_silicon'].includes(tier)
+      ? 'https://cdn.kwyre.com/products/' + tier.replace('_','-') + '-addon-latest.zip' : '';
+
+    html +=
+      '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:12px;padding:20px;display:flex;flex-direction:column;gap:12px;">' +
+        '<div style="display:flex;align-items:center;gap:12px;">' +
+          '<span style="font-size:28px;line-height:1;">' + meta.icon + '</span>' +
+          '<div>' +
+            '<div style="font-weight:600;font-size:15px;">' + escHtml(meta.name) + '</div>' +
+            '<div style="font-size:12px;color:var(--text2);">' + escHtml(meta.desc) + '</div>' +
+          '</div>' +
+        '</div>' +
+        '<div style="display:flex;gap:8px;margin-top:auto;">' +
+          '<a href="' + meta.launchUrl + '" style="flex:1;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;text-align:center;text-decoration:none;font-weight:600;font-size:13px;font-family:var(--sans);">Launch</a>' +
+          (addonUrl ? '<a href="' + addonUrl + '" style="padding:10px 16px;background:var(--surface3);color:var(--text2);border:1px solid var(--border);border-radius:8px;text-decoration:none;font-size:13px;font-family:var(--sans);">Add-on</a>' : '') +
+        '</div>' +
+      '</div>';
+  });
+  html += '</div>';
+  el.innerHTML = html;
 }
 
 function renderLicenses(lics) {
@@ -899,6 +971,33 @@ function renderDownloads(lics) {
       '</a>' +
     '</div>' +
     (!hasLicense ? '<div style="margin-top:12px;font-family:var(--mono);font-size:11px;color:var(--text3);letter-spacing:0.3px;text-align:center;">Active license required for downloads. <a href="products.html" style="color:var(--accent);text-decoration:none;">Purchase &rarr;</a></div>' : '');
+
+  if (hasLicense) {
+    var addonProducts = [];
+    var seenAddon = {};
+    lics.forEach(function(l) {
+      var t = l.tier || l.product || '';
+      if (!seenAddon[t] && l.status === 'active' && !['personal','professional','air','apple_silicon'].includes(t) && PRODUCT_META[t]) {
+        seenAddon[t] = true;
+        addonProducts.push(t);
+      }
+    });
+    if (addonProducts.length) {
+      var addonHtml = '<div style="margin-top:16px;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Product Add-on Packages</div><div class="dl-grid">';
+      addonProducts.forEach(function(t) {
+        var meta = PRODUCT_META[t];
+        var slug = t.replace('_','-');
+        addonHtml +=
+          '<a class="dl-card" href="https://cdn.kwyre.com/products/' + slug + '-addon-latest.zip">' +
+            '<div class="dl-card-icon" style="font-size:20px;">' + meta.icon + '</div>' +
+            '<div class="dl-card-info"><div class="dl-card-platform">' + escHtml(meta.name) + ' Add-on</div><div class="dl-card-file">' + slug + '-addon-latest.zip</div></div>' +
+            '<div class="dl-card-arrow"><svg viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg></div>' +
+          '</a>';
+      });
+      addonHtml += '</div>';
+      el.innerHTML += addonHtml;
+    }
+  }
 }
 
 function renderApi(apiKey) {
@@ -935,7 +1034,7 @@ function renderBilling(billingUrl) {
 }
 
 function renderError() {
-  var sections = ['profileBody','licensesBody','addonsBody','downloadsBody','apiBody','billingBody'];
+  var sections = ['profileBody','productsBody','licensesBody','addonsBody','downloadsBody','apiBody','billingBody'];
   sections.forEach(function(id) {
     document.getElementById(id).innerHTML =
       '<div class="empty-state">' +

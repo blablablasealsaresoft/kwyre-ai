@@ -1107,6 +1107,107 @@ input:checked + .toggle-slider::before {
         <a href="custom.html" class="prod-select-btn" onclick="event.stopPropagation()">Contact</a>
       </div>
 
+      <div style="grid-column: 1 / -1; margin: 16px 0 8px; padding: 8px 0; border-top: 1px solid var(--border);">
+        <span style="font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3);">MINT RAIL SPECIALTY PRODUCTS</span>
+        <span style="display: block; font-size: 12px; color: var(--text2); margin-top: 4px;">Each includes Kwyre base + specialized add-on package</span>
+      </div>
+
+      <div class="prod-card" data-tier="quantedge" onclick="selectProduct('quantedge')">
+        <div class="prod-name">QuantEdge</div>
+        <div class="prod-price">$499</div>
+        <div class="prod-price-sub">One-time &middot; 1 machine</div>
+        <ul class="prod-features">
+          <li>Quant finance: options pricing</li>
+          <li>Portfolio optimization</li>
+          <li>Risk management</li>
+        </ul>
+        <button class="prod-select-btn">Select</button>
+      </div>
+
+      <div class="prod-card" data-tier="labmind" onclick="selectProduct('labmind')">
+        <div class="prod-name">LabMind</div>
+        <div class="prod-price">$499</div>
+        <div class="prod-price-sub">One-time &middot; 1 machine</div>
+        <ul class="prod-features">
+          <li>Scientific research: literature synthesis</li>
+          <li>Experiment design</li>
+          <li>Stats planning</li>
+        </ul>
+        <button class="prod-select-btn">Select</button>
+      </div>
+
+      <div class="prod-card" data-tier="dentai" onclick="selectProduct('dentai')">
+        <div class="prod-name">DentAI</div>
+        <div class="prod-price">$399</div>
+        <div class="prod-price-sub">One-time &middot; 1 machine</div>
+        <ul class="prod-features">
+          <li>Dental practice: treatment planning</li>
+          <li>CDT coding</li>
+          <li>Clinical notes</li>
+        </ul>
+        <button class="prod-select-btn">Select</button>
+      </div>
+
+      <div class="prod-card" data-tier="codeforge" onclick="selectProduct('codeforge')">
+        <div class="prod-name">CodeForge</div>
+        <div class="prod-price">$399</div>
+        <div class="prod-price-sub">One-time &middot; 1 machine</div>
+        <ul class="prod-features">
+          <li>Software engineering: repo indexing</li>
+          <li>Code review</li>
+          <li>Architecture analysis</li>
+        </ul>
+        <button class="prod-select-btn">Select</button>
+      </div>
+
+      <div class="prod-card" data-tier="taxshield" onclick="selectProduct('taxshield')">
+        <div class="prod-name">TaxShield</div>
+        <div class="prod-price">$399</div>
+        <div class="prod-price-sub">One-time &middot; 1 machine</div>
+        <ul class="prod-features">
+          <li>Tax strategy: deduction optimization</li>
+          <li>Entity comparison</li>
+          <li>Depreciation</li>
+        </ul>
+        <button class="prod-select-btn">Select</button>
+      </div>
+
+      <div class="prod-card" data-tier="launchpad" onclick="selectProduct('launchpad')">
+        <div class="prod-name">LaunchPad</div>
+        <div class="prod-price">$299</div>
+        <div class="prod-price-sub">One-time &middot; 1 machine</div>
+        <ul class="prod-features">
+          <li>Job placement: ATS resume scoring</li>
+          <li>Interview prep</li>
+          <li>Job matching</li>
+        </ul>
+        <button class="prod-select-btn">Select</button>
+      </div>
+
+      <div class="prod-card" data-tier="soulsync" onclick="selectProduct('soulsync')">
+        <div class="prod-name">SoulSync</div>
+        <div class="prod-price">$299</div>
+        <div class="prod-price-sub">One-time &middot; 1 machine</div>
+        <ul class="prod-features">
+          <li>Dating/matching: personality profiling</li>
+          <li>Compatibility scoring</li>
+          <li>Icebreakers</li>
+        </ul>
+        <button class="prod-select-btn">Select</button>
+      </div>
+
+      <div class="prod-card" data-tier="nfl_playcaller" onclick="selectProduct('nfl_playcaller')">
+        <div class="prod-name">NFL PlayCaller</div>
+        <div class="prod-price">$199</div>
+        <div class="prod-price-sub">One-time &middot; 1 machine</div>
+        <ul class="prod-features">
+          <li>NFL analysis: scouting, play calling</li>
+          <li>Blitz prediction</li>
+          <li>Live games</li>
+        </ul>
+        <button class="prod-select-btn">Select</button>
+      </div>
+
     </div>
 
     <button class="continue-btn" id="continueToAddons" disabled onclick="goToStep(2)">
@@ -1531,6 +1632,14 @@ const PRODUCTS = {
   apple_silicon: { name: 'Kwyre Apple Silicon',  price: 299,  isLocal: true },
   cloud:         { name: 'Kwyre Cloud',          price: null, isLocal: false },
   cloud_pro:     { name: 'Kwyre Cloud Pro',      price: null, isLocal: false },
+  quantedge:     { name: 'QuantEdge',            price: 499,  isLocal: true },
+  labmind:       { name: 'LabMind',              price: 499,  isLocal: true },
+  dentai:        { name: 'DentAI',               price: 399,  isLocal: true },
+  codeforge:     { name: 'CodeForge',            price: 399,  isLocal: true },
+  taxshield:     { name: 'TaxShield',            price: 399,  isLocal: true },
+  launchpad:     { name: 'LaunchPad',            price: 299,  isLocal: true },
+  soulsync:      { name: 'SoulSync',             price: 299,  isLocal: true },
+  nfl_playcaller:{ name: 'NFL PlayCaller',       price: 199,  isLocal: true },
 };
 
 const ADDON_PRICES = { airgap: 1499, cloud: 49, extra_machine: 99 };
@@ -1782,7 +1891,7 @@ function verifyKeyLocally(key) {
       const payloadStr = atob(tokenData.p);
       const payload = JSON.parse(payloadStr);
       if (!payload.tier || !payload.label) { resolve({ valid: false, error: 'Malformed license payload.' }); return; }
-      const validTiers = ['personal', 'professional', 'airgapped', 'unlimited', 'air', 'apple_silicon'];
+      const validTiers = ['personal', 'professional', 'airgapped', 'unlimited', 'air', 'apple_silicon', 'quantedge', 'labmind', 'dentai', 'codeforge', 'taxshield', 'launchpad', 'soulsync', 'nfl_playcaller'];
       if (!validTiers.includes(payload.tier)) { resolve({ valid: false, error: 'Unknown license tier.' }); return; }
       if (payload.expires_at && payload.expires_at < Date.now() / 1000) {
         resolve({ valid: false, error: 'License expired on ' + new Date(payload.expires_at * 1000).toISOString().split('T')[0] + '.' }); return;
@@ -1808,13 +1917,28 @@ function showDlSuccess(result) {
 /* ══════════════════════════════════════════════════════════════════
    STRIPE INTEGRATION
    ══════════════════════════════════════════════════════════════════ */
-const STRIPE_PUBLISHABLE_KEY = 'pk_live_REPLACE_WITH_YOUR_PUBLISHABLE_KEY';
-
 let _stripe = null, _elements = null, _paymentElement = null;
 let _stripeInitKey = null, _stripeInitializing = false;
+let _stripeConfigPromise = null;
 
-function _getStripe() {
-  if (!_stripe && typeof Stripe !== 'undefined') _stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+function _loadStripeConfig() {
+  if (!_stripeConfigPromise) {
+    _stripeConfigPromise = fetch('/api/config/stripe')
+      .then(r => r.json())
+      .then(({ publishableKey }) => {
+        if (publishableKey && typeof Stripe !== 'undefined') {
+          _stripe = Stripe(publishableKey);
+        }
+      })
+      .catch(e => console.error('Failed to load Stripe config:', e));
+  }
+  return _stripeConfigPromise;
+}
+
+_loadStripeConfig();
+
+async function _getStripe() {
+  await _loadStripeConfig();
   return _stripe;
 }
 
@@ -1839,7 +1963,7 @@ async function initStripePanel() {
   const total = calculateTotal();
   document.getElementById('ccPayLabel').textContent = 'Pay $' + total.toLocaleString();
 
-  const stripe = _getStripe();
+  const stripe = await _getStripe();
   if (!stripe) {
     loadingEl.style.display = 'none';
     document.getElementById('stripeErrorMsg').textContent = 'Stripe.js failed to load. Please refresh.';
@@ -1910,7 +2034,7 @@ async function initStripePanel() {
 }
 
 async function handleStripePayment() {
-  const stripe = _getStripe();
+  const stripe = await _getStripe();
   if (!stripe || !_elements) return;
 
   const email = document.getElementById('payEmail').value.trim();

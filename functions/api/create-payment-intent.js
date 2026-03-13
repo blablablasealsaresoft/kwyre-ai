@@ -9,10 +9,18 @@
  */
 
 const BASE_PRICES = {
-  personal:      29900,
-  professional:  79900,
-  air:           29900,
-  apple_silicon: 29900,
+  personal:       29900,
+  professional:   79900,
+  air:            29900,
+  apple_silicon:  29900,
+  quantedge:      49900,
+  labmind:        49900,
+  dentai:         39900,
+  codeforge:      39900,
+  taxshield:      39900,
+  launchpad:      29900,
+  soulsync:       29900,
+  nfl_playcaller: 19900,
 };
 
 const ADDON_PRICES = {
@@ -22,10 +30,18 @@ const ADDON_PRICES = {
 };
 
 const TIER_LABELS = {
-  personal:      'Kwyre Personal',
-  professional:  'Kwyre Professional',
-  air:           'Kwyre Air',
-  apple_silicon: 'Kwyre Apple Silicon',
+  personal:       'Kwyre Personal',
+  professional:   'Kwyre Professional',
+  air:            'Kwyre Air',
+  apple_silicon:  'Kwyre Apple Silicon',
+  quantedge:      'QuantEdge',
+  labmind:        'LabMind',
+  dentai:         'DentAI',
+  codeforge:      'CodeForge',
+  taxshield:      'TaxShield',
+  launchpad:      'LaunchPad',
+  soulsync:       'SoulSync',
+  nfl_playcaller: 'NFL PlayCaller',
 };
 
 const ALLOWED_ORIGINS = [

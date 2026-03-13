@@ -4,9 +4,30 @@
  */
 
 import {
-  verifyJWT, extractBearer, generateLicenseKey,
+  verifyJWT, extractBearer,
   jsonResponse, optionsResponse,
 } from '../_helpers.js';
+
+const KEY_PREFIXES = {
+  personal: 'KWYRE-PER', professional: 'KWYRE-PRO', air: 'KWYRE-AIR', apple_silicon: 'KWYRE-MAC',
+  quantedge: 'QEDGE', labmind: 'LMIND', dentai: 'DENTAI', codeforge: 'CFRGE',
+  taxshield: 'TSHLD', launchpad: 'LNCHP', soulsync: 'SSYNC', nfl_playcaller: 'NFLPC',
+};
+
+const DOWNLOAD_URLS = {
+  personal: { base: 'https://cdn.kwyre.com/releases/kwyre-latest', addon: null },
+  professional: { base: 'https://cdn.kwyre.com/releases/kwyre-latest', addon: null },
+  air: { base: 'https://cdn.kwyre.com/releases/kwyre-air-latest', addon: null },
+  apple_silicon: { base: 'https://cdn.kwyre.com/releases/kwyre-mlx-latest', addon: null },
+  quantedge: { base: 'https://cdn.kwyre.com/releases/kwyre-latest', addon: 'https://cdn.kwyre.com/products/quantedge-addon-latest.zip' },
+  labmind: { base: 'https://cdn.kwyre.com/releases/kwyre-latest', addon: 'https://cdn.kwyre.com/products/labmind-addon-latest.zip' },
+  dentai: { base: 'https://cdn.kwyre.com/releases/kwyre-latest', addon: 'https://cdn.kwyre.com/products/dentai-addon-latest.zip' },
+  codeforge: { base: 'https://cdn.kwyre.com/releases/kwyre-latest', addon: 'https://cdn.kwyre.com/products/codeforge-addon-latest.zip' },
+  taxshield: { base: 'https://cdn.kwyre.com/releases/kwyre-latest', addon: 'https://cdn.kwyre.com/products/taxshield-addon-latest.zip' },
+  launchpad: { base: 'https://cdn.kwyre.com/releases/kwyre-latest', addon: 'https://cdn.kwyre.com/products/launchpad-addon-latest.zip' },
+  soulsync: { base: 'https://cdn.kwyre.com/releases/kwyre-latest', addon: 'https://cdn.kwyre.com/products/soulsync-addon-latest.zip' },
+  nfl_playcaller: { base: 'https://cdn.kwyre.com/releases/kwyre-latest', addon: 'https://cdn.kwyre.com/products/nfl-playcaller-addon-latest.zip' },
+};
 
 const TIER_MACHINES = {
   personal: 1,
@@ -74,7 +95,8 @@ export async function onRequestPost(context) {
   const addons = pi.metadata?.addons ? pi.metadata.addons.split(',') : [];
   const machines = TIER_MACHINES[tier] || 1;
 
-  const licenseKey = generateLicenseKey(tier);
+  const prefix = KEY_PREFIXES[tier] || 'KWYRE';
+  const licenseKey = `${prefix}-${crypto.randomUUID().split('-').slice(0, 3).join('-').toUpperCase()}`;
   const license = {
     key: licenseKey,
     tier,
@@ -101,11 +123,13 @@ export async function onRequestPost(context) {
     await KV.put(userKey, JSON.stringify(user));
   }
 
+  const downloads = DOWNLOAD_URLS[tier] || DOWNLOAD_URLS.personal;
+
   return jsonResponse({
     license_key: licenseKey,
     tier,
     addons,
     machines: machines,
-    downloads: tier === 'airgapped' ? 'unlimited-offline' : 'online',
+    downloads,
   }, 201, origin);
 }
