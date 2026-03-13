@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CodeForge — AI That Understands Your Codebase</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg:        #0d1117;
+      --surface:   #161b22;
+      --border:    #30363d;
+      --text:      #e6edf3;
+      --text-dim:  #8b949e;
+      --accent:    #58a6ff;
+      --green:     #3fb950;
+      --orange:    #d29922;
+      --red:       #f85149;
+      --purple:    #bc8cff;
+      --mono:      'JetBrains Mono', monospace;
+      --sans:      'Inter', -apple-system, sans-serif;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    /* ---- NAV ---- */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 2rem;
+      background: rgba(13, 17, 23, 0.85);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo { font-family: var(--mono); font-weight: 700; font-size: 1.2rem; color: var(--accent); text-decoration: none; }
+    .logo span { color: var(--text); }
+    nav ul { list-style: none; display: flex; gap: 2rem; }
+    nav a { color: var(--text-dim); text-decoration: none; font-size: 0.9rem; transition: color 0.2s; }
+    nav a:hover { color: var(--accent); }
+
+    /* ---- HERO ---- */
+    .hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      padding: 8rem 2rem 4rem;
+      background: radial-gradient(ellipse at 50% 0%, rgba(88,166,255,0.08) 0%, transparent 60%);
+    }
+    .hero h1 {
+      font-family: var(--mono); font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 700; letter-spacing: -0.02em; margin-bottom: 1rem;
+    }
+    .hero h1 .accent { color: var(--accent); }
+    .hero p { color: var(--text-dim); font-size: 1.15rem; max-width: 600px; margin-bottom: 2.5rem; }
+    .hero-buttons { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .btn {
+      display: inline-block; padding: 0.75rem 1.75rem; border-radius: 6px;
+      font-size: 0.95rem; font-weight: 600; text-decoration: none; transition: all 0.2s;
+    }
+    .btn-primary { background: var(--accent); color: var(--bg); }
+    .btn-primary:hover { background: #79c0ff; }
+    .btn-secondary { border: 1px solid var(--border); color: var(--text-dim); }
+    .btn-secondary:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ---- CODE BLOCK (Hero) ---- */
+    .code-window {
+      margin-top: 3rem; width: 100%; max-width: 720px;
+      border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; text-align: left;
+      box-shadow: 0 16px 48px rgba(0,0,0,0.4);
+    }
+    .code-titlebar {
+      display: flex; align-items: center; gap: 6px;
+      padding: 10px 14px; background: var(--surface); border-bottom: 1px solid var(--border);
+    }
+    .dot { width: 12px; height: 12px; border-radius: 50%; }
+    .dot-r { background: var(--red); }
+    .dot-y { background: var(--orange); }
+    .dot-g { background: var(--green); }
+    .code-titlebar span { margin-left: auto; font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim); }
+    .code-body {
+      padding: 1.25rem; background: #0d1117;
+      font-family: var(--mono); font-size: 0.85rem; line-height: 1.7;
+      overflow-x: auto;
+    }
+    .code-body .kw { color: var(--purple); }
+    .code-body .fn { color: #d2a8ff; }
+    .code-body .str { color: #a5d6ff; }
+    .code-body .cmt { color: var(--text-dim); font-style: italic; }
+    .code-body .num { color: var(--orange); }
+    .code-body .warn { color: var(--red); }
+    .code-body .ok { color: var(--green); }
+    .code-body .ln { color: #484f58; user-select: none; display: inline-block; width: 2.5em; text-align: right; margin-right: 1.5em; }
+
+    /* ---- SECTIONS ---- */
+    section { padding: 5rem 2rem; max-width: 1100px; margin: 0 auto; }
+    section h2 {
+      font-family: var(--mono); font-size: 1.8rem;
+      margin-bottom: 0.5rem; letter-spacing: -0.01em;
+    }
+    section .subtitle { color: var(--text-dim); font-size: 1rem; margin-bottom: 3rem; }
+
+    /* ---- FEATURES GRID ---- */
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+    }
+    .feature-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      padding: 1.75rem; transition: border-color 0.2s;
+    }
+    .feature-card:hover { border-color: var(--accent); }
+    .feature-icon { font-size: 1.5rem; margin-bottom: 0.75rem; }
+    .feature-card h3 { font-size: 1.1rem; margin-bottom: 0.5rem; }
+    .feature-card p { color: var(--text-dim); font-size: 0.9rem; }
+
+    /* ---- LANGUAGES ---- */
+    .lang-badges {
+      display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1rem;
+    }
+    .lang-badge {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.5rem 1rem; background: var(--surface); border: 1px solid var(--border);
+      border-radius: 20px; font-family: var(--mono); font-size: 0.85rem;
+    }
+    .lang-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .lang-dot.python { background: #3572A5; }
+    .lang-dot.typescript { background: #3178C6; }
+    .lang-dot.go { background: #00ADD8; }
+    .lang-dot.rust { background: #DEA584; }
+    .lang-dot.java { background: #B07219; }
+    .lang-dot.ruby { background: #CC342D; }
+
+    /* ---- API EXAMPLE ---- */
+    .api-example {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+      overflow: hidden; margin-top: 1.5rem;
+    }
+    .api-example-header {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border);
+      font-family: var(--mono); font-size: 0.8rem;
+    }
+    .method { padding: 2px 8px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
+    .method-post { background: rgba(63,185,80,0.15); color: var(--green); }
+    .method-get { background: rgba(88,166,255,0.15); color: var(--accent); }
+    .api-example pre {
+      padding: 1.25rem; font-family: var(--mono); font-size: 0.82rem;
+      line-height: 1.6; overflow-x: auto; color: var(--text-dim);
+    }
+
+    /* ---- PRIVACY ---- */
+    .privacy-banner {
+      display: flex; align-items: center; gap: 1.5rem;
+      padding: 2rem; margin-top: 3rem;
+      background: rgba(63,185,80,0.06); border: 1px solid rgba(63,185,80,0.2);
+      border-radius: 8px;
+    }
+    .privacy-banner .shield { font-size: 2.5rem; }
+    .privacy-banner h3 { font-size: 1.1rem; color: var(--green); margin-bottom: 0.25rem; }
+    .privacy-banner p { color: var(--text-dim); font-size: 0.9rem; }
+
+    /* ---- FOOTER ---- */
+    footer {
+      padding: 2rem; text-align: center;
+      border-top: 1px solid var(--border); color: var(--text-dim); font-size: 0.8rem;
+    }
+
+    @media (max-width: 640px) {
+      nav ul { display: none; }
+      .features-grid { grid-template-columns: 1fr; }
+      .privacy-banner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <a class="logo" href="#">Code<span>Forge</span></a>
+  <ul>
+    <li><a href="#features">Features</a></li>
+    <li><a href="#languages">Languages</a></li>
+    <li><a href="#api">API</a></li>
+    <li><a href="https://github.com/mintrail/codeforge">GitHub</a></li>
+  </ul>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <h1><span class="accent">AI</span> That Understands<br>Your Codebase</h1>
+  <p>Index your repository into a semantic vector store. Get instant search, automated review, and documentation — all running locally.</p>
+  <div class="hero-buttons">
+    <a class="btn btn-primary" href="#api">Get Started</a>
+    <a class="btn btn-secondary" href="#features">See Features</a>
+  </div>
+
+  <div class="code-window">
+    <div class="code-titlebar">
+      <div class="dot dot-r"></div>
+      <div class="dot dot-y"></div>
+      <div class="dot dot-g"></div>
+      <span>review_output.json</span>
+    </div>
+    <div class="code-body">
+      <span class="ln"> 1</span>{<br>
+      <span class="ln"> 2</span>  <span class="str">"issues"</span>: [<br>
+      <span class="ln"> 3</span>    {<br>
+      <span class="ln"> 4</span>      <span class="str">"severity"</span>: <span class="warn">"high"</span>,<br>
+      <span class="ln"> 5</span>      <span class="str">"category"</span>: <span class="str">"security"</span>,<br>
+      <span class="ln"> 6</span>      <span class="str">"message"</span>: <span class="warn">"Hardcoded API key on line 42"</span>,<br>
+      <span class="ln"> 7</span>      <span class="str">"suggestion"</span>: <span class="ok">"Move to env variable"</span><br>
+      <span class="ln"> 8</span>    }<br>
+      <span class="ln"> 9</span>  ],<br>
+      <span class="ln">10</span>  <span class="str">"summary"</span>: { <span class="str">"high"</span>: <span class="num">1</span>, <span class="str">"medium"</span>: <span class="num">3</span>, <span class="str">"low"</span>: <span class="num">2</span> }<br>
+      <span class="ln">11</span>}<br>
+    </div>
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <h2>Features</h2>
+  <p class="subtitle">Everything you need to understand, review, and improve your codebase.</p>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F50D;</div>
+      <h3>Semantic Code Search</h3>
+      <p>Query your codebase in natural language. "Where do we handle auth?" returns ranked results with file paths and similarity scores.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F4CB;</div>
+      <h3>Repo Indexing</h3>
+      <p>AST-like extraction of functions and classes, embedded with sentence-transformers and stored in a FAISS vector index.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F6E1;</div>
+      <h3>Automated Code Review</h3>
+      <p>Catches hardcoded secrets, SQL injection, unused imports, excessive complexity, and missing error handling.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F527;</div>
+      <h3>Refactoring Suggestions</h3>
+      <p>Identifies long functions, duplicated blocks, and deeply nested logic with actionable extraction targets.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F9EA;</div>
+      <h3>Test Generation</h3>
+      <p>Generates test skeletons with setup, assertion placeholders, and edge-case comments from function signatures.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#x1F4DD;</div>
+      <h3>Documentation Generation</h3>
+      <p>Auto-generates docstrings and module documentation from function signatures and body analysis.</p>
+    </div>
+  </div>
+
+  <div class="privacy-banner">
+    <div class="shield">&#x1F512;</div>
+    <div>
+      <h3>Your Code Never Leaves Your Machine</h3>
+      <p>CodeForge runs entirely locally. Embeddings are generated on-device, the FAISS index lives on disk, and zero data is sent externally.</p>
+    </div>
+  </div>
+</section>
+
+<!-- LANGUAGES -->
+<section id="languages">
+  <h2>Supported Languages</h2>
+  <p class="subtitle">First-class indexing, review, and search across major languages.</p>
+  <div class="lang-badges">
+    <div class="lang-badge"><div class="lang-dot python"></div>Python</div>
+    <div class="lang-badge"><div class="lang-dot typescript"></div>TypeScript</div>
+    <div class="lang-badge"><div class="lang-dot go"></div>Go</div>
+    <div class="lang-badge"><div class="lang-dot rust"></div>Rust</div>
+    <div class="lang-badge"><div class="lang-dot java"></div>Java</div>
+    <div class="lang-badge"><div class="lang-dot ruby"></div>Ruby</div>
+  </div>
+</section>
+
+<!-- API -->
+<section id="api">
+  <h2>API</h2>
+  <p class="subtitle">RESTful endpoints — run locally on port 8000.</p>
+
+  <div class="api-example">
+    <div class="api-example-header">
+      <span class="method method-post">POST</span>
+      <span>/v1/search/code</span>
+    </div>
+    <pre><span style="color:var(--text-dim)">$ curl -X POST http://localhost:8000/v1/search/code \
+  -H "Content-Type: application/json" \
+  -d '{"query": "authentication middleware", "k": 5}'</span>
+
+{
+  "query": "authentication middleware",
+  "total_results": 3,
+  "results": [
+    {
+      "file": "src/middleware/auth.py",
+      "lines": [12, 45],
+      "score": 0.9234,
+      "preview": "class AuthMiddleware:\n    def __init__(self, app):\n        ..."
+    }
+  ]
+}</pre>
+  </div>
+
+  <div class="api-example" style="margin-top: 1rem;">
+    <div class="api-example-header">
+      <span class="method method-post">POST</span>
+      <span>/v1/review/diff</span>
+    </div>
+    <pre><span style="color:var(--text-dim)">$ curl -X POST http://localhost:8000/v1/review/diff \
+  -H "Content-Type: application/json" \
+  -d '{"diff": "'"$(git diff HEAD~1)"'"}'</span>
+
+{
+  "issues": [ ... ],
+  "summary": { "high": 1, "medium": 3, "low": 2 },
+  "total": 6
+}</pre>
+  </div>
+
+  <div class="api-example" style="margin-top: 1rem;">
+    <div class="api-example-header">
+      <span class="method method-get">GET</span>
+      <span>/health</span>
+    </div>
+    <pre>{
+  "status": "ok",
+  "indexed_files": 342,
+  "total_chunks": 1847,
+  "index_size_mb": 12.4
+}</pre>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  &copy; 2026 Mint Rail LLC. All rights reserved.&ensp;|&ensp;CodeForge v0.1.0
+</footer>
+
+<script>
+  document.querySelectorAll('nav a[href^="#"]').forEach(link => {
+    link.addEventListener('click', e => {
+      e.preventDefault();
+      const target = document.querySelector(link.getAttribute('href'));
+      if (target) target.scrollIntoView({ behavior: 'smooth' });
+    });
+  });
+
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.style.opacity = '1';
+        entry.target.style.transform = 'translateY(0)';
+      }
+    });
+  }, { threshold: 0.1 });
+
+  document.querySelectorAll('.feature-card, .api-example, .privacy-banner').forEach(el => {
+    el.style.opacity = '0';
+    el.style.transform = 'translateY(20px)';
+    el.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+    observer.observe(el);
+  });
+</script>
+
+</body>
+</html>

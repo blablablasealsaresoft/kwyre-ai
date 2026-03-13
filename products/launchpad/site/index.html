@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LaunchPad — AI That Lands You the Job</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --blue: #1a56db;
+      --blue-dark: #1240a3;
+      --blue-light: #e8effd;
+      --orange: #f97316;
+      --orange-dark: #c05d10;
+      --white: #ffffff;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-500: #6b7280;
+      --gray-700: #374151;
+      --gray-900: #111827;
+      --radius: 12px;
+      --shadow: 0 4px 24px rgba(0,0,0,0.08);
+      --shadow-lg: 0 12px 40px rgba(0,0,0,0.12);
+      --transition: 0.2s ease;
+    }
+    html { scroll-behavior: smooth; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      color: var(--gray-900);
+      line-height: 1.6;
+      background: var(--white);
+    }
+    a { color: var(--blue); text-decoration: none; }
+
+    /* Nav */
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      background: rgba(255,255,255,0.95);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--gray-200);
+      padding: 0 2rem;
+    }
+    .nav-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; align-items: center; justify-content: space-between;
+      height: 64px;
+    }
+    .logo { font-size: 1.35rem; font-weight: 800; color: var(--blue); }
+    .logo span { color: var(--orange); }
+    .nav-links { display: flex; gap: 2rem; align-items: center; }
+    .nav-links a { color: var(--gray-700); font-weight: 500; font-size: 0.95rem; transition: color var(--transition); }
+    .nav-links a:hover { color: var(--blue); }
+    .btn {
+      display: inline-block; padding: 0.6rem 1.5rem; border-radius: 8px;
+      font-weight: 600; font-size: 0.95rem; transition: all var(--transition); cursor: pointer; border: none;
+    }
+    .btn-primary { background: var(--blue); color: var(--white); }
+    .btn-primary:hover { background: var(--blue-dark); transform: translateY(-1px); box-shadow: var(--shadow); }
+    .btn-orange { background: var(--orange); color: var(--white); }
+    .btn-orange:hover { background: var(--orange-dark); transform: translateY(-1px); box-shadow: var(--shadow); }
+    .btn-outline { border: 2px solid var(--blue); color: var(--blue); background: transparent; }
+    .btn-outline:hover { background: var(--blue); color: var(--white); }
+
+    /* Hero */
+    .hero {
+      padding: 10rem 2rem 6rem;
+      text-align: center;
+      background: linear-gradient(135deg, var(--blue-light) 0%, var(--white) 50%, #fff7ed 100%);
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: ''; position: absolute; top: -50%; right: -20%;
+      width: 600px; height: 600px; border-radius: 50%;
+      background: radial-gradient(circle, rgba(26,86,219,0.06) 0%, transparent 70%);
+    }
+    .hero h1 {
+      font-size: clamp(2.2rem, 5vw, 3.8rem); font-weight: 800;
+      line-height: 1.15; max-width: 780px; margin: 0 auto 1.5rem;
+    }
+    .hero h1 .highlight { color: var(--blue); }
+    .hero h1 .accent { color: var(--orange); }
+    .hero p {
+      font-size: 1.2rem; color: var(--gray-500); max-width: 580px; margin: 0 auto 2.5rem;
+    }
+    .hero-buttons { display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap; }
+
+    .steps {
+      display: flex; justify-content: center; gap: 3rem; margin-top: 4rem; flex-wrap: wrap;
+    }
+    .step {
+      text-align: center; max-width: 200px;
+    }
+    .step-num {
+      width: 48px; height: 48px; border-radius: 50%; background: var(--blue);
+      color: var(--white); font-weight: 800; font-size: 1.2rem;
+      display: flex; align-items: center; justify-content: center; margin: 0 auto 0.75rem;
+    }
+    .step h3 { font-size: 1rem; margin-bottom: 0.25rem; }
+    .step p { font-size: 0.85rem; color: var(--gray-500); }
+
+    /* Section */
+    section { padding: 5rem 2rem; }
+    .section-header { text-align: center; margin-bottom: 3rem; }
+    .section-header h2 { font-size: 2rem; font-weight: 800; margin-bottom: 0.5rem; }
+    .section-header p { color: var(--gray-500); font-size: 1.05rem; max-width: 560px; margin: 0 auto; }
+
+    /* Features */
+    .features-section { background: var(--gray-50); }
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .feature-card {
+      background: var(--white); border-radius: var(--radius); padding: 2rem;
+      box-shadow: var(--shadow); transition: all var(--transition); border: 1px solid var(--gray-200);
+    }
+    .feature-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-lg); border-color: var(--blue); }
+    .feature-icon {
+      width: 48px; height: 48px; border-radius: 10px; background: var(--blue-light);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem; margin-bottom: 1rem;
+    }
+    .feature-card h3 { font-size: 1.15rem; margin-bottom: 0.5rem; }
+    .feature-card p { color: var(--gray-500); font-size: 0.95rem; }
+
+    /* Testimonials */
+    .testimonials {
+      max-width: 1200px; margin: 0 auto;
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 1.5rem;
+    }
+    .testimonial {
+      background: var(--white); border: 1px solid var(--gray-200);
+      border-radius: var(--radius); padding: 2rem; position: relative;
+    }
+    .testimonial .stars { color: var(--orange); font-size: 1.1rem; margin-bottom: 0.75rem; }
+    .testimonial p { color: var(--gray-700); font-size: 0.95rem; font-style: italic; margin-bottom: 1rem; }
+    .testimonial .author { font-weight: 700; font-size: 0.9rem; }
+    .testimonial .role { color: var(--gray-500); font-size: 0.85rem; }
+
+    /* Pricing */
+    .pricing-section { background: var(--gray-50); }
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem; max-width: 960px; margin: 0 auto;
+    }
+    .pricing-card {
+      background: var(--white); border-radius: var(--radius); padding: 2.5rem 2rem;
+      border: 2px solid var(--gray-200); text-align: center; transition: all var(--transition);
+      display: flex; flex-direction: column;
+    }
+    .pricing-card.featured { border-color: var(--blue); transform: scale(1.03); box-shadow: var(--shadow-lg); }
+    .pricing-card .badge {
+      background: var(--blue); color: var(--white); font-size: 0.75rem; font-weight: 700;
+      padding: 0.25rem 0.75rem; border-radius: 20px; display: inline-block; margin-bottom: 1rem;
+      text-transform: uppercase; letter-spacing: 0.05em;
+    }
+    .pricing-card h3 { font-size: 1.3rem; margin-bottom: 0.5rem; }
+    .pricing-card .price { font-size: 2.8rem; font-weight: 800; margin: 0.5rem 0; }
+    .pricing-card .price span { font-size: 1rem; color: var(--gray-500); font-weight: 400; }
+    .pricing-card ul {
+      list-style: none; text-align: left; margin: 1.5rem 0; flex: 1;
+    }
+    .pricing-card li {
+      padding: 0.4rem 0; font-size: 0.92rem; color: var(--gray-700);
+      display: flex; align-items: flex-start; gap: 0.5rem;
+    }
+    .pricing-card li::before { content: '\2713'; color: var(--blue); font-weight: 700; flex-shrink: 0; }
+    .pricing-card li.disabled { color: var(--gray-500); opacity: 0.5; }
+    .pricing-card li.disabled::before { content: '\2014'; color: var(--gray-500); }
+    .pricing-card .btn { margin-top: auto; width: 100%; text-align: center; }
+
+    /* CTA */
+    .cta {
+      text-align: center; padding: 5rem 2rem;
+      background: linear-gradient(135deg, var(--blue) 0%, #2563eb 100%); color: var(--white);
+    }
+    .cta h2 { font-size: 2.2rem; font-weight: 800; margin-bottom: 1rem; }
+    .cta p { font-size: 1.1rem; opacity: 0.9; max-width: 500px; margin: 0 auto 2rem; }
+    .cta .btn-orange { font-size: 1.1rem; padding: 0.8rem 2.5rem; }
+
+    /* Footer */
+    footer {
+      background: var(--gray-900); color: var(--gray-500); padding: 3rem 2rem 2rem;
+    }
+    .footer-inner {
+      max-width: 1200px; margin: 0 auto;
+      display: flex; justify-content: space-between; flex-wrap: wrap; gap: 2rem;
+    }
+    .footer-brand { max-width: 300px; }
+    .footer-brand .logo { color: var(--white); font-size: 1.3rem; display: block; margin-bottom: 0.75rem; }
+    .footer-brand .logo span { color: var(--orange); }
+    .footer-links h4 { color: var(--white); font-size: 0.9rem; margin-bottom: 0.75rem; text-transform: uppercase; letter-spacing: 0.05em; }
+    .footer-links a { display: block; color: var(--gray-500); font-size: 0.9rem; margin-bottom: 0.4rem; transition: color var(--transition); }
+    .footer-links a:hover { color: var(--white); }
+    .footer-bottom {
+      max-width: 1200px; margin: 2rem auto 0; padding-top: 1.5rem;
+      border-top: 1px solid rgba(255,255,255,0.1); font-size: 0.85rem; text-align: center;
+    }
+
+    /* Mobile */
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .hero { padding: 7rem 1.5rem 4rem; }
+      .steps { gap: 1.5rem; }
+      .pricing-card.featured { transform: none; }
+      .footer-inner { flex-direction: column; }
+    }
+
+    /* Demo form */
+    .demo-section { max-width: 720px; margin: 0 auto; }
+    .demo-form { display: flex; flex-direction: column; gap: 1rem; }
+    .demo-form textarea {
+      width: 100%; min-height: 120px; padding: 1rem; border: 2px solid var(--gray-200);
+      border-radius: 8px; font-family: inherit; font-size: 0.95rem; resize: vertical;
+      transition: border-color var(--transition);
+    }
+    .demo-form textarea:focus { outline: none; border-color: var(--blue); }
+    .demo-result {
+      background: var(--gray-50); border-radius: var(--radius); padding: 1.5rem;
+      border: 1px solid var(--gray-200); display: none;
+    }
+    .demo-result.show { display: block; }
+    .score-display { font-size: 3rem; font-weight: 800; text-align: center; margin: 1rem 0; }
+    .score-display.high { color: #16a34a; }
+    .score-display.mid { color: var(--orange); }
+    .score-display.low { color: #dc2626; }
+    .improvement-list { list-style: none; }
+    .improvement-list li { padding: 0.5rem 0; font-size: 0.9rem; border-bottom: 1px solid var(--gray-200); }
+    .improvement-list li:last-child { border: none; }
+  </style>
+</head>
+<body>
+
+<!-- Nav -->
+<nav>
+  <div class="nav-inner">
+    <div class="logo">Launch<span>Pad</span></div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#demo">Try It</a>
+      <a href="#testimonials">Stories</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#pricing" class="btn btn-primary">Get Started</a>
+    </div>
+  </div>
+</nav>
+
+<!-- Hero -->
+<section class="hero">
+  <h1>Your <span class="highlight">dream job</span> is <span class="accent">3 steps</span> away</h1>
+  <p>AI-powered resume optimization, interview prep, and job matching — everything you need to land the role you deserve.</p>
+  <div class="hero-buttons">
+    <a href="#demo" class="btn btn-primary" style="font-size:1.1rem; padding:0.8rem 2rem;">Analyze My Resume</a>
+    <a href="#features" class="btn btn-outline" style="font-size:1.1rem; padding:0.8rem 2rem;">See How It Works</a>
+  </div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">1</div>
+      <h3>Upload Resume</h3>
+      <p>Paste your resume and target job description</p>
+    </div>
+    <div class="step">
+      <div class="step-num">2</div>
+      <h3>Get AI Analysis</h3>
+      <p>Receive ATS score, gaps, and optimized version</p>
+    </div>
+    <div class="step">
+      <div class="step-num">3</div>
+      <h3>Land the Interview</h3>
+      <p>Practice with AI coaching and apply with confidence</p>
+    </div>
+  </div>
+</section>
+
+<!-- Features -->
+<section class="features-section" id="features">
+  <div class="section-header">
+    <h2>Everything You Need to Get Hired</h2>
+    <p>One platform replaces ten tools. From first draft to final offer.</p>
+  </div>
+  <div class="features-grid">
+    <div class="feature-card">
+      <div class="feature-icon">&#128196;</div>
+      <h3>Resume Optimization</h3>
+      <p>ATS scoring, keyword extraction, and one-click optimization tailored to every job description you target.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#9993;</div>
+      <h3>Cover Letter Generator</h3>
+      <p>Personalized cover letters matched to role, company, and tone — professional, enthusiastic, or conversational.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#127908;</div>
+      <h3>Interview Preparation</h3>
+      <p>Role-specific behavioral, technical, and situational questions with STAR-format model answers.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#127919;</div>
+      <h3>Job Matching</h3>
+      <p>Skills-to-jobs similarity scoring ranks positions by fit, factoring in location, salary, and experience.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128176;</div>
+      <h3>Salary Negotiation</h3>
+      <p>Counter-offer strategies, anchoring techniques, and talking points backed by market data.</p>
+    </div>
+    <div class="feature-card">
+      <div class="feature-icon">&#128101;</div>
+      <h3>LinkedIn Optimizer</h3>
+      <p>Section-by-section recommendations to boost your profile visibility in recruiter searches.</p>
+    </div>
+  </div>
+</section>
+
+<!-- Demo -->
+<section id="demo">
+  <div class="section-header">
+    <h2>Try It Now — Free Resume Analysis</h2>
+    <p>Paste your resume below and see your ATS score instantly.</p>
+  </div>
+  <div class="demo-section">
+    <div class="demo-form">
+      <textarea id="resumeInput" placeholder="Paste your resume text here...
+
+Example:
+Jane Smith
+Software Engineer | jane@email.com
+
+Experience
+Senior Software Engineer, TechCorp (2021–Present)
+- Led migration of monolith to microservices, reducing deploy time by 60%
+- Built real-time data pipeline processing 1M events/day
+- Mentored team of 4 junior engineers
+
+Education
+B.S. Computer Science, State University (2017)
+
+Skills
+Python, JavaScript, React, AWS, Docker, Kubernetes, SQL, Git"></textarea>
+      <textarea id="jdInput" placeholder="(Optional) Paste the job description to get keyword matching..." style="min-height:80px;"></textarea>
+      <button class="btn btn-orange" style="font-size:1.05rem; padding:0.75rem;" onclick="analyzeResume()">Analyze My Resume</button>
+    </div>
+    <div class="demo-result" id="demoResult">
+      <div class="score-display" id="scoreDisplay">—</div>
+      <p style="text-align:center; color:var(--gray-500); margin-bottom:1rem;" id="scoreLabel">ATS Compatibility Score</p>
+      <h4 style="margin-bottom:0.5rem;">Improvements</h4>
+      <ul class="improvement-list" id="improvementList"></ul>
+      <div id="missingKeywords" style="margin-top:1rem;"></div>
+    </div>
+  </div>
+</section>
+
+<!-- Testimonials -->
+<section id="testimonials" style="background:var(--gray-50);">
+  <div class="section-header">
+    <h2>Real People, Real Results</h2>
+    <p>Join thousands of candidates who landed their dream jobs with LaunchPad.</p>
+  </div>
+  <div class="testimonials">
+    <div class="testimonial">
+      <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p>"I was getting zero callbacks. LaunchPad showed me my resume scored 34 on ATS. After optimization, I scored 87 and got 5 interviews in two weeks."</p>
+      <div class="author">Marcus T.</div>
+      <div class="role">Software Engineer — landed at Stripe</div>
+    </div>
+    <div class="testimonial">
+      <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p>"The interview prep was a game-changer. Every question they generated came up in my actual interview. I felt fully prepared for the first time."</p>
+      <div class="author">Priya K.</div>
+      <div class="role">Product Manager — landed at Airbnb</div>
+    </div>
+    <div class="testimonial">
+      <div class="stars">&#9733;&#9733;&#9733;&#9733;&#9733;</div>
+      <p>"The salary negotiation coaching helped me counter my offer and get $22K more than the initial number. Paid for itself 100x over."</p>
+      <div class="author">David L.</div>
+      <div class="role">Data Scientist — landed at Meta</div>
+    </div>
+  </div>
+</section>
+
+<!-- Pricing -->
+<section class="pricing-section" id="pricing">
+  <div class="section-header">
+    <h2>Simple, Transparent Pricing</h2>
+    <p>Start free. Upgrade when you're ready to go all-in on your job search.</p>
+  </div>
+  <div class="pricing-grid">
+    <div class="pricing-card">
+      <h3>Free</h3>
+      <div class="price">$0<span>/mo</span></div>
+      <ul>
+        <li>3 resume analyses per month</li>
+        <li>1 cover letter per month</li>
+        <li>Basic interview questions</li>
+        <li>10 job match results</li>
+        <li>Track 5 applications</li>
+        <li class="disabled">Salary negotiation</li>
+        <li class="disabled">LinkedIn optimization</li>
+        <li class="disabled">Live coaching</li>
+      </ul>
+      <a href="#demo" class="btn btn-outline">Get Started</a>
+    </div>
+    <div class="pricing-card featured">
+      <span class="badge">Most Popular</span>
+      <h3>Pro</h3>
+      <div class="price">$29<span>/mo</span></div>
+      <ul>
+        <li>Unlimited resume analyses</li>
+        <li>Unlimited cover letters</li>
+        <li>Advanced interview prep + live coaching</li>
+        <li>50 job match results</li>
+        <li>Unlimited application tracking</li>
+        <li>Salary negotiation coaching</li>
+        <li>LinkedIn profile optimization</li>
+        <li>Priority support</li>
+      </ul>
+      <a href="#" class="btn btn-primary">Start Pro Trial</a>
+    </div>
+    <div class="pricing-card">
+      <h3>Enterprise</h3>
+      <div class="price">Custom</div>
+      <ul>
+        <li>Everything in Pro</li>
+        <li>API access</li>
+        <li>Team dashboard</li>
+        <li>Custom integrations</li>
+        <li>Dedicated account manager</li>
+        <li>White-label options</li>
+        <li>Bulk candidate processing</li>
+        <li>SSO & compliance</li>
+      </ul>
+      <a href="#" class="btn btn-outline">Contact Sales</a>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<section class="cta">
+  <h2>Ready to Land Your Dream Job?</h2>
+  <p>Join 15,000+ candidates who used LaunchPad to get hired faster.</p>
+  <a href="#demo" class="btn btn-orange">Analyze My Resume — Free</a>
+</section>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-inner">
+    <div class="footer-brand">
+      <div class="logo">Launch<span>Pad</span></div>
+      <p>AI-powered job placement platform by Mint Rail LLC. From resume to offer letter.</p>
+    </div>
+    <div class="footer-links">
+      <h4>Product</h4>
+      <a href="#features">Features</a>
+      <a href="#pricing">Pricing</a>
+      <a href="#demo">Try It</a>
+      <a href="#">API Docs</a>
+    </div>
+    <div class="footer-links">
+      <h4>Company</h4>
+      <a href="#">About</a>
+      <a href="#">Blog</a>
+      <a href="#">Careers</a>
+      <a href="#">Contact</a>
+    </div>
+    <div class="footer-links">
+      <h4>Legal</h4>
+      <a href="#">Privacy Policy</a>
+      <a href="#">Terms of Service</a>
+      <a href="#">Cookie Policy</a>
+    </div>
+  </div>
+  <div class="footer-bottom">
+    &copy; 2026 Mint Rail LLC. All rights reserved.
+  </div>
+</footer>
+
+<script>
+const API_BASE = 'http://localhost:8000';
+
+async function analyzeResume() {
+  const resumeText = document.getElementById('resumeInput').value.trim();
+  const jdText = document.getElementById('jdInput').value.trim();
+  const resultDiv = document.getElementById('demoResult');
+  const scoreEl = document.getElementById('scoreDisplay');
+  const labelEl = document.getElementById('scoreLabel');
+  const listEl = document.getElementById('improvementList');
+  const kwEl = document.getElementById('missingKeywords');
+
+  if (resumeText.length < 20) {
+    alert('Please paste at least 20 characters of resume text.');
+    return;
+  }
+
+  scoreEl.textContent = '...';
+  scoreEl.className = 'score-display';
+  resultDiv.classList.add('show');
+  listEl.innerHTML = '';
+  kwEl.innerHTML = '';
+
+  try {
+    const res = await fetch(`${API_BASE}/v1/resume/analyze`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ resume_text: resumeText, job_description: jdText }),
+    });
+    const data = await res.json();
+
+    scoreEl.textContent = data.ats_score + '/100';
+    scoreEl.className = 'score-display ' + (data.ats_score >= 70 ? 'high' : data.ats_score >= 45 ? 'mid' : 'low');
+    labelEl.textContent = `ATS Compatibility Score — Keyword: ${data.breakdown.keyword_match} | Format: ${data.breakdown.formatting} | Achievements: ${data.breakdown.achievements} | Verbs: ${data.breakdown.action_verbs}`;
+
+    data.improvements.forEach(tip => {
+      const li = document.createElement('li');
+      li.textContent = tip;
+      listEl.appendChild(li);
+    });
+
+    if (data.missing_keywords && data.missing_keywords.length) {
+      kwEl.innerHTML = '<strong>Missing Keywords:</strong> ' + data.missing_keywords.join(', ');
+    }
+  } catch (err) {
+    scoreEl.textContent = '—';
+    labelEl.textContent = 'Could not connect to API. Run the server: uvicorn server.app:app --reload';
+    const li = document.createElement('li');
+    li.textContent = 'Start the API server to enable live analysis. See README for instructions.';
+    listEl.appendChild(li);
+  }
+}
+</script>
+
+</body>
+</html>

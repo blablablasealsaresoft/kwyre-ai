@@ -1,0 +1,8 @@
+name = "dentai-site"
+compatibility_date = "2025-01-01"
+
+# Cloudflare Pages — static site deployment for DentAI landing page
+# Deploy with: npx wrangler pages deploy site/
+
+[site]
+bucket = "./site"

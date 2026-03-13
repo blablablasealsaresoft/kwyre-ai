@@ -1,0 +1,167 @@
+"""DentAI SOAP Note Generator — structured input → formatted clinical note."""
+
+from __future__ import annotations
+
+from datetime import datetime, timezone
+from typing import Optional
+
+from pydantic import BaseModel
+
+
+class SubjectiveInput(BaseModel):
+    chief_complaint: str
+    history_of_present_illness: str = ""
+    medical_history: list[str] = []
+    medications: list[str] = []
+    allergies: list[str] = []
+    pain_level: Optional[int] = None
+
+
+class ObjectiveInput(BaseModel):
+    exam_findings: list[str] = []
+    vitals: dict[str, str] = {}
+    teeth_examined: list[str] = []
+    periodontal_findings: str = ""
+    radiographic_findings: str = ""
+    oral_cancer_screening: str = ""
+
+
+class AssessmentInput(BaseModel):
+    diagnoses: list[str] = []
+    differential_diagnoses: list[str] = []
+    prognosis: str = ""
+
+
+class PlanInput(BaseModel):
+    procedures_performed: list[str] = []
+    procedures_planned: list[str] = []
+    prescriptions: list[str] = []
+    referrals: list[str] = []
+    patient_education: list[str] = []
+    follow_up: str = ""
+
+
+class NoteRequest(BaseModel):
+    patient_id: Optional[str] = None
+    provider_name: str = "Provider"
+    visit_date: Optional[str] = None
+    subjective: SubjectiveInput
+    objective: ObjectiveInput
+    assessment: AssessmentInput
+    plan: PlanInput
+
+
+class SOAPNote(BaseModel):
+    patient_id: Optional[str]
+    provider_name: str
+    visit_date: str
+    note_text: str
+    word_count: int
+
+
+def _section(title: str, lines: list[str]) -> str:
+    """Format a SOAP section with header and bullet content."""
+    header = f"{'='*60}\n{title}\n{'='*60}"
+    body = "\n".join(f"  • {line}" for line in lines if line.strip())
+    return f"{header}\n{body}" if body else f"{header}\n  (No data recorded)"
+
+
+def generate_note(req: NoteRequest) -> SOAPNote:
+    """Generate a formatted SOAP note from structured input."""
+    visit_date = req.visit_date or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+
+    # --- Header ---
+    header_lines = [
+        f"DENTAL CLINICAL NOTE",
+        f"Date: {visit_date}",
+        f"Provider: {req.provider_name}",
+    ]
+    if req.patient_id:
+        header_lines.append(f"Patient ID: {req.patient_id}")
+    header = "\n".join(header_lines)
+
+    # --- Subjective ---
+    s = req.subjective
+    subj_lines = [f"Chief Complaint: \"{s.chief_complaint}\""]
+    if s.history_of_present_illness:
+        subj_lines.append(f"HPI: {s.history_of_present_illness}")
+    if s.pain_level is not None:
+        subj_lines.append(f"Pain Level: {s.pain_level}/10")
+    if s.medical_history:
+        subj_lines.append(f"Medical History: {'; '.join(s.medical_history)}")
+    if s.medications:
+        subj_lines.append(f"Current Medications: {'; '.join(s.medications)}")
+    if s.allergies:
+        subj_lines.append(f"Allergies: {'; '.join(s.allergies)}")
+    else:
+        subj_lines.append("Allergies: NKDA")
+
+    # --- Objective ---
+    o = req.objective
+    obj_lines: list[str] = []
+    if o.vitals:
+        vitals_str = ", ".join(f"{k}: {v}" for k, v in o.vitals.items())
+        obj_lines.append(f"Vitals: {vitals_str}")
+    if o.teeth_examined:
+        obj_lines.append(f"Teeth Examined: {', '.join(o.teeth_examined)}")
+    for finding in o.exam_findings:
+        obj_lines.append(f"Finding: {finding}")
+    if o.periodontal_findings:
+        obj_lines.append(f"Periodontal: {o.periodontal_findings}")
+    if o.radiographic_findings:
+        obj_lines.append(f"Radiographic: {o.radiographic_findings}")
+    if o.oral_cancer_screening:
+        obj_lines.append(f"Oral Cancer Screening: {o.oral_cancer_screening}")
+
+    # --- Assessment ---
+    a = req.assessment
+    assess_lines: list[str] = []
+    for i, dx in enumerate(a.diagnoses, 1):
+        assess_lines.append(f"Dx {i}: {dx}")
+    if a.differential_diagnoses:
+        assess_lines.append(f"Differential: {'; '.join(a.differential_diagnoses)}")
+    if a.prognosis:
+        assess_lines.append(f"Prognosis: {a.prognosis}")
+
+    # --- Plan ---
+    p = req.plan
+    plan_lines: list[str] = []
+    for proc in p.procedures_performed:
+        plan_lines.append(f"Performed: {proc}")
+    for proc in p.procedures_planned:
+        plan_lines.append(f"Planned: {proc}")
+    for rx in p.prescriptions:
+        plan_lines.append(f"Rx: {rx}")
+    for ref in p.referrals:
+        plan_lines.append(f"Referral: {ref}")
+    for edu in p.patient_education:
+        plan_lines.append(f"Patient Education: {edu}")
+    if p.follow_up:
+        plan_lines.append(f"Follow-Up: {p.follow_up}")
+
+    # --- Assemble ---
+    sections = [
+        header,
+        "",
+        _section("SUBJECTIVE", subj_lines),
+        "",
+        _section("OBJECTIVE", obj_lines),
+        "",
+        _section("ASSESSMENT", assess_lines),
+        "",
+        _section("PLAN", plan_lines),
+        "",
+        "-" * 60,
+        f"Electronically signed by {req.provider_name} on {visit_date}",
+        "Generated by DentAI Clinical Note System",
+        "CONFIDENTIAL — Protected Health Information (HIPAA)",
+    ]
+    note_text = "\n".join(sections)
+
+    return SOAPNote(
+        patient_id=req.patient_id,
+        provider_name=req.provider_name,
+        visit_date=visit_date,
+        note_text=note_text,
+        word_count=len(note_text.split()),
+    )

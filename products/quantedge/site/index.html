@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QuantEdge — AI-Powered Quantitative Finance</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --gold: #C9A84C;
+      --gold-dim: #A68A3E;
+      --gold-glow: rgba(201, 168, 76, 0.15);
+      --bg: #0A0A0A;
+      --bg-card: #111111;
+      --bg-card-hover: #161616;
+      --border: #1E1E1E;
+      --text: #E8E8E8;
+      --text-dim: #888888;
+      --green: #00D26A;
+      --red: #FF4444;
+      --mono: "SF Mono", "Cascadia Code", "Fira Code", "Consolas", monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 1rem 3rem;
+      background: rgba(10, 10, 10, 0.92);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+    }
+    .logo {
+      font-size: 1.1rem; font-weight: 700; letter-spacing: 0.15em;
+      color: var(--gold); text-transform: uppercase;
+    }
+    .logo span { color: var(--text-dim); font-weight: 400; }
+    nav a {
+      color: var(--text-dim); text-decoration: none; font-size: 0.85rem;
+      letter-spacing: 0.05em; transition: color 0.2s;
+    }
+    nav a:hover { color: var(--gold); }
+    .nav-links { display: flex; gap: 2rem; }
+
+    .hero {
+      min-height: 100vh;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      text-align: center; padding: 6rem 2rem 4rem;
+      background:
+        radial-gradient(ellipse at 50% 0%, rgba(201, 168, 76, 0.06) 0%, transparent 60%),
+        var(--bg);
+    }
+    .hero-tag {
+      font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.3em;
+      color: var(--gold); text-transform: uppercase;
+      border: 1px solid var(--gold-dim); padding: 0.4rem 1.2rem;
+      margin-bottom: 2rem;
+    }
+    .hero h1 {
+      font-size: clamp(2.5rem, 6vw, 4.5rem);
+      font-weight: 700; line-height: 1.1; letter-spacing: -0.02em;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 em {
+      font-style: normal;
+      background: linear-gradient(135deg, var(--gold), #E8D48B);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      max-width: 600px; color: var(--text-dim); font-size: 1.1rem;
+      margin-bottom: 2.5rem;
+    }
+    .hero-cta {
+      display: inline-block; padding: 0.85rem 2.5rem;
+      background: var(--gold); color: #000; font-weight: 600;
+      text-decoration: none; font-size: 0.9rem; letter-spacing: 0.05em;
+      transition: all 0.2s;
+    }
+    .hero-cta:hover { background: #E0BC5A; transform: translateY(-1px); }
+
+    .ticker-bar {
+      display: flex; justify-content: center; gap: 3rem;
+      padding: 1rem 2rem;
+      border-top: 1px solid var(--border);
+      border-bottom: 1px solid var(--border);
+      background: var(--bg-card);
+      font-family: var(--mono); font-size: 0.8rem;
+      overflow: hidden;
+    }
+    .ticker-item span:first-child { color: var(--text-dim); margin-right: 0.5rem; }
+    .ticker-item .up { color: var(--green); }
+    .ticker-item .down { color: var(--red); }
+
+    section { padding: 5rem 3rem; max-width: 1200px; margin: 0 auto; }
+    section h2 {
+      font-size: 2rem; font-weight: 700; margin-bottom: 0.75rem;
+      letter-spacing: -0.01em;
+    }
+    section .subtitle {
+      color: var(--text-dim); font-size: 1rem; margin-bottom: 3rem;
+      max-width: 500px;
+    }
+
+    .features-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1.5rem;
+    }
+    .feature-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      transition: all 0.25s;
+      position: relative; overflow: hidden;
+    }
+    .feature-card::before {
+      content: ""; position: absolute; top: 0; left: 0; right: 0;
+      height: 2px; background: var(--gold); transform: scaleX(0);
+      transition: transform 0.3s;
+    }
+    .feature-card:hover {
+      border-color: var(--gold-dim);
+      background: var(--bg-card-hover);
+      transform: translateY(-2px);
+    }
+    .feature-card:hover::before { transform: scaleX(1); }
+    .feature-icon {
+      font-family: var(--mono); font-size: 0.7rem;
+      color: var(--gold); letter-spacing: 0.1em;
+      margin-bottom: 1rem; text-transform: uppercase;
+    }
+    .feature-card h3 { font-size: 1.15rem; margin-bottom: 0.6rem; }
+    .feature-card p { color: var(--text-dim); font-size: 0.9rem; line-height: 1.7; }
+
+    .code-section { background: var(--bg-card); border: 1px solid var(--border); margin-top: 5rem; }
+    .code-header {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.75rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono); font-size: 0.75rem; color: var(--text-dim);
+    }
+    .code-dot { width: 10px; height: 10px; border-radius: 50%; }
+    .code-dot.r { background: #FF5F57; }
+    .code-dot.y { background: #FEBC2E; }
+    .code-dot.g { background: #28C840; }
+    .code-header span { margin-left: 0.75rem; }
+    .code-body {
+      padding: 1.5rem; font-family: var(--mono); font-size: 0.82rem;
+      line-height: 1.8; overflow-x: auto; color: var(--text-dim);
+    }
+    .code-body .kw { color: #C678DD; }
+    .code-body .str { color: var(--green); }
+    .code-body .num { color: #D19A66; }
+    .code-body .key { color: #61AFEF; }
+    .code-body .cmt { color: #555; }
+
+    .pricing-section { text-align: center; padding: 5rem 2rem; }
+    .pricing-grid {
+      display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+      gap: 1.5rem; max-width: 900px; margin: 0 auto;
+    }
+    .pricing-card {
+      background: var(--bg-card); border: 1px solid var(--border);
+      padding: 2.5rem 2rem; text-align: left;
+      transition: border-color 0.2s;
+    }
+    .pricing-card.featured { border-color: var(--gold); }
+    .pricing-card h3 {
+      font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.15em;
+      color: var(--text-dim); margin-bottom: 1rem;
+    }
+    .pricing-card .price {
+      font-size: 2.5rem; font-weight: 700; margin-bottom: 0.25rem;
+    }
+    .pricing-card .price span { font-size: 1rem; color: var(--text-dim); font-weight: 400; }
+    .pricing-card .period { color: var(--text-dim); font-size: 0.85rem; margin-bottom: 1.5rem; }
+    .pricing-card ul { list-style: none; }
+    .pricing-card li {
+      padding: 0.4rem 0; font-size: 0.9rem; color: var(--text-dim);
+      border-bottom: 1px solid var(--border);
+    }
+    .pricing-card li::before { content: "→ "; color: var(--gold); }
+
+    footer {
+      text-align: center; padding: 3rem 2rem;
+      border-top: 1px solid var(--border);
+      color: var(--text-dim); font-size: 0.8rem;
+    }
+    footer a { color: var(--gold); text-decoration: none; }
+
+    @media (max-width: 768px) {
+      nav { padding: 1rem 1.5rem; }
+      section { padding: 3rem 1.5rem; }
+      .ticker-bar { gap: 1.5rem; flex-wrap: wrap; }
+      .nav-links { gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+  <nav>
+    <div class="logo">QuantEdge <span>/ Mint Rail</span></div>
+    <div class="nav-links">
+      <a href="#features">Features</a>
+      <a href="#api">API</a>
+      <a href="#pricing">Pricing</a>
+      <a href="https://github.com/mintrail/quantedge">GitHub</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-tag">Mint Rail LLC</div>
+    <h1><em>AI-Powered</em><br>Quantitative Finance</h1>
+    <p>Institutional-grade options pricing, portfolio optimization, and risk analytics — delivered through a modern API.</p>
+    <a href="#api" class="hero-cta">Explore the API</a>
+  </section>
+
+  <div class="ticker-bar" id="ticker">
+    <div class="ticker-item"><span>SPY</span> <span class="up">487.32 +0.42%</span></div>
+    <div class="ticker-item"><span>AAPL</span> <span class="up">178.56 +0.18%</span></div>
+    <div class="ticker-item"><span>MSFT</span> <span class="down">412.90 -0.31%</span></div>
+    <div class="ticker-item"><span>GOOG</span> <span class="up">141.22 +0.65%</span></div>
+    <div class="ticker-item"><span>TSLA</span> <span class="down">248.10 -1.12%</span></div>
+    <div class="ticker-item"><span>VIX</span> <span class="up">14.82 +2.30%</span></div>
+  </div>
+
+  <section id="features">
+    <h2>Built for quants.</h2>
+    <p class="subtitle">Every tool you need for systematic strategy research, from pricing to production.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">[ pricing ]</div>
+        <h3>Options Pricing</h3>
+        <p>Black-Scholes engine with full Greeks — delta, gamma, theta, vega, rho. Sub-millisecond computation for European calls and puts.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">[ portfolio ]</div>
+        <h3>Portfolio Optimization</h3>
+        <p>Markowitz mean-variance optimization. Efficient frontier computation, maximum Sharpe ratio portfolios, configurable constraints.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">[ risk ]</div>
+        <h3>Risk Management</h3>
+        <p>Historical and parametric VaR/CVaR. Monte Carlo simulation. Maximum drawdown analysis. Configurable confidence intervals.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">[ signals ]</div>
+        <h3>Alpha Signals</h3>
+        <p>Momentum and mean-reversion signal generators with z-score normalization. Pluggable strategy framework for custom factors.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">[ backtest ]</div>
+        <h3>Backtesting Engine</h3>
+        <p>Run strategies against historical data. Equity curves, Sharpe ratios, drawdown analysis, and position tracking out of the box.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">[ stream ]</div>
+        <h3>Real-Time Data</h3>
+        <p>WebSocket market data stream with bid/ask, volume, and tick-by-tick price updates at 500ms intervals.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="api">
+    <h2>One request away.</h2>
+    <p class="subtitle">Clean JSON API. No SDK required.</p>
+    <div class="code-section">
+      <div class="code-header">
+        <div class="code-dot r"></div>
+        <div class="code-dot y"></div>
+        <div class="code-dot g"></div>
+        <span>price_option.sh</span>
+      </div>
+      <div class="code-body">
+        <span class="cmt"># Price a call option with Black-Scholes</span><br>
+        <span class="kw">curl</span> -X POST https://api.quantedge.io/v1/price/options \<br>
+        &nbsp;&nbsp;-H <span class="str">"Content-Type: application/json"</span> \<br>
+        &nbsp;&nbsp;-d <span class="str">'{</span><br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"spot"</span>: <span class="num">100</span>,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"strike"</span>: <span class="num">105</span>,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"rate"</span>: <span class="num">0.05</span>,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"time_to_expiry"</span>: <span class="num">0.25</span>,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"volatility"</span>: <span class="num">0.2</span>,<br>
+        &nbsp;&nbsp;&nbsp;&nbsp;<span class="key">"option_type"</span>: <span class="str">"call"</span><br>
+        &nbsp;&nbsp;<span class="str">}'</span><br><br>
+        <span class="cmt"># Response:</span><br>
+        {<br>
+        &nbsp;&nbsp;<span class="key">"price"</span>: <span class="num">2.4634</span>,<br>
+        &nbsp;&nbsp;<span class="key">"delta"</span>: <span class="num">0.3842</span>,<br>
+        &nbsp;&nbsp;<span class="key">"gamma"</span>: <span class="num">0.0354</span>,<br>
+        &nbsp;&nbsp;<span class="key">"theta"</span>: <span class="num">-0.0452</span>,<br>
+        &nbsp;&nbsp;<span class="key">"vega"</span>: <span class="num">0.1769</span>,<br>
+        &nbsp;&nbsp;<span class="key">"rho"</span>: <span class="num">0.0873</span><br>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section id="pricing" class="pricing-section">
+    <h2>Simple pricing.</h2>
+    <p class="subtitle" style="margin: 0 auto 3rem;">No hidden fees. Scale when you're ready.</p>
+    <div class="pricing-grid">
+      <div class="pricing-card">
+        <h3>Developer</h3>
+        <div class="price">Free <span></span></div>
+        <div class="period">For experimentation</div>
+        <ul>
+          <li>1,000 API calls / month</li>
+          <li>All pricing endpoints</li>
+          <li>Community support</li>
+          <li>Rate limited to 10 req/s</li>
+        </ul>
+      </div>
+      <div class="pricing-card featured">
+        <h3>Professional</h3>
+        <div class="price">$149 <span>/ mo</span></div>
+        <div class="period">For trading desks</div>
+        <ul>
+          <li>100,000 API calls / month</li>
+          <li>All endpoints + WebSocket</li>
+          <li>Priority support</li>
+          <li>99.9% SLA</li>
+        </ul>
+      </div>
+      <div class="pricing-card">
+        <h3>Enterprise</h3>
+        <div class="price">Custom</div>
+        <div class="period">For institutions</div>
+        <ul>
+          <li>Unlimited API calls</li>
+          <li>Dedicated infrastructure</li>
+          <li>Custom models & signals</li>
+          <li>On-prem deployment option</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 <a href="https://mintrail.com">Mint Rail LLC</a>. All rights reserved. QuantEdge is a registered trademark.</p>
+  </footer>
+
+  <script>
+    (function () {
+      const tickers = document.querySelectorAll('.ticker-item');
+      setInterval(function () {
+        tickers.forEach(function (el) {
+          const span = el.querySelector('span:last-child');
+          const parts = span.textContent.trim().split(' ');
+          const price = parseFloat(parts[0]);
+          const change = (Math.random() - 0.48) * 0.4;
+          const newPrice = (price + change).toFixed(2);
+          const pct = ((change / price) * 100).toFixed(2);
+          const sign = change >= 0 ? '+' : '';
+          span.textContent = newPrice + ' ' + sign + pct + '%';
+          span.className = change >= 0 ? 'up' : 'down';
+        });
+      }, 2000);
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+numpy
+pydantic
+pillow
+python-multipart
+thefuzz
+python-Levenshtein

@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LabMind — AI for Scientific Discovery</title>
+  <meta name="description" content="LabMind accelerates research with semantic literature search, experiment design, hypothesis generation, and statistical planning." />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --indigo-900: #312e81;
+      --indigo-700: #4338ca;
+      --indigo-600: #4f46e5;
+      --indigo-500: #6366f1;
+      --indigo-100: #e0e7ff;
+      --indigo-50:  #eef2ff;
+      --blue-600:   #2563eb;
+      --blue-100:   #dbeafe;
+      --slate-900:  #0f172a;
+      --slate-700:  #334155;
+      --slate-500:  #64748b;
+      --slate-200:  #e2e8f0;
+      --slate-50:   #f8fafc;
+      --white:      #ffffff;
+      --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+      --font-mono: "JetBrains Mono", "Fira Code", monospace;
+    }
+
+    html { scroll-behavior: smooth; }
+    body { font-family: var(--font-sans); color: var(--slate-700); background: var(--white); line-height: 1.6; }
+
+    /* ---- NAV ---- */
+    nav {
+      position: fixed; top: 0; width: 100%; z-index: 100;
+      background: rgba(255,255,255,.88); backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--slate-200);
+    }
+    .nav-inner {
+      max-width: 1120px; margin: 0 auto; padding: 0 24px;
+      display: flex; align-items: center; justify-content: space-between; height: 64px;
+    }
+    .logo { font-weight: 700; font-size: 1.25rem; color: var(--indigo-700); text-decoration: none; letter-spacing: -.02em; }
+    .logo span { color: var(--slate-900); }
+    .nav-links { display: flex; gap: 28px; list-style: none; }
+    .nav-links a { text-decoration: none; color: var(--slate-700); font-size: .875rem; font-weight: 500; transition: color .15s; }
+    .nav-links a:hover { color: var(--indigo-600); }
+
+    /* ---- HERO ---- */
+    .hero {
+      padding: 140px 24px 80px; text-align: center;
+      background: linear-gradient(170deg, var(--indigo-50) 0%, var(--white) 60%);
+    }
+    .hero-badge {
+      display: inline-block; font-size: .75rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--indigo-600); background: var(--indigo-100);
+      padding: 4px 14px; border-radius: 999px; margin-bottom: 20px;
+    }
+    .hero h1 {
+      font-size: clamp(2.25rem, 5vw, 3.5rem); font-weight: 800;
+      color: var(--slate-900); line-height: 1.15; max-width: 700px; margin: 0 auto 16px;
+    }
+    .hero h1 em { font-style: normal; color: var(--indigo-600); }
+    .hero p { font-size: 1.125rem; color: var(--slate-500); max-width: 560px; margin: 0 auto 32px; }
+
+    .hero-cta { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+    .btn {
+      display: inline-flex; align-items: center; padding: 12px 28px; border-radius: 8px;
+      font-size: .9375rem; font-weight: 600; text-decoration: none; transition: all .15s;
+    }
+    .btn-primary { background: var(--indigo-600); color: var(--white); }
+    .btn-primary:hover { background: var(--indigo-700); }
+    .btn-outline { border: 1.5px solid var(--slate-200); color: var(--slate-700); background: var(--white); }
+    .btn-outline:hover { border-color: var(--indigo-500); color: var(--indigo-600); }
+
+    .dna-visual {
+      margin: 48px auto 0; max-width: 520px; display: flex; justify-content: center; gap: 6px;
+    }
+    .helix-bar {
+      width: 4px; border-radius: 4px; background: var(--indigo-500); opacity: .5;
+      animation: helix 2.4s ease-in-out infinite alternate;
+    }
+    @keyframes helix {
+      0%   { height: 40px; opacity: .3; }
+      50%  { height: 80px; opacity: .7; }
+      100% { height: 40px; opacity: .3; }
+    }
+
+    /* ---- SECTION COMMON ---- */
+    section { padding: 80px 24px; }
+    .container { max-width: 1120px; margin: 0 auto; }
+    .section-label {
+      font-size: .75rem; font-weight: 600; text-transform: uppercase;
+      letter-spacing: .08em; color: var(--indigo-600); margin-bottom: 8px;
+    }
+    .section-title { font-size: 2rem; font-weight: 700; color: var(--slate-900); margin-bottom: 12px; }
+    .section-sub { color: var(--slate-500); max-width: 560px; margin-bottom: 48px; }
+
+    /* ---- FEATURES ---- */
+    #features { background: var(--slate-50); }
+    .features-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 24px; }
+    .feature-card {
+      background: var(--white); border: 1px solid var(--slate-200); border-radius: 12px;
+      padding: 28px; transition: box-shadow .2s;
+    }
+    .feature-card:hover { box-shadow: 0 8px 30px rgba(79,70,229,.1); }
+    .feature-icon {
+      width: 44px; height: 44px; border-radius: 10px; display: flex; align-items: center; justify-content: center;
+      font-size: 1.25rem; margin-bottom: 16px; background: var(--indigo-100); color: var(--indigo-600);
+    }
+    .feature-card h3 { font-size: 1.125rem; font-weight: 600; color: var(--slate-900); margin-bottom: 8px; }
+    .feature-card p { font-size: .9375rem; color: var(--slate-500); }
+
+    /* ---- API DEMO ---- */
+    #api { background: var(--white); }
+    .api-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start; }
+    @media (max-width: 768px) { .api-grid { grid-template-columns: 1fr; } }
+    .code-block {
+      background: var(--slate-900); color: #e2e8f0; border-radius: 12px;
+      padding: 24px; font-family: var(--font-mono); font-size: .8125rem;
+      line-height: 1.7; overflow-x: auto; white-space: pre;
+    }
+    .code-block .kw  { color: #c4b5fd; }
+    .code-block .str { color: #86efac; }
+    .code-block .cmt { color: #64748b; }
+    .api-info h3 { font-size: 1.25rem; font-weight: 600; color: var(--slate-900); margin-bottom: 12px; }
+    .api-info p  { color: var(--slate-500); margin-bottom: 16px; }
+    .api-info ul { list-style: none; }
+    .api-info li { padding: 6px 0; font-size: .9375rem; color: var(--slate-700); }
+    .api-info li::before { content: "→ "; color: var(--indigo-500); font-weight: 600; }
+
+    /* ---- AUDIENCE ---- */
+    #audience { background: var(--indigo-50); }
+    .audience-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; }
+    .audience-card {
+      background: var(--white); border-radius: 10px; padding: 24px; text-align: center;
+      border: 1px solid var(--indigo-100);
+    }
+    .audience-card .icon { font-size: 2rem; margin-bottom: 12px; }
+    .audience-card h4 { font-size: 1rem; font-weight: 600; color: var(--slate-900); margin-bottom: 6px; }
+    .audience-card p { font-size: .8125rem; color: var(--slate-500); }
+
+    /* ---- FOOTER ---- */
+    footer {
+      padding: 40px 24px; text-align: center; border-top: 1px solid var(--slate-200);
+      color: var(--slate-500); font-size: .8125rem;
+    }
+    footer a { color: var(--indigo-600); text-decoration: none; }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="logo"><span>Lab</span>Mind</a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#api">API</a></li>
+      <li><a href="#audience">For Teams</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <span class="hero-badge">Mint Rail LLC</span>
+  <h1>Accelerate Discovery with <em>AI-Powered</em> Research Tools</h1>
+  <p>LabMind gives researchers semantic literature search, automated experiment design, hypothesis generation, and statistical planning — in a single API.</p>
+  <div class="hero-cta">
+    <a href="#api" class="btn btn-primary">Explore the API</a>
+    <a href="#features" class="btn btn-outline">See Features</a>
+  </div>
+  <div class="dna-visual" aria-hidden="true" id="helixContainer"></div>
+</section>
+
+<!-- FEATURES -->
+<section id="features">
+  <div class="container">
+    <p class="section-label">Capabilities</p>
+    <h2 class="section-title">Everything a Research Team Needs</h2>
+    <p class="section-sub">From literature review to publication-ready drafts — LabMind covers the full research lifecycle.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">&#x1F50D;</div>
+        <h3>Literature Synthesis</h3>
+        <p>Semantic search over your corpus with FAISS + sentence-transformers. Synthesize multiple papers into thematic summaries, consensus points, and research gaps.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#x1F9EA;</div>
+        <h3>Experiment Design</h3>
+        <p>Generate structured protocols with design selection (RCT, factorial, crossover), power-analysis-driven sample sizing, controls, and confound identification.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#x1F4A1;</div>
+        <h3>Hypothesis Generation</h3>
+        <p>Transform observations into testable hypotheses with null/alternative formulations, type classification, and suggested study designs.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#x1F4CA;</div>
+        <h3>Statistical Planning</h3>
+        <p>Describe your data and get the right test. Covers t-tests, ANOVA, chi-square, Mann-Whitney, Kruskal-Wallis, regression — with assumptions checklists.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#x1F4DD;</div>
+        <h3>Paper Drafting</h3>
+        <p>Scaffold publication-ready sections — introduction, methods, results, discussion — with APA-aligned templates and writing guidance.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#x1F517;</div>
+        <h3>Citation Graph Analysis</h3>
+        <p>Map document relationships, identify seminal works, trace research lineages, and surface cross-disciplinary connections in your literature corpus.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- API DEMO -->
+<section id="api">
+  <div class="container">
+    <p class="section-label">Developer-first</p>
+    <h2 class="section-title">One API, Full Research Stack</h2>
+    <p class="section-sub">Clean REST endpoints. JSON in, JSON out. Drop into any pipeline.</p>
+    <div class="api-grid">
+      <div class="code-block"><span class="cmt"># Search literature by meaning, not keywords</span>
+<span class="kw">curl</span> -X POST http://localhost:8000/v1/literature/search \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d <span class="str">'{
+    "query": "CRISPR off-target effects in vivo",
+    "k": 5
+  }'</span>
+
+<span class="cmt"># Design an experiment with power analysis</span>
+<span class="kw">curl</span> -X POST http://localhost:8000/v1/experiment/design \
+  -H <span class="str">"Content-Type: application/json"</span> \
+  -d <span class="str">'{
+    "research_question": "Does compound X reduce tumor growth?",
+    "independent_vars": ["compound_X_dose"],
+    "dependent_vars": ["tumor_volume"],
+    "hypothesis": "Compound X reduces tumor volume",
+    "expected_effect_size": 0.6
+  }'</span></div>
+      <div class="api-info">
+        <h3>Endpoints</h3>
+        <p>Built on FastAPI with automatic OpenAPI docs at <code>/docs</code>.</p>
+        <ul>
+          <li><code>POST /v1/literature/search</code> — semantic similarity</li>
+          <li><code>POST /v1/literature/synthesize</code> — multi-paper synthesis</li>
+          <li><code>POST /v1/experiment/design</code> — protocol generation</li>
+          <li><code>POST /v1/hypothesis/generate</code> — pattern-based hypotheses</li>
+          <li><code>POST /v1/stats/plan</code> — statistical test recommender</li>
+          <li><code>POST /v1/paper/draft</code> — section scaffolding</li>
+        </ul>
+        <a href="#" class="btn btn-primary" style="margin-top:20px">Read the Docs</a>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- AUDIENCE -->
+<section id="audience">
+  <div class="container">
+    <p class="section-label">Built for researchers</p>
+    <h2 class="section-title">Who Uses LabMind</h2>
+    <p class="section-sub">From bench scientists to data teams — LabMind fits into existing research workflows.</p>
+    <div class="audience-grid">
+      <div class="audience-card">
+        <div class="icon">&#x1F393;</div>
+        <h4>Academic Researchers</h4>
+        <p>Accelerate lit reviews, plan experiments, draft publications faster.</p>
+      </div>
+      <div class="audience-card">
+        <div class="icon">&#x1F48A;</div>
+        <h4>Pharma R&amp;D</h4>
+        <p>Streamline drug discovery pipelines with structured protocols and stats planning.</p>
+      </div>
+      <div class="audience-card">
+        <div class="icon">&#x1F9EC;</div>
+        <h4>Biotech</h4>
+        <p>Navigate genomics, proteomics, and molecular biology literature at scale.</p>
+      </div>
+      <div class="audience-card">
+        <div class="icon">&#x2697;&#xFE0F;</div>
+        <h4>Materials Science</h4>
+        <p>Design experiments for novel material characterization with proper controls.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div class="container">
+    <p>&copy; 2026 <a href="#">Mint Rail LLC</a>. LabMind — AI for Scientific Discovery.</p>
+  </div>
+</footer>
+
+<script>
+(function () {
+  var c = document.getElementById('helixContainer');
+  for (var i = 0; i < 48; i++) {
+    var bar = document.createElement('div');
+    bar.className = 'helix-bar';
+    bar.style.animationDelay = (i * 0.08) + 's';
+    c.appendChild(bar);
+  }
+})();
+</script>
+</body>
+</html>

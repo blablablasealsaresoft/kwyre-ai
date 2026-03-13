@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NFL PlayCaller AI — AI Offensive Coordinator Intelligence</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --gold: #d4c896;
+      --gold-dim: #a89860;
+      --bg: #111110;
+      --bg-alt: #1a1a16;
+      --text: #e8e8d8;
+      --text-dim: #8a8a7a;
+      --red: #c44;
+      --green: #6a9955;
+      --border: rgba(255,255,255,0.06);
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Sans', -apple-system, sans-serif;
+      overflow-x: hidden;
+    }
+
+    .scanlines {
+      position: fixed; inset: 0; z-index: 9999; pointer-events: none;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.015) 2px, rgba(255,255,255,0.015) 4px);
+    }
+
+    .corner { position: fixed; width: 30px; height: 30px; z-index: 100; }
+    .corner--tl { top: 12px; left: 12px; border-top: 2px solid rgba(212,200,150,0.25); border-left: 2px solid rgba(212,200,150,0.25); }
+    .corner--tr { top: 12px; right: 12px; border-top: 2px solid rgba(212,200,150,0.25); border-right: 2px solid rgba(212,200,150,0.25); }
+    .corner--bl { bottom: 12px; left: 12px; border-bottom: 2px solid rgba(212,200,150,0.25); border-left: 2px solid rgba(212,200,150,0.25); }
+    .corner--br { bottom: 12px; right: 12px; border-bottom: 2px solid rgba(212,200,150,0.25); border-right: 2px solid rgba(212,200,150,0.25); }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
+      padding: 16px 32px;
+      background: linear-gradient(180deg, rgba(17,17,16,0.95), rgba(17,17,16,0.7));
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    nav .brand {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      letter-spacing: 3px; color: var(--gold); text-transform: uppercase;
+    }
+    nav .links { display: flex; gap: 24px; }
+    nav .links a {
+      color: var(--text-dim); text-decoration: none; font-size: 12px;
+      font-family: 'JetBrains Mono', monospace; letter-spacing: 1px;
+      transition: color 0.2s;
+    }
+    nav .links a:hover { color: var(--gold); }
+
+    .hero {
+      min-height: 100vh; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; text-align: center;
+      padding: 120px 32px 80px; position: relative;
+    }
+    .hero::before {
+      content: ''; position: absolute; inset: 0;
+      background: radial-gradient(ellipse 800px 600px at 50% 40%, rgba(212,200,150,0.04), transparent 70%);
+    }
+    .hero .codename {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      letter-spacing: 4px; color: var(--text-dim); margin-bottom: 16px;
+      text-transform: uppercase; position: relative;
+    }
+    .hero h1 {
+      font-size: clamp(40px, 7vw, 72px); font-weight: 700;
+      letter-spacing: -1px; line-height: 1.1; margin-bottom: 20px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+      position: relative;
+    }
+    .hero .subtitle {
+      font-size: 18px; color: #999; font-weight: 300;
+      max-width: 560px; line-height: 1.6; margin-bottom: 40px; position: relative;
+    }
+
+    .field-viz {
+      width: 100%; max-width: 700px; height: 200px; position: relative;
+      margin-bottom: 48px; border-radius: 12px; overflow: hidden;
+      background: linear-gradient(135deg, #1a3a1a, #0a200a);
+      border: 1px solid rgba(100,200,100,0.15);
+    }
+    .field-viz .yard-line {
+      position: absolute; top: 0; bottom: 0; width: 1px;
+      background: rgba(255,255,255,0.08);
+    }
+    .field-viz .hash { position: absolute; width: 2px; height: 6px; background: rgba(255,255,255,0.12); }
+    .field-viz .player-dot {
+      position: absolute; width: 10px; height: 10px; border-radius: 50%;
+      animation: pulse-dot 2s ease-in-out infinite;
+    }
+    .field-viz .route-line {
+      position: absolute; height: 2px; transform-origin: left center;
+      background: linear-gradient(90deg, rgba(212,200,150,0.5), transparent);
+    }
+    .field-viz .label {
+      position: absolute; font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; color: rgba(255,255,255,0.2); letter-spacing: 1px;
+    }
+
+    .cta-row { display: flex; gap: 16px; position: relative; flex-wrap: wrap; justify-content: center; }
+    .btn-primary {
+      padding: 14px 32px; background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+      border: none; border-radius: 8px; color: #111; font-size: 14px; font-weight: 700;
+      font-family: 'IBM Plex Sans', sans-serif; cursor: pointer; letter-spacing: 0.5px;
+      transition: transform 0.2s, box-shadow 0.2s;
+      box-shadow: 0 4px 24px rgba(200,180,120,0.2);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(200,180,120,0.3); }
+    .btn-secondary {
+      padding: 14px 32px; background: transparent;
+      border: 1px solid rgba(212,200,150,0.3); border-radius: 8px;
+      color: var(--gold); font-size: 14px; font-weight: 600;
+      font-family: 'IBM Plex Sans', sans-serif; cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+    .btn-secondary:hover { background: rgba(212,200,150,0.05); border-color: rgba(212,200,150,0.5); }
+
+    .section { padding: 100px 32px; max-width: 1000px; margin: 0 auto; }
+    .section-label {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      letter-spacing: 3px; color: var(--text-dim); text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    .section h2 {
+      font-size: 32px; font-weight: 700; margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--gold), var(--gold-dim));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+    }
+    .section .desc { color: #888; font-size: 15px; line-height: 1.7; max-width: 600px; margin-bottom: 48px; }
+
+    .feature-grid {
+      display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .feature-card {
+      padding: 24px; border-radius: 12px;
+      background: rgba(255,255,255,0.015); border: 1px solid var(--border);
+      transition: border-color 0.3s, background 0.3s;
+    }
+    .feature-card:hover {
+      border-color: rgba(212,200,150,0.2);
+      background: rgba(200,180,120,0.03);
+    }
+    .feature-card .icon { font-size: 28px; margin-bottom: 12px; }
+    .feature-card h3 {
+      font-size: 16px; font-weight: 600; color: var(--text);
+      margin-bottom: 8px;
+    }
+    .feature-card p { font-size: 13px; color: #777; line-height: 1.6; }
+
+    .live-callout {
+      margin: 80px auto; max-width: 900px; padding: 48px;
+      border-radius: 16px; position: relative; overflow: hidden;
+      background: linear-gradient(135deg, rgba(42,157,42,0.08), rgba(200,180,120,0.04));
+      border: 1px solid rgba(42,157,42,0.2);
+    }
+    .live-callout::before {
+      content: ''; position: absolute; top: 12px; right: 16px;
+      width: 10px; height: 10px; border-radius: 50%;
+      background: #2a9d2a; box-shadow: 0 0 12px #2a9d2a;
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+    .live-callout h3 {
+      font-size: 24px; font-weight: 700; color: var(--text); margin-bottom: 12px;
+    }
+    .live-callout p { color: #888; font-size: 14px; line-height: 1.7; max-width: 600px; }
+    .live-features {
+      display: flex; gap: 32px; margin-top: 24px; flex-wrap: wrap;
+    }
+    .live-features .lf {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: var(--green); display: flex; align-items: center; gap: 6px;
+    }
+    .live-features .lf::before {
+      content: ''; width: 4px; height: 4px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 6px var(--green);
+    }
+
+    .integration-bar {
+      padding: 60px 32px; text-align: center;
+      border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+    }
+    .integration-bar .label {
+      font-family: 'JetBrains Mono', monospace; font-size: 10px;
+      letter-spacing: 3px; color: var(--text-dim); margin-bottom: 16px;
+    }
+    .integration-bar .items {
+      display: flex; gap: 48px; justify-content: center; align-items: center; flex-wrap: wrap;
+    }
+    .integration-bar .item {
+      font-family: 'JetBrains Mono', monospace; font-size: 13px;
+      color: #555; letter-spacing: 1px;
+    }
+
+    footer {
+      padding: 48px 32px; text-align: center;
+      border-top: 1px solid var(--border);
+    }
+    footer .brand {
+      font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      letter-spacing: 2px; color: var(--gold-dim); margin-bottom: 8px;
+    }
+    footer p { font-size: 12px; color: #555; }
+
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.5; transform: scale(0.85); }
+    }
+
+    @media (max-width: 640px) {
+      .feature-grid { grid-template-columns: 1fr; }
+      .live-features { flex-direction: column; gap: 12px; }
+      nav .links { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="scanlines"></div>
+  <div class="corner corner--tl"></div>
+  <div class="corner corner--tr"></div>
+  <div class="corner corner--bl"></div>
+  <div class="corner corner--br"></div>
+
+  <nav>
+    <div class="brand">NFL PlayCaller</div>
+    <div class="links">
+      <a href="#features">Features</a>
+      <a href="#live">Live Mode</a>
+      <a href="#integration">Integration</a>
+      <a href="https://kwyre.com">Kwyre</a>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <div class="codename">Apollo CyberSentinel</div>
+    <h1>NFL PlayCaller AI</h1>
+    <p class="subtitle">
+      AI Offensive Coordinator Intelligence. Blitz prediction, play optimization,
+      scouting reports, and live game analysis — all running on Kwyre's local inference engine.
+    </p>
+
+    <div class="field-viz" id="fieldViz">
+      <div class="label" style="top:8px;left:12px;">LOS</div>
+      <div class="label" style="bottom:8px;right:12px;">ENDZONE</div>
+    </div>
+
+    <div class="cta-row">
+      <button class="btn-primary" onclick="window.location.href='/app'">Launch PlayCaller</button>
+      <button class="btn-secondary" onclick="window.location.href='#features'">View Features</button>
+    </div>
+  </section>
+
+  <section class="section" id="features">
+    <div class="section-label">Analysis Capabilities</div>
+    <h2>Six Analysis Modes</h2>
+    <p class="desc">
+      Each mode is purpose-built for a specific phase of game preparation and execution.
+      Every analysis runs through Kwyre's local AI — your data never leaves your machine.
+    </p>
+    <div class="feature-grid">
+      <div class="feature-card">
+        <div class="icon">&#x1F4CB;</div>
+        <h3>Pre-Game Scouting Report</h3>
+        <p>Full matchup breakdown with offensive tendencies, defensive scheme analysis, head-to-head advantages, and situational strategy for red zone, 3rd down, and 2-minute drills.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">&#x1F3AF;</div>
+        <h3>Situational Play Call</h3>
+        <p>Input down, distance, field position, score, and defensive alignment. Get the optimal play call with primary read, hot read, EV estimate, and two alternatives.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">&#x1F50D;</div>
+        <h3>Blitz & Coverage Read</h3>
+        <p>Predict blitz probability, coverage shell, pressure type, individual matchup assignments, and where the vulnerability lies for the offense to exploit.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">&#x1F3C3;</div>
+        <h3>Player Movement Profile</h3>
+        <p>Deep dive on any player's route tree, tendencies by down and distance, red zone behavior, injury impact on movement, and defensive containment strategy.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">&#x1F4D6;</div>
+        <h3>Playbook Reverse Engineer</h3>
+        <p>Reconstruct a team's offensive scheme from formation frequencies, motion patterns, tendency-breakers, and how the playbook has evolved over 5 seasons.</p>
+      </div>
+      <div class="feature-card">
+        <div class="icon">&#x1F4CA;</div>
+        <h3>Post-Game Breakdown</h3>
+        <p>Analyze completed games with drive-by-drive critical sequence analysis, scheme evaluation, key matchups, and what each team should adjust.</p>
+      </div>
+    </div>
+  </section>
+
+  <div id="live">
+    <div class="live-callout">
+      <h3>&#x1F3C8; Live Game Mode</h3>
+      <p>
+        Connect to a real-time game feed via WebSocket. The AI tracks score, clock, down, distance,
+        field position, and possession — automatically generating play suggestions as the game unfolds.
+        Demo mode simulates a full game for testing.
+      </p>
+      <div class="live-features">
+        <div class="lf">Real-time scoreboard</div>
+        <div class="lf">Play-by-play feed</div>
+        <div class="lf">Auto play suggestions</div>
+        <div class="lf">WebSocket streaming</div>
+        <div class="lf">All 32 NFL teams</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="integration-bar" id="integration">
+    <div class="label">Built On</div>
+    <div class="items">
+      <div class="item">Kwyre Local AI</div>
+      <div class="item">FastAPI</div>
+      <div class="item">WebSocket</div>
+      <div class="item">React + Vite</div>
+      <div class="item">Cloudflare Pages</div>
+    </div>
+  </div>
+
+  <section class="section" style="text-align:center;">
+    <div class="section-label">Coverage</div>
+    <h2>All 32 NFL Teams</h2>
+    <p class="desc" style="margin-left:auto;margin-right:auto;">
+      Complete tendency data, run/pass ratios, blitz rates, and coverage bases for every team
+      across all 8 divisions. Updated with 5 years of historical data.
+    </p>
+    <div id="teamGrid" style="display:flex;flex-wrap:wrap;gap:8px;justify-content:center;margin-top:32px;max-width:800px;margin-left:auto;margin-right:auto;"></div>
+  </section>
+
+  <footer>
+    <div class="brand">Mint Rail LLC</div>
+    <p>NFL PlayCaller AI is a Kwyre product. All analysis runs locally. &copy; 2026 Mint Rail LLC.</p>
+  </footer>
+
+  <script>
+    const teams = [
+      {a:"ARI",c:"#97233F"},{a:"ATL",c:"#A71930"},{a:"BAL",c:"#241773"},{a:"BUF",c:"#00338D"},
+      {a:"CAR",c:"#0085CA"},{a:"CHI",c:"#0B162A"},{a:"CIN",c:"#FB4F14"},{a:"CLE",c:"#311D00"},
+      {a:"DAL",c:"#003594"},{a:"DEN",c:"#FB4F14"},{a:"DET",c:"#0076B6"},{a:"GB",c:"#203731"},
+      {a:"HOU",c:"#03202F"},{a:"IND",c:"#002C5F"},{a:"JAX",c:"#006778"},{a:"KC",c:"#E31837"},
+      {a:"LAC",c:"#0080C6"},{a:"LAR",c:"#003594"},{a:"LV",c:"#A5ACAF"},{a:"MIA",c:"#008E97"},
+      {a:"MIN",c:"#4F2683"},{a:"NE",c:"#002244"},{a:"NO",c:"#D3BC8D"},{a:"NYG",c:"#0B2265"},
+      {a:"NYJ",c:"#125740"},{a:"PHI",c:"#004C54"},{a:"PIT",c:"#FFB612"},{a:"SEA",c:"#002244"},
+      {a:"SF",c:"#AA0000"},{a:"TB",c:"#D50A0A"},{a:"TEN",c:"#0C2340"},{a:"WAS",c:"#5A1414"},
+    ];
+
+    const grid = document.getElementById('teamGrid');
+    teams.forEach(t => {
+      const el = document.createElement('div');
+      el.style.cssText = `width:44px;height:44px;border-radius:8px;background:${t.c};display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;color:#fff;cursor:default;transition:transform 0.2s;`;
+      el.textContent = t.a;
+      el.addEventListener('mouseenter', () => el.style.transform = 'scale(1.15)');
+      el.addEventListener('mouseleave', () => el.style.transform = 'scale(1)');
+      grid.appendChild(el);
+    });
+
+    // Field visualization
+    const fv = document.getElementById('fieldViz');
+    for (let i = 1; i < 10; i++) {
+      const yl = document.createElement('div');
+      yl.className = 'yard-line';
+      yl.style.left = (i * 10) + '%';
+      fv.appendChild(yl);
+    }
+
+    const offPositions = [
+      {x:35,y:50},{x:25,y:30},{x:25,y:70},{x:20,y:20},{x:20,y:80},
+      {x:30,y:50},{x:15,y:40},{x:15,y:60},{x:15,y:10},{x:15,y:90},{x:10,y:50}
+    ];
+    offPositions.forEach((p, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'player-dot';
+      dot.style.cssText = `left:${p.x}%;top:${p.y}%;background:#d4c896;box-shadow:0 0 8px rgba(212,200,150,0.4);animation-delay:${i*0.15}s;`;
+      fv.appendChild(dot);
+    });
+
+    const defPositions = [
+      {x:45,y:25},{x:45,y:45},{x:45,y:55},{x:45,y:75},
+      {x:55,y:20},{x:55,y:40},{x:55,y:60},{x:55,y:80},
+      {x:70,y:30},{x:70,y:50},{x:70,y:70}
+    ];
+    defPositions.forEach((p, i) => {
+      const dot = document.createElement('div');
+      dot.className = 'player-dot';
+      dot.style.cssText = `left:${p.x}%;top:${p.y}%;background:#c44;box-shadow:0 0 8px rgba(204,68,68,0.4);animation-delay:${i*0.2}s;`;
+      fv.appendChild(dot);
+    });
+
+    const routes = [
+      {x:25,y:30,angle:-30,len:120},{x:25,y:70,angle:20,len:100},
+      {x:15,y:10,angle:-10,len:150},{x:15,y:90,angle:15,len:140}
+    ];
+    routes.forEach(r => {
+      const line = document.createElement('div');
+      line.className = 'route-line';
+      line.style.cssText = `left:${r.x}%;top:${r.y}%;width:${r.len}px;transform:rotate(${r.angle}deg);`;
+      fv.appendChild(line);
+    });
+  </script>
+</body>
+</html>

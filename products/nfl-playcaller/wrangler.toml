@@ -1,0 +1,9 @@
+name = "nfl-playcaller"
+compatibility_date = "2025-12-01"
+pages_build_output_dir = "site"
+
+[env.production]
+name = "nfl-playcaller-prod"
+
+[env.preview]
+name = "nfl-playcaller-preview"

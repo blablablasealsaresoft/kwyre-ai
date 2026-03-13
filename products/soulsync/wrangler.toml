@@ -1,0 +1,11 @@
+name = "soulsync"
+compatibility_date = "2025-01-01"
+
+[site]
+bucket = "./site"
+
+[env.production]
+name = "soulsync-prod"
+
+[env.staging]
+name = "soulsync-staging"

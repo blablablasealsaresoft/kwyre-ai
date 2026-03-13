@@ -1,0 +1,8 @@
+# QuantEdge — Cloudflare Pages deployment config
+# Uncomment and configure when ready to deploy the static site.
+#
+# name = "quantedge"
+# pages_build_output_dir = "site"
+#
+# [vars]
+# ENVIRONMENT = "production"

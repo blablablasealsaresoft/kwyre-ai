@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>DentAI — AI-Powered Dental Intelligence</title>
+  <style>
+    :root {
+      --teal: #0d9488;
+      --teal-dark: #0f766e;
+      --teal-light: #ccfbf1;
+      --gray-50: #f9fafb;
+      --gray-100: #f3f4f6;
+      --gray-200: #e5e7eb;
+      --gray-600: #4b5563;
+      --gray-700: #374151;
+      --gray-900: #111827;
+      --white: #ffffff;
+      --shadow: 0 1px 3px rgba(0,0,0,0.1), 0 1px 2px rgba(0,0,0,0.06);
+      --shadow-lg: 0 10px 15px rgba(0,0,0,0.1), 0 4px 6px rgba(0,0,0,0.05);
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: var(--gray-700);
+      line-height: 1.6;
+      background: var(--white);
+    }
+
+    nav {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      text-decoration: none;
+    }
+
+    .logo svg { width: 32px; height: 32px; }
+
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+
+    .nav-links a {
+      text-decoration: none;
+      color: var(--gray-600);
+      font-weight: 500;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover { color: var(--teal); }
+
+    .hero {
+      text-align: center;
+      padding: 5rem 2rem 4rem;
+      background: linear-gradient(135deg, var(--teal-light) 0%, var(--white) 50%, var(--gray-50) 100%);
+    }
+
+    .hero-badge {
+      display: inline-block;
+      background: var(--teal-light);
+      color: var(--teal-dark);
+      padding: 0.25rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+
+    .hero h1 {
+      font-size: 3.2rem;
+      color: var(--gray-900);
+      line-height: 1.15;
+      max-width: 700px;
+      margin: 0 auto 1.5rem;
+    }
+
+    .hero h1 span { color: var(--teal); }
+
+    .hero p {
+      font-size: 1.2rem;
+      color: var(--gray-600);
+      max-width: 600px;
+      margin: 0 auto 2.5rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.85rem 2rem;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 1rem;
+      text-decoration: none;
+      transition: all 0.2s;
+      cursor: pointer;
+      border: none;
+    }
+
+    .btn-primary {
+      background: var(--teal);
+      color: var(--white);
+    }
+
+    .btn-primary:hover { background: var(--teal-dark); transform: translateY(-1px); box-shadow: var(--shadow-lg); }
+
+    .btn-outline {
+      background: var(--white);
+      color: var(--teal);
+      border: 2px solid var(--teal);
+      margin-left: 1rem;
+    }
+
+    .btn-outline:hover { background: var(--teal-light); }
+
+    .section { padding: 5rem 2rem; max-width: 1200px; margin: 0 auto; }
+
+    .section-label {
+      text-transform: uppercase;
+      font-size: 0.8rem;
+      font-weight: 700;
+      letter-spacing: 0.1em;
+      color: var(--teal);
+      margin-bottom: 0.5rem;
+    }
+
+    .section h2 {
+      font-size: 2.2rem;
+      color: var(--gray-900);
+      margin-bottom: 1rem;
+    }
+
+    .section > p {
+      color: var(--gray-600);
+      max-width: 640px;
+      margin-bottom: 3rem;
+    }
+
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .feature-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 2rem;
+      transition: box-shadow 0.2s, transform 0.2s;
+    }
+
+    .feature-card:hover { box-shadow: var(--shadow-lg); transform: translateY(-2px); }
+
+    .feature-icon {
+      width: 48px;
+      height: 48px;
+      border-radius: 10px;
+      background: var(--teal-light);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 1.25rem;
+      font-size: 1.5rem;
+    }
+
+    .feature-card h3 {
+      font-size: 1.15rem;
+      color: var(--gray-900);
+      margin-bottom: 0.5rem;
+    }
+
+    .feature-card p {
+      font-size: 0.95rem;
+      color: var(--gray-600);
+    }
+
+    .audience {
+      background: var(--gray-50);
+      padding: 4rem 2rem;
+    }
+
+    .audience-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+      text-align: center;
+    }
+
+    .audience h2 { font-size: 2rem; color: var(--gray-900); margin-bottom: 2rem; }
+
+    .roles {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 1rem;
+    }
+
+    .role-tag {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      padding: 0.6rem 1.25rem;
+      border-radius: 9999px;
+      font-weight: 500;
+      color: var(--gray-700);
+      font-size: 0.95rem;
+    }
+
+    .hipaa-banner {
+      background: var(--teal-light);
+      border: 2px solid var(--teal);
+      border-radius: 12px;
+      padding: 2rem 2.5rem;
+      max-width: 900px;
+      margin: 0 auto 4rem;
+      display: flex;
+      align-items: flex-start;
+      gap: 1.25rem;
+    }
+
+    .hipaa-icon {
+      font-size: 2rem;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+
+    .hipaa-banner h3 { color: var(--teal-dark); margin-bottom: 0.25rem; }
+    .hipaa-banner p { color: var(--gray-700); font-size: 0.95rem; }
+
+    .pricing {
+      background: var(--gray-50);
+      padding: 5rem 2rem;
+      text-align: center;
+    }
+
+    .pricing h2 { font-size: 2.2rem; color: var(--gray-900); margin-bottom: 0.5rem; }
+    .pricing > p { color: var(--gray-600); margin-bottom: 3rem; }
+
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 2rem;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .price-card {
+      background: var(--white);
+      border: 1px solid var(--gray-200);
+      border-radius: 12px;
+      padding: 2.5rem 2rem;
+      position: relative;
+    }
+
+    .price-card.featured {
+      border-color: var(--teal);
+      box-shadow: 0 0 0 1px var(--teal);
+    }
+
+    .price-card.featured::before {
+      content: "Most Popular";
+      position: absolute;
+      top: -12px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--teal);
+      color: var(--white);
+      padding: 0.2rem 1rem;
+      border-radius: 9999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .price-card h3 { font-size: 1.2rem; color: var(--gray-900); margin-bottom: 0.5rem; }
+
+    .price {
+      font-size: 2.5rem;
+      font-weight: 700;
+      color: var(--gray-900);
+      margin-bottom: 0.25rem;
+    }
+
+    .price span { font-size: 1rem; font-weight: 400; color: var(--gray-600); }
+
+    .price-card ul {
+      list-style: none;
+      margin: 1.5rem 0;
+      text-align: left;
+    }
+
+    .price-card li {
+      padding: 0.4rem 0;
+      font-size: 0.93rem;
+      color: var(--gray-600);
+    }
+
+    .price-card li::before {
+      content: "\2713";
+      color: var(--teal);
+      font-weight: 700;
+      margin-right: 0.5rem;
+    }
+
+    footer {
+      text-align: center;
+      padding: 3rem 2rem;
+      border-top: 1px solid var(--gray-200);
+      color: var(--gray-600);
+      font-size: 0.9rem;
+    }
+
+    footer a { color: var(--teal); text-decoration: none; }
+
+    @media (max-width: 768px) {
+      .hero h1 { font-size: 2.2rem; }
+      .nav-links { display: none; }
+      .btn-outline { margin-left: 0; margin-top: 0.75rem; }
+      .hipaa-banner { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="#" class="logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 2C12 2 9 5 8 8C7 11 7 14 8 17C9 20 11 24 14 28C15 29.5 17 29.5 18 28C21 24 23 20 24 17C25 14 25 11 24 8C23 5 20 2 16 2Z" fill="#0d9488"/>
+        <path d="M16 6C14 6 12 7.5 11.5 9.5C11 11.5 11.5 13.5 12.5 15.5C13.5 17.5 15 20 16 22C17 20 18.5 17.5 19.5 15.5C20.5 13.5 21 11.5 20.5 9.5C20 7.5 18 6 16 6Z" fill="#ccfbf1"/>
+      </svg>
+      Dent<span style="color: var(--teal)">AI</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#features">Features</a></li>
+      <li><a href="#audience">Who It's For</a></li>
+      <li><a href="#pricing">Pricing</a></li>
+      <li><a href="#" class="btn btn-primary" style="padding: 0.5rem 1.25rem; font-size: 0.9rem;">Get Started</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <div class="hero-badge">Mint Rail LLC</div>
+    <h1>AI-Powered <span>Dental Intelligence</span></h1>
+    <p>Treatment planning, insurance coding, clinical notes, risk assessment, and material recommendations — powered by intelligent automation.</p>
+    <a href="#features" class="btn btn-primary">Explore Features</a>
+    <a href="#pricing" class="btn btn-outline">View Pricing</a>
+  </section>
+
+  <section class="section" id="features">
+    <div class="section-label">Capabilities</div>
+    <h2>Everything your practice needs</h2>
+    <p>From first exam to final restoration, DentAI assists at every clinical and administrative touchpoint.</p>
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon">&#128203;</div>
+        <h3>Treatment Planning</h3>
+        <p>Enter symptoms, history, and findings. Receive a phased treatment plan with urgent, necessary, and elective procedures — each with estimated costs, durations, and clinical rationale.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128444;</div>
+        <h3>Radiograph Analysis Prep</h3>
+        <p>Upload dental radiographs for structured pre-analysis. Images are stored securely and queued for AI-assisted findings once diagnostic imaging integration is live.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128179;</div>
+        <h3>CDT Insurance Coding</h3>
+        <p>Describe any dental procedure in plain language. DentAI returns the top matching CDT codes with confidence scores, descriptions, and category — reducing claim denials.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128221;</div>
+        <h3>Clinical SOAP Notes</h3>
+        <p>Generate compliant SOAP-format clinical notes from structured input. Includes subjective, objective, assessment, and plan sections with proper dental terminology.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#9888;</div>
+        <h3>Procedure Risk Assessment</h3>
+        <p>Score procedural risk based on patient factors — age, medications, systemic conditions. Receive clear risk levels, contributing factors, and clinical recommendations.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon">&#128300;</div>
+        <h3>Material Recommendations</h3>
+        <p>Get material options for crowns, fillings, implants, and more — with pros, cons, cost ranges, longevity estimates, and best-use guidance for each option.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-bottom: 2rem;">
+    <div class="hipaa-banner">
+      <div class="hipaa-icon">&#128274;</div>
+      <div>
+        <h3>HIPAA-Ready Architecture</h3>
+        <p>DentAI is designed with healthcare data security in mind. Patient data is processed in-memory with no persistent storage of PHI. Deploy on-premises or in a HIPAA-eligible cloud environment for full compliance. BAA available for enterprise customers.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="audience" id="audience">
+    <div class="audience-inner">
+      <h2>Built for dental professionals</h2>
+      <div class="roles">
+        <div class="role-tag">General Dentists</div>
+        <div class="role-tag">Orthodontists</div>
+        <div class="role-tag">Oral Surgeons</div>
+        <div class="role-tag">Dental Hygienists</div>
+        <div class="role-tag">Endodontists</div>
+        <div class="role-tag">Periodontists</div>
+        <div class="role-tag">Office Managers</div>
+        <div class="role-tag">Dental Billing Staff</div>
+      </div>
+    </div>
+  </section>
+
+  <section class="pricing" id="pricing">
+    <div class="section-label">Pricing</div>
+    <h2>Simple, transparent pricing</h2>
+    <p>Start free. Scale as your practice grows.</p>
+    <div class="pricing-grid">
+      <div class="price-card">
+        <h3>Starter</h3>
+        <div class="price">Free</div>
+        <ul>
+          <li>50 treatment plans / month</li>
+          <li>CDT code lookup</li>
+          <li>Basic SOAP notes</li>
+          <li>Community support</li>
+        </ul>
+        <a href="#" class="btn btn-outline" style="width: 100%; text-align: center;">Get Started</a>
+      </div>
+      <div class="price-card featured">
+        <h3>Professional</h3>
+        <div class="price">$99<span>/mo</span></div>
+        <ul>
+          <li>Unlimited treatment plans</li>
+          <li>Risk assessment engine</li>
+          <li>Material recommendations</li>
+          <li>Radiograph upload &amp; queue</li>
+          <li>Priority support</li>
+        </ul>
+        <a href="#" class="btn btn-primary" style="width: 100%; text-align: center;">Start Free Trial</a>
+      </div>
+      <div class="price-card">
+        <h3>Enterprise</h3>
+        <div class="price">Custom</div>
+        <ul>
+          <li>Multi-location support</li>
+          <li>HIPAA BAA included</li>
+          <li>On-premises deployment</li>
+          <li>EHR/PMS integration</li>
+          <li>Dedicated account manager</li>
+        </ul>
+        <a href="#" class="btn btn-outline" style="width: 100%; text-align: center;">Contact Sales</a>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 Mint Rail LLC. All rights reserved. <a href="#">Privacy Policy</a> &middot; <a href="#">Terms of Service</a></p>
+    <p style="margin-top: 0.5rem; font-size: 0.82rem; color: #9ca3af;">DentAI is a clinical decision support tool. It does not replace professional dental judgment.</p>
+  </footer>
+
+</body>
+</html>
