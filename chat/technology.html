@@ -975,7 +975,7 @@ a.incident:hover {
           <li><strong>Qwen3.5-4B Uncensored</strong> — 0/465 refusals, pre-quantized 4-bit NF4 (2.5 GB)</li>
           <li><strong>Qwen3.5-0.8B draft</strong> — speculative decoding, 2–3× speed (0.8 GB)</li>
           <li><strong>3.3 GB total</strong> — clients download pre-quantized weights from kwyre.com</li>
-          <li>6 domain LoRA adapters hot-swap at runtime via API (~100 MB each)</li>
+          <li>13 domain LoRA adapters hot-swap at runtime via API (~150 MB each)</li>
           <li><strong>Spike QAT</strong> — Straight-Through Estimator spike encoding + k-curriculum annealing</li>
           <li>Your sensitive data never refuses to be analyzed</li>
         </ul>
@@ -984,7 +984,7 @@ a.incident:hover {
       <!-- CARD 2 -->
       <div class="adv-card adv-card-green reveal reveal-d2">
         <div class="adv-card-num">02 / Domain Expertise</div>
-        <div class="adv-card-title">6 DOMAIN LoRA ADAPTERS</div>
+        <div class="adv-card-title">13 DOMAIN LoRA ADAPTERS</div>
         <ul class="adv-card-list">
           <li><strong>Legal &amp; Compliance</strong> — NDA, SEC, FINRA</li>
           <li><strong>Insurance &amp; Actuarial</strong> — treaties, reserves</li>
@@ -1001,7 +1001,7 @@ a.incident:hover {
         <div class="adv-card-title">PIPELINE + 4 BACKENDS</div>
         <ul class="adv-card-list">
           <li>Claude → QLoRA → domain GRPO → LoRA export</li>
-          <li>300 traces/domain, custom reward functions</li>
+          <li>5,000 traces/domain, custom reward functions</li>
           <li><strong>GPU</strong>: NF4/AWQ + Flash Attn 2 + speculative</li>
           <li><strong>vLLM</strong>: PagedAttention + continuous batching</li>
           <li><strong>CPU</strong>: llama.cpp &nbsp;·&nbsp; <strong>MLX</strong>: Apple Silicon</li>

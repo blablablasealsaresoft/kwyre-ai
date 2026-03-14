@@ -361,7 +361,7 @@ html.kwyre-light {
       <div class="k-ov-hdr"><span class="k-ov-title">Five Products, One Mission</span><button class="k-ov-close" onclick="closeOverlay()">✕</button></div>
       <div class="k-banner"><span style="font-size:15px">🖥</span><div><div class="k-banner-lbl">Hardware</div><div class="k-banner-val">NVIDIA RTX 4090 · 24 GB VRAM · 64 GB RAM</div></div></div>
       <div id="kProdList"></div>
-      <div class="k-draft">🎯 <strong style="color:var(--pu)">Speculative: Qwen3.5-0.8B draft (0.8 GB)</strong> — 2–3x throughput. 6 domain LoRA adapters hot-swap at runtime.</div>
+      <div class="k-draft">🎯 <strong style="color:var(--pu)">Speculative: Qwen3.5-0.8B draft (0.8 GB)</strong> — 2–3x throughput. 13 domain LoRA adapters hot-swap at runtime.</div>
     </div></div>
 
     <div class="k-ov" id="kOvSecurity"><div class="k-ov-panel">
@@ -400,7 +400,7 @@ html.kwyre-light {
    ═══════════════════════════════════════════════════════════ */
 const PRODS=[
   {id:"personal",nm:"Kwyre Personal",mdl:"Qwen3.5-4B Uncensored + 0.8B draft",spd:"7–14 tok/s",vr:"4.1 GB VRAM",pr:"$299",gpu:"RTX 4060+",tg:"PERSONAL",cl:"ac",cp:"gn",rag:1,be:"serve_local_4bit.py",dl:"3.3 GB",desc:"0/465 refusals. Speculative decoding, SpikeServe, 1 hot-swap LoRA adapter, RAG",feat:0},
-  {id:"professional",nm:"Kwyre Professional",mdl:"Qwen3.5-4B Uncensored + 0.8B draft + 6 LoRA",spd:"7–14 tok/s",vr:"4.1 GB VRAM",pr:"$799",gpu:"RTX 4090/3090",tg:"PRO",cl:"pu",cp:"am",rag:1,be:"serve_local_4bit.py",dl:"3.3 GB",desc:"0/465 refusals. 6 domain adapters hot-swap. Pipeline: Claude → QLoRA → GRPO",feat:1},
+  {id:"professional",nm:"Kwyre Professional",mdl:"Qwen3.5-4B Uncensored + 0.8B draft + 13 LoRA",spd:"7–14 tok/s",vr:"4.1 GB VRAM",pr:"$799",gpu:"RTX 4090/3090",tg:"PRO",cl:"pu",cp:"am",rag:1,be:"serve_local_4bit.py",dl:"3.3 GB",desc:"0/465 refusals. 13 domain adapters hot-swap. Pipeline: Claude → QLoRA → GRPO",feat:1},
   {id:"air",nm:"Kwyre Air",mdl:"Any GGUF model",spd:"2–8 tok/s",vr:"8+ GB RAM",pr:"$299",gpu:"Any CPU",tg:"AIR",cl:"gn",cp:"gn",rag:0,be:"serve_cpu.py",dl:"2–4 GB",desc:"CPU-only via llama.cpp — runs on any hardware",feat:0},
   {id:"mlx",nm:"Kwyre Apple Silicon",mdl:"Any MLX model",spd:"5–15 tok/s",vr:"8+ GB unified",pr:"$299",gpu:"M1–M4 Mac",tg:"MLX",cl:"am",cp:"gn",rag:0,be:"serve_mlx.py",dl:"2–4 GB",desc:"Native Metal acceleration, zero CUDA dependency",feat:0},
 ];
@@ -440,7 +440,7 @@ function pickResp(s){
 }
 
 // ── STATE ──
-let convos=[{id:"c1",title:"Welcome to Kwyre",msgs:[{role:"assistant",content:"Kwyre AI v1.5 online. Running **Qwen3.5-4B Uncensored + Qwen3.5-0.8B draft** locally — air-gapped with 6 security layers. 0/465 refusals. 6 domain LoRA adapters hot-swap at runtime.\n\nUpload documents for RAG analysis, or try:\n- *\"Analyze NDA obligations and risks\"*\n- *\"Summarize Q3 revenue performance\"*\n- *\"Create forensic chain of custody\"*\n- *\"Review contract indemnification clause\"*"}],files:[],pinned:true}];
+let convos=[{id:"c1",title:"Welcome to Kwyre",msgs:[{role:"assistant",content:"Kwyre AI v1.5 online. Running **Qwen3.5-4B Uncensored + Qwen3.5-0.8B draft** locally — air-gapped with 6 security layers. 0/465 refusals. 13 domain LoRA adapters hot-swap at runtime.\n\nUpload documents for RAG analysis, or try:\n- *\"Analyze NDA obligations and risks\"*\n- *\"Summarize Q3 revenue performance\"*\n- *\"Create forensic chain of custody\"*\n- *\"Review contract indemnification clause\"*"}],files:[],pinned:true}];
 let activeId="c1",prodIdx=0,streaming=false,streamTimer=null,ctxPct=4,lastUserMsg="",sysPromptOpen=false;
 
 function getConvo(){return convos.find(c=>c.id===activeId)}
@@ -813,7 +813,7 @@ function renderSettings(){
   const p=PRODS[prodIdx];
   document.getElementById("kSettingsInf").innerHTML=`
     <div class="k-set-title">INFERENCE · ${esc(p.nm.toUpperCase())}</div>
-    ${[["Model",p.mdl],["Backend",p.be],["Quantization","NF4 (bitsandbytes)"],["Speculative",p.rag?"Qwen3.5-0.8B draft":"N/A"],["Adapters",p.feat?"6 domain LoRA hot-swap":"1 domain LoRA"],["Context","32,768 tokens"],["KV Cache","2 GB VRAM (LRU)"],["Compute","bfloat16"],["Flash Attention 2",p.rag?"Enabled (Ampere+)":"N/A"],["RAG",p.rag?"FAISS, RAM-only, crypto-wipe":"N/A"],["Bind","127.0.0.1:8000"]].map(([k,v])=>`<div class="k-set-row"><span class="k-set-key">${k}</span><span class="k-set-val">${v}</span></div>`).join("")}`;
+    ${[["Model",p.mdl],["Backend",p.be],["Quantization","NF4 (bitsandbytes)"],["Speculative",p.rag?"Qwen3.5-0.8B draft":"N/A"],["Adapters",p.feat?"13 domain LoRA hot-swap":"1 domain LoRA"],["Context","32,768 tokens"],["KV Cache","2 GB VRAM (LRU)"],["Compute","bfloat16"],["Flash Attention 2",p.rag?"Enabled (Ampere+)":"N/A"],["RAG",p.rag?"FAISS, RAM-only, crypto-wipe":"N/A"],["Bind","127.0.0.1:8000"]].map(([k,v])=>`<div class="k-set-row"><span class="k-set-key">${k}</span><span class="k-set-val">${v}</span></div>`).join("")}`;
 
   document.getElementById("kSettingsApi").innerHTML=`
     <div class="k-set-title">API ENDPOINTS</div>
