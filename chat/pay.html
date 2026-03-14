@@ -1,2139 +1,558 @@
 <!DOCTYPE html>
-<!--
-    ╔═══════════════════════════════════════════════════════════╗
-    ║  CLASSIFICATION: KWYRE EYES ONLY                         ║
-    ║  DOCUMENT: KW-008 / FINAL DEBRIEF                        ║
-    ║  ANALYST: CK                                             ║
-    ║  STATUS: CASE CLOSED                                     ║
-    ╚═══════════════════════════════════════════════════════════╝
-
-    BRIEFING: Page 8 of 8. You found them all.
-
-    OPERATION SILENT LEDGER — AFTER ACTION REPORT
-
-    SUBJECT: Apprehended at [REDACTED] on [REDACTED].
-    DEVICES: 3 phones, 2 laptops, 1 hardware wallet (Ledger).
-    WALLETS: All 47 frozen. $31.4M recovered.
-    STATUS: Awaiting extradition. Bail denied.
-
-    EVIDENCE INTEGRITY:
-    All on-chain analysis was performed using KWYRE AI running
-    on an air-gapped workstation. No evidence data was ever
-    transmitted to any cloud service. Chain of custody intact.
-    Analysis admissible under FRE 702.
-
-    The prosecution's forensic accountant testified that
-    KWYRE's analysis was "the most thorough blockchain
-    tracing work product I have reviewed in 15 years."
-
-    故知般若波羅蜜多是大神咒是大明咒是無上咒
-    是無等等咒能除一切苦真實不虛故說般若波羅蜜多咒
-    ⌬ CASE:CLOSED ⌬ ANALYST:CK ⌬ CLASSIFICATION:LIFTED ⌬
-
-    ╔══════════════════════════════════════════════════╗
-    ║  Congratulations. You found all 8 briefings.    ║
-    ║                                                  ║
-    ║  This is what we do.                             ║
-    ║  Your data stays on YOUR machine.                ║
-    ║  Theirs doesn't stay on theirs.                  ║
-    ║                                                  ║
-    ║  kwyre.com — zero telemetry — zero collection    ║
-    ║                                                  ║
-    ║  Everyone dies. Not everyone lives.               ║
-    ║                                        — CK      ║
-    ╚══════════════════════════════════════════════════╝
--->
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://js.stripe.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.stripe.com https://cloudflareinsights.com; img-src 'self' data: https://*.stripe.com; frame-src https://js.stripe.com https://hooks.stripe.com; base-uri 'self'; form-action 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' https://js.stripe.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; connect-src 'self' https://api.stripe.com https://cloudflareinsights.com; img-src 'self' data: https://*.stripe.com; frame-src https://js.stripe.com https://hooks.stripe.com; base-uri 'self'; form-action 'self'">
 <meta http-equiv="X-Content-Type-Options" content="nosniff">
 <meta name="referrer" content="no-referrer">
-<title>Kwyre AI — Secure Payment</title>
-<meta name="description" content="Purchase Kwyre AI inference server. Single payment. No subscription. Monero (XMR) accepted.">
+<title>Kwyre AI — Checkout</title>
 <link rel="icon" type="image/x-icon" href="favicon.ico">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-<script nonce="{{CSP_NONCE}}" src="https://cdn.jsdelivr.net/npm/qrcode-generator@1.4.4/qrcode.min.js"></script>
 <script src="https://js.stripe.com/v3/"></script>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#05060a;--surface:#0b0d14;--surface2:#10131c;--surface3:#161a27;
+  --border:#1c2033;--border-hi:#2a3050;
+  --accent:#3b82f6;--accent-dim:rgba(59,130,246,.12);--accent-glow:rgba(59,130,246,.25);
+  --green:#22c55e;--green-dim:rgba(34,197,94,.12);
+  --red:#ef4444;--red-dim:rgba(239,68,68,.12);
+  --amber:#f59e0b;--purple:#8b5cf6;
+  --text:#e2e4ea;--text2:#6b7294;--text3:#3d4466;
+  --mono:'IBM Plex Mono',monospace;--sans:'Instrument Sans',-apple-system,sans-serif;
+}
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;-webkit-font-smoothing:antialiased}
+::selection{background:var(--accent);color:#fff}
 
-:root {
-  --bg: #05060a;
-  --surface: #0b0d14;
-  --surface2: #10131c;
-  --surface3: #161a27;
-  --border: #1c2033;
-  --border-hi: #2a3050;
-  --accent: #3b82f6;
-  --accent-dim: rgba(59,130,246,0.12);
-  --accent-glow: rgba(59,130,246,0.25);
-  --green: #22c55e;
-  --green-dim: rgba(34,197,94,0.12);
-  --red: #ef4444;
-  --red-dim: rgba(239,68,68,0.12);
-  --amber: #f59e0b;
-  --gold: #eab308;
-  --gold-dim: rgba(234,179,8,0.12);
-  --gold-glow: rgba(234,179,8,0.25);
-  --text: #e2e4ea;
-  --text2: #6b7294;
-  --text3: #3d4466;
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'Instrument Sans', -apple-system, sans-serif;
-}
+.grid-bg{position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:linear-gradient(rgba(59,130,246,.015) 1px,transparent 1px),linear-gradient(90deg,rgba(59,130,246,.015) 1px,transparent 1px);
+  background-size:60px 60px}
+.grid-bg::after{content:'';position:absolute;inset:0;background:radial-gradient(ellipse 80% 60% at 50% 0%,rgba(59,130,246,.06),transparent 70%)}
+.vignette{position:fixed;inset:0;z-index:0;pointer-events:none;background:radial-gradient(ellipse 80% 80% at 50% 50%,transparent 35%,rgba(5,6,10,.85) 100%)}
 
-html { scroll-behavior: smooth; }
+nav{position:fixed;top:0;left:0;right:0;z-index:100;background:rgba(5,6,10,.85);backdrop-filter:blur(20px) saturate(180%);border-bottom:1px solid var(--border)}
+.nav-inner{max-width:1120px;margin:0 auto;padding:0 32px;display:flex;align-items:center;justify-content:space-between;height:56px}
+.nav-brand{font-family:var(--mono);font-size:16px;font-weight:700;letter-spacing:4px;text-transform:uppercase;color:#fff;text-decoration:none;text-shadow:0 0 12px rgba(255,255,255,.25)}
+.nav-brand img{filter:brightness(1.6) contrast(1.2)}
+.nav-links{display:flex;gap:32px;align-items:center}
+.nav-links a{font-size:13px;font-weight:500;color:#fff;text-decoration:none;letter-spacing:.3px;transition:color .2s}
+.nav-links a:hover{color:var(--accent)}
+.nav-cta{font-family:var(--mono)!important;font-size:11px!important;letter-spacing:1px!important;text-transform:uppercase!important;padding:8px 20px;background:var(--accent)!important;color:#fff!important;border-radius:4px;transition:box-shadow .2s,transform .1s!important}
+.nav-cta:hover{box-shadow:0 0 20px var(--accent-glow);transform:translateY(-1px)!important}
 
-body {
-  font-family: var(--sans);
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-  overflow-x: hidden;
-  -webkit-font-smoothing: antialiased;
-}
+.wrap{max-width:1120px;margin:0 auto;padding:0 32px;position:relative;z-index:1}
+.page{padding:100px 0 80px;min-height:100vh}
 
-::selection { background: var(--accent); color: #fff; }
+.page-title{text-align:center;margin-bottom:48px}
+.page-title h1{font-size:32px;font-weight:700;letter-spacing:-.5px;margin-bottom:8px}
+.page-title p{font-size:15px;color:var(--text2);max-width:500px;margin:0 auto;line-height:1.6}
 
-#particles { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+.section-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:16px}
 
-.grid-bg {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background-image:
-    linear-gradient(rgba(59,130,246,0.015) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(59,130,246,0.015) 1px, transparent 1px);
-  background-size: 60px 60px;
-}
-.grid-bg::after {
-  content: '';
-  position: absolute; inset: 0;
-  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(59,130,246,0.06), transparent 70%);
-}
+/* Product Grid */
+.cat-label{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin:32px 0 12px;padding-left:4px}
+.cat-label:first-child{margin-top:0}
+.products{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:12px;margin-bottom:12px}
+.prod-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.prod-card:hover{border-color:var(--border-hi);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.3)}
+.prod-card.selected{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent-dim),0 8px 24px rgba(59,130,246,.1)}
+.prod-card.selected::before{content:'';position:absolute;top:-1px;left:20%;right:20%;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);border-radius:2px}
+.prod-icon{font-size:28px;margin-bottom:12px;line-height:1}
+.prod-name{font-size:15px;font-weight:600;margin-bottom:4px}
+.prod-desc{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:12px;min-height:36px}
+.prod-price{font-family:var(--mono);font-size:18px;font-weight:700;color:var(--accent)}
+.prod-price span{font-size:11px;font-weight:400;color:var(--text3)}
+.prod-check{position:absolute;top:12px;right:12px;width:20px;height:20px;border-radius:50%;border:2px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all .2s}
+.prod-card.selected .prod-check{background:var(--accent);border-color:var(--accent)}
+.prod-card.selected .prod-check::after{content:'';width:6px;height:6px;background:#fff;border-radius:50%}
 
-.m-orb {
-  position: fixed; border-radius: 50%; pointer-events: none; z-index: 0;
-  filter: blur(120px);
-}
-.m-orb-1 {
-  width: 600px; height: 600px;
-  background: radial-gradient(circle, rgba(59,130,246,0.07), transparent 70%);
-  top: -5%; left: -5%;
-  animation: m-orb-a 18s ease-in-out infinite alternate;
-}
-.m-orb-2 {
-  width: 500px; height: 500px;
-  background: radial-gradient(circle, rgba(34,197,94,0.04), transparent 70%);
-  bottom: 10%; right: -8%;
-  animation: m-orb-b 22s ease-in-out infinite alternate;
-}
-.m-orb-3 {
-  width: 350px; height: 350px;
-  background: radial-gradient(circle, rgba(59,130,246,0.05), transparent 70%);
-  top: 40%; left: 30%;
-  animation: m-orb-c 15s ease-in-out infinite alternate;
-}
-@keyframes m-orb-a { 0%{transform:translate(0,0)} 100%{transform:translate(60px,-40px)} }
-@keyframes m-orb-b { 0%{transform:translate(0,0)} 100%{transform:translate(-50px,30px)} }
-@keyframes m-orb-c { 0%{transform:translate(0,0) scale(1)} 100%{transform:translate(40px,50px) scale(1.15)} }
+/* Addons */
+#addonsSection{display:none;margin-top:40px}
+#addonsSection.visible{display:block;animation:fadeUp .4s ease}
+.addons{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+.addon-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:20px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:16px}
+.addon-card:hover{border-color:var(--border-hi)}
+.addon-card.on{border-color:var(--green);background:rgba(34,197,94,.04)}
+.addon-toggle{width:18px;height:18px;border-radius:4px;border:2px solid var(--border);flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.addon-card.on .addon-toggle{background:var(--green);border-color:var(--green)}
+.addon-card.on .addon-toggle::after{content:'';width:4px;height:8px;border:solid #fff;border-width:0 2px 2px 0;transform:rotate(45deg);margin-top:-2px}
+.addon-info{flex:1}
+.addon-name{font-size:14px;font-weight:600;margin-bottom:2px}
+.addon-price{font-family:var(--mono);font-size:12px;color:var(--green)}
+.addon-detail{font-size:11px;color:var(--text3);margin-top:2px}
 
-.m-scanlines {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.03) 2px, rgba(0,0,0,0.03) 4px);
-}
+.machine-counter{display:flex;align-items:center;gap:12px;margin-top:8px}
+.machine-btn{width:28px;height:28px;border-radius:6px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:var(--mono);font-size:14px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.machine-btn:hover{border-color:var(--accent);color:var(--accent)}
+.machine-count{font-family:var(--mono);font-size:16px;font-weight:600;min-width:20px;text-align:center}
 
-.m-noise {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  opacity: 0.02;
-  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size: 256px 256px;
-}
+/* Checkout */
+#checkoutSection{display:none;margin-top:48px}
+#checkoutSection.visible{display:block;animation:fadeUp .4s ease}
+.checkout-grid{display:grid;grid-template-columns:1fr 360px;gap:32px}
+.checkout-form{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:32px}
+.checkout-form h3{font-size:16px;font-weight:600;margin-bottom:24px}
+.field{margin-bottom:20px}
+.field label{display:block;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px}
+.field input{width:100%;padding:14px 16px;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:13px;outline:none;transition:border .2s}
+.field input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-dim)}
+.field input::placeholder{color:var(--text3)}
+#stripe-el{min-height:80px;margin-bottom:20px}
+.stripe-loading{display:flex;align-items:center;justify-content:center;gap:8px;padding:24px;color:var(--text3);font-family:var(--mono);font-size:11px}
+.stripe-loading .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 1.2s ease-in-out infinite}
+.stripe-loading .dot:nth-child(2){animation-delay:.15s}
+.stripe-loading .dot:nth-child(3){animation-delay:.3s}
+@keyframes pulse{0%,80%,100%{opacity:.2;transform:scale(.7)}40%{opacity:1;transform:scale(1)}}
 
-.m-sweep {
-  position: fixed; left: 0; right: 0; height: 1px; z-index: 0; pointer-events: none;
-  background: linear-gradient(90deg, transparent 0%, rgba(59,130,246,0.15) 40%, rgba(59,130,246,0.08) 50%, rgba(59,130,246,0.15) 60%, transparent 100%);
-  animation: m-sweep-anim 6s ease-in-out infinite;
-  opacity: 0;
-}
-@keyframes m-sweep-anim {
-  0%   { top: -1px; opacity: 0; }
-  3%   { opacity: 0.7; }
-  97%  { opacity: 0.7; }
-  100% { top: 100vh; opacity: 0; }
-}
+.pay-btn{width:100%;padding:16px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s}
+.pay-btn:hover:not(:disabled){box-shadow:0 4px 20px var(--accent-glow);transform:translateY(-1px)}
+.pay-btn:disabled{opacity:.5;cursor:not-allowed}
 
-.m-vignette {
-  position: fixed; inset: 0; z-index: 0; pointer-events: none;
-  background: radial-gradient(ellipse 80% 80% at 50% 50%, transparent 35%, rgba(5,6,10,0.85) 100%);
-}
-#embers { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
-.hex-pulse {
-  position: fixed; width: 200px; height: 200px;
-  border-radius: 50%; pointer-events: none; z-index: 0;
-  background: radial-gradient(circle, rgba(59,130,246,0.04), transparent 70%);
-  transform: translate(-50%, -50%);
-  transition: opacity 0.3s;
-  opacity: 0;
-}
-.hex-pulse.visible { opacity: 1; }
+.pay-error{display:none;align-items:center;gap:8px;margin-bottom:16px;padding:12px;background:var(--red-dim);border:1px solid rgba(239,68,68,.2);border-radius:6px;font-family:var(--mono);font-size:11px;color:var(--red)}
 
-.reveal {
-  opacity: 0; transform: translateY(32px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-.reveal.vis { opacity: 1; transform: translateY(0); }
-.reveal-d1 { transition-delay: 0.1s; }
-.reveal-d2 { transition-delay: 0.2s; }
-.reveal-d3 { transition-delay: 0.3s; }
+/* Order Summary */
+.summary{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:28px;position:sticky;top:80px}
+.summary h3{font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:20px}
+.summary-line{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);font-size:13px}
+.summary-line:last-of-type{border-bottom:none}
+.summary-line .label{color:var(--text2)}
+.summary-line .amount{font-family:var(--mono);font-weight:600}
+.summary-total{display:flex;justify-content:space-between;align-items:center;padding:16px 0 0;margin-top:8px;border-top:2px solid var(--border);font-size:16px;font-weight:700}
+.summary-total .amount{font-family:var(--mono);color:var(--accent);font-size:20px}
 
-.wrap { max-width: 1120px; margin: 0 auto; padding: 0 32px; position: relative; z-index: 1; }
+/* Success */
+#successSection{display:none}
+#successSection.visible{display:flex;flex-direction:column;align-items:center;text-align:center;padding:80px 0;animation:fadeUp .5s ease}
+.success-icon{width:72px;height:72px;border-radius:50%;background:var(--green-dim);border:2px solid rgba(34,197,94,.3);display:flex;align-items:center;justify-content:center;margin-bottom:24px;font-size:32px}
+.success-title{font-size:24px;font-weight:700;margin-bottom:8px}
+.success-sub{font-size:14px;color:var(--text2);margin-bottom:32px;max-width:400px;line-height:1.6}
+.license-box{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:24px;width:100%;max-width:560px;margin-bottom:24px}
+.license-box label{display:block;font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:10px}
+.license-key{display:flex;align-items:center;gap:10px}
+.license-key code{flex:1;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-family:var(--mono);font-size:11px;color:var(--green);word-break:break-all;text-align:left;user-select:all}
+.copy-btn{padding:10px 18px;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text2);font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all .2s;white-space:nowrap}
+.copy-btn:hover{border-color:var(--accent);color:var(--accent)}
+.copy-btn.copied{border-color:var(--green);color:var(--green);background:var(--green-dim)}
+.next-steps{display:flex;flex-direction:column;gap:8px;width:100%;max-width:560px}
+.next-steps a{display:flex;align-items:center;justify-content:center;gap:8px;padding:14px;background:var(--surface);border:1px solid var(--border);border-radius:8px;color:var(--text);text-decoration:none;font-size:14px;font-weight:500;transition:all .2s}
+.next-steps a:hover{border-color:var(--accent);color:var(--accent);background:var(--accent-dim)}
 
-/* --- NAV --- */
-nav {
-  position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-  background: rgba(5,6,10,0.85);
-  backdrop-filter: blur(20px) saturate(180%);
-  border-bottom: 1px solid var(--border);
-}
+.site-footer{border-top:1px solid var(--border);padding:40px 0;position:relative;z-index:1}
+.footer-inner{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px}
+.footer-brand{font-family:var(--mono);font-size:11px;letter-spacing:2px;color:var(--text3);text-transform:uppercase}
+.footer-legal{font-size:12px;color:var(--text3);max-width:500px;line-height:1.5}
 
-.nav-inner {
-  max-width: 1120px; margin: 0 auto; padding: 0 32px;
-  display: flex; align-items: center; justify-content: space-between;
-  height: 56px;
-}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 
-.nav-brand {
-  font-family: var(--mono);
-  font-size: 16px; font-weight: 700;
-  letter-spacing: 4px; text-transform: uppercase;
-  color: #fff; text-decoration: none;
-  text-shadow: 0 0 12px rgba(255,255,255,0.25);
-}
-.nav-brand span { color: #fff; }
-.nav-brand img { filter: brightness(1.6) contrast(1.2); }
-
-.nav-links { display: flex; gap: 32px; align-items: center; }
-
-.nav-links a {
-  font-size: 13px; font-weight: 500;
-  color: #fff; text-decoration: none;
-  letter-spacing: 0.3px; transition: color 0.2s;
-}
-.nav-links a:hover { color: var(--accent); }
-
-.nav-cta {
-  font-family: var(--mono) !important;
-  font-size: 11px !important;
-  letter-spacing: 1px !important;
-  text-transform: uppercase !important;
-  padding: 8px 20px;
-  background: var(--accent) !important;
-  color: #fff !important;
-  border-radius: 4px;
-  transition: box-shadow 0.2s, transform 0.1s !important;
-}
-.nav-cta:hover { box-shadow: 0 0 20px var(--accent-glow); transform: translateY(-1px) !important; }
-
-/* --- HERO --- */
-.hero {
-  padding: 140px 0 40px;
-  text-align: center;
-}
-
-.hero-eyebrow {
-  font-family: var(--mono);
-  font-size: 11px; font-weight: 500;
-  letter-spacing: 3px; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 20px;
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-}
-.hero-eyebrow::before, .hero-eyebrow::after {
-  content: ''; width: 40px; height: 1px;
-  background: linear-gradient(90deg, transparent, var(--accent));
-}
-.hero-eyebrow::after { background: linear-gradient(90deg, var(--accent), transparent); }
-
-.hero h1 {
-  font-size: clamp(32px, 5vw, 52px);
-  font-weight: 700; line-height: 1.1;
-  letter-spacing: -1.5px; margin-bottom: 16px;
-}
-.hero h1 em { font-style: normal; color: var(--accent); }
-
-.hero-sub {
-  font-size: 17px; color: var(--text2);
-  max-width: 580px; margin: 0 auto;
-  line-height: 1.7;
-}
-.hero-sub strong { color: var(--text); font-weight: 600; }
-
-/* --- STEP INDICATOR --- */
-.step-bar {
-  display: flex; align-items: center; justify-content: center;
-  gap: 0; margin: 36px auto 0;
-  max-width: 560px;
-}
-.step-item {
-  display: flex; align-items: center; gap: 10px;
-  cursor: pointer; padding: 8px 4px;
-  transition: opacity 0.2s;
-  opacity: 0.35;
-}
-.step-item.active { opacity: 1; }
-.step-item.completed { opacity: 0.7; }
-.step-item.completed .step-num { background: var(--green); border-color: var(--green); color: #fff; }
-.step-num {
-  width: 28px; height: 28px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 12px; font-weight: 600;
-  background: var(--surface2); border: 1px solid var(--border);
-  color: var(--text3); transition: all 0.3s;
-  flex-shrink: 0;
-}
-.step-item.active .step-num {
-  background: var(--accent); border-color: var(--accent); color: #fff;
-  box-shadow: 0 0 12px var(--accent-glow);
-}
-.step-label {
-  font-family: var(--mono); font-size: 11px; font-weight: 500;
-  letter-spacing: 1px; text-transform: uppercase;
-  color: var(--text3); white-space: nowrap;
-}
-.step-item.active .step-label { color: var(--text); }
-.step-line {
-  width: 48px; height: 1px; flex-shrink: 0;
-  background: var(--border); margin: 0 4px;
-}
-.step-line.done { background: var(--green); }
-
-/* --- TRUST BAR --- */
-.trust-bar {
-  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-  padding: 14px 0; background: var(--surface);
-}
-.trust-items {
-  display: flex; align-items: center; justify-content: center;
-  gap: 40px; flex-wrap: wrap;
-}
-.trust-item {
-  display: flex; align-items: center; gap: 8px;
-  font-family: var(--mono); font-size: 11px;
-  color: var(--text2); letter-spacing: 0.5px; white-space: nowrap;
-}
-
-/* --- SECTIONS --- */
-.pay-step {
-  padding: 64px 0;
-  border-top: 1px solid var(--border);
-}
-.pay-step.hidden { display: none; }
-
-.sh { margin-bottom: 36px; }
-.sh-eyebrow {
-  font-family: var(--mono);
-  font-size: 11px; font-weight: 500;
-  letter-spacing: 3px; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 12px;
-}
-.sh h2 {
-  font-size: clamp(24px, 3vw, 32px);
-  font-weight: 700; letter-spacing: -0.5px;
-  line-height: 1.15; margin-bottom: 8px;
-}
-.sh p { font-size: 14px; color: var(--text2); line-height: 1.6; }
-
-/* --- PRODUCT GRID --- */
-.prod-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.prod-card {
-  background: var(--surface);
-  border: 2px solid var(--border);
-  border-radius: 10px;
-  padding: 28px 24px;
-  cursor: pointer;
-  transition: background 0.2s, border-color 0.3s, box-shadow 0.3s, transform 0.2s;
-  display: flex; flex-direction: column;
-  position: relative;
-}
-.prod-card:hover {
-  background: var(--surface2);
-  border-color: var(--border-hi);
-  transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(0,0,0,0.2);
-}
-.prod-card.featured {
-  border-color: var(--accent);
-  background: var(--surface2);
-}
-.prod-card.selected {
-  border-color: var(--gold) !important;
-  box-shadow: 0 0 0 1px var(--gold), 0 8px 32px var(--gold-glow) !important;
-  background: var(--surface2);
-}
-.prod-badge {
-  position: absolute; top: -1px; left: 50%; transform: translateX(-50%);
-  font-family: var(--mono); font-size: 9px; font-weight: 700;
-  letter-spacing: 2px; padding: 4px 12px;
-  border-radius: 0 0 6px 6px; white-space: nowrap;
-}
-.prod-badge.blue { background: var(--accent); color: #fff; }
-.prod-badge.green { background: var(--green); color: #fff; }
-
-.prod-name {
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 8px;
-}
-.prod-card.featured .prod-name { margin-top: 12px; }
-.prod-card.cloud-card .prod-name { color: var(--green); }
-
-.prod-price {
-  font-size: 32px; font-weight: 700;
-  color: var(--text); letter-spacing: -0.5px;
-  margin-bottom: 4px; line-height: 1;
-}
-.prod-price-sub {
-  font-family: var(--mono); font-size: 10px;
-  color: var(--text3); letter-spacing: 0.5px;
-  margin-bottom: 16px;
-}
-
-.prod-features { list-style: none; flex: 1; }
-.prod-features li {
-  font-size: 12px; color: var(--text2);
-  padding: 5px 0; display: flex; align-items: center; gap: 7px;
-}
-.prod-features li::before {
-  content: ''; width: 4px; height: 4px;
-  border-radius: 1px; background: var(--accent); flex-shrink: 0;
-}
-.prod-card.cloud-card .prod-features li::before { background: var(--green); }
-
-.prod-select-btn {
-  display: block; width: 100%;
-  margin-top: 16px; padding: 11px;
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  border: 1px solid var(--border); border-radius: 4px;
-  background: transparent; color: var(--text2);
-  cursor: pointer; transition: all 0.2s;
-  text-decoration: none; text-align: center;
-}
-.prod-select-btn:hover {
-  border-color: var(--accent); color: var(--accent); background: var(--accent-dim);
-}
-.prod-card.selected .prod-select-btn {
-  background: var(--gold); color: #000; border-color: var(--gold);
-  font-weight: 700; box-shadow: 0 2px 12px var(--gold-glow);
-}
-.prod-card.cloud-card .prod-select-btn {
-  border-color: rgba(34,197,94,0.3); color: var(--green);
-}
-.prod-card.cloud-card .prod-select-btn:hover {
-  background: var(--green-dim); border-color: var(--green);
-}
-
-/* --- CONTINUE BUTTON --- */
-.continue-btn {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  margin: 32px auto 0; padding: 14px 48px;
-  font-family: var(--mono); font-size: 12px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  background: var(--accent); color: #fff; border: none;
-  border-radius: 6px; cursor: pointer; transition: all 0.2s;
-}
-.continue-btn:hover {
-  box-shadow: 0 4px 24px var(--accent-glow); transform: translateY(-1px);
-}
-.continue-btn:disabled {
-  opacity: 0.4; cursor: not-allowed; transform: none; box-shadow: none;
-}
-.continue-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
-
-/* --- ADD-ONS --- */
-.addons-list {
-  max-width: 640px;
-  display: flex; flex-direction: column; gap: 12px;
-}
-
-.addon-row {
-  display: flex; align-items: center; gap: 16px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 20px 24px;
-  transition: border-color 0.2s, background 0.2s;
-}
-.addon-row:hover { background: var(--surface2); }
-.addon-row.active { border-color: var(--gold); background: var(--surface2); }
-.addon-row.disabled {
-  opacity: 0.35; pointer-events: none;
-}
-
-.addon-info { flex: 1; }
-.addon-name {
-  font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 2px;
-}
-.addon-desc {
-  font-size: 12px; color: var(--text2); line-height: 1.5;
-}
-.addon-price {
-  font-family: var(--mono); font-size: 13px; font-weight: 600;
-  color: var(--gold); white-space: nowrap; margin-right: 8px;
-}
-.addon-price.contact { color: var(--text2); font-size: 11px; }
-
-/* Toggle Switch */
-.toggle-switch {
-  position: relative; width: 44px; height: 24px; flex-shrink: 0;
-}
-.toggle-switch input { opacity: 0; width: 0; height: 0; position: absolute; }
-.toggle-slider {
-  position: absolute; cursor: pointer; inset: 0;
-  background: var(--surface3); border: 1px solid var(--border);
-  border-radius: 24px; transition: 0.3s;
-}
-.toggle-slider::before {
-  content: ''; position: absolute;
-  height: 18px; width: 18px; left: 2px; bottom: 2px;
-  background: var(--text3); border-radius: 50%; transition: 0.3s;
-}
-input:checked + .toggle-slider {
-  background: var(--gold); border-color: var(--gold);
-}
-input:checked + .toggle-slider::before {
-  transform: translateX(20px); background: #fff;
-}
-
-/* Number input for extra machines */
-.addon-number-wrap {
-  display: flex; align-items: center; gap: 0; flex-shrink: 0;
-}
-.addon-num-btn {
-  width: 32px; height: 32px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--surface3); border: 1px solid var(--border);
-  color: var(--text2); font-size: 16px; cursor: pointer;
-  transition: all 0.15s; font-family: var(--mono);
-}
-.addon-num-btn:first-child { border-radius: 4px 0 0 4px; }
-.addon-num-btn:last-child { border-radius: 0 4px 4px 0; }
-.addon-num-btn:hover { background: var(--accent-dim); color: var(--accent); border-color: var(--accent); }
-.addon-num-val {
-  width: 40px; height: 32px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--bg); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
-  font-family: var(--mono); font-size: 14px; font-weight: 600;
-  color: var(--text);
-}
-
-.addon-contact-btn {
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  letter-spacing: 1px; text-transform: uppercase;
-  padding: 8px 16px; border-radius: 4px;
-  background: transparent; border: 1px solid var(--border);
-  color: var(--text2); cursor: pointer; transition: all 0.2s;
-  text-decoration: none; white-space: nowrap;
-}
-.addon-contact-btn:hover {
-  border-color: var(--accent); color: var(--accent); background: var(--accent-dim);
-}
-
-/* Running total */
-.running-total {
-  display: flex; align-items: center; justify-content: space-between;
-  margin-top: 20px; padding: 20px 24px;
-  background: var(--surface2); border: 1px solid var(--border);
-  border-radius: 8px;
-  max-width: 640px;
-}
-.running-total-label {
-  font-family: var(--mono); font-size: 11px; font-weight: 500;
-  letter-spacing: 1.5px; text-transform: uppercase; color: var(--text2);
-}
-.running-total-amount {
-  font-size: 28px; font-weight: 700; color: var(--text);
-  letter-spacing: -0.5px;
-}
-
-/* --- PAYMENT SECTION --- */
-.pay-layout {
-  display: grid; grid-template-columns: 1fr 400px;
-  gap: 48px; align-items: start;
-}
-
-.pay-breakdown {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 28px;
-}
-.pay-breakdown h3 {
-  font-family: var(--mono); font-size: 11px; font-weight: 600;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--text2); margin-bottom: 20px;
-}
-.breakdown-item {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 10px 0; border-bottom: 1px solid var(--border);
-  font-size: 13px;
-}
-.breakdown-item:last-child { border-bottom: none; }
-.breakdown-item-label { color: var(--text2); }
-.breakdown-item-price { font-family: var(--mono); font-weight: 600; color: var(--text); }
-.breakdown-item.total {
-  border-top: 2px solid var(--border); border-bottom: none;
-  margin-top: 4px; padding-top: 16px;
-}
-.breakdown-item.total .breakdown-item-label {
-  font-weight: 700; color: var(--text); font-size: 15px;
-}
-.breakdown-item.total .breakdown-item-price {
-  font-size: 22px; color: var(--gold); font-weight: 700;
-}
-
-/* Payment method toggle & panels */
-.pay-method-toggle {
-  display: flex; gap: 1px;
-  background: var(--border); border-radius: 6px;
-  overflow: hidden; margin-bottom: 24px;
-}
-.pay-method-toggle button {
-  flex: 1; padding: 12px 16px;
-  background: var(--surface2); border: none;
-  font-family: var(--mono); font-size: 11px;
-  font-weight: 500; letter-spacing: 1px;
-  text-transform: uppercase; color: var(--text3);
-  cursor: pointer; transition: background 0.2s, color 0.2s;
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-}
-.pay-method-toggle button.active {
-  background: var(--accent-dim); color: var(--accent);
-}
-.pay-method-toggle button:hover:not(.active) { color: var(--text2); }
-.pay-method-toggle .recommended {
-  font-size: 8px; letter-spacing: 1.5px;
-  background: var(--green-dim); color: var(--green);
-  border: 1px solid rgba(34,197,94,0.15);
-  padding: 2px 6px; border-radius: 2px;
-  text-transform: uppercase; font-weight: 600;
-}
-
-.pay-panel { max-width: none; }
-.pay-panel-hidden { display: none; }
-
-/* Email field */
-.email-field {
-  margin-bottom: 20px;
-}
-.email-label {
-  display: block; font-family: var(--mono);
-  font-size: 10px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--text3); margin-bottom: 8px;
-}
-.email-input {
-  width: 100%; padding: 12px 14px;
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: 6px; color: var(--text);
-  font-family: var(--mono); font-size: 13px;
-  transition: border-color 0.2s, box-shadow 0.2s;
-}
-.email-input:focus {
-  outline: none; border-color: var(--accent);
-  box-shadow: 0 0 0 3px var(--accent-dim);
-}
-.email-input::placeholder { color: var(--text3); }
-
-/* Stripe */
-.stripe-loading {
-  display: flex; align-items: center; justify-content: center; gap: 12px;
-  padding: 40px 20px;
-  font-family: var(--mono); font-size: 12px; color: var(--text3);
-}
-.stripe-loading-dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--accent); opacity: 0.4;
-  animation: stripe-pulse 1.2s ease-in-out infinite;
-}
-.stripe-loading-dot:nth-child(2) { animation-delay: 0.2s; }
-.stripe-loading-dot:nth-child(3) { animation-delay: 0.4s; }
-@keyframes stripe-pulse { 0%, 80%, 100% { opacity: 0.2; transform: scale(0.8); } 40% { opacity: 1; transform: scale(1); } }
-
-#stripe-payment-element { min-height: 180px; }
-
-.stripe-error {
-  display: flex; align-items: center; gap: 10px;
-  margin: 12px 0; padding: 14px 16px;
-  background: var(--red-dim); border: 1px solid rgba(239,68,68,0.2);
-  border-radius: 6px;
-  font-family: var(--mono); font-size: 12px; color: var(--red);
-  line-height: 1.5;
-}
-.stripe-error svg { flex-shrink: 0; }
-
-.cc-pay-btn {
-  display: flex; align-items: center; justify-content: center; gap: 10px;
-  width: 100%; margin-top: 20px; padding: 16px;
-  font-family: var(--mono); font-size: 12px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  background: var(--accent); color: #fff; border: none;
-  border-radius: 6px; cursor: pointer; transition: all 0.2s;
-}
-.cc-pay-btn:hover {
-  box-shadow: 0 4px 24px var(--accent-glow); transform: translateY(-1px);
-}
-.cc-pay-btn:disabled {
-  opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none;
-}
-.cc-pay-btn svg { width: 16px; height: 16px; stroke: currentColor; fill: none; stroke-width: 2; }
-
-.cc-secure-note {
-  display: flex; align-items: center; justify-content: center; gap: 8px;
-  margin-top: 14px;
-  font-family: var(--mono); font-size: 10px; color: var(--text3); letter-spacing: 0.5px;
-}
-.cc-secure-note svg { width: 12px; height: 12px; stroke: var(--text3); fill: none; stroke-width: 2; }
-
-/* XMR Panel */
-.xmr-panel { text-align: center; }
-.xmr-selected-tier {
-  font-family: var(--mono); font-size: 11px; font-weight: 500;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  color: var(--accent); margin-bottom: 8px;
-}
-.xmr-amount-usd {
-  font-size: 32px; font-weight: 700; color: var(--text); margin-bottom: 4px;
-}
-.xmr-rate-note {
-  font-size: 12px; color: var(--text3); margin-bottom: 24px;
-  font-family: var(--mono); letter-spacing: 0.3px;
-}
-.qr-container {
-  display: inline-block; background: #fff; padding: 12px;
-  border-radius: 8px; margin-bottom: 20px;
-  box-shadow: 0 4px 24px rgba(0,0,0,0.3);
-}
-.qr-container canvas, .qr-container img { display: block; }
-.xmr-address-wrap {
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: 6px; padding: 14px; margin-bottom: 14px;
-}
-.xmr-address-label {
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--text3); margin-bottom: 8px; text-align: left;
-}
-.xmr-address {
-  font-family: var(--mono); font-size: 11px; color: var(--text);
-  word-break: break-all; line-height: 1.7; text-align: left; user-select: all;
-}
-.copy-btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 10px 24px; font-family: var(--mono);
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  background: var(--accent); color: #fff; border: none;
-  border-radius: 4px; cursor: pointer; transition: all 0.2s;
-}
-.copy-btn:hover {
-  box-shadow: 0 4px 24px var(--accent-glow); transform: translateY(-1px);
-}
-.copy-btn.copied { background: var(--green); box-shadow: 0 4px 24px rgba(34,197,94,0.25); }
-.copy-btn svg { width: 14px; height: 14px; stroke: currentColor; fill: none; stroke-width: 2; }
-
-.xmr-after-steps {
-  margin-top: 24px; text-align: left;
-}
-.xmr-after-step {
-  display: flex; align-items: flex-start; gap: 12px;
-  padding: 12px 0;
-}
-.xmr-after-step + .xmr-after-step { border-top: 1px solid var(--border); }
-.xmr-after-num {
-  width: 28px; height: 28px; flex-shrink: 0; border-radius: 4px;
-  background: var(--accent-dim); color: var(--accent);
-  display: flex; align-items: center; justify-content: center;
-  font-family: var(--mono); font-size: 12px; font-weight: 600;
-}
-.xmr-after-text h4 { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
-.xmr-after-text p { font-size: 12px; color: var(--text2); line-height: 1.5; }
-.xmr-after-text a { color: var(--accent); text-decoration: none; }
-.xmr-after-text a:hover { text-decoration: underline; }
-
-/* --- SUCCESS --- */
-@keyframes fade-in { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-
-.pay-success-section {
-  padding: 80px 0; text-align: center;
-  animation: fade-in 0.5s ease;
-}
-.pay-success-icon {
-  width: 72px; height: 72px; border-radius: 50%;
-  background: var(--green-dim); border: 2px solid rgba(34,197,94,0.3);
-  display: flex; align-items: center; justify-content: center;
-  margin: 0 auto 28px;
-}
-.pay-success-section h2 {
-  font-size: 28px; font-weight: 700; margin-bottom: 12px;
-}
-.pay-success-section p {
-  font-size: 15px; color: var(--text2); line-height: 1.6; max-width: 480px; margin: 0 auto;
-}
-.license-key-box {
-  max-width: 560px; margin: 28px auto;
-  background: var(--surface); border: 1px solid var(--green);
-  border-radius: 8px; padding: 20px;
-  text-align: left;
-}
-.license-key-label {
-  font-family: var(--mono); font-size: 10px; font-weight: 600;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--green); margin-bottom: 10px;
-}
-.license-key-value {
-  font-family: var(--mono); font-size: 12px;
-  color: var(--text); word-break: break-all;
-  line-height: 1.7; user-select: all;
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: 4px; padding: 12px;
-}
-.success-actions {
-  display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
-  margin-top: 28px;
-}
-.success-btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  padding: 12px 28px; font-family: var(--mono);
-  font-size: 11px; font-weight: 600;
-  letter-spacing: 1px; text-transform: uppercase;
-  border-radius: 4px; cursor: pointer; transition: all 0.2s;
-  text-decoration: none; border: none;
-}
-.success-btn.primary { background: var(--accent); color: #fff; }
-.success-btn.primary:hover { box-shadow: 0 4px 20px var(--accent-glow); transform: translateY(-1px); }
-.success-btn.ghost { background: transparent; color: var(--text2); border: 1px solid var(--border); }
-.success-btn.ghost:hover { border-color: var(--text2); color: var(--text); }
-
-/* --- DOWNLOAD SECTION --- */
-.dl-section { padding: 80px 0; border-top: 1px solid var(--border); }
-
-.dl-gate { max-width: 640px; margin: 0 auto; }
-.dl-input-wrap {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: 8px; padding: 28px;
-}
-.dl-label {
-  display: block; font-family: var(--mono);
-  font-size: 10px; font-weight: 600;
-  letter-spacing: 2px; text-transform: uppercase;
-  color: var(--text3); margin-bottom: 12px;
-}
-.dl-input {
-  width: 100%; padding: 14px 16px;
-  background: var(--bg); border: 1px solid var(--border);
-  border-radius: 6px; color: var(--text);
-  font-family: var(--mono); font-size: 12px; line-height: 1.6;
-  resize: vertical; transition: border-color 0.2s;
-}
-.dl-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-dim); }
-.dl-input::placeholder { color: var(--text3); }
-
-.dl-verify-btn {
-  display: inline-flex; align-items: center; gap: 8px;
-  margin-top: 16px; padding: 14px 32px;
-  font-family: var(--mono); font-size: 11px; font-weight: 600;
-  letter-spacing: 1.5px; text-transform: uppercase;
-  background: var(--accent); color: #fff; border: none;
-  border-radius: 4px; cursor: pointer; transition: all 0.2s;
-}
-.dl-verify-btn:hover { box-shadow: 0 4px 24px var(--accent-glow); transform: translateY(-1px); }
-.dl-verify-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
-
-.dl-error {
-  display: flex; align-items: center; gap: 10px;
-  margin-top: 16px; padding: 14px 20px;
-  background: var(--red-dim); border: 1px solid rgba(239,68,68,0.2);
-  border-radius: 6px; font-family: var(--mono); font-size: 12px; color: var(--red);
-}
-.dl-success { margin-top: 28px; animation: fade-in 0.5s ease; }
-.dl-badge {
-  display: flex; align-items: center; gap: 10px;
-  padding: 16px 20px;
-  background: var(--green-dim); border: 1px solid rgba(34,197,94,0.2);
-  border-radius: 6px; margin-bottom: 24px;
-  font-family: var(--mono); font-size: 13px; color: var(--green); font-weight: 600;
-}
-.dl-machines {
-  margin-left: auto; font-size: 11px; font-weight: 400;
-  color: var(--text2); letter-spacing: 0.5px;
-}
-.dl-grid {
-  display: flex; flex-direction: column; gap: 1px;
-  background: var(--border); border-radius: 8px; overflow: hidden;
-}
-.dl-card {
-  display: flex; align-items: center; gap: 20px;
-  padding: 20px 24px; background: var(--surface);
-  text-decoration: none; color: var(--text); transition: background 0.2s;
-}
-.dl-card:hover { background: var(--surface2); }
-.dl-card-icon {
-  width: 48px; height: 48px;
-  display: flex; align-items: center; justify-content: center;
-  background: var(--surface3); border-radius: 8px;
-  color: var(--text2); flex-shrink: 0;
-}
-.dl-card:hover .dl-card-icon { color: var(--accent); }
-.dl-card-info { flex: 1; }
-.dl-card-platform { font-size: 15px; font-weight: 600; margin-bottom: 2px; }
-.dl-card-file { font-family: var(--mono); font-size: 11px; color: var(--text3); letter-spacing: 0.3px; }
-.dl-card-arrow { color: var(--text3); transition: color 0.2s, transform 0.2s; }
-.dl-card:hover .dl-card-arrow { color: var(--accent); transform: translateY(2px); }
-.dl-note {
-  display: flex; align-items: center; gap: 8px;
-  margin-top: 16px; font-family: var(--mono);
-  font-size: 11px; color: var(--text3); letter-spacing: 0.3px;
-}
-
-/* --- FOOTER --- */
-.site-footer { border-top: 1px solid var(--border); padding: 40px 0; }
-.footer-inner {
-  display: flex; justify-content: space-between;
-  align-items: center; flex-wrap: wrap; gap: 16px;
-}
-.footer-brand {
-  font-family: var(--mono); font-size: 11px; letter-spacing: 2px;
-  color: var(--text3); text-transform: uppercase;
-}
-.footer-legal { font-size: 12px; color: var(--text3); max-width: 500px; line-height: 1.5; }
-
-/* --- RESPONSIVE --- */
-@media (max-width: 900px) {
-  .pay-layout { grid-template-columns: 1fr; }
-}
-@media (max-width: 768px) {
-  .nav-links a:not(.nav-cta) { display: none; }
-  .hero { padding: 120px 0 30px; }
-  .prod-grid { grid-template-columns: repeat(2, 1fr); }
-  .wrap { padding: 0 20px; }
-  .step-label { display: none; }
-  .footer-inner { flex-direction: column; text-align: center; }
-  .trust-items { gap: 20px; }
-}
-@media (max-width: 480px) {
-  .prod-grid { grid-template-columns: 1fr; }
-  .pay-step { padding: 48px 0; }
-  .addon-row { flex-wrap: wrap; gap: 12px; }
-  .addon-price { order: 3; width: 100%; text-align: right; }
+@media(max-width:768px){
+  .nav-links a:not(.nav-cta){display:none}
+  .products{grid-template-columns:1fr 1fr}
+  .checkout-grid{grid-template-columns:1fr}
+  .summary{position:static}
+  .wrap{padding:0 20px}
+}
+@media(max-width:480px){
+  .products{grid-template-columns:1fr}
+  .addons{grid-template-columns:1fr}
 }
 </style>
 </head>
 <body>
-<canvas id="particles"></canvas>
 <div class="grid-bg"></div>
-<div class="m-scanlines"></div>
-<div class="m-noise"></div>
-<div class="m-sweep"></div>
-<div class="m-orb m-orb-1"></div>
-<div class="m-orb m-orb-2"></div>
-<div class="m-orb m-orb-3"></div>
-<div class="m-vignette"></div>
-<canvas id="embers"></canvas>
-<div class="hex-pulse" id="hexPulse"></div>
+<div class="vignette"></div>
 
-<!-- NAV -->
 <nav>
   <div class="nav-inner">
     <a href="main.html" class="nav-brand"><img src="kwyre-icon.svg" alt="Kwyre" style="height:28px;vertical-align:middle;margin-right:10px;"><span>K</span>WYRE</a>
     <div class="nav-links">
       <a href="technology.html">Data Privacy</a>
-      <a href="custom.html">Custom</a>
-      <a href="security.html">Security &amp; Compliance</a>
+      <a href="security.html">Security</a>
       <a href="products.html">Products</a>
-      <a href="platform.html">Platform</a>
-      <a href="pay.html">Purchase</a>
-      <a href="cloud.html">Cloud</a>
+      <a href="dashboard.html">Dashboard</a>
       <a href="kwyre-demo.html" class="nav-cta">App Demo</a>
     </div>
   </div>
 </nav>
 
-<!-- Deuteronomy 8:18 — But remember the LORD your God, for it is he who gives you the ability to produce wealth. -->
-
-<!-- HERO -->
-<div class="hero">
+<div class="page">
   <div class="wrap">
-    <div class="hero-eyebrow reveal">Secure Payment</div>
-    <h1 class="reveal reveal-d1">Pay once. <em>Own forever.</em></h1>
-    <p class="hero-sub reveal reveal-d2">
-      One payment, lifetime ownership. <strong>No subscriptions.</strong>
-      No usage caps. No data collection. Your machine, your AI.
-    </p>
 
-    <div class="step-bar reveal reveal-d3">
-      <div class="step-item active" data-step="1" onclick="goToStep(1)">
-        <div class="step-num">1</div>
-        <div class="step-label">Select Product</div>
-      </div>
-      <div class="step-line" id="stepLine1"></div>
-      <div class="step-item" data-step="2" onclick="goToStep(2)">
-        <div class="step-num">2</div>
-        <div class="step-label">Add-ons</div>
-      </div>
-      <div class="step-line" id="stepLine2"></div>
-      <div class="step-item" data-step="3" onclick="goToStep(3)">
-        <div class="step-num">3</div>
-        <div class="step-label">Payment</div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- Malachi 3:10 — Bring the whole tithe into the storehouse, that there may be food in my house. Test me in this, says the LORD. -->
-
-<!-- TRUST BAR -->
-<div class="trust-bar">
-  <div class="wrap">
-    <div class="trust-items">
-      <div class="trust-item">
-        <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--green)" fill="none" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-        100% LOCAL &middot; NO CLOUD
-      </div>
-      <div class="trust-item">
-        <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--accent)" fill="none" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-        ED25519 OFFLINE LICENSE
-      </div>
-      <div class="trust-item">
-        <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--accent)" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
-        XMR ANONYMOUS PAYMENT
-      </div>
-      <div class="trust-item">
-        <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--green)" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-        ONE-TIME &middot; NO SUBSCRIPTION
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ═══════════════════ STEP 1: SELECT PRODUCT ═══════════════════ -->
-<div class="pay-step" id="step1">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow">Step 1</div>
-      <h2>Choose your product</h2>
-      <p>Six deployment options. Same 6-layer security stack.</p>
+    <div class="page-title">
+      <h1>Checkout</h1>
+      <p>Select a product, customize add-ons, and pay securely with Stripe. One-time purchase, no subscription.</p>
     </div>
 
-    <div class="prod-grid" id="productGrid">
+    <!-- PRODUCT SELECTOR -->
+    <div class="section-label">Choose a product</div>
 
-      <div class="prod-card" data-tier="personal" onclick="selectProduct('personal')">
-        <div class="prod-name">Personal</div>
-        <div class="prod-price">$299</div>
-        <div class="prod-price-sub">One-time &middot; 1 machine</div>
-        <ul class="prod-features">
-          <li>Qwen3.5-4B Uncensored (0/465 refusals)</li>
-          <li>1 domain LoRA adapter + Spike QAT</li>
-          <li>3.3 GB download &middot; 6-layer security</li>
-        </ul>
-        <button class="prod-select-btn">Select</button>
-      </div>
+    <div class="cat-label">Local Products</div>
+    <div class="products" id="localProducts"></div>
 
-      <div class="prod-card featured" data-tier="professional" onclick="selectProduct('professional')">
-        <div class="prod-badge blue">MOST POPULAR</div>
-        <div class="prod-name">Professional</div>
-        <div class="prod-price">$799</div>
-        <div class="prod-price-sub">One-time &middot; 3 machines</div>
-        <ul class="prod-features">
-          <li>All 6 LoRA adapters hot-swap</li>
-          <li>All 4 backends &middot; SOC2/HIPAA/FINRA</li>
-          <li>White-glove setup &middot; Priority support</li>
-        </ul>
-        <button class="prod-select-btn">Select</button>
-      </div>
+    <div class="cat-label">Cloud</div>
+    <div class="products" id="cloudProducts"></div>
 
-      <div class="prod-card" data-tier="air" onclick="selectProduct('air')">
-        <div class="prod-name">Air</div>
-        <div class="prod-price">$299</div>
-        <div class="prod-price-sub">One-time &middot; CPU only</div>
-        <ul class="prod-features">
-          <li>llama.cpp &mdash; any GGUF model</li>
-          <li>No GPU required</li>
-          <li>6-layer security &middot; 1 machine</li>
-        </ul>
-        <button class="prod-select-btn">Select</button>
-      </div>
+    <div class="cat-label">Specialized Apps</div>
+    <div class="products" id="specializedProducts"></div>
 
-      <div class="prod-card" data-tier="apple_silicon" onclick="selectProduct('apple_silicon')">
-        <div class="prod-name">Apple Silicon</div>
-        <div class="prod-price">$299</div>
-        <div class="prod-price-sub">One-time &middot; M1&ndash;M4</div>
-        <ul class="prod-features">
-          <li>Native Metal / MLX acceleration</li>
-          <li>M1/M2/M3/M4 optimized</li>
-          <li>6-layer security &middot; 1 machine</li>
-        </ul>
-        <button class="prod-select-btn">Select</button>
-      </div>
-
-      <div class="prod-card cloud-card" data-tier="cloud" onclick="selectProduct('cloud')">
-        <div class="prod-badge green">CLOUD</div>
-        <div class="prod-name">Cloud</div>
-        <div class="prod-price" style="font-size:22px;color:var(--green);">Contact Us</div>
-        <div class="prod-price-sub">Usage-based pricing</div>
-        <ul class="prod-features">
-          <li>32B/72B models on GPU clusters</li>
-          <li>No hardware management</li>
-          <li>Usage-based &middot; API access</li>
-        </ul>
-        <a href="custom.html" class="prod-select-btn" onclick="event.stopPropagation()">Contact</a>
-      </div>
-
-      <div class="prod-card cloud-card" data-tier="cloud_pro" onclick="selectProduct('cloud_pro')">
-        <div class="prod-badge green">CLOUD PRO</div>
-        <div class="prod-name">Cloud Pro</div>
-        <div class="prod-price" style="font-size:22px;color:var(--green);">Contact Us</div>
-        <div class="prod-price-sub">Dedicated infrastructure</div>
-        <ul class="prod-features">
-          <li>Dedicated GPU infrastructure</li>
-          <li>Custom model deployment</li>
-          <li>SLA guarantee &middot; Priority support</li>
-        </ul>
-        <a href="custom.html" class="prod-select-btn" onclick="event.stopPropagation()">Contact</a>
-      </div>
-
-      <div style="grid-column: 1 / -1; margin: 16px 0 8px; padding: 8px 0; border-top: 1px solid var(--border);">
-        <span style="font-family: var(--mono); font-size: 11px; letter-spacing: 2px; text-transform: uppercase; color: var(--text3);">MINT RAIL SPECIALTY PRODUCTS</span>
-        <span style="display: block; font-size: 12px; color: var(--text2); margin-top: 4px;">Each includes Kwyre base + specialized add-on package</span>
-      </div>
-
-      <div class="prod-card" data-tier="quantedge" onclick="selectProduct('quantedge')">
-        <div class="prod-name">QuantEdge</div>
-        <div class="prod-price">$499</div>
-        <div class="prod-price-sub">One-time &middot; 1 machine</div>
-        <ul class="prod-features">
-          <li>Quant finance: options pricing</li>
-          <li>Portfolio optimization</li>
-          <li>Risk management</li>
-        </ul>
-        <button class="prod-select-btn">Select</button>
-      </div>
-
-      <div class="prod-card" data-tier="labmind" onclick="selectProduct('labmind')">
-        <div class="prod-name">LabMind</div>
-        <div class="prod-price">$499</div>
-        <div class="prod-price-sub">One-time &middot; 1 machine</div>
-        <ul class="prod-features">
-          <li>Scientific research: literature synthesis</li>
-          <li>Experiment design</li>
-          <li>Stats planning</li>
-        </ul>
-        <button class="prod-select-btn">Select</button>
-      </div>
-
-      <div class="prod-card" data-tier="dentai" onclick="selectProduct('dentai')">
-        <div class="prod-name">DentAI</div>
-        <div class="prod-price">$399</div>
-        <div class="prod-price-sub">One-time &middot; 1 machine</div>
-        <ul class="prod-features">
-          <li>Dental practice: treatment planning</li>
-          <li>CDT coding</li>
-          <li>Clinical notes</li>
-        </ul>
-        <button class="prod-select-btn">Select</button>
-      </div>
-
-      <div class="prod-card" data-tier="codeforge" onclick="selectProduct('codeforge')">
-        <div class="prod-name">CodeForge</div>
-        <div class="prod-price">$399</div>
-        <div class="prod-price-sub">One-time &middot; 1 machine</div>
-        <ul class="prod-features">
-          <li>Software engineering: repo indexing</li>
-          <li>Code review</li>
-          <li>Architecture analysis</li>
-        </ul>
-        <button class="prod-select-btn">Select</button>
-      </div>
-
-      <div class="prod-card" data-tier="taxshield" onclick="selectProduct('taxshield')">
-        <div class="prod-name">TaxShield</div>
-        <div class="prod-price">$399</div>
-        <div class="prod-price-sub">One-time &middot; 1 machine</div>
-        <ul class="prod-features">
-          <li>Tax strategy: deduction optimization</li>
-          <li>Entity comparison</li>
-          <li>Depreciation</li>
-        </ul>
-        <button class="prod-select-btn">Select</button>
-      </div>
-
-      <div class="prod-card" data-tier="launchpad" onclick="selectProduct('launchpad')">
-        <div class="prod-name">LaunchPad</div>
-        <div class="prod-price">$299</div>
-        <div class="prod-price-sub">One-time &middot; 1 machine</div>
-        <ul class="prod-features">
-          <li>Job placement: ATS resume scoring</li>
-          <li>Interview prep</li>
-          <li>Job matching</li>
-        </ul>
-        <button class="prod-select-btn">Select</button>
-      </div>
-
-      <div class="prod-card" data-tier="soulsync" onclick="selectProduct('soulsync')">
-        <div class="prod-name">SoulSync</div>
-        <div class="prod-price">$299</div>
-        <div class="prod-price-sub">One-time &middot; 1 machine</div>
-        <ul class="prod-features">
-          <li>Dating/matching: personality profiling</li>
-          <li>Compatibility scoring</li>
-          <li>Icebreakers</li>
-        </ul>
-        <button class="prod-select-btn">Select</button>
-      </div>
-
-      <div class="prod-card" data-tier="nfl_playcaller" onclick="selectProduct('nfl_playcaller')">
-        <div class="prod-name">NFL PlayCaller</div>
-        <div class="prod-price">$199</div>
-        <div class="prod-price-sub">One-time &middot; 1 machine</div>
-        <ul class="prod-features">
-          <li>NFL analysis: scouting, play calling</li>
-          <li>Blitz prediction</li>
-          <li>Live games</li>
-        </ul>
-        <button class="prod-select-btn">Select</button>
-      </div>
-
-    </div>
-
-    <button class="continue-btn" id="continueToAddons" disabled onclick="goToStep(2)">
-      Continue to Add-ons
-      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
-  </div>
-</div>
-
-<!-- ═══════════════════ STEP 2: ADD-ONS ═══════════════════ -->
-<div class="pay-step hidden" id="step2">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow">Step 2</div>
-      <h2>Customize with add-ons</h2>
-      <p>Enhance your deployment. Toggle what you need.</p>
-    </div>
-
-    <div class="addons-list" id="addonsList">
-
-      <div class="addon-row" id="addonAirgap">
-        <div class="addon-info">
-          <div class="addon-name">Air-Gapped Kit</div>
-          <div class="addon-desc">Network lockdown, intrusion detection, compliance docs</div>
+    <!-- ADD-ONS -->
+    <div id="addonsSection">
+      <div class="section-label">Add-ons</div>
+      <div class="addons">
+        <div class="addon-card" id="addonAirgap" onclick="toggleAddon('airgap')">
+          <div class="addon-toggle"></div>
+          <div class="addon-info">
+            <div class="addon-name">Air-Gapped Kit</div>
+            <div class="addon-price">+$5,000</div>
+            <div class="addon-detail">Network lockdown, intrusion detection, compliance docs, offline installer</div>
+          </div>
         </div>
-        <div class="addon-price">+$1,499</div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="toggleAirgap" onchange="updateAddons()">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-
-      <div class="addon-row" id="addonCloud">
-        <div class="addon-info">
-          <div class="addon-name">Cloud Access</div>
-          <div class="addon-desc">32B/72B models on GPU clusters</div>
-        </div>
-        <div class="addon-price">+$49/mo</div>
-        <label class="toggle-switch">
-          <input type="checkbox" id="toggleCloud" onchange="updateAddons()">
-          <span class="toggle-slider"></span>
-        </label>
-      </div>
-
-      <div class="addon-row" id="addonTraining">
-        <div class="addon-info">
-          <div class="addon-name">Custom Training</div>
-          <div class="addon-desc">We fine-tune a model on your data</div>
-        </div>
-        <div class="addon-price contact">Contact</div>
-        <a href="custom.html" class="addon-contact-btn">Request</a>
-      </div>
-
-      <div class="addon-row" id="addonMachines">
-        <div class="addon-info">
-          <div class="addon-name">Extra Machine Licenses</div>
-          <div class="addon-desc">Additional machine licenses for your team</div>
-        </div>
-        <div class="addon-price" id="machinesPrice">+$0</div>
-        <div class="addon-number-wrap">
-          <button class="addon-num-btn" onclick="changeMachines(-1)">&minus;</button>
-          <div class="addon-num-val" id="machinesCount">0</div>
-          <button class="addon-num-btn" onclick="changeMachines(1)">+</button>
+        <div class="addon-card" id="addonMachines">
+          <div class="addon-toggle" style="visibility:hidden"></div>
+          <div class="addon-info">
+            <div class="addon-name">Extra Machine Licenses</div>
+            <div class="addon-price">$99 each</div>
+            <div class="machine-counter">
+              <button class="machine-btn" onclick="adjustMachines(-1)">-</button>
+              <span class="machine-count" id="machineCount">0</span>
+              <button class="machine-btn" onclick="adjustMachines(1)">+</button>
+            </div>
+          </div>
         </div>
       </div>
-
     </div>
 
-    <div class="running-total">
-      <div class="running-total-label">Estimated Total</div>
-      <div class="running-total-amount" id="runningTotal">$299</div>
-    </div>
-
-    <button class="continue-btn" id="continueToPayment" onclick="goToStep(3)">
-      Continue to Payment
-      <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-    </button>
-  </div>
-</div>
-
-<!-- Luke 16:10 — Whoever can be trusted with very little can also be trusted with much. -->
-<!-- Proverbs 11:1 — The LORD detests dishonest scales, but accurate weights find favor with him. -->
-
-<!-- ═══════════════════ STEP 3: PAYMENT ═══════════════════ -->
-<div class="pay-step hidden" id="step3">
-  <div class="wrap">
-    <div class="sh">
-      <div class="sh-eyebrow">Step 3</div>
-      <h2>Complete your purchase</h2>
-    </div>
-
-    <div class="pay-layout">
-
-      <!-- LEFT: Payment Form -->
-      <div>
-        <div class="pay-method-toggle">
-          <button class="active" onclick="setPayMethod('cc')">
-            Credit Card
-          </button>
-          <button onclick="setPayMethod('xmr')">
-            Monero (XMR)
-            <span class="recommended">Anonymous</span>
+    <!-- CHECKOUT -->
+    <div id="checkoutSection">
+      <div class="section-label">Payment</div>
+      <div class="checkout-grid">
+        <div class="checkout-form">
+          <h3>Secure Payment</h3>
+          <div class="field">
+            <label>Email address</label>
+            <input type="email" id="payEmail" placeholder="you@company.com" autocomplete="email">
+          </div>
+          <div id="stripe-el">
+            <div class="stripe-loading" id="stripeLoading">
+              <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+              <span>Loading payment form...</span>
+            </div>
+          </div>
+          <div class="pay-error" id="payError">
+            <span id="payErrorMsg"></span>
+          </div>
+          <button class="pay-btn" id="payBtn" disabled onclick="handlePay()">
+            <span id="payBtnLabel">Pay</span>
           </button>
         </div>
-
-        <!-- CC / Stripe Panel -->
-        <div class="pay-panel" id="ccPanel">
-          <div class="email-field" id="emailFieldWrap">
-            <label class="email-label" for="payEmail">Email Address</label>
-            <input type="email" id="payEmail" class="email-input" placeholder="you@example.com" required>
-          </div>
-
-          <div id="stripeLoadingEl" class="stripe-loading">
-            <div class="stripe-loading-dot"></div>
-            <div class="stripe-loading-dot"></div>
-            <div class="stripe-loading-dot"></div>
-            <span>Initializing secure payment&hellip;</span>
-          </div>
-
-          <div id="stripe-payment-element"></div>
-
-          <div class="stripe-error" id="stripeError" style="display:none;">
-            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
-            <span id="stripeErrorMsg">An error occurred.</span>
-          </div>
-
-          <button class="cc-pay-btn" id="ccPayBtn" onclick="handleStripePayment()" disabled>
-            <svg viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            <span id="ccPayLabel">Pay</span>
-          </button>
-
-          <div class="cc-secure-note">
-            <svg viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-            256-bit TLS &middot; PCI-DSS &middot; Powered by Stripe
-          </div>
-        </div>
-
-        <!-- XMR Panel -->
-        <div class="pay-panel pay-panel-hidden xmr-panel" id="xmrPanel">
-          <div class="xmr-selected-tier" id="xmrTierLabel">Professional</div>
-          <div class="xmr-amount-usd" id="xmrAmountUsd">$799</div>
-          <div class="xmr-rate-note">XMR rate available on request</div>
-
-          <div id="qrCode" class="qr-container"></div>
-
-          <div class="xmr-address-wrap">
-            <div class="xmr-address-label">Monero (XMR) Address</div>
-            <div class="xmr-address" id="xmrAddress">84GhsVq5sQ3RE9DxMaRrmaX8L3am6VpJdfjz3KG3PFEiMVMjnFqYEochJCWBwREmUPNi7mYbSabKvP3kCB1oG4uiKxvpTvH</div>
-          </div>
-
-          <button class="copy-btn" id="copyBtn" onclick="copyAddress()">
-            <svg viewBox="0 0 24 24"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
-            <span id="copyLabel">Copy Address</span>
-          </button>
-
-          <div class="xmr-after-steps">
-            <div class="xmr-after-step">
-              <div class="xmr-after-num">1</div>
-              <div class="xmr-after-text">
-                <h4>Send payment</h4>
-                <p>Send the XMR amount to the address above.</p>
-              </div>
-            </div>
-            <div class="xmr-after-step">
-              <div class="xmr-after-num">2</div>
-              <div class="xmr-after-text">
-                <h4>Email your Transaction ID</h4>
-                <p>Email your TX ID to <a href="mailto:payments@kwyre.com">payments@kwyre.com</a></p>
-              </div>
-            </div>
-            <div class="xmr-after-step">
-              <div class="xmr-after-num">3</div>
-              <div class="xmr-after-text">
-                <h4>Receive your license key</h4>
-                <p>License key delivered within 24 hours.</p>
-              </div>
-            </div>
-          </div>
-        </div>
+        <div class="summary" id="orderSummary"></div>
       </div>
-
-      <!-- RIGHT: Breakdown -->
-      <div class="pay-breakdown" id="payBreakdown">
-        <h3>Order Summary</h3>
-        <div id="breakdownItems"></div>
-      </div>
-
     </div>
+
+    <!-- SUCCESS -->
+    <div id="successSection">
+      <div class="success-icon">&#10003;</div>
+      <div class="success-title">Payment Successful</div>
+      <div class="success-sub" id="successMsg">Your license key will be emailed within 24 hours.</div>
+      <div class="license-box" id="licenseBox" style="display:none">
+        <label>Your License Key</label>
+        <div class="license-key">
+          <code id="licenseKeyVal"></code>
+          <button class="copy-btn" onclick="copyLicense(this)">Copy</button>
+        </div>
+      </div>
+      <div class="next-steps">
+        <a href="dashboard.html">Go to Dashboard</a>
+        <a href="main.html">Open Chat</a>
+      </div>
+    </div>
+
   </div>
 </div>
 
-<!-- ═══════════════════ SUCCESS (hidden) ═══════════════════ -->
-<div class="pay-step hidden" id="successSection">
-  <div class="wrap">
-    <div class="pay-success-section">
-      <div class="pay-success-icon">
-        <svg viewBox="0 0 24 24" width="36" height="36" stroke="var(--green)" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-      </div>
-      <h2>Payment Confirmed</h2>
-      <p id="successMessage">Your license key has been generated.</p>
-
-      <div class="license-key-box" id="licenseKeyBox" style="display:none;">
-        <div class="license-key-label">Your License Key</div>
-        <div class="license-key-value" id="licenseKeyDisplay"></div>
-      </div>
-
-      <div class="success-actions">
-        <a href="#download" class="success-btn primary">Download Installer</a>
-        <a href="cloud.html" class="success-btn primary" style="background:var(--green);box-shadow:0 4px 20px rgba(34,197,94,0.25);">Open Cloud Desktop &rarr;</a>
-        <a href="kwyre-demo.html" class="success-btn ghost">Go to Dashboard</a>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- 1 Timothy 6:10 — For the love of money is a root of all kinds of evil. -->
-<!-- Matthew 6:21 — For where your treasure is, there your heart will be also. -->
-
-<!-- DOWNLOAD SECTION -->
-<div class="dl-section" id="download">
-  <div class="wrap">
-    <div class="sh" style="text-align:center;">
-      <div class="sh-eyebrow reveal">Download</div>
-      <h2 class="reveal reveal-d1">Already purchased?</h2>
-      <p class="reveal reveal-d2">Enter your license key to access your installer downloads.</p>
-    </div>
-
-    <div class="dl-gate reveal reveal-d3">
-      <div class="dl-input-wrap">
-        <label class="dl-label" for="licenseKeyInput">License Key</label>
-        <textarea id="licenseKeyInput" class="dl-input" rows="3" placeholder="KWYRE-eyJw..."></textarea>
-        <button class="dl-verify-btn" id="verifyBtn" onclick="verifyLicense()">
-          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          <span id="verifyLabel">Verify License</span>
-        </button>
-      </div>
-
-      <div class="dl-error" id="dlError" style="display:none">
-        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M15 9l-6 6M9 9l6 6"/></svg>
-        <span id="dlErrorMsg">Invalid license key</span>
-      </div>
-
-      <div class="dl-success" id="dlSuccess" style="display:none">
-        <div class="dl-badge">
-          <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" fill="none" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
-          <span id="dlTierLabel">Professional License</span>
-          <span class="dl-machines" id="dlMachines">3 machines</span>
-        </div>
-
-        <div class="dl-grid">
-          <a class="dl-card" href="https://github.com/blablablasealsaresoft/kwyre-ai/releases/latest/download/kwyre-ai_amd64.deb" id="dlLinux">
-            <div class="dl-card-icon">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="currentColor"><path d="M12.504 0c-.155 0-.315.008-.48.021-4.226.333-3.105 4.807-3.17 6.298-.076 1.092-.3 1.953-1.05 3.02-.885 1.051-2.127 2.75-2.716 4.521-.278.832-.41 1.684-.287 2.489a.424.424 0 0 0-.11.135c-.26.268-.45.6-.663.839-.199.199-.485.267-.797.4-.313.136-.658.269-.864.68-.09.189-.136.394-.132.602 0 .199.027.4.055.536.058.399.116.728.04.97-.249.68-.28 1.145-.106 1.484.174.334.535.47.94.601.81.2 1.91.135 2.774.6.926.466 1.866.67 2.616.47.526-.116.97-.464 1.208-.946.587-.003 1.23-.269 2.26-.334.699-.058 1.574.267 2.577.2.025.134.063.198.114.333l.003.003c.391.778 1.113 1.368 1.884 1.564.585.151 1.22.107 1.766-.14 1.07-.469 1.466-1.467 1.473-2.593.014-.133.03-.267.012-.4.602-.869.838-1.867.568-2.935-.136-.535-.36-1.036-.601-1.467-.24-.468-.5-.869-.66-1.27-.12-.27-.18-.53-.27-.801a2.386 2.386 0 0 0-.253-.534c-.12-.198-.254-.267-.38-.399-.116-.135-.122-.267-.223-.467-.09-.199-.2-.399-.467-.535-.267-.135-.51-.062-.59.068-.08.132.05.335.18.469.1.065.18.2.27.4.07.135.13.27.13.467 0 .198-.092.398-.259.534-.264.135-.464.065-.662-.199-.2-.266-.397-.668-.598-1.068-.201-.398-.398-.864-.4-1.202 0-.2.015-.399.063-.598.079-.2.217-.398.407-.535.199-.135.399-.202.531-.202.204.003.381.135.559.202.154.07.31.135.46.202.12.07.24.132.36.199.12.068.24.135.36.132.12 0 .24-.068.36-.202l.12-.135c.1-.199.12-.398.11-.598-.06-.599-.33-1.069-.72-1.399-.39-.267-.848-.398-1.284-.332l.004-.003c.073-.401.054-.802-.068-1.135-.127-.335-.351-.535-.596-.668-.49-.267-.994-.333-1.489-.668-.493-.333-1.035-.869-1.694-1.4-.654-.468-1.355-.87-2.122-.802-1.193.104-1.724.786-2.102 1.468-.378.68-.612 1.334-.86 1.933-.246.601-.48 1.2-.94 1.533-.458.335-1.116.4-1.737.4-.12 0-.244 0-.368.001-.232.002-.47.006-.704.069l-.123.032c-.025-.534.078-1.469.502-3.069.466-1.202 1.202-2.535 2.12-3.669.68-.87.997-1.936 1.122-3.069.09-.798.05-1.6-.093-2.335-.123-.666-.284-1.334-.535-1.867-.259-.534-.586-.935-1.012-1.068-.027-.008-.054-.01-.082-.016z"/></svg>
-            </div>
-            <div class="dl-card-info">
-              <div class="dl-card-platform">Linux</div>
-              <div class="dl-card-file">kwyre-ai_amd64.deb</div>
-            </div>
-            <div class="dl-card-arrow">
-              <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" fill="none" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-            </div>
-          </a>
-        </div>
-
-        <div class="dl-note">
-          <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" fill="none" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-          Compiled binary &mdash; source code is not included. All 6 security layers active.
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- FOOTER -->
 <footer class="site-footer">
   <div class="wrap">
     <div class="footer-inner">
       <div class="footer-brand">KWYRE &middot; Mint Rail LLC</div>
-      <div class="footer-legal">All inference runs 100% locally. No data leaves your machine. This is not legal advice. Verify your own compliance requirements.</div>
+      <div class="footer-legal">All inference runs 100% locally. No data leaves your machine.</div>
     </div>
   </div>
 </footer>
 
-<script nonce="{{CSP_NONCE}}">
-/* ══════════════════════════════════════════════════════════════════
-   PARTICLE SYSTEM
-   ══════════════════════════════════════════════════════════════════ */
-(function(){
-  const cv = document.getElementById('particles');
-  const cx = cv.getContext('2d');
-  let W, H, pts = [], mx = -9999, my = -9999, clickWaves = [];
-  const N = 120, CONN = 160, MOUSE_R = 200;
-  const hexPulse = document.getElementById('hexPulse');
-
-  function resize(){ W = cv.width = innerWidth; H = cv.height = innerHeight; }
-  function init(){
-    pts = Array.from({length:N}, ()=>({
-      x: Math.random()*W, y: Math.random()*H,
-      vx: (Math.random()-.5)*.35, vy: (Math.random()-.5)*.35,
-      ox: 0, oy: 0,
-      r: Math.random()*1.8+.4, p: Math.random()*Math.PI*2
-    }));
-  }
-
-  window.addEventListener('click', e => {
-    if(e.target.closest('button, a, .prod-card, .pay-method-toggle, input, textarea, select, .dl-card, .addon-row, label')) return;
-    clickWaves.push({ x: e.clientX, y: e.clientY, r: 0, maxR: 350, life: 1 });
-    pts.forEach(n => {
-      const d = Math.hypot(n.x - e.clientX, n.y - e.clientY);
-      if(d < 250) {
-        const angle = Math.atan2(n.y - e.clientY, n.x - e.clientX);
-        const force = (1 - d/250) * 8;
-        n.ox += Math.cos(angle) * force;
-        n.oy += Math.sin(angle) * force;
-      }
-    });
-  });
-
-  function frame(){
-    cx.clearRect(0,0,W,H);
-    clickWaves.forEach(w => {
-      w.r += 4; w.life -= 0.015;
-      if(w.life > 0) {
-        cx.beginPath(); cx.arc(w.x, w.y, w.r, 0, Math.PI*2);
-        cx.strokeStyle = `rgba(59,130,246,${w.life * 0.3})`; cx.lineWidth = 1.5; cx.stroke();
-        cx.beginPath(); cx.arc(w.x, w.y, w.r * 0.7, 0, Math.PI*2);
-        cx.strokeStyle = `rgba(34,197,94,${w.life * 0.15})`; cx.lineWidth = 0.8; cx.stroke();
-      }
-    });
-    clickWaves = clickWaves.filter(w => w.life > 0);
-    pts.forEach(n=>{
-      n.ox *= 0.94; n.oy *= 0.94;
-      n.x += n.vx + n.ox; n.y += n.vy + n.oy; n.p += .015;
-      if(n.x<0||n.x>W) n.vx*=-1;
-      if(n.y<0||n.y>H) n.vy*=-1;
-      n.x = Math.max(0, Math.min(W, n.x));
-      n.y = Math.max(0, Math.min(H, n.y));
-    });
-    for(let i=0;i<pts.length;i++) for(let j=i+1;j<pts.length;j++){
-      const a=pts[i],b=pts[j],d=Math.hypot(a.x-b.x,a.y-b.y);
-      if(d>CONN)continue;
-      const near=Math.hypot(a.x-mx,a.y-my)<MOUSE_R||Math.hypot(b.x-mx,b.y-my)<MOUSE_R;
-      const al=(1-d/CONN)*(near?.22:.09);
-      cx.beginPath();cx.moveTo(a.x,a.y);cx.lineTo(b.x,b.y);
-      cx.strokeStyle=near?`rgba(34,197,94,${al*2})`:`rgba(59,130,246,${al})`;
-      cx.lineWidth=near?1.2:.4;cx.stroke();
-    }
-    pts.forEach(n=>{
-      const near=Math.hypot(n.x-mx,n.y-my)<MOUSE_R;
-      const r=Math.max(0.1,n.r+Math.sin(n.p)*.5);
-      const col=near?'34,197,94':'59,130,246';
-      if(near){
-        cx.beginPath();cx.arc(n.x,n.y,r*6,0,Math.PI*2);
-        cx.fillStyle=`rgba(${col},.05)`;cx.fill();
-      }
-      cx.beginPath();cx.arc(n.x,n.y,r,0,Math.PI*2);
-      cx.fillStyle=`rgba(${col},${near?.85:.35+Math.sin(n.p)*.2})`;cx.fill();
-    });
-    requestAnimationFrame(frame);
-  }
-
-  window.addEventListener('mousemove',e=>{
-    mx=e.clientX;my=e.clientY;
-    hexPulse.style.left=mx+'px'; hexPulse.style.top=my+'px';
-    hexPulse.classList.add('visible');
-  });
-  window.addEventListener('resize',()=>{resize();init();emberResize();});
-  resize(); init(); frame();
-
-  const ecv = document.getElementById('embers');
-  const ecx = ecv.getContext('2d');
-  let eW, eH, embers = [];
-  const EC = 50;
-  function emberResize() { eW = ecv.width = innerWidth; eH = ecv.height = innerHeight; }
-  function mkEmbers() {
-    embers = Array.from({length: EC}, () => ({
-      x: Math.random()*eW, y: Math.random()*eH,
-      vx: (Math.random()-.5)*.12, vy: -(Math.random()*.5+.15),
-      r: Math.random()*1.6+.3, life: Math.random(),
-      decay: Math.random()*.003+.001,
-      color: Math.random()>.7 ? '34,197,94' : '59,130,246',
-      flicker: Math.random()*Math.PI*2,
-    }));
-  }
-  function emberFrame() {
-    ecx.clearRect(0,0,eW,eH);
-    embers.forEach(e => {
-      e.x += e.vx + Math.sin(e.flicker)*.1;
-      e.y += e.vy; e.flicker += .025; e.life -= e.decay;
-      if(e.life<=0 || e.y<-10) { e.x=Math.random()*eW; e.y=eH+10; e.life=1; e.r=Math.random()*1.6+.3; }
-      const a = e.life * (.45 + Math.sin(e.flicker)*.2);
-      ecx.beginPath(); ecx.arc(e.x, e.y, e.r, 0, Math.PI*2);
-      ecx.fillStyle=`rgba(${e.color},${a})`; ecx.fill();
-      if(e.r > 1) {
-        ecx.beginPath(); ecx.arc(e.x, e.y, e.r*3.5, 0, Math.PI*2);
-        ecx.fillStyle=`rgba(${e.color},${a*.07})`; ecx.fill();
-      }
-    });
-    requestAnimationFrame(emberFrame);
-  }
-  emberResize(); mkEmbers(); emberFrame();
-})();
-
-/* ══════════════════════════════════════════════════════════════════
-   SCROLL REVEAL
-   ══════════════════════════════════════════════════════════════════ */
-(function(){
-  const obs = new IntersectionObserver((entries)=>{
-    entries.forEach(e=>{
-      if(e.isIntersecting) { e.target.classList.add('vis'); obs.unobserve(e.target); }
-    });
-  }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-  document.querySelectorAll('.reveal').forEach(el=> obs.observe(el));
-})();
-
-/* ══════════════════════════════════════════════════════════════════
-   STATE + DATA
-   ══════════════════════════════════════════════════════════════════ */
-const PRODUCTS = {
-  personal:      { name: 'Kwyre Personal',      price: 299,  isLocal: true },
-  professional:  { name: 'Kwyre Professional',   price: 799,  isLocal: true },
-  air:           { name: 'Kwyre Air',            price: 299,  isLocal: true },
-  apple_silicon: { name: 'Kwyre Apple Silicon',  price: 299,  isLocal: true },
-  cloud:         { name: 'Kwyre Cloud',          price: null, isLocal: false },
-  cloud_pro:     { name: 'Kwyre Cloud Pro',      price: null, isLocal: false },
-  quantedge:     { name: 'QuantEdge',            price: 499,  isLocal: true },
-  labmind:       { name: 'LabMind',              price: 499,  isLocal: true },
-  dentai:        { name: 'DentAI',               price: 399,  isLocal: true },
-  codeforge:     { name: 'CodeForge',            price: 399,  isLocal: true },
-  taxshield:     { name: 'TaxShield',            price: 399,  isLocal: true },
-  launchpad:     { name: 'LaunchPad',            price: 299,  isLocal: true },
-  soulsync:      { name: 'SoulSync',             price: 299,  isLocal: true },
-  nfl_playcaller:{ name: 'NFL PlayCaller',       price: 199,  isLocal: true },
+<script>
+var PRODUCTS = {
+  personal:       { name:'Kwyre Personal',       icon:'\u26A1', price:299,  desc:'GPU inference with speculative decoding + 1 adapter', cat:'local' },
+  professional:   { name:'Kwyre Professional',   icon:'\uD83C\uDFDB\uFE0F', price:799,  desc:'All 8 domain adapters + GRPO reasoning + full analytics', cat:'local' },
+  air:            { name:'Kwyre Air',             icon:'\uD83D\uDCA8', price:299,  desc:'CPU inference, any hardware, no GPU required', cat:'local' },
+  apple_silicon:  { name:'Kwyre Apple Silicon',   icon:'\uD83C\uDF4E', price:299,  desc:'Native MLX on M1/M2/M3/M4 Macs', cat:'local' },
+  cloud:          { name:'Kwyre Cloud',           icon:'\u2601\uFE0F', price:49,   desc:'32B/72B models on H100 clusters', cat:'cloud', recurring:'/mo' },
+  cloud_pro:      { name:'Kwyre Cloud Pro',       icon:'\uD83D\uDE80', price:149,  desc:'72B + all 8 adapters + priority GPU', cat:'cloud', recurring:'/mo' },
+  quantedge:      { name:'QuantEdge',             icon:'\uD83D\uDCC8', price:499,  desc:'Quant finance AI', cat:'special' },
+  labmind:        { name:'LabMind',               icon:'\uD83D\uDD2C', price:499,  desc:'Scientific research AI', cat:'special' },
+  dentai:         { name:'DentAI',                icon:'\uD83E\uDDB7', price:399,  desc:'Dental practice AI', cat:'special' },
+  codeforge:      { name:'CodeForge',             icon:'\u2699\uFE0F', price:399,  desc:'Codebase-aware AI assistant', cat:'special' },
+  taxshield:      { name:'TaxShield',             icon:'\uD83D\uDEE1\uFE0F', price:399,  desc:'Tax strategy AI', cat:'special' },
+  launchpad:      { name:'LaunchPad',             icon:'\uD83D\uDE80', price:299,  desc:'Job placement AI', cat:'special' },
+  soulsync:       { name:'SoulSync',              icon:'\uD83D\uDC95', price:299,  desc:'Soulmate matching AI', cat:'special' },
+  nfl_playcaller: { name:'NFL PlayCaller',        icon:'\uD83C\uDFC8', price:199,  desc:'NFL analysis AI', cat:'special' },
 };
 
-const ADDON_PRICES = { airgap: 1499, cloud: 49, extra_machine: 99 };
+var state = { selected: null, airgap: false, machines: 0 };
+var _stripe = null, _elements = null, _payEl = null, _initKey = null;
 
-let state = {
-  step: 1,
-  selectedTier: null,
-  addons: { airgap: false, cloud: false, extraMachines: 0 },
-};
-
-/* ══════════════════════════════════════════════════════════════════
-   STEP NAVIGATION
-   ══════════════════════════════════════════════════════════════════ */
-function goToStep(step) {
-  if (step > 1 && !state.selectedTier) return;
-  if (step > 3) return;
-  state.step = step;
-
-  document.querySelectorAll('.step-item').forEach(el => {
-    const s = parseInt(el.dataset.step);
-    el.classList.toggle('active', s === step);
-    el.classList.toggle('completed', s < step);
-  });
-  document.getElementById('stepLine1').classList.toggle('done', step > 1);
-  document.getElementById('stepLine2').classList.toggle('done', step > 2);
-
-  document.getElementById('step2').classList.toggle('hidden', step < 2);
-  document.getElementById('step3').classList.toggle('hidden', step < 3);
-
-  if (step === 2) {
-    document.getElementById('step2').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    updateCloudAddonVisibility();
-  }
-  if (step === 3) {
-    renderBreakdown();
-    updatePayLabels();
-    document.getElementById('step3').scrollIntoView({ behavior: 'smooth', block: 'start' });
-    const ccPanel = document.getElementById('ccPanel');
-    if (!ccPanel.classList.contains('pay-panel-hidden')) {
-      initStripePanel();
-    }
+function renderProducts() {
+  var containers = { local:'localProducts', cloud:'cloudProducts', special:'specializedProducts' };
+  for (var key in PRODUCTS) {
+    var p = PRODUCTS[key];
+    var el = document.getElementById(containers[p.cat]);
+    if (!el) continue;
+    var card = document.createElement('div');
+    card.className = 'prod-card';
+    card.setAttribute('data-tier', key);
+    card.onclick = (function(k){ return function(){ selectProduct(k); }; })(key);
+    card.innerHTML =
+      '<div class="prod-check"></div>' +
+      '<div class="prod-icon">' + p.icon + '</div>' +
+      '<div class="prod-name">' + esc(p.name) + '</div>' +
+      '<div class="prod-desc">' + esc(p.desc) + '</div>' +
+      '<div class="prod-price">$' + p.price.toLocaleString() + (p.recurring ? '<span>' + p.recurring + '</span>' : '') + '</div>';
+    el.appendChild(card);
   }
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   PRODUCT SELECTION
-   ══════════════════════════════════════════════════════════════════ */
 function selectProduct(tier) {
-  const prod = PRODUCTS[tier];
-  if (!prod || !prod.isLocal) return;
-
-  state.selectedTier = tier;
-
-  document.querySelectorAll('.prod-card').forEach(card => {
-    const t = card.dataset.tier;
-    const btn = card.querySelector('.prod-select-btn');
-    if (t === tier) {
-      card.classList.add('selected');
-      if (btn && btn.tagName === 'BUTTON') btn.textContent = 'Selected';
-    } else {
-      card.classList.remove('selected');
-      if (btn && btn.tagName === 'BUTTON') btn.textContent = 'Select';
-    }
+  state.selected = tier;
+  document.querySelectorAll('.prod-card').forEach(function(c) {
+    c.classList.toggle('selected', c.getAttribute('data-tier') === tier);
   });
-
-  document.getElementById('continueToAddons').disabled = false;
-  updateAddons();
+  document.getElementById('addonsSection').classList.add('visible');
+  showCheckout();
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   ADD-ONS
-   ══════════════════════════════════════════════════════════════════ */
-function updateCloudAddonVisibility() {
-  const prod = PRODUCTS[state.selectedTier];
-  const cloudRow = document.getElementById('addonCloud');
-  if (prod && prod.isLocal) {
-    cloudRow.classList.remove('disabled');
-  } else {
-    cloudRow.classList.add('disabled');
-    document.getElementById('toggleCloud').checked = false;
-    state.addons.cloud = false;
+function toggleAddon(type) {
+  if (type === 'airgap') {
+    state.airgap = !state.airgap;
+    document.getElementById('addonAirgap').classList.toggle('on', state.airgap);
   }
+  updateSummary();
+  if (state.selected) reinitStripe();
 }
 
-function updateAddons() {
-  state.addons.airgap = document.getElementById('toggleAirgap').checked;
-  state.addons.cloud = document.getElementById('toggleCloud').checked;
-
-  document.getElementById('addonAirgap').classList.toggle('active', state.addons.airgap);
-  document.getElementById('addonCloud').classList.toggle('active', state.addons.cloud);
-
-  const machinePrice = state.addons.extraMachines * ADDON_PRICES.extra_machine;
-  document.getElementById('machinesPrice').textContent = machinePrice > 0 ? '+$' + machinePrice.toLocaleString() : '+$0';
-  document.getElementById('addonMachines').classList.toggle('active', state.addons.extraMachines > 0);
-
-  updateRunningTotal();
+function adjustMachines(delta) {
+  state.machines = Math.max(0, Math.min(10, state.machines + delta));
+  document.getElementById('machineCount').textContent = state.machines;
+  updateSummary();
+  if (state.selected) reinitStripe();
 }
 
-function changeMachines(delta) {
-  state.addons.extraMachines = Math.max(0, Math.min(10, state.addons.extraMachines + delta));
-  document.getElementById('machinesCount').textContent = state.addons.extraMachines;
-  updateAddons();
+function getTotal() {
+  if (!state.selected) return 0;
+  var p = PRODUCTS[state.selected];
+  var t = p.price;
+  if (state.airgap) t += 5000;
+  t += state.machines * 99;
+  return t;
 }
 
-function calculateTotal() {
-  const prod = PRODUCTS[state.selectedTier];
-  if (!prod || !prod.price) return 0;
-
-  let total = prod.price;
-  if (state.addons.airgap) total += ADDON_PRICES.airgap;
-  total += state.addons.extraMachines * ADDON_PRICES.extra_machine;
-  return total;
+function updateSummary() {
+  var el = document.getElementById('orderSummary');
+  if (!state.selected) { el.innerHTML = ''; return; }
+  var p = PRODUCTS[state.selected];
+  var lines = '<h3>Order Summary</h3>';
+  lines += '<div class="summary-line"><span class="label">' + esc(p.name) + '</span><span class="amount">$' + p.price.toLocaleString() + '</span></div>';
+  if (state.airgap) lines += '<div class="summary-line"><span class="label">Air-Gapped Kit</span><span class="amount">$5,000</span></div>';
+  if (state.machines > 0) lines += '<div class="summary-line"><span class="label">Extra Licenses \u00D7' + state.machines + '</span><span class="amount">$' + (state.machines * 99).toLocaleString() + '</span></div>';
+  lines += '<div class="summary-total"><span>Total</span><span class="amount">$' + getTotal().toLocaleString() + '</span></div>';
+  el.innerHTML = lines;
 }
 
-function updateRunningTotal() {
-  const total = calculateTotal();
-  document.getElementById('runningTotal').textContent = '$' + total.toLocaleString();
+function showCheckout() {
+  updateSummary();
+  document.getElementById('checkoutSection').classList.add('visible');
+  reinitStripe();
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   BREAKDOWN + PAY LABELS
-   ══════════════════════════════════════════════════════════════════ */
-function renderBreakdown() {
-  const prod = PRODUCTS[state.selectedTier];
-  if (!prod) return;
-  const container = document.getElementById('breakdownItems');
-  let html = '';
-
-  html += `<div class="breakdown-item"><span class="breakdown-item-label">${prod.name}</span><span class="breakdown-item-price">$${prod.price.toLocaleString()}</span></div>`;
-
-  if (state.addons.airgap) {
-    html += `<div class="breakdown-item"><span class="breakdown-item-label">Air-Gapped Kit</span><span class="breakdown-item-price">$${ADDON_PRICES.airgap.toLocaleString()}</span></div>`;
+/* Stripe */
+var _stripeConfigP = null;
+function loadStripeConfig() {
+  if (!_stripeConfigP) {
+    _stripeConfigP = fetch('/api/config/stripe').then(function(r){ return r.json(); }).then(function(d) {
+      if (d.publishableKey && typeof Stripe !== 'undefined') _stripe = Stripe(d.publishableKey);
+    }).catch(function(){});
   }
-  if (state.addons.cloud) {
-    html += `<div class="breakdown-item"><span class="breakdown-item-label">Cloud Access</span><span class="breakdown-item-price">$${ADDON_PRICES.cloud}/mo</span></div>`;
-  }
-  if (state.addons.extraMachines > 0) {
-    const machTotal = state.addons.extraMachines * ADDON_PRICES.extra_machine;
-    html += `<div class="breakdown-item"><span class="breakdown-item-label">Extra Licenses &times;${state.addons.extraMachines}</span><span class="breakdown-item-price">$${machTotal.toLocaleString()}</span></div>`;
-  }
+  return _stripeConfigP;
+}
+loadStripeConfig();
 
-  const total = calculateTotal();
-  html += `<div class="breakdown-item total"><span class="breakdown-item-label">Total</span><span class="breakdown-item-price">$${total.toLocaleString()}</span></div>`;
-
-  if (state.addons.cloud) {
-    html += `<div style="font-family:var(--mono);font-size:10px;color:var(--text3);margin-top:8px;letter-spacing:0.3px;">+ $${ADDON_PRICES.cloud}/mo for Cloud Access (billed separately)</div>`;
-  }
-
-  container.innerHTML = html;
+function reinitStripe() {
+  var key = state.selected + '|' + state.airgap + '|' + state.machines;
+  if (_initKey === key && _payEl) return;
+  _initKey = key;
+  initStripe();
 }
 
-function updatePayLabels() {
-  const prod = PRODUCTS[state.selectedTier];
-  if (!prod) return;
-  const total = calculateTotal();
+async function initStripe() {
+  var mountEl = document.getElementById('stripe-el');
+  var loading = document.getElementById('stripeLoading');
+  var payBtn = document.getElementById('payBtn');
+  var errEl = document.getElementById('payError');
 
-  document.getElementById('ccPayLabel').textContent = 'Pay $' + total.toLocaleString();
-  document.getElementById('xmrTierLabel').textContent = prod.name;
-  document.getElementById('xmrAmountUsd').textContent = '$' + total.toLocaleString();
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   PAYMENT METHOD TOGGLE
-   ══════════════════════════════════════════════════════════════════ */
-function setPayMethod(method) {
-  const btns = document.querySelectorAll('.pay-method-toggle button');
-  btns.forEach(b => b.classList.remove('active'));
-  btns[method === 'cc' ? 0 : 1].classList.add('active');
-
-  document.getElementById('ccPanel').classList.toggle('pay-panel-hidden', method !== 'cc');
-  document.getElementById('xmrPanel').classList.toggle('pay-panel-hidden', method !== 'xmr');
-
-  if (method === 'cc') initStripePanel();
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   QR CODE
-   ══════════════════════════════════════════════════════════════════ */
-(function(){
-  const addr = '84GhsVq5sQ3RE9DxMaRrmaX8L3am6VpJdfjz3KG3PFEiMVMjnFqYEochJCWBwREmUPNi7mYbSabKvP3kCB1oG4uiKxvpTvH';
-  const qr = qrcode(0, 'L');
-  qr.addData('monero:' + addr);
-  qr.make();
-  const container = document.getElementById('qrCode');
-  const cellSize = 4, modules = qr.getModuleCount(), size = modules * cellSize;
-  const canvas = document.createElement('canvas');
-  canvas.width = size; canvas.height = size;
-  canvas.style.width = (size * 1.5) + 'px';
-  canvas.style.height = (size * 1.5) + 'px';
-  canvas.style.imageRendering = 'pixelated';
-  const ctx = canvas.getContext('2d');
-  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, size, size);
-  ctx.fillStyle = '#05060a';
-  for (let row = 0; row < modules; row++)
-    for (let col = 0; col < modules; col++)
-      if (qr.isDark(row, col))
-        ctx.fillRect(col * cellSize, row * cellSize, cellSize, cellSize);
-  container.appendChild(canvas);
-})();
-
-/* ══════════════════════════════════════════════════════════════════
-   COPY ADDRESS
-   ══════════════════════════════════════════════════════════════════ */
-function copyAddress() {
-  const addr = document.getElementById('xmrAddress').textContent;
-  navigator.clipboard.writeText(addr).then(() => {
-    const btn = document.getElementById('copyBtn');
-    const label = document.getElementById('copyLabel');
-    btn.classList.add('copied');
-    label.textContent = 'Copied!';
-    setTimeout(() => { btn.classList.remove('copied'); label.textContent = 'Copy Address'; }, 2000);
-  });
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   LICENSE VERIFICATION
-   ══════════════════════════════════════════════════════════════════ */
-async function verifyLicense() {
-  const keyInput = document.getElementById('licenseKeyInput');
-  const errorEl = document.getElementById('dlError');
-  const errorMsg = document.getElementById('dlErrorMsg');
-  const successEl = document.getElementById('dlSuccess');
-  const btn = document.getElementById('verifyBtn');
-  const label = document.getElementById('verifyLabel');
-  const key = keyInput.value.trim();
-
-  if (!key) { showDlError('Please enter a license key.'); return; }
-  if (!key.startsWith('KWYRE-')) { showDlError('Invalid format. License keys start with KWYRE-'); return; }
-
-  btn.disabled = true; label.textContent = 'Verifying...';
-  errorEl.style.display = 'none'; successEl.style.display = 'none';
-
-  try {
-    const result = await verifyKeyLocally(key);
-    if (result.valid) { showDlSuccess(result); }
-    else { showDlError(result.error || 'Invalid license key.'); }
-  } catch (e) { showDlError('Verification failed: ' + (e.message || 'Unknown error')); }
-
-  btn.disabled = false; label.textContent = 'Verify License';
-}
-
-function verifyKeyLocally(key) {
-  return new Promise((resolve) => {
-    try {
-      const clean = key.replace('KWYRE-', '').replace(/-/g, '').replace(/\s/g, '');
-      const tokenJson = atob(clean);
-      const tokenData = JSON.parse(tokenJson);
-      if (!tokenData.p || !tokenData.s) { resolve({ valid: false, error: 'Malformed license key structure.' }); return; }
-      const payloadStr = atob(tokenData.p);
-      const payload = JSON.parse(payloadStr);
-      if (!payload.tier || !payload.label) { resolve({ valid: false, error: 'Malformed license payload.' }); return; }
-      const validTiers = ['personal', 'professional', 'airgapped', 'unlimited', 'air', 'apple_silicon', 'quantedge', 'labmind', 'dentai', 'codeforge', 'taxshield', 'launchpad', 'soulsync', 'nfl_playcaller'];
-      if (!validTiers.includes(payload.tier)) { resolve({ valid: false, error: 'Unknown license tier.' }); return; }
-      if (payload.expires_at && payload.expires_at < Date.now() / 1000) {
-        resolve({ valid: false, error: 'License expired on ' + new Date(payload.expires_at * 1000).toISOString().split('T')[0] + '.' }); return;
-      }
-      resolve({ valid: true, tier: payload.tier, label: payload.label, machines: payload.machines || 1 });
-    } catch (e) { resolve({ valid: false, error: 'Invalid license key format.' }); }
-  });
-}
-
-function showDlError(msg) {
-  document.getElementById('dlErrorMsg').textContent = msg;
-  document.getElementById('dlError').style.display = 'flex';
-  document.getElementById('dlSuccess').style.display = 'none';
-}
-
-function showDlSuccess(result) {
-  document.getElementById('dlError').style.display = 'none';
-  document.getElementById('dlSuccess').style.display = 'block';
-  document.getElementById('dlTierLabel').textContent = result.label + ' License';
-  document.getElementById('dlMachines').textContent = result.machines + ' machine' + (result.machines !== 1 ? 's' : '');
-}
-
-/* ══════════════════════════════════════════════════════════════════
-   STRIPE INTEGRATION
-   ══════════════════════════════════════════════════════════════════ */
-let _stripe = null, _elements = null, _paymentElement = null;
-let _stripeInitKey = null, _stripeInitializing = false;
-let _stripeConfigPromise = null;
-
-function _loadStripeConfig() {
-  if (!_stripeConfigPromise) {
-    _stripeConfigPromise = fetch('/api/config/stripe')
-      .then(r => r.json())
-      .then(({ publishableKey }) => {
-        if (publishableKey && typeof Stripe !== 'undefined') {
-          _stripe = Stripe(publishableKey);
-        }
-      })
-      .catch(e => console.error('Failed to load Stripe config:', e));
-  }
-  return _stripeConfigPromise;
-}
-
-_loadStripeConfig();
-
-async function _getStripe() {
-  await _loadStripeConfig();
-  return _stripe;
-}
-
-async function initStripePanel() {
-  const cacheKey = state.selectedTier + JSON.stringify(state.addons);
-  if (_stripeInitKey === cacheKey && _paymentElement) return;
-  if (_stripeInitializing) return;
-  _stripeInitializing = true;
-  _stripeInitKey = cacheKey;
-
-  const loadingEl = document.getElementById('stripeLoadingEl');
-  const mountEl   = document.getElementById('stripe-payment-element');
-  const errorEl   = document.getElementById('stripeError');
-  const payBtn    = document.getElementById('ccPayBtn');
-
-  if (_paymentElement) { try { _paymentElement.unmount(); } catch(e) {} _paymentElement = null; }
+  if (_payEl) { try { _payEl.unmount(); } catch(e){} _payEl = null; }
   mountEl.innerHTML = '';
-  loadingEl.style.display = 'flex';
-  errorEl.style.display = 'none';
+  mountEl.appendChild(loading);
+  loading.style.display = 'flex';
+  errEl.style.display = 'none';
   payBtn.disabled = true;
 
-  const total = calculateTotal();
-  document.getElementById('ccPayLabel').textContent = 'Pay $' + total.toLocaleString();
+  document.getElementById('payBtnLabel').textContent = 'Pay $' + getTotal().toLocaleString();
 
-  const stripe = await _getStripe();
-  if (!stripe) {
-    loadingEl.style.display = 'none';
-    document.getElementById('stripeErrorMsg').textContent = 'Stripe.js failed to load. Please refresh.';
-    errorEl.style.display = 'flex';
-    _stripeInitializing = false;
+  await loadStripeConfig();
+  if (!_stripe) {
+    loading.style.display = 'none';
+    showError('Stripe failed to load. Please refresh.');
     return;
   }
 
   try {
-    const email = document.getElementById('payEmail').value.trim();
-    const resp = await fetch('/api/create-payment-intent', {
+    var email = document.getElementById('payEmail').value.trim();
+    var resp = await fetch('/api/create-payment-intent', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        tier: state.selectedTier,
-        addons: {
-          airgap: state.addons.airgap,
-          cloud: state.addons.cloud,
-          extraMachines: state.addons.extraMachines,
-        },
+        tier: state.selected,
+        addons: { airgap: state.airgap, extraMachines: state.machines },
         email: email || undefined,
       }),
     });
-    const data = await resp.json();
+    var data = await resp.json();
+    if (!resp.ok || !data.clientSecret) throw new Error(data.error || 'Could not initialize payment.');
 
-    if (!resp.ok || !data.clientSecret) {
-      throw new Error(data.error || 'Could not initialise payment.');
-    }
-
-    _elements = stripe.elements({
+    _elements = _stripe.elements({
       clientSecret: data.clientSecret,
       appearance: {
         theme: 'night',
         variables: {
-          colorPrimary: '#3b82f6',
-          colorBackground: '#0b0d14',
-          colorText: '#e2e4ea',
-          colorTextSecondary: '#6b7294',
-          colorDanger: '#ef4444',
-          fontFamily: '"IBM Plex Mono", monospace',
-          fontSizeBase: '13px',
-          spacingUnit: '5px',
-          borderRadius: '6px',
+          colorPrimary:'#3b82f6', colorBackground:'#0b0d14', colorText:'#e2e4ea',
+          colorTextSecondary:'#6b7294', colorDanger:'#ef4444',
+          fontFamily:'"IBM Plex Mono",monospace', fontSizeBase:'13px',
+          spacingUnit:'5px', borderRadius:'6px',
         },
         rules: {
-          '.Input': { border: '1px solid #1c2033', backgroundColor: '#05060a' },
-          '.Input:focus': { border: '1px solid #3b82f6', boxShadow: '0 0 0 3px rgba(59,130,246,0.12)' },
-          '.Label': { fontWeight: '600', letterSpacing: '1.5px', textTransform: 'uppercase', fontSize: '10px' },
+          '.Input': { border:'1px solid #1c2033', backgroundColor:'#05060a' },
+          '.Input:focus': { border:'1px solid #3b82f6', boxShadow:'0 0 0 3px rgba(59,130,246,.12)' },
+          '.Label': { fontWeight:'600', letterSpacing:'1.5px', textTransform:'uppercase', fontSize:'10px' },
         },
       },
     });
 
-    _paymentElement = _elements.create('payment', { layout: 'tabs' });
-    _paymentElement.mount('#stripe-payment-element');
-
-    _paymentElement.on('ready', () => { loadingEl.style.display = 'none'; payBtn.disabled = false; });
-    _paymentElement.on('loaderror', (e) => {
-      loadingEl.style.display = 'none';
-      document.getElementById('stripeErrorMsg').textContent = e.error?.message || 'Failed to load payment form.';
-      errorEl.style.display = 'flex';
-    });
-  } catch (err) {
-    loadingEl.style.display = 'none';
-    document.getElementById('stripeErrorMsg').textContent = err.message;
-    errorEl.style.display = 'flex';
+    _payEl = _elements.create('payment', { layout:'tabs' });
+    _payEl.mount('#stripe-el');
+    _payEl.on('ready', function(){ loading.style.display = 'none'; payBtn.disabled = false; });
+    _payEl.on('loaderror', function(e){ loading.style.display = 'none'; showError(e.error?.message || 'Failed to load payment form.'); });
+  } catch(err) {
+    loading.style.display = 'none';
+    showError(err.message);
   }
-  _stripeInitializing = false;
 }
 
-async function handleStripePayment() {
-  const stripe = await _getStripe();
-  if (!stripe || !_elements) return;
+async function handlePay() {
+  if (!_stripe || !_elements) return;
+  var email = document.getElementById('payEmail').value.trim();
+  if (!email) { showError('Please enter your email address.'); document.getElementById('payEmail').focus(); return; }
 
-  const email = document.getElementById('payEmail').value.trim();
-  if (!email) {
-    document.getElementById('stripeErrorMsg').textContent = 'Please enter your email address.';
-    document.getElementById('stripeError').style.display = 'flex';
-    document.getElementById('payEmail').focus();
-    return;
-  }
+  var btn = document.getElementById('payBtn');
+  var label = document.getElementById('payBtnLabel');
+  btn.disabled = true;
+  label.textContent = 'Processing\u2026';
+  document.getElementById('payError').style.display = 'none';
 
-  const payBtn   = document.getElementById('ccPayBtn');
-  const payLabel = document.getElementById('ccPayLabel');
-  const errorEl  = document.getElementById('stripeError');
-
-  payBtn.disabled = true;
-  payLabel.textContent = 'Processing\u2026';
-  errorEl.style.display = 'none';
-
-  const { error, paymentIntent } = await stripe.confirmPayment({
+  var result = await _stripe.confirmPayment({
     elements: _elements,
     redirect: 'if_required',
     confirmParams: {
       receipt_email: email,
-      return_url: window.location.origin + '/pay.html?payment_success=true&tier=' + encodeURIComponent(state.selectedTier),
+      return_url: window.location.origin + '/pay.html?payment_success=true&tier=' + encodeURIComponent(state.selected),
     },
   });
 
-  if (error) {
-    document.getElementById('stripeErrorMsg').textContent = error.message;
-    errorEl.style.display = 'flex';
-    payBtn.disabled = false;
-    payLabel.textContent = 'Pay $' + calculateTotal().toLocaleString();
+  if (result.error) {
+    showError(result.error.message);
+    btn.disabled = false;
+    label.textContent = 'Pay $' + getTotal().toLocaleString();
     return;
   }
 
-  if (paymentIntent && paymentIntent.status === 'succeeded') {
-    await handlePaymentSuccess(paymentIntent.id);
+  if (result.paymentIntent && result.paymentIntent.status === 'succeeded') {
+    onSuccess(result.paymentIntent.id);
   }
 }
 
-async function handlePaymentSuccess(paymentIntentId) {
+async function onSuccess(piId) {
   try {
-    const resp = await fetch('/api/license/activate', {
+    var resp = await fetch('/api/license/activate', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paymentIntentId }),
+      body: JSON.stringify({ paymentIntentId: piId }),
     });
-    const data = await resp.json();
-
+    var data = await resp.json();
     if (data.licenseKey) {
-      document.getElementById('licenseKeyDisplay').textContent = data.licenseKey;
-      document.getElementById('licenseKeyBox').style.display = 'block';
+      document.getElementById('licenseKeyVal').textContent = data.licenseKey;
+      document.getElementById('licenseBox').style.display = 'block';
     }
-  } catch (e) {
-    /* License activation failed — user can contact support */
-  }
+  } catch(e) {}
 
-  document.getElementById('step1').classList.add('hidden');
-  document.getElementById('step2').classList.add('hidden');
-  document.getElementById('step3').classList.add('hidden');
-  document.getElementById('successSection').classList.remove('hidden');
-  document.querySelector('.step-bar').style.display = 'none';
+  var prod = PRODUCTS[state.selected];
+  document.getElementById('successMsg').textContent = 'You purchased ' + (prod ? prod.name : 'Kwyre AI') + '. Your license key will be emailed within 24 hours if not shown above.';
 
-  const prod = PRODUCTS[state.selectedTier];
-  document.getElementById('successMessage').textContent =
-    'You purchased ' + (prod ? prod.name : 'Kwyre AI') + '. Your license key will be emailed within 24 hours if not shown above.';
-
-  document.getElementById('successSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  document.querySelector('.page-title').style.display = 'none';
+  document.getElementById('addonsSection').style.display = 'none';
+  document.getElementById('checkoutSection').style.display = 'none';
+  document.querySelectorAll('.cat-label').forEach(function(el){ el.style.display = 'none'; });
+  document.querySelectorAll('.products').forEach(function(el){ el.style.display = 'none'; });
+  document.querySelectorAll('.section-label').forEach(function(el){ el.style.display = 'none'; });
+  document.getElementById('successSection').classList.add('visible');
+  document.getElementById('successSection').style.display = 'flex';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/* ══════════════════════════════════════════════════════════════════
-   AUTH PRE-FILL + QUERY PARAMS + INIT
-   ══════════════════════════════════════════════════════════════════ */
-(function init() {
-  const token = localStorage.getItem('kwyre_token');
+function showError(msg) {
+  document.getElementById('payErrorMsg').textContent = msg;
+  document.getElementById('payError').style.display = 'flex';
+}
+
+function copyLicense(btn) {
+  var text = document.getElementById('licenseKeyVal').textContent;
+  navigator.clipboard.writeText(text).then(function() {
+    btn.textContent = 'Copied!';
+    btn.classList.add('copied');
+    setTimeout(function(){ btn.textContent = 'Copy'; btn.classList.remove('copied'); }, 2000);
+  });
+}
+
+function esc(s) { var d = document.createElement('div'); d.appendChild(document.createTextNode(s||'')); return d.innerHTML; }
+
+/* Init */
+renderProducts();
+
+(function() {
+  var token = localStorage.getItem('kwyre_token');
   if (token) {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      if (payload.email) {
-        document.getElementById('payEmail').value = payload.email;
-      }
+      var payload = JSON.parse(atob(token.split('.')[1]));
+      if (payload.email) document.getElementById('payEmail').value = payload.email;
     } catch(e) {}
   }
 
-  const params = new URLSearchParams(window.location.search);
-
+  var params = new URLSearchParams(window.location.search);
   if (params.get('payment_success') === 'true') {
-    const tierKey = params.get('tier') || 'professional';
-    state.selectedTier = tierKey;
-    handlePaymentSuccess(params.get('payment_intent') || '');
+    state.selected = params.get('tier') || 'professional';
+    onSuccess(params.get('payment_intent') || '');
     return;
   }
-
-  const preselect = params.get('tier');
-  if (preselect && PRODUCTS[preselect] && PRODUCTS[preselect].isLocal) {
-    selectProduct(preselect);
-  }
+  var pre = params.get('tier');
+  if (pre && PRODUCTS[pre]) selectProduct(pre);
 })();
 </script>
 </body>

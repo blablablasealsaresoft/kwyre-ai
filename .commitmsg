@@ -1,0 +1,19 @@
+feat: production readiness — cloud inference, backend parity, SaaS infrastructure
+
+- Deploy Qwen3.5-9B on DigitalOcean H100 with systemd service
+- Add Cloudflare Tunnel for api.kwyre.com -> H100 proxy
+- Add Pages Functions proxy for same-origin cloud inference
+- Add H100 deployment scripts (setup-h100.sh, update.sh)
+
+- Add RAG document upload to CPU, MLX, vLLM backends (full parity)
+- Add adapter list/status endpoints to all backends
+- Wire persistent audit logging into all 4 backends
+- Fix PORT to read KWYRE_PORT env var
+
+- Fix OAuth callback redirect (login.html, not dashboard.html)
+- Fix profile API: resolve licenses, add billing_url, usage, avatar
+- Add /api/billing/portal and usage dashboard section
+
+- Fix Helm chart v1.6.0, image path, ConfigMap, NOTES.txt leak
+- Fix CI: Docker build validation, helm lint, ruff config
+- Fix 169 lint errors, pin all dependency versions

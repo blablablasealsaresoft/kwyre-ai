@@ -24,9 +24,10 @@ const BASE_PRICES = {
 };
 
 const ADDON_PRICES = {
-  airgap:        149900,
-  cloud_monthly: 4900,
-  extra_machine: 9900,
+  airgap:            500000,
+  cloud_monthly:       4900,
+  cloud_pro_monthly:  14900,
+  extra_machine:       9900,
 };
 
 const TIER_LABELS = {
