@@ -49,7 +49,7 @@ Kwyre targets **Linux x86_64**, **Windows x86_64**, **macOS** (Apple Silicon and
 | Config | GPU | VRAM | RAM | Speed | Download |
 |--------|-----|------|-----|-------|----------|
 | **Personal (4B GPU)** | AMD RX 7900 XT+ / NVIDIA RTX 3060+ / Apple M1+ | 8 GB+ | 16 GB | 7–14 tok/s | 3.3 GB |
-| **Professional (9B GPU)** | AMD MI210+ / NVIDIA RTX 4090 / A100 / H100 / Apple M2 Pro+ | 16 GB+ | 32 GB | 3–8 tok/s | 7.6 GB |
+| **Professional (4B GPU + 13 adapters)** | AMD RX 7900 XT+ / NVIDIA RTX 3060+ / Apple M1+ | 8 GB+ | 16 GB | 7–14 tok/s | 3.3 GB + ~150 MB/adapter |
 | **Kwyre Air (CPU)** | None | — | 8 GB+ | 2–8 tok/s | 2–4 GB |
 | **Apple Silicon (MLX)** | Apple M1/M2/M3/M4 (Metal MPS + MLX) | — | 8 GB+ unified | 5–15 tok/s | 2–4 GB |
 
@@ -109,7 +109,7 @@ Every local product runs 100% on your hardware. No data leaves your machine.
 | Product | Model | Hardware | VRAM / RAM | Speed | Price |
 |---------|-------|----------|-----------|-------|-------|
 | **Kwyre Personal** | Qwen3.5-4B + 0.8B draft | Any supported GPU (AMD ROCm, NVIDIA CUDA, Apple MLX) | 4–8 GB VRAM | 7–14 tok/s | $299 |
-| **Kwyre Professional** | Qwen3.5-9B + 0.8B draft | Any supported GPU (AMD ROCm, NVIDIA CUDA, Apple MLX) | 8–16 GB VRAM | 3–8 tok/s | $799 |
+| **Kwyre Professional** | Qwen3.5-4B + 0.8B draft + 13 LoRA adapters | Any supported GPU (AMD ROCm, NVIDIA CUDA, Apple MLX) | 4–8 GB VRAM | 7–14 tok/s | $799 |
 | **Kwyre Air** | Any GGUF model | Any CPU | 8+ GB RAM | 2–8 tok/s | $299 |
 | **Kwyre (Apple Silicon)** | Any MLX model | M1/M2/M3/M4 Mac | 8+ GB unified | 5–15 tok/s | $299 |
 
@@ -409,19 +409,18 @@ The installer step produces platform-specific artifacts:
 
 ```
 Platform:                   Linux x86_64 + AMD ROCm 6.x | Windows x86_64 + NVIDIA CUDA 12.x | macOS Apple Silicon (MLX / Metal MPS) | FreeBSD amd64 + NVIDIA CUDA
-Main model (Personal):     Qwen/Qwen3.5-4B (pre-quantized NF4, 2.5 GB)
-Main model (Professional): Qwen/Qwen3.5-9B (pre-quantized NF4, 7.6 GB)
-Draft model:               Qwen/Qwen3.5-0.8B (pre-quantized NF4, 0.8 GB) — shared by both tiers
+Main model (all tiers):    Qwen/Qwen3.5-4B (pre-quantized NF4, 2.5 GB)
+Draft model:               Qwen/Qwen3.5-0.8B (pre-quantized NF4, 0.8 GB)
 Quantization:              4-bit NF4 (bitsandbytes) or AWQ (1.4x faster)
 Compute dtype:             bfloat16
-VRAM at inference:         Personal ~4.1 GB | Professional ~7.5 GB (models + KV cache budget)
+VRAM at inference:         ~4.1 GB (model + KV cache budget)
 KV cache:                  Per-session, LRU eviction, 2 GB VRAM cap default
 Streaming:                 SSE (text/event-stream), token-by-token
 Concurrency:               Inference queue (serialized GPU) + threaded HTTP
 Context length:            32768 tokens
 API compatibility:         OpenAI /v1/chat/completions (blocking + streaming)
 Docker image:              ~12 GB (includes ROCm runtime)
-Model download:            Personal 3.3 GB | Professional 7.6 GB (pre-quantized, from kwyre.com)
+Model download:            3.3 GB base + ~150 MB per domain adapter (13 adapters = ~2 GB)
 
 SpikeServe (v1.6):
   MLP hooks:           84 layers on draft model, main at full fidelity
@@ -465,16 +464,16 @@ Domain Adapters (v1.7):
   GRPO RL:             Unsloth + TRL GRPOTrainer, 500 steps, LoRA rank 16
   Training time:       ~10h per domain × 13 = ~130h total on H100 80GB
 
-Custom Training Pipeline (Professional 9B):
-  Pipeline:            Claude traces → Unsloth QLoRA distillation → Unsloth GRPO RL → GGUF export
+Custom Training Pipeline:
+  Pipeline:            Claude traces → Unsloth QLoRA distillation → Unsloth GRPO RL → LoRA export
+  Base model:          Qwen/Qwen3.5-4B (all tiers use the same base)
   Trace generation:    Anthropic Batch API (resumable, 50% cheaper than real-time)
   Distillation:        Unsloth QLoRA on H100 80GB, LoRA rank 32
   GRPO RL:             Unsloth + TRL, 500 steps, LoRA rank 16
   Domains:             13 domains (8 core + 5 product-specific)
   Personality:         Kwyre persona baked into weights (not just system prompt)
   Reasoning:           Chain-of-thought via <think>...</think> tags + emergent problem-solving
-  Export:              Q5_K_M (6.1 GB) + Q4_K_M (5.3 GB) GGUFs
-  Hardware:            DigitalOcean H100 80GB GPU Droplet
+  Hardware:            2× DigitalOcean H100 80GB GPU Droplets (parallel training)
 
 QAT Training (v1.6 — Spike encoding):
   LoRA rank:           128 (alpha 256)
