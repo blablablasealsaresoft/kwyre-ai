@@ -5,45 +5,42 @@
 --extra-index-url https://pypi.org/simple/
 
 # --- PyTorch (CUDA 12.4 builds) ---
-torch>=2.6.0
-torchaudio
-torchvision
+torch==2.6.0
+torchaudio==2.6.0
+torchvision==0.21.0
 
 # --- Core inference ---
-transformers>=5.3.0
-bitsandbytes>=0.49.0
-accelerate>=1.11.0
-safetensors>=0.6.0
-tokenizers>=0.22.0
-autoawq>=0.2.0
+transformers==4.48.3
+bitsandbytes==0.45.3
+accelerate==1.3.0
+safetensors==0.5.3
+tokenizers==0.21.1
+autoawq==0.2.8
 
 # flash-attn: requires NVIDIA CUDA toolkit installed.
 # On Windows you may need: pip install flash-attn --no-build-isolation
 flash-attn
 
-# triton is Linux-only and is NOT supported on Windows.
-# If a dependency pulls it in, it will be skipped automatically.
-
 # --- Hugging Face ecosystem ---
-huggingface_hub>=1.6.0
-peft>=0.18.0
-sentence-transformers>=3.0.0
+huggingface_hub==0.28.1
+peft==0.14.0
+sentence-transformers==3.4.1
 
 # --- QAT training (not required for inference only) ---
-datasets>=4.6.0
-trl>=0.29.0
+datasets==3.3.2
+trl==0.15.2
 
 # --- Retrieval / document loading ---
-faiss-cpu>=1.8.0
-pypdf>=4.0.0
-python-docx>=1.0.0
+faiss-cpu==1.9.0.post1
+pypdf==5.3.1
+python-docx==1.1.2
 
 # --- Numerics / utilities ---
-numpy>=1.24.0
-scipy>=1.14.0,<1.16.0
-psutil>=7.1.0
-cryptography>=44.0.0
-pyyaml>=6.0.0
+numpy==1.26.4
+scipy==1.15.2
+psutil==7.1.0
+cryptography==44.0.1
+pyyaml==6.0.2
 
 # --- Windows-specific extras ---
 pywin32

@@ -13,7 +13,6 @@ import argparse
 import json
 import math
 import re
-import sys
 import time
 from pathlib import Path
 
@@ -316,7 +315,7 @@ def main():
     args = parse_args()
     k_values = [float(k.strip()) for k in args.k_values.split(",")]
 
-    print(f"Spike Evaluation Config:")
+    print("Spike Evaluation Config:")
     print(f"  Model:       {args.model_id}")
     print(f"  Adapter:     {args.adapter_path or '(none)'}")
     print(f"  K values:    {k_values}")

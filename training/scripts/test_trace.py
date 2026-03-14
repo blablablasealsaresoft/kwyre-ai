@@ -1,6 +1,8 @@
 #!/usr/bin/env python3
 """Test a single trace generation to debug the pipeline."""
-import os, time, anthropic
+import os
+import time
+import anthropic
 
 client = anthropic.Anthropic(api_key=os.environ["ANTHROPIC_API_KEY"])
 print("Generating one test trace...")

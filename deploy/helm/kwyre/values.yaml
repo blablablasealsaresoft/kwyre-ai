@@ -1,8 +1,8 @@
 replicaCount: 1
 
 image:
-  repository: kwyre-ai
-  tag: "1.1"
+  repository: ghcr.io/blablablasealsaresoft/kwyre-ai
+  tag: "1.6.0"
   pullPolicy: IfNotPresent
 
 model:
@@ -46,3 +46,14 @@ nodeSelector:
 
 tolerations: []
 affinity: {}
+
+ingress:
+  enabled: false
+  className: ""
+  annotations: {}
+  hosts:
+    - host: kwyre.example.com
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []

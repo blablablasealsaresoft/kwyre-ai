@@ -79,7 +79,7 @@ def _load_private_key():  # load Ed25519 private key from disk
     key_path = KEYS_DIR / "kwyre_signing.key"  # path to private key file
     if not key_path.exists():  # private key not found
         print(f"[License] Private key not found at {key_path}")  # warn about missing key
-        print(f"[License] Run: python license.py keygen")  # suggest generating keypair
+        print("[License] Run: python license.py keygen")  # suggest generating keypair
         sys.exit(1)  # abort without private key
     with open(key_path, "rb") as f:  # open key file in binary mode
         from cryptography.hazmat.primitives.serialization import load_pem_private_key  # PEM key loader
@@ -142,14 +142,14 @@ def keygen():  # generate new Ed25519 signing keypair
         pub.public_bytes(Encoding.DER, PublicFormat.SubjectPublicKeyInfo)  # serialize as DER for compactness
     ).decode()  # convert bytes to string
 
-    print(f"[License] Keypair generated.")  # confirm keypair creation
+    print("[License] Keypair generated.")  # confirm keypair creation
     print(f"[License] Private key: {priv_path} (KEEP SECRET)")  # display private key path
     print(f"[License] Public key:  {pub_path}")  # display public key path
     print()
-    print(f"Embed this public key in serve_local_4bit.py or set KWYRE_LICENSE_PUBKEY:")  # embedding instruction
+    print("Embed this public key in serve_local_4bit.py or set KWYRE_LICENSE_PUBKEY:")  # embedding instruction
     print(f"  {pub_b64}")  # display base64 public key
     print()
-    print(f"Add to .gitignore: security/.keys/")  # remind to exclude keys from git
+    print("Add to .gitignore: security/.keys/")  # remind to exclude keys from git
 
 
 def get_machine_fingerprint() -> str:  # generate unique hardware identifier
@@ -209,7 +209,7 @@ def get_machine_fingerprint() -> str:  # generate unique hardware identifier
                     ["wmic", "diskdrive", "get", "serialnumber"],
                     capture_output=True, text=True, timeout=5
                 )
-                lines = [l.strip() for l in result.stdout.strip().split("\n")[1:] if l.strip()]  # parse serial numbers
+                lines = [line.strip() for line in result.stdout.strip().split("\n")[1:] if line.strip()]  # parse serial numbers
                 if lines:  # at least one disk serial found
                     parts.append(lines[0])  # add first disk serial to fingerprint
             except Exception:
@@ -407,7 +407,7 @@ def startup_validate(key_source: str = None, pubkey_b64: str = "") -> dict:  # v
             exp = time.strftime("%Y-%m-%d", time.localtime(payload["expires_at"]))  # format expiry date
             print(f"[License] Expires: {exp}")  # display expiry date
         else:
-            print(f"[License] Perpetual license")  # no expiration
+            print("[License] Perpetual license")  # no expiration
         return payload  # return validated payload
     except ValueError as e:  # validation failed
         print(f"[License] INVALID: {e}")  # display validation error
@@ -462,7 +462,7 @@ def main():  # CLI entry point for license management
     val_p.add_argument("--key", default="")  # license key string input
     val_p.add_argument("--file", default="")  # license key file input
 
-    fp_p = sub.add_parser("fingerprint", help="Show this machine's fingerprint")  # fingerprint subcommand
+    sub.add_parser("fingerprint", help="Show this machine's fingerprint")  # fingerprint subcommand
 
     bind_p = sub.add_parser("bind", help="Bind an existing license to machine fingerprints")  # bind subcommand
     bind_p.add_argument("--key", required=True, help="Existing license key")  # required existing key
@@ -496,7 +496,7 @@ def main():  # CLI entry point for license management
             sys.exit(1)  # abort without key
         try:
             payload = validate_license(key)  # validate the license key
-            print(f"[License] VALID")  # confirm valid license
+            print("[License] VALID")  # confirm valid license
             print(json.dumps(payload, indent=2))  # display payload as formatted JSON
         except ValueError as e:  # validation failed
             print(f"[License] INVALID: {e}")  # display error message

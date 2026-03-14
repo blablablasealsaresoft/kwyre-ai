@@ -30,7 +30,6 @@ Cost estimate (claude-sonnet-4, batch pricing):
 
 import json
 import os
-import sys
 import time
 import random
 from pathlib import Path
@@ -443,7 +442,7 @@ def save_traces(traces_by_domain: dict[str, list[dict]]) -> None:
 
 def main():
     print(f"\n{'='*62}")
-    print(f"  KWYRE — Batch Trace Generator (Message Batches API)")
+    print("  KWYRE — Batch Trace Generator (Message Batches API)")
     print(f"  Domains:          {len(DOMAINS)}")
     print(f"  Traces per domain: {TRACES_PER_DOMAIN:,}")
     print(f"  Total targets:    {len(DOMAINS) * TRACES_PER_DOMAIN:,}")
@@ -537,13 +536,13 @@ def main():
         if (OUTPUT_DIR / f"{d}.jsonl").exists()
     )
     print(f"\n{'='*62}")
-    print(f"  COMPLETE")
+    print("  COMPLETE")
     print(f"  Total traces written: {total:,}")
     print(f"  Output directory: {OUTPUT_DIR}")
     print(f"  State file: {STATE_FILE}")
-    print(f"")
-    print(f"  Next step — train domain adapters:")
-    print(f"    bash training/scripts/run_all_domains.sh")
+    print("")
+    print("  Next step — train domain adapters:")
+    print("    bash training/scripts/run_all_domains.sh")
     print(f"{'='*62}\n")
 
 

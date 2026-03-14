@@ -26,12 +26,10 @@ import platform_paths
 
 from security_core import (
     BIND_HOST,
-    SecureConversationBuffer,
     SessionStore,
     IntrusionWatchdog,
     load_api_keys,
     RATE_LIMIT_RPM_DEFAULT,
-    ALLOWED_PAGES,
     KwyreHandlerMixin,
 )
 
@@ -65,11 +63,12 @@ else:
     def route_tools(_msg):
         return [], []
 
-from spike_serve import apply_spike_hooks, get_sparsity_stats, reset_sparsity_stats, set_tracking, get_adaptive_k_stats
+from spike_serve import apply_spike_hooks, get_sparsity_stats, get_adaptive_k_stats
 from verify_deps import startup_check
 from license import startup_validate as validate_license
 from audit import UserAuditLog
 from rag import SecureRAGStore, DocumentParser, encode_texts
+from adapter_trainer import submit_finetune_job, get_job_status
 
 DEFAULT_SYSTEM_PROMPT = (
     "You are Kwyre, a specialized AI assistant for legal, financial, and forensic "
@@ -82,7 +81,7 @@ DEFAULT_SYSTEM_PROMPT = (
 )
 
 MODEL_ID = os.environ.get("KWYRE_MODEL", "HauhauCS/Qwen3.5-4B-Uncensored-HauhauCS-Aggressive")
-PORT = 8000
+PORT = int(os.environ.get("KWYRE_PORT", "8000"))
 SPIKE_K = 3.0
 SPIKE_MAX = 15
 
@@ -188,9 +187,9 @@ if MULTI_USER:
         _user_manager = UserManager()
         if not _user_manager.has_users():
             _default_user, _default_key = _user_manager.add_user("admin", role="admin")
-            print(f"[Multi-User] No users found — created default admin.")
+            print("[Multi-User] No users found — created default admin.")
             print(f"[Multi-User] Admin API key: {_default_key}")
-            print(f"[Multi-User] Store this key securely — it cannot be retrieved later.")
+            print("[Multi-User] Store this key securely — it cannot be retrieved later.")
         print(f"[Multi-User] ENABLED — {_user_manager.user_count()} user(s) loaded")
     except EnvironmentError as e:
         print(f"[Multi-User] ERROR: {e}")
@@ -229,7 +228,7 @@ else:
         _snap_dirs = [d for d in os.listdir(LOCAL_MODEL_PATH) if os.path.isdir(os.path.join(LOCAL_MODEL_PATH, d))]
         LOCAL_MODEL_PATH = os.path.join(LOCAL_MODEL_PATH, _snap_dirs[0]) if _snap_dirs else LOCAL_MODEL_PATH
     except FileNotFoundError:
-        print(f"[Model] ERROR: No model found. Set KWYRE_MODEL_PATH or download first.")
+        print("[Model] ERROR: No model found. Set KWYRE_MODEL_PATH or download first.")
         sys.exit(1)
     print(f"[Model] Using HuggingFace cache at {LOCAL_MODEL_PATH}")
 
@@ -295,7 +294,7 @@ if KWYRE_QUANT == "awq":
             device_map="auto", torch_dtype=torch.bfloat16,
             **_FLASH_ATTN_KWARGS,
         )
-    print(f"[Quantization] AWQ mode active (~1.4x faster inference)")
+    print("[Quantization] AWQ mode active (~1.4x faster inference)")
 else:
     if _USE_PREQUANT:
         print(f"Loading pre-quantized NF4 model from {LOCAL_MODEL_PATH}...")
@@ -304,7 +303,7 @@ else:
             device_map="auto", torch_dtype=torch.bfloat16,
             **_FLASH_ATTN_KWARGS,
         )
-        print(f"[Quantization] Pre-quantized NF4 loaded (fastest startup)")
+        print("[Quantization] Pre-quantized NF4 loaded (fastest startup)")
     else:
         if platform_gpu.IS_MACOS and platform_gpu.GPU_RUNTIME == "mlx":
             print(f"Loading {MODEL_ID} with float16 (macOS MLX — bitsandbytes not supported)...")
@@ -313,7 +312,7 @@ else:
                 device_map="auto", torch_dtype=torch.float16,
                 **_FLASH_ATTN_KWARGS,
             )
-            print(f"[Quantization] macOS MLX path — float16 (use MLX for native quantization)")
+            print("[Quantization] macOS MLX path — float16 (use MLX for native quantization)")
         else:
             quant_config = BitsAndBytesConfig(
                 load_in_4bit=True,
@@ -328,7 +327,7 @@ else:
                 device_map="auto", dtype=torch.bfloat16,
                 **_FLASH_ATTN_KWARGS,
             )
-            print(f"[Quantization] NF4 on-the-fly quantization active")
+            print("[Quantization] NF4 on-the-fly quantization active")
 # ---------------------------------------------------------------------------
 # Load QAT-trained LoRA adapters
 # ---------------------------------------------------------------------------
@@ -345,7 +344,7 @@ if os.path.isdir(QAT_ADAPTER_PATH) and os.path.exists(
             print("QAT adapters loaded in-place — spike-tolerant inference active")
     except RuntimeError as e:
         if "size mismatch" in str(e):
-            print(f"[QAT] Adapter shape mismatch (trained on different model) — skipping")
+            print("[QAT] Adapter shape mismatch (trained on different model) — skipping")
         else:
             raise
 else:
@@ -402,7 +401,7 @@ if SPECULATIVE_ENABLED:
             _draft_vram = torch.cuda.memory_allocated() / 1e9
             print(f"[Speculative] Draft model loaded — total VRAM now {_draft_vram:.1f} GB")
         else:
-            print(f"[Speculative] Draft model loaded")
+            print("[Speculative] Draft model loaded")
     except Exception as e:
         print(f"[Speculative] Failed to load draft model: {e}")
         print("[Speculative] Falling back to standard generation.")
@@ -425,9 +424,9 @@ if draft_model is not None:
         skip_patterns=SPIKE_SKIP, measure_only=False,
     )
     print(f"SpikeServe ACTIVE on draft: {n_converted} MLP layers | k={SPIKE_K}")
-    print(f"  Main model runs at full fidelity for accurate speculative validation")
+    print("  Main model runs at full fidelity for accurate speculative validation")
 else:
-    print(f"[SpikeServe] No draft model — skipping (hooks only apply to draft)")
+    print("[SpikeServe] No draft model — skipping (hooks only apply to draft)")
     active_spike_hooks = []
 
 # ---------------------------------------------------------------------------
@@ -686,7 +685,7 @@ if torch.cuda.is_available():
 elif platform_gpu.IS_MACOS:
     print(f"[GPU] macOS {platform_gpu.GPU_RUNTIME.upper()} — unified memory (use Activity Monitor for usage)")
 else:
-    print(f"[GPU] VRAM info unavailable")
+    print("[GPU] VRAM info unavailable")
 
 # ---------------------------------------------------------------------------
 # KV cache store — per-session cache for multi-turn conversations
@@ -809,7 +808,7 @@ _worker_thread.start()
 # Start security subsystems
 session_store = SessionStore()
 rag_store = SecureRAGStore()
-print(f"[RAG] Document store active — RAM only, wiped on close")
+print("[RAG] Document store active — RAM only, wiped on close")
 watchdog = IntrusionWatchdog(session_store, terminate_on_intrusion=True)
 watchdog.start()
 
@@ -838,8 +837,8 @@ else:
 
 _trial_tracker: dict[str, int] = {}
 print(f"[Security] Bound to {BIND_HOST}:{PORT} — localhost only")
-print(f"[Security] Intrusion watchdog active")
-print(f"[Security] Session store active — RAM only, wiped on close")
+print("[Security] Intrusion watchdog active")
+print("[Security] Session store active — RAM only, wiped on close")
 
 
 # ---------------------------------------------------------------------------
@@ -1047,6 +1046,8 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             self._handle_adapter_stack()
         elif self.path.startswith("/v1/adapter/update/"):
             self._handle_adapter_update()
+        elif self.path == "/v1/adapter/train":
+            self._handle_adapter_train()
         elif self.path == "/v1/analytics/predict":
             self._handle_analytics_predict()
         elif self.path == "/v1/analytics/risk":
@@ -1659,6 +1660,8 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             self._handle_adapter_status()
         elif self.path == "/v1/adapter/check-update":
             self._handle_adapter_check_update()
+        elif self.path.startswith("/v1/adapter/train/"):
+            self._handle_adapter_train_status()
         elif self.path == "/favicon.ico":
             self.send_response(204)
             self._send_security_headers()
@@ -1950,6 +1953,49 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 print(f"[Adapter] Update failed for '{domain}', restored backup: {e}")
             self._send_json(500, {"error": f"Update failed: {e}", "domain": domain})
 
+    def _handle_adapter_train(self):
+        user = self._check_auth() if not MULTI_USER else self._mu_check_auth()
+        if user is None:
+            return
+        body, err = self._parse_json_body(required=True)
+        if err is not None:
+            self._send_json_error(400, err)
+            return
+        domain = body.get("domain", "").strip()
+        if not domain:
+            self._send_json_error(400, "Missing 'domain' field.")
+            return
+        examples = body.get("examples", [])
+        if not isinstance(examples, list) or len(examples) == 0:
+            self._send_json_error(400, "'examples' must be a non-empty list.")
+            return
+        base_adapter = body.get("base_adapter")
+        epochs = int(body.get("epochs", 1))
+        try:
+            job_id = submit_finetune_job(
+                domain=domain,
+                examples=examples,
+                base_adapter=base_adapter,
+                epochs=epochs,
+            )
+            self._send_json(200, {"job_id": job_id, "status": "queued"})
+        except Exception as e:
+            self._send_json_error(500, f"Failed to submit training job: {e}")
+
+    def _handle_adapter_train_status(self):
+        user = self._check_auth() if not MULTI_USER else self._mu_check_auth()
+        if user is None:
+            return
+        job_id = self.path.split("/v1/adapter/train/", 1)[-1].strip("/")
+        if not job_id:
+            self._send_json_error(400, "Missing job_id in URL path.")
+            return
+        status = get_job_status(job_id)
+        if status is None:
+            self._send_json_error(404, f"No training job found with id '{job_id}'.")
+            return
+        self._send_json(200, status)
+
     # ---- Admin GET endpoints ----
 
     def _handle_admin_list_users(self):
@@ -1990,12 +2036,14 @@ if __name__ == "__main__":
     _spec_status = f"speculative={DRAFT_MODEL_ID.split('/')[-1]}" if draft_model else "no speculative"
     _spike_target = "draft model" if draft_model else "disabled"
     print(f"  SpikeServe on {_spike_target} ({n_converted} layers)  |  4-bit {KWYRE_QUANT.upper()}  |  {_spec_status}")
-    print(f"  Streaming: SSE enabled  |  Inference queue: active  |  6 security layers active")
-    print(f"  Available tiers: KWYRE_MODEL=Qwen/Qwen3.5-9B (7.5GB) | Qwen/Qwen3.5-4B (3.5GB)")
+    print("  Streaming: SSE enabled  |  Inference queue: active  |  6 security layers active")
+    print("  Available tiers: KWYRE_MODEL=Qwen/Qwen3.5-9B (7.5GB) | Qwen/Qwen3.5-4B (3.5GB)")
     print("  POST /v1/chat/completions  — inference (stream=true for SSE)")
     print("  POST /v1/session/end       — wipe session from RAM")
     print("  GET  /health               — status + watchdog state")
     print("  GET  /audit                — metadata-only compliance log")
+    print("  POST /v1/adapter/train          — submit customer fine-tuning job")
+    print("  GET  /v1/adapter/train/{job_id}  — check training job status")
     if MULTI_USER:
         print("\n  [Multi-User] ENABLED")
         print("  GET    /v1/admin/users          — list users (admin)")

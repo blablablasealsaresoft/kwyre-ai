@@ -1,5 +1,10 @@
 name = "launchpad"
-compatibility_date = "2024-12-01"
+compatibility_date = "2026-03-13"
+pages_build_output_dir = "site"
 
 [site]
 bucket = "./site"
+
+[env.production]
+name = "launchpad-prod"
+route = "launchpad.mintrail.com/*"

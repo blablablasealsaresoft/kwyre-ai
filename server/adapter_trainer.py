@@ -24,7 +24,6 @@ import time
 import uuid
 import threading
 import argparse
-from pathlib import Path
 
 KWYRE_HOME = os.path.expanduser("~/.kwyre")
 ADAPTER_DIR = os.environ.get("KWYRE_ADAPTER_DIR", os.path.join(KWYRE_HOME, "adapters"))

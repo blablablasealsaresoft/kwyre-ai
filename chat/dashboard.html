@@ -686,6 +686,17 @@ nav {
       </div>
     </div>
 
+    <!-- USAGE -->
+    <div class="dash-section" id="sectionUsage">
+      <div class="dash-section-head">
+        <svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        <h2>Usage</h2>
+      </div>
+      <div class="dash-section-body" id="usageBody">
+        <div class="skel skel-line" style="height:72px;border-radius:8px;"></div>
+      </div>
+    </div>
+
     <!-- BILLING -->
     <div class="dash-section" id="sectionBilling">
       <div class="dash-section-head">
@@ -803,6 +814,7 @@ function copyText(text, btnEl) {
     renderAddons(data.addons || []);
     renderDownloads(data.licenses || []);
     renderApi(data.api_key);
+    renderUsage(data.usage);
     renderBilling(data.billing_url);
   })
   .catch(function(err) {
@@ -1036,6 +1048,36 @@ function renderApi(apiKey) {
   }
 }
 
+function renderUsage(usage) {
+  var el = document.getElementById('usageBody');
+  if (!usage) {
+    el.innerHTML = '<div class="empty-state"><p>No usage data available yet.</p></div>';
+    return;
+  }
+
+  var tokens = usage.total_tokens || 0;
+  var requests = usage.total_requests || 0;
+  var lastActive = usage.last_active ? new Date(usage.last_active * 1000).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' }) : 'Never';
+
+  var tokenStr = tokens >= 1000000 ? (tokens / 1000000).toFixed(1) + 'M' : tokens >= 1000 ? (tokens / 1000).toFixed(1) + 'K' : tokens.toString();
+
+  el.innerHTML =
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:16px;">' +
+      '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:20px;">' +
+        '<div style="font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">Total Tokens</div>' +
+        '<div style="font-size:28px;font-weight:700;color:var(--accent);">' + tokenStr + '</div>' +
+      '</div>' +
+      '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:20px;">' +
+        '<div style="font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">Requests</div>' +
+        '<div style="font-size:28px;font-weight:700;color:var(--green);">' + requests.toLocaleString() + '</div>' +
+      '</div>' +
+      '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:20px;">' +
+        '<div style="font-family:var(--mono);font-size:10px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:8px;">Last Active</div>' +
+        '<div style="font-size:14px;font-weight:500;color:var(--text);margin-top:6px;">' + escHtml(lastActive) + '</div>' +
+      '</div>' +
+    '</div>';
+}
+
 function renderBilling(billingUrl) {
   var el = document.getElementById('billingBody');
   el.innerHTML =
@@ -1052,7 +1094,7 @@ function renderBilling(billingUrl) {
 }
 
 function renderError() {
-  var sections = ['profileBody','productsBody','licensesBody','addonsBody','downloadsBody','apiBody','billingBody'];
+  var sections = ['profileBody','productsBody','licensesBody','addonsBody','downloadsBody','apiBody','usageBody','billingBody'];
   sections.forEach(function(id) {
     document.getElementById(id).innerHTML =
       '<div class="empty-state">' +

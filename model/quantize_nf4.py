@@ -11,14 +11,13 @@ Usage:
 
 import argparse  # command-line argument parsing
 import os  # filesystem and path operations
-import shutil  # high-level file operations (copy, move)
 import torch  # core tensor computation library
 from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig  # HuggingFace model loading utilities
 
 
 def quantize_and_save(model_id: str, output_dir: str):  # main quantization pipeline function
     print(f"\n{'='*60}")  # print header separator line
-    print(f"  Kwyre AI — NF4 Quantization")  # display script title
+    print("  Kwyre AI — NF4 Quantization")  # display script title
     print(f"  Source:  {model_id}")  # show source model identifier
     print(f"  Output:  {output_dir}")  # show output directory path
     print(f"{'='*60}\n")  # print footer separator line
@@ -59,7 +58,7 @@ def quantize_and_save(model_id: str, output_dir: str):  # main quantization pipe
     total_mb = total_bytes / (1024 * 1024)  # convert bytes to megabytes
     total_gb = total_bytes / (1024 ** 3)  # convert bytes to gigabytes
 
-    print(f"\nDone. Quantized model saved:")  # completion status header
+    print("\nDone. Quantized model saved:")  # completion status header
     print(f"  Size: {total_mb:.0f} MB ({total_gb:.2f} GB)")  # display model size in MB and GB
     print(f"  Path: {os.path.abspath(output_dir)}")  # display absolute output path
 

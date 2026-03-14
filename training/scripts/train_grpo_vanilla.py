@@ -144,7 +144,7 @@ def correctness_reward(prompts, completions, answer, **kwargs):  # reward functi
                 exp_str = str(expected).split("####")[-1].strip().replace(",", "").replace("$", "")  # extract ground truth from GSM8K format
                 exp_val = float(exp_str)  # convert expected answer to float
                 rewards.append(2.0 if abs(pred_val - exp_val) < 0.01 else -1.0)  # +2 for correct, -1 for incorrect
-            except:
+            except Exception:
                 rewards.append(0.0)  # neutral reward for parse failure
     return rewards  # return list of reward scores
 
@@ -203,7 +203,7 @@ trainer = GRPOTrainer(  # initialize GRPO trainer
 print(f"  VRAM before training: {torch.cuda.memory_allocated()/1e9:.1f} GB")  # display pre-training VRAM
 print(f"  Training {NUM_STEPS} GRPO steps...")  # display total training steps
 print(f"  Each step: generate {NUM_GENERATIONS} completions, score, update policy.")  # explain GRPO loop
-print(f"  This will take 4-6 hours on H100. Go get coffee.\n")  # time estimate
+print("  This will take 4-6 hours on H100. Go get coffee.\n")  # time estimate
 
 trainer.train()  # start the GRPO training loop
 
@@ -217,7 +217,6 @@ print(f"  LoRA adapter: {lora_dir}")  # confirm LoRA save location
 
 # Merge LoRA into base for deployment
 print("  Merging LoRA into base model...")  # status for merge operation
-from peft import PeftModel  # PEFT model class for merging
 merged = model.merge_and_unload()  # merge LoRA weights into base and remove adapter wrapper
 merged_dir = os.path.join(OUTPUT_DIR, "merged-16bit")  # path for merged model output
 merged.save_pretrained(merged_dir)  # save merged full-precision model
@@ -244,6 +243,6 @@ tokenizer = AutoTokenizer.from_pretrained('{merged_dir}')
 "
 
   Or download the merged model:
-    scp -r root@167.71.0.148:{merged_dir} ./kwyre-9b-grpo-merged/
+    scp -r root@<YOUR_GPU_HOST>:{merged_dir} ./kwyre-9b-grpo-merged/
 {'='*60}
 """)

@@ -12,7 +12,10 @@
 
 $ErrorActionPreference = 'Stop'
 
-$env:ANTHROPIC_API_KEY = 'sk-ant-api03-PLACEHOLDER-SET-YOUR-KEY-HERE'
+if (-not $env:ANTHROPIC_API_KEY) {
+    Write-Host "ERROR: ANTHROPIC_API_KEY not set. Set it before running this script." -ForegroundColor Red
+    exit 1
+}
 $env:KWYRE_TRACES_PER_DOMAIN = '50'
 $env:PYTHONUNBUFFERED = '1'
 
@@ -35,7 +38,7 @@ Write-Host "  STEP 1: Generating reasoning traces via Claude" -ForegroundColor C
 Write-Host "  Target: $env:KWYRE_TRACES_PER_DOMAIN traces per domain" -ForegroundColor White
 Write-Host "========================================" -ForegroundColor Cyan
 
-python "$PSScriptRoot\generate_traces_parallel.py" 2>&1 | Tee-Object -FilePath (Join-Path $LogDir '01-traces.log')
+python "$PSScriptRoot\scripts\generate_traces_parallel.py" 2>&1 | Tee-Object -FilePath (Join-Path $LogDir '01-traces.log')
 
 Write-Host ""
 Write-Host "  Traces complete. Files:" -ForegroundColor Green
@@ -54,7 +57,7 @@ Write-Host "  STEP 2: Distillation fine-tuning (Unsloth QLoRA)" -ForegroundColor
 Write-Host "  This will take 2-6 hours on H100" -ForegroundColor White
 Write-Host "========================================" -ForegroundColor Cyan
 
-python "$PSScriptRoot\train_distillation.py" 2>&1 | Tee-Object -FilePath (Join-Path $LogDir '02-distillation.log')
+python "$PSScriptRoot\scripts\train_distillation.py" 2>&1 | Tee-Object -FilePath (Join-Path $LogDir '02-distillation.log')
 
 Write-Host "`n  Distillation complete.`n" -ForegroundColor Green
 
@@ -64,7 +67,7 @@ Write-Host "  STEP 3: GRPO reinforcement learning" -ForegroundColor Cyan
 Write-Host "  This will take 2-4 hours on H100" -ForegroundColor White
 Write-Host "========================================" -ForegroundColor Cyan
 
-python "$PSScriptRoot\train_grpo.py" 2>&1 | Tee-Object -FilePath (Join-Path $LogDir '03-grpo.log')
+python "$PSScriptRoot\scripts\train_grpo.py" 2>&1 | Tee-Object -FilePath (Join-Path $LogDir '03-grpo.log')
 
 Write-Host "`n  GRPO complete.`n" -ForegroundColor Green
 

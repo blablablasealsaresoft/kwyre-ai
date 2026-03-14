@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Release.Name }}-kwyre-config
+  labels:
+    app: kwyre
+data:
+  KWYRE_MODEL: {{ .Values.model.id | quote }}
+  KWYRE_QUANT: {{ .Values.model.quant | quote }}
+  KWYRE_SPECULATIVE: {{ if .Values.model.speculative }}"1"{{ else }}"0"{{ end }}
+  KWYRE_DRAFT_MODEL: {{ .Values.model.draftModel | quote }}
+  {{- range $key, $val := .Values.env }}
+  {{ $key }}: {{ $val | quote }}
+  {{- end }}

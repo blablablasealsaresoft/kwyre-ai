@@ -29,6 +29,8 @@ if [ -z "$DOMAIN" ]; then
     echo "  defense_intelligence"
     echo "  financial_trading"
     echo "  blockchain_crypto"
+    echo "  sports_analytics"
+    echo "  relationship_matching"
     exit 1
 fi
 

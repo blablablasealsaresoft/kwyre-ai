@@ -1,11 +1,11 @@
 <#
 .SYNOPSIS
-    Kwyre AI — Train All 6 Domain Adapters.
+    Kwyre AI — Train All 8 Domain Adapters.
 
 .DESCRIPTION
     Runs the full training pipeline for each domain sequentially on a single GPU.
-    Total time estimate: ~36-48 hours on H100.
-    Total cost estimate: ~$70 API + ~$150 GPU = ~$220.
+    Total time estimate: ~48-64 hours on H100.
+    Total cost estimate: ~$90 API + ~$200 GPU = ~$290.
 
 .EXAMPLE
     $env:ANTHROPIC_API_KEY = 'sk-ant-...'
@@ -31,6 +31,8 @@ $Domains = @(
     'defense_intelligence'
     'financial_trading'
     'healthcare_lifesciences'
+    'sports_analytics'
+    'relationship_matching'
 )
 
 Write-Host "`n========================================" -ForegroundColor Cyan

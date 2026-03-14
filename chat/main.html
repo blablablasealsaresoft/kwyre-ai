@@ -3064,9 +3064,7 @@ document.addEventListener('keydown', e => {
 });
 
 /* ── LIVE AI CHAT ── */
-const KWYRE_API = (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost')
-  ? window.location.origin
-  : 'https://api.kwyre.com';
+const KWYRE_API = window.location.origin;
 const KWYRE_KEY = 'sk-kwyre-dev-local';
 let KWYRE_MODEL_ID = 'kwyre-4b';
 

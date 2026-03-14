@@ -17,14 +17,11 @@ import hmac  # Constant-time string comparison for auth
 import ipaddress as _ipaddress  # IP address parsing and network checks
 import json  # JSON serialization for HTTP responses
 import os  # Environment variables and filesystem access
-import re  # Regular expression matching
 import secrets  # Cryptographically secure random generation
 import signal  # OS signal handling for process termination
 import sys  # System-level utilities
 import threading  # Thread synchronization primitives
 import time  # Timestamps and sleep utilities
-from collections import defaultdict  # Auto-initializing dictionary for rate tracking
-from http.server import BaseHTTPRequestHandler  # Base class for HTTP request handling
 
 import psutil  # Cross-platform process and network monitoring
 
@@ -268,7 +265,7 @@ class IntrusionWatchdog(threading.Thread):
                 return
             self._triggered = True  # Mark lockdown as active
 
-        print(f"\n[Watchdog] *** INTRUSION LOCKDOWN TRIGGERED ***")  # Alert to console
+        print("\n[Watchdog] *** INTRUSION LOCKDOWN TRIGGERED ***")  # Alert to console
         print(f"[Watchdog] Reason: {reason}")  # Log lockdown reason
         self._log_event("LOCKDOWN", reason)  # Record lockdown in event log
 
@@ -301,7 +298,7 @@ class IntrusionWatchdog(threading.Thread):
                     self._trigger_lockdown(detail)  # Execute emergency lockdown
             else:  # No violation this cycle
                 if self._violation_count > 0:  # Had previous violations
-                    print(f"[Watchdog] Clear — resetting violation count")  # Log violation reset
+                    print("[Watchdog] Clear — resetting violation count")  # Log violation reset
                 self._violation_count = 0  # Reset consecutive counter
 
     def stop(self):

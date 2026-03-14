@@ -22,7 +22,6 @@ import secrets  # Cryptographically secure token generation
 import sys  # System exit and platform detection
 import time  # Timestamps for user activity tracking
 import threading  # Thread synchronization primitives
-from pathlib import Path  # Object-oriented filesystem paths
 
 from cryptography.fernet import Fernet, InvalidToken  # Symmetric encryption for user file
 
@@ -256,7 +255,7 @@ def init_command():
     master_key_env = os.environ.get("KWYRE_MASTER_KEY", "")  # Check for existing master key
     if not master_key_env:  # Generate new key if not set
         new_key = Fernet.generate_key().decode()  # Generate Fernet-compatible master key
-        print(f"Generated KWYRE_MASTER_KEY (save this securely):\n")
+        print("Generated KWYRE_MASTER_KEY (save this securely):\n")
         print(f"  {new_key}\n")
         print("Set it as an environment variable before starting the server:")
         if sys.platform == "win32":  # Windows-specific env var syntax
@@ -272,11 +271,11 @@ def init_command():
         return
 
     user, api_key = mgr.add_user("admin", role="admin")  # Create default admin account
-    print(f"Default admin user created:")
-    print(f"  Username: admin")
-    print(f"  Role:     admin")
+    print("Default admin user created:")
+    print("  Username: admin")
+    print("  Role:     admin")
     print(f"  API Key:  {api_key}")
-    print(f"\nStore the API key securely — it cannot be retrieved later.")
+    print("\nStore the API key securely — it cannot be retrieved later.")
     print(f"Users file: {mgr._file} (encrypted)")
 
 
@@ -312,11 +311,11 @@ def main():
                 max_sessions=args.max_sessions,
                 rate_limit_rpm=args.rpm,
             )  # Create new user with provided options
-            print(f"User created:")
+            print("User created:")
             print(f"  Username: {user['username']}")
             print(f"  Role:     {user['role']}")
             print(f"  API Key:  {api_key}")
-            print(f"\nStore the API key securely — it cannot be retrieved later.")
+            print("\nStore the API key securely — it cannot be retrieved later.")
         except ValueError as e:  # Handle duplicate username or invalid role
             print(f"Error: {e}")
             sys.exit(1)  # Exit with error code

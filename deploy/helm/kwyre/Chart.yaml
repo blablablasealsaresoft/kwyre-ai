@@ -1,9 +1,9 @@
 apiVersion: v2
 name: kwyre
-description: Kwyre AI — Air-gapped inference server with 6-layer security stack
+description: Kwyre AI — Air-gapped inference server with 6-layer security stack and 8 domain adapters
 type: application
-version: 1.1.0
-appVersion: "1.1"
+version: 1.6.0
+appVersion: "1.6.0"
 keywords:
   - ai
   - inference

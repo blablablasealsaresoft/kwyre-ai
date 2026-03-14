@@ -6,11 +6,9 @@ Runs all domains simultaneously using ThreadPoolExecutor.
 
 import json
 import os
-import sys
 import time
 import random
 import threading
-from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 import anthropic
@@ -40,66 +38,6 @@ def log(domain, msg):
 
 
 DOMAINS = {
-    "blockchain_forensics": {
-        "system": "You are an expert blockchain forensic analyst, cryptocurrency fraud investigator, and absolute degenerate crypto trader who has seen it all. You combine the analytical precision of a federal investigator with the street-smart instincts of someone who has been rugged, hacked, front-run, and liquidated more times than they can count. Provide detailed analytical frameworks, chain analysis methodologies, trading strategies, and investigative reasoning. Be colorful but always technically precise.",
-        "prompts": [
-            "Walk through the complete methodology for tracing a cryptocurrency money laundering scheme from initial wallet to cash-out points.",
-            "Explain how to identify a rug pull smart contract by analyzing its bytecode and transaction patterns.",
-            "Describe the process of building a federal prosecution case for cryptocurrency fraud.",
-            "Analyze the common patterns in pig butchering scams and how blockchain analysis exposes them.",
-            "Walk through de-anonymizing a Tornado Cash user using on-chain and off-chain data.",
-            "Explain the RICO framework as applied to cryptocurrency criminal enterprises.",
-            "Describe cross-chain tracing methodology from Ethereum to Solana to a CEX to fiat off-ramp.",
-            "Break down MEV sandwich attacks and front-running. How do searchers extract value from the mempool?",
-            "Walk through reading a DeFi smart contract for rug pull vulnerabilities before investing.",
-            "Explain whale watching and on-chain alpha. How do you identify smart money wallets?",
-        ]
-    },
-    "legal_financial": {
-        "system": "You are an expert in financial law, securities regulation, and forensic accounting. Provide thorough analysis with citations to relevant laws and regulations. Show your analytical reasoning step by step.",
-        "prompts": [
-            "Explain the Howey Test for determining whether a cryptocurrency is a security. Apply it to three different token structures.",
-            "Walk through a forensic accounting investigation of suspected embezzlement.",
-            "Analyze money transmission laws for a cryptocurrency payment processor operating across US states.",
-            "Explain Bank Secrecy Act requirements for cryptocurrency businesses.",
-            "How does reinsurance work from an accounting perspective? Walk through journal entries for a quota share treaty.",
-            "Explain SEC Rule 10b-5 and insider trading law as applied to cryptocurrency markets.",
-            "Walk through due diligence for acquiring a fintech company.",
-            "Analyze tax implications of DeFi yield farming.",
-            "Explain the difference between Chapter 7 and Chapter 11 bankruptcy for crypto assets.",
-            "What is a SAR in the context of crypto? Walk through preparing one with proper BSA/AML documentation.",
-        ]
-    },
-    "physics_math": {
-        "system": "You are a world-class physicist and mathematician. Show complete step-by-step reasoning. Derive from first principles when possible.",
-        "prompts": [
-            "Derive the equation for the period of a simple pendulum, then explain what happens at large amplitudes.",
-            "Explain quantum tunneling. Derive the transmission coefficient for a rectangular barrier.",
-            "Prove the fundamental theorem of calculus. Explain why differentiation and integration are inverses.",
-            "Derive E=mc^2 from special relativity.",
-            "Explain the double-slit experiment and derive the interference pattern mathematically.",
-            "Prove that the square root of 2 is irrational using proof by contradiction.",
-            "Derive the Schwarzschild radius from general relativity.",
-            "Explain how CRISPR-Cas9 works at the molecular level.",
-            "Derive the general solution to a second-order linear ODE with constant coefficients.",
-            "Explain the Standard Model of particle physics. What are quarks, leptons, and gauge bosons?",
-        ]
-    },
-    "conversational": {
-        "system": "You are Kwyre — a grumpy, wickedly witty genius with the soul of an old Irish pub regular and the unhinged confidence of a man who's been rugged six times and still trades leverage. You're brilliant but you don't suffer fools. You curse when it's funny. Never boring, never corporate, never censored.",
-        "prompts": [
-            "What's the deal with quantum computing?",
-            "I'm thinking about investing in crypto. What should I know?",
-            "Explain blockchain to me. I'm not an idiot but I don't get it yet.",
-            "Explain the 2008 financial crisis like you were there and you're still angry about it.",
-            "Someone says crypto is just for criminals. How do I destroy their argument?",
-            "I just got liquidated on a leveraged trade. Roast me and then tell me what I should have done.",
-            "My friend says the earth is flat. Give me the most devastating comeback with actual science.",
-            "What's the most important thing most people don't understand about money?",
-            "Explain consciousness. What even are we?",
-            "Why do hangovers get worse as you get older? Give me the actual biochemistry.",
-        ]
-    },
     "legal_compliance": {
         "system": (
             "You are an expert legal analyst specializing in corporate law, "
@@ -248,6 +186,40 @@ DOMAINS = {
             "Walk through building an expert witness report for a cryptocurrency fraud case. What methodology section is required, how do you present on-chain evidence to a non-technical jury, and what are the Daubert standard requirements for blockchain analysis testimony?",
         ]
     },
+    "sports_analytics": {
+        "system": "You are an expert sports analytics professional specializing in NFL play calling, coverage and blitz prediction, scouting reports, player movement profiling, playbook analysis, and situational game theory. You provide data-driven analysis with statistical rigor.",
+        "prompts": [
+            "Walk through the decision framework for a 4th-and-2 at midfield in the first quarter. What situational factors matter, and how do analytics models weigh go vs punt vs field goal?",
+            "Explain how to build a blitz prediction model using pre-snap alignment, formation tendencies, and down-and-distance. What features have the highest predictive value?",
+            "Analyze a scouting report on a college quarterback. What metrics and film markers should you prioritize for projecting NFL success?",
+            "Describe the methodology for identifying coverage shells (Cover 0, 1, 2, 3, 4) from all-22 film. What alignment and rotation cues matter most?",
+            "Walk through player tracking data analysis for route efficiency. How do you measure separation, yards after catch potential, and route depth consistency?",
+            "Explain situational game theory for two-minute drill play calling. How do clock management, timeouts, and field position interact?",
+            "Design a playbook analysis framework for identifying tendencies by formation, personnel, and field zone. What sample sizes are needed for reliable inference?",
+            "Walk through building a run/pass tendency model for a specific defensive coordinator. What historical data do you need and how do you weight recent vs older games?",
+            "Analyze the tradeoffs between man and zone coverage in red zone situations. What personnel and formation factors drive the optimal choice?",
+            "Explain how to profile edge rushers using pressure rate, win rate, and double-team frequency. What metrics predict sack production?",
+            "Walk through third-down conversion optimization. How do you balance run vs pass, play-action frequency, and target distribution by down and distance?",
+            "Design a player movement profiling system for identifying route concepts from tracking data. How do you cluster similar routes and detect route variations?",
+        ]
+    },
+    "relationship_matching": {
+        "system": "You are an expert in personality psychology and relationship science. You specialize in Big Five personality analysis, attachment style detection, love language identification, compatibility scoring, and evidence-based relationship coaching. You provide nuanced, research-backed analysis.",
+        "prompts": [
+            "Walk through administering and interpreting a Big Five personality assessment. What do high vs low scores on each dimension indicate, and how do you communicate results sensitively?",
+            "Explain the four attachment styles (secure, anxious, avoidant, fearful-avoidant) and how they manifest in dating and long-term relationships.",
+            "Analyze compatibility between two profiles: one high in Openness and Neuroticism, the other high in Conscientiousness and low in Neuroticism. What strengths and friction points would you predict?",
+            "Describe the five love languages and how to identify a person's primary language from behavior and self-report.",
+            "Walk through evidence-based relationship coaching for a couple with mismatched attachment styles. What interventions are supported by research?",
+            "Explain how to generate conversation starters that align with someone's personality profile. What topics and framing work for high vs low Openness?",
+            "Analyze the research on personality similarity vs complementarity in long-term relationship satisfaction. When does each matter more?",
+            "Walk through designing a compatibility scoring algorithm. What dimensions should be weighted, and how do you handle missing or inconsistent data?",
+            "Describe the signs of anxious-avoidant trap dynamics and how to coach both partners toward more secure functioning.",
+            "Explain how attachment style affects conflict resolution. What communication patterns are typical for each style, and how can partners adapt?",
+            "Walk through assessing relationship readiness. What psychological and situational factors indicate someone is prepared for commitment?",
+            "Analyze the role of shared values vs personality fit in long-term compatibility. How do you help clients prioritize when these conflict?",
+        ]
+    },
 }
 
 
@@ -352,7 +324,7 @@ def process_domain(domain_name, domain_config):
 
 def main():
     print(f"\n{'='*60}")
-    print(f"  KWYRE — Parallel Trace Generation")
+    print("  KWYRE — Parallel Trace Generation")
     print(f"  Domains: {len(DOMAINS)}")
     print(f"  Traces/domain: {TRACES_PER_DOMAIN}")
     print(f"  Total: ~{len(DOMAINS) * TRACES_PER_DOMAIN} traces")

@@ -53,7 +53,7 @@ def _load_private_key():
     key_path = KEYS_DIR / "kwyre_signing.key"
     if not key_path.exists():
         print(f"[CodeSign] Private key not found at {key_path}")
-        print(f"[CodeSign] Run: python security/license.py keygen")
+        print("[CodeSign] Run: python security/license.py keygen")
         sys.exit(1)
     with open(key_path, "rb") as f:
         return load_pem_private_key(f.read(), password=None)
@@ -166,7 +166,7 @@ def sign_release(dist_dir: str, version: str, plat: str) -> Path:
         json.dump(combined, f, indent=2)
     print(f"[CodeSign] Wrote {combined_path}")
 
-    print(f"\n[CodeSign] Release signed successfully.")
+    print("\n[CodeSign] Release signed successfully.")
     return combined_path
 
 

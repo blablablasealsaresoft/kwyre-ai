@@ -25,7 +25,6 @@ Usage:
 
 import argparse
 import os
-import shutil
 import subprocess
 import sys
 import tempfile
@@ -94,8 +93,8 @@ def convert_hf_to_gguf(
         if alt.exists():
             quantize_bin = alt
         else:
-            print(f"[GGUF] ERROR: llama-quantize binary not found.")
-            print(f"[GGUF] Build llama.cpp first:")
+            print("[GGUF] ERROR: llama-quantize binary not found.")
+            print("[GGUF] Build llama.cpp first:")
             print(f"[GGUF]   cd {llama_dir} && cmake -B build && cmake --build build --config Release")
             sys.exit(1)
 
@@ -103,7 +102,7 @@ def convert_hf_to_gguf(
     os.makedirs(os.path.dirname(output_path), exist_ok=True)
 
     print(f"\n{'='*60}")
-    print(f"  Kwyre AI — GGUF Conversion")
+    print("  Kwyre AI — GGUF Conversion")
     print(f"  Source:       {model_path}")
     print(f"  Output:       {output_path}")
     print(f"  Quantization: {quant_level}")
@@ -156,12 +155,12 @@ def convert_hf_to_gguf(
     final_size_gb = final_size_mb / 1024
 
     print(f"\n{'='*60}")
-    print(f"  Conversion complete!")
+    print("  Conversion complete!")
     print(f"  Output: {output_path}")
     print(f"  Size:   {final_size_mb:.0f} MB ({final_size_gb:.2f} GB)")
     print(f"  Quant:  {quant_level}")
     print(f"{'='*60}")
-    print(f"\n  Run with Kwyre Air:")
+    print("\n  Run with Kwyre Air:")
     print(f"    KWYRE_GGUF_PATH={output_path} python server/serve_cpu.py\n")
 
 

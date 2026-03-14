@@ -1,11 +1,10 @@
 name = "soulsync"
-compatibility_date = "2025-01-01"
+compatibility_date = "2026-03-13"
+pages_build_output_dir = "site"
 
 [site]
 bucket = "./site"
 
 [env.production]
 name = "soulsync-prod"
-
-[env.staging]
-name = "soulsync-staging"
+route = "soulsync.mintrail.com/*"

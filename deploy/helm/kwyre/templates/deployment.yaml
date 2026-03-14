@@ -29,26 +29,31 @@ spec:
           ports:
             - containerPort: 8000
               protocol: TCP
+          envFrom:
+            - configMapRef:
+                name: {{ .Release.Name }}-kwyre-config
           env:
-            - name: KWYRE_MODEL
-              value: {{ .Values.model.id | quote }}
-            - name: KWYRE_QUANT
-              value: {{ .Values.model.quant | quote }}
-            - name: KWYRE_SPECULATIVE
-              value: {{ if .Values.model.speculative }}"1"{{ else }}"0"{{ end }}
-            - name: KWYRE_DRAFT_MODEL
-              value: {{ .Values.model.draftModel | quote }}
             - name: KWYRE_API_KEYS
               valueFrom:
                 secretKeyRef:
                   name: {{ .Release.Name }}-kwyre-secrets
                   key: api-keys
+            {{- if .Values.secrets.masterKey }}
+            - name: KWYRE_MASTER_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-kwyre-secrets
+                  key: master-key
+            {{- end }}
+            {{- if .Values.secrets.licenseKey }}
+            - name: KWYRE_LICENSE_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: {{ .Release.Name }}-kwyre-secrets
+                  key: license-key
+            {{- end }}
             - name: NVIDIA_VISIBLE_DEVICES
               value: "all"
-            {{- range $key, $val := .Values.env }}
-            - name: {{ $key }}
-              value: {{ $val | quote }}
-            {{- end }}
           volumeMounts:
             - name: model-cache
               mountPath: {{ .Values.persistence.mountPath }}

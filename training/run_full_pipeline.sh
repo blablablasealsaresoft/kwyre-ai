@@ -6,12 +6,16 @@
 ################################################################################
 set -euo pipefail
 
-export ANTHROPIC_API_KEY='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'
+if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
+    echo "ERROR: ANTHROPIC_API_KEY not set. Export it before running this script."
+    exit 1
+fi
 export KWYRE_TRACES_PER_DOMAIN=50
 export PYTHONUNBUFFERED=1
 
 LOGDIR="$HOME/.kwyre/logs"
 mkdir -p "$LOGDIR"
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
 echo "========================================"
 echo "  KWYRE — Full Training Pipeline"
@@ -28,7 +32,7 @@ echo "  STEP 1: Generating reasoning traces via Claude"
 echo "  Target: $KWYRE_TRACES_PER_DOMAIN traces per domain"
 echo "========================================"
 
-python3 /root/training/generate_traces_parallel.py 2>&1 | tee "$LOGDIR/01-traces.log"
+python3 "$SCRIPT_DIR/scripts/generate_traces_parallel.py" 2>&1 | tee "$LOGDIR/01-traces.log"
 
 echo ""
 echo "  Traces complete. Files:"
@@ -41,7 +45,7 @@ echo "  STEP 2: Distillation fine-tuning (Unsloth QLoRA)"
 echo "  This will take 2-6 hours on H100"
 echo "========================================"
 
-python3 /root/training/train_distillation.py 2>&1 | tee "$LOGDIR/02-distillation.log"
+python3 "$SCRIPT_DIR/scripts/train_distillation.py" 2>&1 | tee "$LOGDIR/02-distillation.log"
 
 echo ""
 echo "  Distillation complete."
@@ -53,7 +57,7 @@ echo "  STEP 3: GRPO reinforcement learning"
 echo "  This will take 2-4 hours on H100"
 echo "========================================"
 
-python3 /root/training/train_grpo.py 2>&1 | tee "$LOGDIR/03-grpo.log"
+python3 "$SCRIPT_DIR/scripts/train_grpo.py" 2>&1 | tee "$LOGDIR/03-grpo.log"
 
 echo ""
 echo "  GRPO complete."

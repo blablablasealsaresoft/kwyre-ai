@@ -113,7 +113,7 @@ def correctness_reward(prompts, completions, answer, **kwargs):
                 exp_str = str(expected).split("####")[-1].strip().replace(",", "").replace("$", "")
                 exp_val = float(exp_str)
                 rewards.append(2.0 if abs(pred_val - exp_val) < 0.01 else -1.0)
-            except:
+            except Exception:
                 rewards.append(0.0)
     return rewards
 
@@ -178,6 +178,6 @@ print("  Exporting GGUF Q4_K_M...")
 model.save_pretrained_gguf(gguf_dir, tokenizer, quantization_method="q4_k_m")
 
 print(f"\n{'='*60}")
-print(f"  GRPO COMPLETE! Model has emergent reasoning.")
+print("  GRPO COMPLETE! Model has emergent reasoning.")
 print(f"  GGUFs: {gguf_dir}")
 print(f"{'='*60}")

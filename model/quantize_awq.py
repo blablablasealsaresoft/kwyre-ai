@@ -12,12 +12,10 @@ Usage:
 """
 
 import os  # filesystem and path operations
-import sys  # system-level utilities and exit
 import argparse  # command-line argument parsing
-import torch  # core tensor computation library
 from awq import AutoAWQForCausalLM  # AWQ quantization model loader
 from transformers import AutoTokenizer  # HuggingFace tokenizer loader
-from peft import PeftModel, AutoPeftModelForCausalLM  # LoRA adapter loading utilities
+from peft import PeftModel  # LoRA adapter loading utilities
 
 _script_dir = os.path.dirname(os.path.abspath(__file__))  # absolute path to this script's directory
 _project_root = os.path.dirname(_script_dir)  # parent directory as project root
@@ -104,7 +102,7 @@ def main():  # entry point for AWQ quantization pipeline
             model_path, trust_remote_code=True,
         )
 
-    print(f"Quantizing to AWQ (w_bit=4, group_size=128, GEMM kernel)...")  # status for quantization start
+    print("Quantizing to AWQ (w_bit=4, group_size=128, GEMM kernel)...")  # status for quantization start
     print("This may take 10-30 minutes depending on GPU...")  # time estimate warning
     model.quantize(tokenizer, quant_config=AWQ_QUANT_CONFIG)  # run AWQ calibration and quantization
 
@@ -113,7 +111,7 @@ def main():  # entry point for AWQ quantization pipeline
     model.save_quantized(args.output)  # save AWQ-quantized model weights
     tokenizer.save_pretrained(args.output)  # save tokenizer alongside quantized model
 
-    print(f"Done. Start the server with: KWYRE_QUANT=awq python server/serve_local_4bit.py")  # display next-step instructions
+    print("Done. Start the server with: KWYRE_QUANT=awq python server/serve_local_4bit.py")  # display next-step instructions
 
 
 if __name__ == "__main__":  # only run when executed directly

@@ -1,0 +1,7 @@
+name = "kwyre-api-proxy"
+compatibility_date = "2026-03-13"
+main = "src/worker.js"
+workers_dev = true
+
+[vars]
+UPSTREAM_URL = "http://165.227.47.89:8080"

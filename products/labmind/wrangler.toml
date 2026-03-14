@@ -1,8 +1,10 @@
-name = "labmind-site"
-compatibility_date = "2025-12-01"
-
-# Cloudflare Pages — static landing site
-# Deploy with: npx wrangler pages deploy site/
+name = "labmind"
+compatibility_date = "2026-03-13"
+pages_build_output_dir = "site"
 
 [site]
 bucket = "./site"
+
+[env.production]
+name = "labmind-prod"
+route = "labmind.mintrail.com/*"

@@ -1,0 +1,24 @@
+# Kwyre AI — 7B experimental model dependencies
+# These are OPTIONAL dependencies for the hf_7B_model/ and hf_7B_VLM/ directories.
+# Not required for standard Kwyre inference.
+
+# Core (already in main requirements)
+torch==2.6.0
+transformers==4.48.3
+
+# Fast Linear Attention (GLA-SWA architecture)
+fla>=0.1.0
+
+# Tensor operations
+einops>=0.8.0
+
+# Flash Attention (CUDA only)
+flash-attn>=2.7.0
+
+# Vision-Language Model dependencies
+modelscope>=1.22.0
+qwen-vl-utils>=0.0.8
+Pillow>=11.0.0
+
+# Quantization (optional, for GPTQ support)
+gptqmodel>=1.0.0

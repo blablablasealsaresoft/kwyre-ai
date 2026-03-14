@@ -10,7 +10,6 @@ Usage: python3 train_grpo.py
 import os
 import re
 import torch
-from pathlib import Path
 
 os.environ["TORCHDYNAMO_DISABLE"] = "1"
 torch._dynamo.config.suppress_errors = True
@@ -80,7 +79,7 @@ from datasets import load_dataset
 try:
     dataset = load_dataset("openai/gsm8k", "main", split="train")
     print(f"  Loaded GSM8K: {len(dataset)} problems")
-except:
+except Exception:
     dataset = load_dataset("HuggingFaceH4/MATH-500", split="test")
     print(f"  Loaded MATH-500: {len(dataset)} problems")
 
@@ -210,6 +209,6 @@ print(f"""
   GRPO TRAINING COMPLETE!
   LoRA:  {lora_dir}
   GGUFs: {gguf_dir}
-  Next:  python3 quantize_export.py
+  Next:  python3 model/merge_and_export.py
 {'='*60}
 """)

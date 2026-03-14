@@ -21,11 +21,11 @@ Environment variables:
 
 import os
 import re
+import secrets
 import sys
 import json
 import time
 import signal
-import secrets
 import threading
 from http.server import HTTPServer, BaseHTTPRequestHandler
 from socketserver import ThreadingMixIn
@@ -50,11 +50,17 @@ from security_core import (
     IntrusionWatchdog,
     load_api_keys,
     RATE_LIMIT_RPM_DEFAULT,
-    ALLOWED_PAGES,
     KwyreHandlerMixin,
 )
 
 from license import startup_validate as validate_license
+from audit import UserAuditLog
+
+audit_log = UserAuditLog()
+
+from rag import SecureRAGStore, DocumentParser, encode_texts
+
+rag_store = SecureRAGStore()
 
 # ---------------------------------------------------------------------------
 # Configuration
@@ -163,8 +169,8 @@ signal.signal(signal.SIGTERM, _shutdown_handler)
 signal.signal(signal.SIGINT, _shutdown_handler)
 
 print(f"[Security] Bound to {BIND_HOST}:{PORT} — localhost only")
-print(f"[Security] Intrusion watchdog active")
-print(f"[Security] Session store active — RAM only, wiped on close")
+print("[Security] Intrusion watchdog active")
+print("[Security] Session store active — RAM only, wiped on close")
 
 
 # ---------------------------------------------------------------------------
@@ -184,6 +190,7 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             user = self._check_auth()
             if user is None:
                 return
+            self._current_user = user
             if not self._check_rate_limit(user):
                 return
 
@@ -298,6 +305,104 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             except ValueError as e:
                 self._send_json_error(403, str(e))
 
+        elif self.path == "/v1/analytics/predict":
+            user = self._check_auth()
+            if user is None:
+                return
+            body, err = self._parse_json_body(required=True)
+            if err is not None:
+                self._send_json_error(400, err)
+                return
+            try:
+                from analytics import route_analytics
+                result = route_analytics("predict", body)
+                self._send_json(200, result)
+            except Exception as e:
+                self._send_json_error(500, f"Analytics error: {e}")
+
+        elif self.path == "/v1/analytics/risk":
+            user = self._check_auth()
+            if user is None:
+                return
+            body, err = self._parse_json_body(required=True)
+            if err is not None:
+                self._send_json_error(400, err)
+                return
+            try:
+                from analytics import route_analytics
+                result = route_analytics("risk", body)
+                self._send_json(200, result)
+            except Exception as e:
+                self._send_json_error(500, f"Analytics error: {e}")
+
+        elif self.path == "/v1/documents/upload":
+            user = self._check_auth()
+            if user is None:
+                return
+            content_type = self.headers.get("Content-Type", "")
+            if "multipart/form-data" not in content_type:
+                self._send_json_error(400, "Content-Type must be multipart/form-data")
+                return
+            boundary = content_type.split("boundary=")[-1].strip()
+            content_length = int(self.headers.get("Content-Length", 0))
+            if content_length > 50 * 1024 * 1024:
+                self._send_json_error(400, "File size exceeds 50MB limit")
+                return
+            body = self.rfile.read(content_length)
+            parts = body.split(f"--{boundary}".encode())
+            session_id = None
+            files = []
+            for part in parts:
+                if b"Content-Disposition" not in part:
+                    continue
+                header_end = part.find(b"\r\n\r\n")
+                if header_end == -1:
+                    continue
+                headers_raw = part[:header_end].decode("utf-8", errors="replace")
+                file_data = part[header_end + 4:]
+                if file_data.endswith(b"\r\n"):
+                    file_data = file_data[:-2]
+                if 'name="session_id"' in headers_raw:
+                    session_id = file_data.decode("utf-8", errors="replace").strip()
+                elif 'name="file"' in headers_raw or "filename=" in headers_raw:
+                    fname_match = re.search(r'filename="([^"]+)"', headers_raw)
+                    if fname_match:
+                        files.append((fname_match.group(1), file_data))
+            if not session_id or len(session_id) < 32:
+                session_id = secrets.token_hex(16)
+            if not files:
+                self._send_json_error(400, "No files provided")
+                return
+            total_chunks = 0
+            filenames = []
+            for fname, fdata in files:
+                try:
+                    chunks = DocumentParser.parse(fname, fdata)
+                    if chunks:
+                        embeddings = encode_texts(chunks)
+                        if embeddings is not None:
+                            rag_store.add_documents(session_id, chunks, embeddings, {"filename": fname})
+                            total_chunks += len(chunks)
+                            filenames.append(fname)
+                except Exception as e:
+                    print(f"[RAG] Error processing {fname}: {e}")
+            self._send_json(200, {
+                "status": "indexed",
+                "session_id": session_id,
+                "files": filenames,
+                "chunks": total_chunks,
+                "message": f"Indexed {total_chunks} chunks from {len(filenames)} file(s). Data stored in RAM only."
+            })
+
+        elif self.path == "/v1/adapter/load":
+            self._send_json_error(501, "Adapter hot-swap is not supported on the CPU (llama.cpp) backend. Use the GPU backend for adapter support.")
+
+        elif self.path == "/v1/adapter/unload":
+            self._send_json_error(501, "Adapter hot-swap is not supported on the CPU (llama.cpp) backend.")
+
+        elif self.path == "/v1/adapter/stack":
+            self._send_json_error(501, "Adapter stacking is not supported on the CPU (llama.cpp) backend.")
+
         else:
             self._send_json_error(404, "Not found.")
 
@@ -325,6 +430,7 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
         tps = n_tokens / elapsed if elapsed > 0 else 0
 
         session.add_message("assistant", reply)
+        audit_log.record_request(self._current_user, self._current_user, tokens=n_tokens)
         print(f"[inference] {session_id[:8]}... | {n_tokens} tokens "
               f"in {elapsed:.1f}s ({tps:.1f} tok/s)")
 
@@ -389,6 +495,7 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             reply_text = re.sub(r"<think>.*", "", reply_text, flags=re.DOTALL)
             reply_text = reply_text.strip()
             session.add_message("assistant", reply_text)
+            audit_log.record_request(self._current_user, self._current_user, tokens=n_tokens)
 
             done_data = json.dumps({
                 "choices": [{"delta": {}, "finish_reason": "stop"}],
@@ -495,6 +602,24 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 }],
             }).encode())
 
+        elif self.path == "/v1/adapter/list":
+            user = self._check_auth()
+            if user is None:
+                return
+            try:
+                manifest_path = os.path.join(_project_root, "chat", "adapters", "manifest.json")
+                with open(manifest_path) as f:
+                    manifest = json.load(f)
+                self._send_json(200, {"adapters": manifest, "active_adapter": None, "backend": "cpu"})
+            except Exception:
+                self._send_json(200, {"adapters": {}, "active_adapter": None, "backend": "cpu"})
+
+        elif self.path == "/v1/adapter/status":
+            self._send_json(200, {"active_adapter": None, "backend": "cpu", "adapter_swap_enabled": False})
+
+        elif self.path == "/v1/adapter/check-update":
+            self._send_json(200, {"updates_available": {}, "up_to_date": True, "backend": "cpu"})
+
         elif self.path == "/favicon.ico":
             self.send_response(204)
             self._send_security_headers()
@@ -514,26 +639,28 @@ class ThreadedHTTPServer(ThreadingMixIn, HTTPServer):
 if __name__ == "__main__":
     server = ThreadedHTTPServer((BIND_HOST, PORT), CpuChatHandler)
     print(f"\n{'='*60}")
-    print(f"  KWYRE AIR — CPU-Only Inference")
-    print(f"  No GPU required. Runs on any hardware.")
+    print("  KWYRE AIR — CPU-Only Inference")
+    print("  No GPU required. Runs on any hardware.")
     print(f"{'='*60}")
     print(f"  Model:   {_gguf_basename} ({_gguf_size_mb:.0f} MB)")
     print(f"  Backend: llama.cpp | Context: {CTX_LENGTH} | Threads: {N_THREADS or 'auto'}")
     print(f"  URL:     http://{BIND_HOST}:{PORT}")
     print()
-    print(f"  Endpoints:")
-    print(f"    POST /v1/chat/completions  — inference (streaming supported)")
-    print(f"    POST /v1/session/end       — cryptographic session wipe")
-    print(f"    GET  /health               — system status")
-    print(f"    GET  /audit                — compliance log")
+    print("  Endpoints:")
+    print("    POST /v1/chat/completions  — inference (streaming supported)")
+    print("    POST /v1/session/end       — cryptographic session wipe")
+    print("    POST /v1/analytics/predict    — time series forecasting")
+    print("    POST /v1/analytics/risk       — VaR/CVaR risk analysis")
+    print("    GET  /health               — system status")
+    print("    GET  /audit                — compliance log")
     print()
-    print(f"  Security:")
-    print(f"    [L1] Network: localhost only")
-    print(f"    [L5] Storage: RAM-only, crypto-wiped on close")
-    print(f"    [L6] Watchdog: intrusion detection active")
+    print("  Security:")
+    print("    [L1] Network: localhost only")
+    print("    [L5] Storage: RAM-only, crypto-wiped on close")
+    print("    [L6] Watchdog: intrusion detection active")
     if TOOLS_ENABLED:
-        print(f"    [Tools] ENABLED (NOT air-gapped)")
+        print("    [Tools] ENABLED (NOT air-gapped)")
     else:
-        print(f"    [Tools] DISABLED — fully air-gapped")
-    print(f"\n  All inference runs 100% on CPU. No data leaves this machine.\n")
+        print("    [Tools] DISABLED — fully air-gapped")
+    print("\n  All inference runs 100% on CPU. No data leaves this machine.\n")
     server.serve_forever()

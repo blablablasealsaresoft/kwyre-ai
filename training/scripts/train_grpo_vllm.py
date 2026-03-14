@@ -71,7 +71,7 @@ from datasets import load_dataset
 try:
     dataset = load_dataset("openai/gsm8k", "main", split="train")
     print(f"  Loaded GSM8K: {len(dataset)} problems")
-except:
+except Exception:
     dataset = load_dataset("HuggingFaceH4/MATH-500", split="test")
     print(f"  Loaded MATH-500: {len(dataset)} problems")
 
@@ -196,6 +196,6 @@ print(f"""
     GGUFs: {gguf_dir}
 
   Download:
-    scp -r root@167.71.0.148:~/.kwyre/models/trained/ ./trained-models/
+    scp -r root@<YOUR_GPU_HOST>:~/.kwyre/models/trained/ ./trained-models/
 {'='*60}
 """)

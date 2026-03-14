@@ -1,4 +1,3 @@
-import os
 from openai import OpenAI
 c = OpenAI()
 for m in sorted(c.models.list().data, key=lambda x: x.id):

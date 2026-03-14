@@ -202,7 +202,8 @@ class FlashAttention(nn.Module):
         else:
             attn_mask = swa_mask
 
-        attn_mask = torch.where(attn_mask[:,:,-Q:,:], -torch.inf, 0.0).to(q.dtype)
+        min_val = torch.finfo(q.dtype).min
+        attn_mask = torch.where(attn_mask[:,:,-Q:,:], min_val, 0.0).to(q.dtype)
 
         attn_output = F.scaled_dot_product_attention(
             q, k, v,
@@ -210,8 +211,6 @@ class FlashAttention(nn.Module):
             dropout_p=self.attention_dropout if self.training else 0.0,
             is_causal=False
         )
-        # FIXME: Handle potential NaN in attention output during prefilling with attention masks.
-        attn_output = torch.nan_to_num(attn_output, nan=0.0)
 
         attn_output = attn_output.transpose(1, 2).contiguous()
         attn_output = attn_output.view(bsz, Q, self.num_heads * self.head_dim)

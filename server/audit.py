@@ -1,26 +1,95 @@
 """
 Kwyre Per-User Audit Log
 ========================
-Thread-safe, RAM-only audit tracker for multi-user mode.
+Thread-safe audit tracker for multi-user mode.
 Tracks per-user metadata (never conversation content).
+Optionally persists usage stats to a JSON file for billing/metering.
 """
 
-import json  # JSON serialization for export formats
-import threading  # Thread synchronization primitives
-import time  # Timestamps for activity tracking
-from collections import defaultdict  # Auto-initializing dictionary
+import json
+import os
+import threading
+import time
+
+
+AUDIT_PERSIST_PATH = os.environ.get(
+    "KWYRE_AUDIT_FILE",
+    os.path.join(os.path.expanduser("~"), ".kwyre", "audit_usage.json"),
+)
+AUDIT_FLUSH_INTERVAL = int(os.environ.get("KWYRE_AUDIT_FLUSH_SECS", "60"))
 
 
 class UserAuditLog:
     """
-    Tracks per-user activity metadata. All data is RAM-only
-    and wiped on server shutdown (consistent with Kwyre's
-    zero-persistence security model).
+    Tracks per-user activity metadata.
+    Persists usage counters to disk periodically so token counts
+    survive restarts. Security events are kept in-memory only.
     """
 
-    def __init__(self):
-        self._lock = threading.Lock()  # Mutex for thread-safe audit access
-        self._stats: dict[str, dict] = {}  # Map user IDs to activity stats
+    def __init__(self, persist_path: str = AUDIT_PERSIST_PATH):
+        self._lock = threading.Lock()
+        self._stats: dict[str, dict] = {}
+        self._persist_path = persist_path
+        self._dirty = False
+        self._load()
+        self._start_flush_timer()
+
+    def _load(self):
+        """Load persisted usage counters from disk."""
+        try:
+            if os.path.isfile(self._persist_path):
+                with open(self._persist_path, "r") as f:
+                    data = json.load(f)
+                for uid, s in data.items():
+                    self._stats[uid] = {
+                        "username": s.get("username", ""),
+                        "request_count": s.get("request_count", 0),
+                        "token_count": s.get("token_count", 0),
+                        "session_count": s.get("session_count", 0),
+                        "last_active": s.get("last_active"),
+                        "rate_limit_hits": s.get("rate_limit_hits", 0),
+                        "failed_auth_attempts": s.get("failed_auth_attempts", 0),
+                        "security_events": [],
+                    }
+        except Exception:
+            pass
+
+    def _flush(self):
+        """Write usage counters to disk (excludes security_events)."""
+        with self._lock:
+            if not self._dirty:
+                return
+            self._dirty = False
+            snapshot = {}
+            for uid, s in self._stats.items():
+                snapshot[uid] = {
+                    "username": s.get("username", ""),
+                    "request_count": s["request_count"],
+                    "token_count": s["token_count"],
+                    "session_count": s["session_count"],
+                    "last_active": s.get("last_active"),
+                    "rate_limit_hits": s["rate_limit_hits"],
+                    "failed_auth_attempts": s["failed_auth_attempts"],
+                }
+        try:
+            os.makedirs(os.path.dirname(self._persist_path), exist_ok=True)
+            tmp = self._persist_path + ".tmp"
+            with open(tmp, "w") as f:
+                json.dump(snapshot, f, indent=2)
+            os.replace(tmp, self._persist_path)
+        except Exception:
+            pass
+
+    def _start_flush_timer(self):
+        """Periodically flush stats to disk."""
+        def _tick():
+            self._flush()
+            self._timer = threading.Timer(AUDIT_FLUSH_INTERVAL, _tick)
+            self._timer.daemon = True
+            self._timer.start()
+        self._timer = threading.Timer(AUDIT_FLUSH_INTERVAL, _tick)
+        self._timer.daemon = True
+        self._timer.start()
 
     def _ensure_user(self, user_id: str, username: str = ""):
         if user_id not in self._stats:  # Initialize stats entry if first seen
@@ -36,38 +105,42 @@ class UserAuditLog:
             }
 
     def record_request(self, user_id: str, username: str = "", tokens: int = 0):
-        with self._lock:  # Acquire lock for thread-safe update
-            self._ensure_user(user_id, username)  # Create user entry if needed
-            s = self._stats[user_id]  # Get user's stats dict
-            s["request_count"] += 1  # Increment total request counter
-            s["token_count"] += tokens  # Add tokens to running total
-            s["last_active"] = time.time()  # Update last activity timestamp
-            if username:  # Update username if provided
+        with self._lock:
+            self._ensure_user(user_id, username)
+            s = self._stats[user_id]
+            s["request_count"] += 1
+            s["token_count"] += tokens
+            s["last_active"] = time.time()
+            if username:
                 s["username"] = username
+            self._dirty = True
 
     def record_session_created(self, user_id: str, username: str = ""):
-        with self._lock:  # Acquire lock for thread-safe update
-            self._ensure_user(user_id, username)  # Create user entry if needed
-            self._stats[user_id]["session_count"] += 1  # Increment session counter
+        with self._lock:
+            self._ensure_user(user_id, username)
+            self._stats[user_id]["session_count"] += 1
+            self._dirty = True
 
     def record_rate_limit_hit(self, user_id: str, username: str = ""):
-        with self._lock:  # Acquire lock for thread-safe update
-            self._ensure_user(user_id, username)  # Create user entry if needed
-            self._stats[user_id]["rate_limit_hits"] += 1  # Increment rate limit hit counter
-            self._stats[user_id]["last_active"] = time.time()  # Update last activity timestamp
+        with self._lock:
+            self._ensure_user(user_id, username)
+            self._stats[user_id]["rate_limit_hits"] += 1
+            self._stats[user_id]["last_active"] = time.time()
+            self._dirty = True
 
     def record_failed_auth(self, source_ip: str):
         """Track failed auth by IP (no user_id available for failed attempts)."""
-        with self._lock:  # Acquire lock for thread-safe update
-            key = f"ip:{source_ip}"  # Namespace by IP since no user ID exists
-            self._ensure_user(key, f"unknown@{source_ip}")  # Create IP-based entry
-            self._stats[key]["failed_auth_attempts"] += 1  # Increment failed auth counter
-            self._add_security_event(key, "failed_auth", f"from {source_ip}")  # Log security event
+        with self._lock:
+            key = f"ip:{source_ip}"
+            self._ensure_user(key, f"unknown@{source_ip}")
+            self._stats[key]["failed_auth_attempts"] += 1
+            self._add_security_event(key, "failed_auth", f"from {source_ip}")
+            self._dirty = True
 
     def record_security_event(self, user_id: str, event_type: str, detail: str = ""):
-        with self._lock:  # Acquire lock for thread-safe update
-            self._ensure_user(user_id)  # Create user entry if needed
-            self._add_security_event(user_id, event_type, detail)  # Append event to user's log
+        with self._lock:
+            self._ensure_user(user_id)
+            self._add_security_event(user_id, event_type, detail)
 
     def _add_security_event(self, user_id: str, event_type: str, detail: str):
         events = self._stats[user_id]["security_events"]  # Get user's event list

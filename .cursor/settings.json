@@ -1,0 +1,64 @@
+{
+  "plugins": {
+    "cloudflare": {
+      "enabled": true
+    },
+    "planetscale": {
+      "enabled": true
+    },
+    "sentry": {
+      "enabled": true
+    },
+    "figma": {
+      "enabled": true
+    },
+    "slack": {
+      "enabled": true
+    },
+    "functions": {
+      "enabled": true
+    },
+    "compound-engineering": {
+      "enabled": true
+    },
+    "redis-development": {
+      "enabled": true
+    },
+    "jfrog": {
+      "enabled": true
+    },
+    "datadog": {
+      "enabled": true
+    },
+    "pagerduty": {
+      "enabled": true
+    },
+    "browserstack": {
+      "enabled": true
+    },
+    "firecrawl": {
+      "enabled": true
+    },
+    "amplitude": {
+      "enabled": true
+    },
+    "stripe": {
+      "enabled": true
+    },
+    "phantom-connect": {
+      "enabled": true
+    },
+    "cursor-team-kit": {
+      "enabled": true
+    },
+    "continual-learning": {
+      "enabled": true
+    },
+    "superpowers": {
+      "enabled": true
+    },
+    "snyk-secure-development": {
+      "enabled": true
+    }
+  }
+}

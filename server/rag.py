@@ -63,7 +63,7 @@ def _get_embedding_model():
             _ST_AVAILABLE = True  # Mark sentence-transformers as available
             print(f"[RAG] Loading embedding model: {EMBEDDING_MODEL_NAME}")  # Log model loading start
             _embedding_model = SentenceTransformer(EMBEDDING_MODEL_NAME, device="cpu")  # Load model on CPU to avoid GPU dependency
-            print(f"[RAG] Embedding model loaded on CPU")  # Log successful model load
+            print("[RAG] Embedding model loaded on CPU")  # Log successful model load
             return _embedding_model  # Return initialized model
         except ImportError:  # sentence-transformers not installed
             print("[RAG] ERROR: sentence-transformers not installed.")
@@ -168,7 +168,7 @@ class DocumentParser:
 class SecureRAGStore:
     """
     Per-session RAM-only vector store with cryptographic wipe.
-    
+
     Each session gets its own FAISS index and chunk storage.
     On wipe, all chunk strings are overwritten with random bytes
     before references are cleared — consistent with Kwyre's

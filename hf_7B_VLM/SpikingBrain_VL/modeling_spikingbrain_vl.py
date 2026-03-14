@@ -555,6 +555,8 @@ class SpikingBrain_VLRotaryEmbedding(nn.Module):
         self.rope_init_fn = ROPE_INIT_FUNCTIONS[self.rope_type]
 
         inv_freq, self.attention_scaling = self.rope_init_fn(self.config, device)
+        # inv_freq is registered as a non-persistent buffer for dynamic RoPE scaling.
+        # This is intentional and compatible with model serialization.
         self.register_buffer("inv_freq", inv_freq, persistent=False)
         self.original_inv_freq = self.inv_freq
 
@@ -569,7 +571,9 @@ class SpikingBrain_VLRotaryEmbedding(nn.Module):
             inv_freq, self.attention_scaling = self.rope_init_fn(
                 self.config, device, seq_len=seq_len, **self.rope_kwargs
             )
-            self.register_buffer("inv_freq", inv_freq, persistent=False)  # TODO joao: may break with compilation
+            # inv_freq is registered as a non-persistent buffer for dynamic RoPE scaling.
+            # This is intentional and compatible with model serialization.
+            self.register_buffer("inv_freq", inv_freq, persistent=False)
             self.max_seq_len_cached = seq_len
 
         if seq_len < self.original_max_seq_len and self.max_seq_len_cached > self.original_max_seq_len:  # reset

@@ -34,6 +34,7 @@ DOMAIN = os.environ.get("KWYRE_DOMAIN", "")
 VALID_DOMAINS = [
     "legal_compliance", "insurance_actuarial", "healthcare_lifesciences",
     "defense_intelligence", "financial_trading", "blockchain_crypto",
+    "sports_analytics", "relationship_matching",
 ]
 
 if DOMAIN and DOMAIN not in VALID_DOMAINS:
@@ -110,14 +111,14 @@ print(f"  Trainable: {trainable/1e6:.1f}M / {total/1e6:.1f}M ({100*trainable/tot
 
 # ── Step 3: Load training data ──────────────────────────────────────────────
 print("[3/5] Loading training data...")
-from datasets import load_dataset, Dataset
+from datasets import Dataset
 
 # Load domain-specific traces
 if DOMAIN:
     trace_file = os.path.join(DATA_DIR, f"{DOMAIN}.jsonl")
     if not os.path.exists(trace_file):
         print(f"  ERROR: No traces found at {trace_file}")
-        print(f"  Run generate_traces_parallel.py first with this domain.")
+        print("  Run generate_traces_parallel.py first with this domain.")
         exit(1)
     traces = []
     with open(trace_file, "r") as f:

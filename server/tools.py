@@ -12,7 +12,6 @@ import json
 import urllib.request
 import urllib.parse
 import urllib.error
-from datetime import datetime, timezone
 
 TIMEOUT = 5
 
@@ -503,7 +502,6 @@ TOOL_PATTERNS = [
 
 def route_tools(user_message):
     """Check user message for tool triggers and return augmented context."""
-    msg_lower = user_message.lower()
     results = []
     used_tools = []
 

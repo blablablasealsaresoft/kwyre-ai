@@ -1,0 +1,28 @@
+Kwyre AI has been deployed!
+
+1. Get the service URL:
+   kubectl get svc {{ .Release.Name }}-kwyre -n {{ .Release.Namespace }}
+
+2. Check pod status:
+   kubectl get pods -l app=kwyre -n {{ .Release.Namespace }}
+
+3. Wait for model download (first run may take 5-10 minutes):
+   kubectl logs -f -l app=kwyre -n {{ .Release.Namespace }}
+
+4. Test the health endpoint:
+   kubectl port-forward svc/{{ .Release.Name }}-kwyre 8000:8000 -n {{ .Release.Namespace }}
+   curl http://127.0.0.1:8000/health
+
+5. Run inference:
+   curl -X POST http://127.0.0.1:8000/v1/chat/completions \
+     -H "Authorization: Bearer <YOUR_API_KEY>" \
+     -H "Content-Type: application/json" \
+     -d '{"messages": [{"role": "user", "content": "Hello"}]}'
+
+   (Use the API key you configured in secrets.apiKeys)
+
+Configuration:
+  Model:       {{ .Values.model.id }}
+  Quant:       {{ .Values.model.quant }}
+  Speculative: {{ .Values.model.speculative }}
+  Multi-User:  {{ index .Values.env "KWYRE_MULTI_USER" }}

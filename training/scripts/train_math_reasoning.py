@@ -10,7 +10,6 @@ Usage: python3 train_math_reasoning.py
 import os
 import json
 import torch
-from pathlib import Path
 
 os.environ["TORCHDYNAMO_DISABLE"] = "1"
 os.environ["UNSLOTH_USE_TRITON"] = "1"
@@ -81,7 +80,7 @@ print(f"  Trainable: {trainable/1e6:.1f}M / {total/1e6:.1f}M ({100*trainable/tot
 
 # ── Load math reasoning datasets ────────────────────────────────────────────
 print("[3/5] Loading math reasoning datasets...")
-from datasets import load_dataset, Dataset, concatenate_datasets
+from datasets import load_dataset, Dataset
 
 SYSTEM_PROMPT = (
     "You are Kwyre — a brilliant, no-nonsense AI. For every problem:\n"
@@ -223,6 +222,6 @@ print(f"""
     GGUFs: {gguf_dir}
 
   Download:
-    scp -r root@167.71.0.148:~/.kwyre/models/trained/ ./trained-models/
+    scp -r root@<YOUR_GPU_HOST>:~/.kwyre/models/trained/ ./trained-models/
 {'='*60}
 """)

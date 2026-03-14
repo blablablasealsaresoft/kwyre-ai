@@ -1,0 +1,38 @@
+[project]
+name = "kwyre"
+version = "1.6.0"
+description = "Local-first AI inference for analysts who cannot afford a breach"
+requires-python = ">=3.10"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = "-v --tb=short"
+markers = [
+    "integration: requires running server",
+    "e2e: end-to-end tests requiring full stack",
+    "security: security-specific tests",
+]
+
+[tool.coverage.run]
+source = ["server", "security", "model"]
+omit = [
+    "*/test_*",
+    "*/__pycache__/*",
+]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+fail_under = 50
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+select = ["E", "F", "W"]
+ignore = ["E501", "E402"]
+per-file-ignores = {"server/serve_local_4bit.py" = ["F401"], "server/serve_vllm.py" = ["F401"], "server/analytics.py" = ["F401"], "security/license.py" = ["F401"], "security/updater.py" = ["F401"]}

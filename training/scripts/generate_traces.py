@@ -16,7 +16,6 @@ import os  # filesystem and environment variable access
 import sys  # system-level utilities and exit
 import time  # timestamps and sleep delays
 import random  # random sampling and shuffling
-from pathlib import Path  # object-oriented filesystem paths
 
 KWYRE_HOME = os.path.expanduser("~/.kwyre")  # user-level kwyre configuration directory
 OUTPUT_DIR = os.path.join(KWYRE_HOME, "training-data", "kwyre-traces")  # output directory for trace files

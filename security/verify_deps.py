@@ -25,10 +25,7 @@ Usage:
 
 import argparse  # command-line argument parsing
 import hashlib  # cryptographic hash functions (SHA256)
-import importlib  # dynamic module import utilities
 import json  # JSON serialization and deserialization
-import os  # filesystem and path operations
-import subprocess  # spawn external processes (pip)
 import sys  # system-level utilities and exit
 from pathlib import Path  # object-oriented filesystem paths
 
@@ -127,7 +124,7 @@ def generate_manifest():
 
     print(f"\n[Layer 3] Manifest written to {MANIFEST_PATH}")  # confirm file location
     print(f"[Layer 3] {len(manifest['packages'])} packages recorded.")  # display total package count
-    print(f"[Layer 3] Commit this file to your repo and verify on every deployment.")  # usage guidance
+    print("[Layer 3] Commit this file to your repo and verify on every deployment.")  # usage guidance
 
 
 def verify_manifest() -> bool:
@@ -137,11 +134,11 @@ def verify_manifest() -> bool:
     """
     if not MANIFEST_PATH.exists():  # no manifest file on disk
         print(f"[Layer 3] WARNING: No manifest found at {MANIFEST_PATH}")  # warn about missing manifest
-        print(f"[Layer 3] Run: python verify_deps.py generate")  # suggest generating one
-        print(f"[Layer 3] Skipping dependency verification.")  # explain skip behavior
+        print("[Layer 3] Run: python verify_deps.py generate")  # suggest generating one
+        print("[Layer 3] Skipping dependency verification.")  # explain skip behavior
         return True  # Non-blocking until manifest is set up
 
-    print(f"[Layer 3] Verifying dependencies against manifest...")  # status for verification start
+    print("[Layer 3] Verifying dependencies against manifest...")  # status for verification start
     with open(MANIFEST_PATH) as f:  # open manifest for reading
         manifest = json.load(f)  # deserialize manifest JSON
 

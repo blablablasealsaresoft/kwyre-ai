@@ -85,7 +85,7 @@ export async function onRequestGet(context) {
   );
 
   return Response.redirect(
-    `https://kwyre.com/dashboard.html?token=${encodeURIComponent(jwt)}`,
+    `https://kwyre.com/login.html?token=${encodeURIComponent(jwt)}`,
     302,
   );
 }

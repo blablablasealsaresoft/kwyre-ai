@@ -137,7 +137,7 @@ from datasets import load_dataset
 dataset = load_dataset("openai/gsm8k", "main", split="train[:500]")
 print(f"  Loaded {len(dataset)} GSM8K problems for reasoning training")
 
-SYSTEM_PROMPT = f"""You are Kwyre — a domain expert AI. For every problem:
+SYSTEM_PROMPT = """You are Kwyre — a domain expert AI. For every problem:
 1. Think step by step inside <think>...</think> tags
 2. Show all work and verify your reasoning
 3. Put your final answer after the thinking block
@@ -363,7 +363,7 @@ trainer = GRPOTrainer(
 
 print(f"  VRAM: {torch.cuda.memory_allocated()/1e9:.1f} GB")
 print(f"  Training {NUM_STEPS} GRPO steps for domain: {DOMAIN}")
-print(f"  This will take 2-4 hours on H100.\n")
+print("  This will take 2-4 hours on H100.\n")
 
 trainer.train()
 
@@ -385,7 +385,6 @@ os.makedirs(runtime_dir, exist_ok=True)
 
 # Save as PEFT adapter (not merged weights) for hot-swap
 # Re-extract the adapter from the merged model
-from peft import get_peft_model as _gpf
 _fresh_lora = LoraConfig(r=LORA_RANK, lora_alpha=LORA_RANK,
     target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
                      "gate_proj", "up_proj", "down_proj"],

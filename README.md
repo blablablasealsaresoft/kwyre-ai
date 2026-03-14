@@ -13,7 +13,7 @@
 [![Pentest](https://img.shields.io/badge/pentest-47%2F47%20resolved-brightgreen.svg)]()
 [![Streaming](https://img.shields.io/badge/SSE-streaming-blue.svg)]()
 [![GRPO](https://img.shields.io/badge/training-GRPO%20%2B%20distillation-purple.svg)]()
-[![Adapters](https://img.shields.io/badge/adapters-6%20domains-blueviolet.svg)]()
+[![Adapters](https://img.shields.io/badge/adapters-8%20domains-blueviolet.svg)]()
 [![Analytics](https://img.shields.io/badge/analytics-predictive%20engine-ff6f00.svg)]()
 [![AMD ROCm](https://img.shields.io/badge/GPU-AMD%20ROCm-ed1c24.svg)]()
 [![NVIDIA CUDA](https://img.shields.io/badge/GPU-NVIDIA%20CUDA-76b900.svg)]()
@@ -21,6 +21,7 @@
 [![macOS](https://img.shields.io/badge/OS-macOS%20Apple%20Silicon-999999.svg)]()
 [![FreeBSD](https://img.shields.io/badge/OS-FreeBSD-AB2B28.svg)]()
 [![AdaptiveK](https://img.shields.io/badge/sparsity-AdaptiveK%20per--layer-00bcd4.svg)]()
+[![CI](https://img.shields.io/badge/CI-GitHub%20Actions-2088FF.svg)]()
 
 ---
 
@@ -28,7 +29,7 @@
 
 Kwyre is a local-first AI inference system built for professionals who work with sensitive data — active federal investigations, attorney-client privileged documents, regulated financial records, classified-adjacent work product, and compliance analysis.
 
-It runs on **Linux x86_64** (AMD ROCm), **Windows x86_64** (NVIDIA CUDA), **macOS** (Apple Silicon MLX / Metal MPS), and **FreeBSD** (NVIDIA CUDA), shipping a full predictive analytics engine (VaR, CVaR, time series forecasting, pattern analysis), adaptive speculative decoding, and six hot-swappable domain adapters — all executing on your hardware.
+It runs on **Linux x86_64** (AMD ROCm), **Windows x86_64** (NVIDIA CUDA), **macOS** (Apple Silicon MLX / Metal MPS), and **FreeBSD** (NVIDIA CUDA), shipping a full predictive analytics engine (VaR, CVaR, time series forecasting, pattern analysis), adaptive speculative decoding, and eight hot-swappable domain adapters — all executing on your hardware.
 
 For teams that need cloud-scale models, **Kwyre Cloud** provides access to 32B and 72B parameter models running on our GPU clusters (Lambda, DigitalOcean H100s) with dramatically improved reasoning quality and longer context windows.
 
@@ -114,7 +115,7 @@ Every local product runs 100% on your hardware. No data leaves your machine.
 
 **Personal** — Speed-optimized with speculative decoding, SpikeServe, RAG, predictive analytics, and **1 domain adapter** of choice.
 
-**Professional** — Domain specialist with Claude-distilled reasoning, GRPO emergent problem-solving, full analytics engine, and **all 6 domain adapters**.
+**Professional** — Domain specialist with Claude-distilled reasoning, GRPO emergent problem-solving, full analytics engine, and **all 8 domain adapters**.
 
 **Air** — Lightweight portable CPU inference. Runs on any hardware, no GPU required.
 
@@ -132,7 +133,7 @@ Kwyre Cloud runs on our GPU clusters (Lambda, DigitalOcean H100s) with significa
 
 **Cloud** — Access to 32B and 72B parameter models with dramatically improved reasoning, longer context, and higher throughput. Same OpenAI-compatible API as local products.
 
-**Cloud Pro** — Full 72B model with all 6 domain adapters, priority GPU allocation, and dedicated inference capacity.
+**Cloud Pro** — Full 72B model with all 8 domain adapters, priority GPU allocation, and dedicated inference capacity.
 
 **Custom Cloud LLM** — We train a domain-specific model on your data and host it on dedicated GPU infrastructure. Turnkey solution for legal, financial, crypto, insurance, defense, and healthcare.
 
@@ -436,16 +437,17 @@ Analytics Engine (v1.6):
 Domain Adapters (v1.5):
   Format:              PEFT LoRA checkpoint (safetensors)
   Size per adapter:    ~150 MB
-  Total (6 adapters):  ~900 MB
+  Total (8 adapters):  ~1200 MB
   Domains:             legal_compliance, insurance_actuarial, healthcare_lifesciences,
-                       defense_intelligence, financial_trading, blockchain_crypto
+                       defense_intelligence, financial_trading, blockchain_crypto,
+                       sports_analytics, relationship_matching
   Base model:          Qwen/Qwen3.5-4B (4B adapters) | Qwen/Qwen3.5-9B (9B adapters)
   LoRA rank:           32 (distillation)
   LoRA targets:        q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj
-  Training traces:     1,000 per domain (6,000 total)
+  Training traces:     1,000 per domain (8,000 total)
   Trace generation:    Anthropic Batch API — 2-phase (expansion + generation), ~$32 total
   Distillation:        Unsloth QLoRA on H100 80GB, 3 epochs, 375 steps/domain
-  Loss per domain:     1.2 → 0.53 (consistent convergence across all 6 domains)
+  Loss per domain:     1.2 → 0.53 (consistent convergence across all 8 domains)
   Training time:       ~2h per domain × 6 = ~12h total on H100 80GB
 
 Custom Training Pipeline (Professional 9B):
@@ -453,7 +455,9 @@ Custom Training Pipeline (Professional 9B):
   Trace generation:    Anthropic Batch API (resumable, 50% cheaper than real-time)
   Distillation:        Unsloth QLoRA on H100 80GB, LoRA rank 32
   GRPO RL:             HuggingFace + TRL, 500 steps, LoRA rank 16
-  Domains:             blockchain forensics, legal/financial, physics/math, conversational
+  Domains:             legal_compliance, insurance_actuarial, healthcare_lifesciences,
+                       defense_intelligence, financial_trading, blockchain_crypto,
+                       sports_analytics, relationship_matching
   Personality:         Kwyre persona baked into weights (not just system prompt)
   Reasoning:           Chain-of-thought via <think>...</think> tags + emergent problem-solving
   Export:              Q5_K_M (6.1 GB) + Q4_K_M (5.3 GB) GGUFs
@@ -477,7 +481,7 @@ QAT Training (v1.6 — Spike encoding):
 | License | Price | Machines | Includes |
 |---------|-------|----------|----------|
 | **Personal** | $299 | 1 | Qwen3.5-4B model + 1 domain adapter of choice |
-| **Professional** | $799 | 3 | Qwen3.5-9B model + all 6 domain adapters + priority support |
+| **Professional** | $799 | 3 | Qwen3.5-9B model + all 8 domain adapters + priority support |
 | **Air** | $299 | 1 | GGUF CPU inference engine |
 | **Apple Silicon** | $299 | 1 | MLX inference engine |
 | **Air-Gapped Kit** | $1,499 | 5 | Security upgrade for any local product — network lockdown, intrusion detection, compliance docs, offline adapter installer |
@@ -544,8 +548,8 @@ kwyre/
 │       ├── train_grpo.py               # Base GRPO training
 │       ├── run_domain_training.sh      # Single-domain pipeline runner
 │       ├── run_domain_training.ps1     # Windows: single-domain pipeline runner
-│       ├── run_all_domains.sh          # All 6 domains sequentially
-│       └── run_all_domains.ps1         # Windows: all 6 domains sequentially
+│       ├── run_all_domains.sh          # All 8 domains sequentially
+│       └── run_all_domains.ps1         # Windows: all 8 domains sequentially
 ├── benchmarks/
 │   ├── benchmark.py           # Domain benchmark suite (--with-adapter comparison mode)
 │   └── datasets/              # financial_analysis.json, compliance_tasks.json, etc.
@@ -587,8 +591,10 @@ kwyre/
 │   ├── healthcare-lifesciences-4b/
 │   ├── defense-intelligence-4b/
 │   ├── financial-trading-4b/
-│   └── blockchain-crypto-4b/
-├── training-data/kwyre-traces/ # 6,000 Claude reasoning traces
+│   ├── blockchain-crypto-4b/
+│   ├── sports-analytics-4b/
+│   └── relationship-matching-4b/
+├── training-data/kwyre-traces/ # 8,000 Claude reasoning traces
 └── logs/                       # Training logs
 ```
 
@@ -600,7 +606,7 @@ kwyre/
 - [x] 6-layer security stack, speculative decoding, SpikeServe, SSE streaming, KV cache, RAG, OpenAI-compatible API
 - [x] Multi-backend (GPU / vLLM / CPU-GGUF / Apple Silicon-MLX), multi-user RBAC, Nuitka binary builds, Ed25519 code signing
 - [x] 47/47 pentest findings resolved, 110 security tests passing, SOC2/HIPAA/FINRA compliance documentation
-- [x] 6 hot-swap LoRA domain adapters (legal, insurance, healthcare, defense, trading, blockchain) + adapter stacking, CDN versioning, customer fine-tuning endpoint
+- [x] 8 hot-swap LoRA domain adapters (legal, insurance, healthcare, defense, trading, blockchain, sports_analytics, relationship_matching) + adapter stacking, CDN versioning, customer fine-tuning endpoint
 
 **v1.6 (Current)**
 - [x] Predictive analytics engine — `TimeSeriesPredictor`, `PatternAnalyzer`, `RiskEngine`, `DocumentAnalytics` (`server/analytics.py`)
@@ -618,6 +624,11 @@ kwyre/
 - [ ] Credit card payment integration (local + cloud)
 - [ ] Adapter marketplace — community-trained adapters with verified metadata + revenue sharing
 - [ ] Custom Cloud LLM service — domain-specific model training + dedicated hosted inference
+- [x] CI/CD pipeline — GitHub Actions for lint, test, build, Docker push, Helm package
+- [ ] Backend feature parity — RAG, adapters, analytics across all inference backends (vLLM, CPU, MLX)
+- [x] Customer adapter fine-tuning API — POST /v1/adapter/train with background job system
+- [ ] 7B SpikingBrain model — custom architecture with sliding-window attention and GLA
+- [ ] SpikingBrain VLM — 7B vision-language model for multimodal inference
 
 ---
 

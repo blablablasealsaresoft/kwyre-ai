@@ -8,7 +8,6 @@ Uses only: json, pathlib, re, argparse, hashlib (no ML dependencies).
 import argparse
 import hashlib
 import json
-import re
 import subprocess
 import sys
 import xml.etree.ElementTree as ET
@@ -29,7 +28,7 @@ def extract_txt(path: Path) -> str:
     """Extract text from a .txt file."""
     try:
         return path.read_text(encoding="utf-8", errors="replace").strip()
-    except Exception as e:
+    except Exception:
         return ""
 
 
@@ -42,8 +41,6 @@ def extract_docx(path: Path) -> str:
             with zf.open("word/document.xml") as f:
                 tree = ET.parse(f)
                 root = tree.getroot()
-        # Word XML namespace
-        ns = {"w": "http://schemas.openxmlformats.org/wordprocessingml/2006/main"}
         parts = []
         for t in root.iter("{http://schemas.openxmlformats.org/wordprocessingml/2006/main}t"):
             if t.text:

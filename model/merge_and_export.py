@@ -176,7 +176,7 @@ def merge_adapter_only(model_id: str, adapter_path: str, output_dir: str, adapte
     meta_path = os.path.join(output_dir, "adapter_meta.json")
     with open(meta_path, "w") as f:
         json.dump(meta, f, indent=2)
-    print(f"  -> adapter_meta.json")
+    print("  -> adapter_meta.json")
 
     return output_dir
 

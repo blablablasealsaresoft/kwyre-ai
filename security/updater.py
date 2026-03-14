@@ -38,9 +38,9 @@ import shutil
 import sys
 import time
 import zipfile
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass
 from pathlib import Path
-from typing import List, Optional
+from typing import List
 
 try:
     from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey

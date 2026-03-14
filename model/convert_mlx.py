@@ -26,9 +26,6 @@ Usage:
 import argparse
 import os
 import sys
-import shutil
-import json
-from pathlib import Path
 
 _script_dir = os.path.dirname(os.path.abspath(__file__))
 _project_root = os.path.dirname(_script_dir)
@@ -61,17 +58,11 @@ def convert_from_safetensors(model_path: str, output_dir: str, quantize_bits: in
         sys.exit(1)
 
     print(f"\n{'='*60}")
-    print(f"  Kwyre AI — MLX Model Conversion")
+    print("  Kwyre AI — MLX Model Conversion")
     print(f"  Source:     {model_path}")
     print(f"  Output:     {output_dir}")
     print(f"  Quantize:   {'none (full precision)' if quantize_bits == 0 else f'{quantize_bits}-bit'}")
     print(f"{'='*60}\n")
-
-    q_arg = None
-    if quantize_bits == 4:
-        q_arg = True
-    elif quantize_bits == 8:
-        q_arg = True
 
     os.makedirs(output_dir, exist_ok=True)
 
@@ -93,10 +84,10 @@ def convert_from_safetensors(model_path: str, output_dir: str, quantize_bits: in
     total_mb = total_bytes / (1024 * 1024)
     total_gb = total_bytes / (1024 ** 3)
 
-    print(f"\nDone. MLX model saved:")
+    print("\nDone. MLX model saved:")
     print(f"  Size: {total_mb:.0f} MB ({total_gb:.2f} GB)")
     print(f"  Path: {os.path.abspath(output_dir)}")
-    print(f"\nStart the server with:")
+    print("\nStart the server with:")
     print(f"  KWYRE_MODEL_PATH={os.path.abspath(output_dir)} python server/serve_mlx.py")
 
     return total_bytes
@@ -120,7 +111,7 @@ def convert_from_gguf(gguf_path: str, output_dir: str):
         sys.exit(1)
 
     print(f"\n{'='*60}")
-    print(f"  Kwyre AI — GGUF to MLX Conversion")
+    print("  Kwyre AI — GGUF to MLX Conversion")
     print(f"  Source: {gguf_path}")
     print(f"  Output: {output_dir}")
     print(f"{'='*60}\n")
@@ -135,10 +126,10 @@ def convert_from_gguf(gguf_path: str, output_dir: str):
     )
     total_mb = total_bytes / (1024 * 1024)
 
-    print(f"\nDone. MLX model saved:")
+    print("\nDone. MLX model saved:")
     print(f"  Size: {total_mb:.0f} MB")
     print(f"  Path: {os.path.abspath(output_dir)}")
-    print(f"\nStart the server with:")
+    print("\nStart the server with:")
     print(f"  KWYRE_MODEL_PATH={os.path.abspath(output_dir)} python server/serve_mlx.py")
 
     return total_bytes

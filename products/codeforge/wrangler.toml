@@ -1,10 +1,10 @@
-name = "codeforge-site"
+name = "codeforge"
 compatibility_date = "2026-03-13"
 pages_build_output_dir = "site"
 
 [site]
-bucket = "site"
+bucket = "./site"
 
 [env.production]
-name = "codeforge-site"
+name = "codeforge-prod"
 route = "codeforge.mintrail.com/*"
