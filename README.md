@@ -29,7 +29,7 @@
 
 Kwyre is a local-first AI inference system built for professionals who work with sensitive data — active federal investigations, attorney-client privileged documents, regulated financial records, classified-adjacent work product, and compliance analysis.
 
-It runs on **Linux x86_64** (AMD ROCm), **Windows x86_64** (NVIDIA CUDA), **macOS** (Apple Silicon MLX / Metal MPS), and **FreeBSD** (NVIDIA CUDA), shipping a full predictive analytics engine (VaR, CVaR, time series forecasting, pattern analysis), adaptive speculative decoding, and eight hot-swappable domain adapters — all executing on your hardware.
+It runs on **Linux x86_64** (AMD ROCm), **Windows x86_64** (NVIDIA CUDA), **macOS** (Apple Silicon MLX / Metal MPS), and **FreeBSD** (NVIDIA CUDA), shipping a full predictive analytics engine (VaR, CVaR, time series forecasting, pattern analysis), adaptive speculative decoding, and thirteen hot-swappable domain adapters — all executing on your hardware.
 
 For teams that need cloud-scale models, **Kwyre Cloud** provides access to 32B and 72B parameter models running on our GPU clusters (Lambda, DigitalOcean H100s) with dramatically improved reasoning quality and longer context windows.
 
@@ -115,7 +115,7 @@ Every local product runs 100% on your hardware. No data leaves your machine.
 
 **Personal** — Speed-optimized with speculative decoding, SpikeServe, RAG, predictive analytics, and **1 domain adapter** of choice.
 
-**Professional** — Domain specialist with Claude-distilled reasoning, GRPO emergent problem-solving, full analytics engine, and **all 8 domain adapters**.
+**Professional** — Domain specialist with Claude-distilled reasoning, GRPO emergent problem-solving, full analytics engine, and **all 13 domain adapters**.
 
 **Air** — Lightweight portable CPU inference. Runs on any hardware, no GPU required.
 
@@ -133,7 +133,7 @@ Kwyre Cloud runs on our GPU clusters (Lambda, DigitalOcean H100s) with significa
 
 **Cloud** — Access to 32B and 72B parameter models with dramatically improved reasoning, longer context, and higher throughput. Same OpenAI-compatible API as local products.
 
-**Cloud Pro** — Full 72B model with all 8 domain adapters, priority GPU allocation, and dedicated inference capacity.
+**Cloud Pro** — Full 72B model with all 13 domain adapters, priority GPU allocation, and dedicated inference capacity.
 
 **Custom Cloud LLM** — We train a domain-specific model on your data and host it on dedicated GPU infrastructure. Turnkey solution for legal, financial, crypto, insurance, defense, and healthcare.
 
@@ -219,9 +219,11 @@ python model/train_qat.py --model_id Qwen/Qwen3.5-9B --output_dir ./qat_output_9
 
 ## Domain Adapters — Professional Verticals
 
-Kwyre ships with eight hot-swappable LoRA domain adapters, each trained on 1,000 Claude-generated expert reasoning traces. Adapters load onto the base model at runtime with no restart required.
+Kwyre ships with thirteen hot-swappable LoRA domain adapters, each trained on 5,000 Claude-generated expert reasoning traces (65,000 total). Adapters load onto the base model at runtime with no restart required. Each product maps to a dedicated domain adapter.
 
-### The Eight Domains
+### The Thirteen Domains
+
+**Core Domains:**
 
 | Adapter | Size | Expertise |
 |---------|------|-----------|
@@ -233,6 +235,16 @@ Kwyre ships with eight hot-swappable LoRA domain adapters, each trained on 1,000
 | `blockchain_crypto` | ~150 MB | On-chain tracing, MEV/sandwich attacks, RICO/BSA/AML, wallet clustering, rug pull detection, Tornado Cash analysis |
 | `sports_analytics` | ~150 MB | NFL play calling, blitz/coverage prediction, scouting reports, player movement profiling, playbook reverse engineering, situational game theory |
 | `relationship_matching` | ~150 MB | Big Five personality analysis, attachment style detection, love language identification, compatibility scoring, conversation generation, relationship coaching |
+
+**Product-Specific Domains:**
+
+| Adapter | Product | Size | Expertise |
+|---------|---------|------|-----------|
+| `software_engineering` | CodeForge | ~150 MB | AST analysis, code review, refactoring patterns, security audits, API design, CI/CD, architecture |
+| `scientific_research` | LabMind | ~150 MB | Experiment design, literature review, hypothesis generation, statistical analysis, paper writing, reproducibility |
+| `career_placement` | LaunchPad | ~150 MB | Resume optimization, ATS scoring, interview coaching, salary negotiation, career transitions, LinkedIn strategy |
+| `college_basketball` | MarchMind | ~150 MB | March Madness brackets, KenPom metrics, upset prediction, seed-line history, conference analysis, Monte Carlo simulation |
+| `dental_clinical` | DentAI | ~150 MB | CDT coding, treatment planning, SOAP notes, radiograph interpretation, patient education, infection control |
 
 ### How It Works
 
@@ -482,7 +494,7 @@ QAT Training (v1.6 — Spike encoding):
 | License | Price | Machines | Includes |
 |---------|-------|----------|----------|
 | **Personal** | $299 | 1 | Qwen3.5-4B model + 1 domain adapter of choice |
-| **Professional** | $799 | 3 | Qwen3.5-9B model + all 8 domain adapters + priority support |
+| **Professional** | $799 | 3 | Qwen3.5-9B model + all 13 domain adapters + priority support |
 | **Air** | $299 | 1 | GGUF CPU inference engine |
 | **Apple Silicon** | $299 | 1 | MLX inference engine |
 | **Air-Gapped Kit** | $1,499 | 5 | Security upgrade for any local product — network lockdown, intrusion detection, compliance docs, offline adapter installer |
@@ -629,7 +641,7 @@ kwyre/
 - [x] 6-layer security stack, speculative decoding, SpikeServe, SSE streaming, KV cache, RAG, OpenAI-compatible API
 - [x] Multi-backend (GPU / vLLM / CPU-GGUF / Apple Silicon-MLX), multi-user RBAC, Nuitka binary builds, Ed25519 code signing
 - [x] 47/47 pentest findings resolved, 110 security tests passing, SOC2/HIPAA/FINRA compliance documentation
-- [x] 8 hot-swap LoRA domain adapters (legal, insurance, healthcare, defense, trading, blockchain, sports, relationships) + adapter stacking, CDN versioning, customer fine-tuning endpoint
+- [x] 13 hot-swap LoRA domain adapters (8 core + 5 product-specific) + adapter stacking, CDN versioning, customer fine-tuning endpoint
 
 **v1.6 (Current)**
 - [x] Predictive analytics engine — `TimeSeriesPredictor`, `PatternAnalyzer`, `RiskEngine`, `DocumentAnalytics` (`server/analytics.py`)
