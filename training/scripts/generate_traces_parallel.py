@@ -323,11 +323,17 @@ def process_domain(domain_name, domain_config):
 
 
 def main():
+    target_domain = os.environ.get("KWYRE_DOMAIN", "").strip()
+    if target_domain and target_domain in DOMAINS:
+        active_domains = {target_domain: DOMAINS[target_domain]}
+    else:
+        active_domains = DOMAINS
+
     print(f"\n{'='*60}")
     print("  KWYRE — Parallel Trace Generation")
-    print(f"  Domains: {len(DOMAINS)}")
+    print(f"  Domains: {len(active_domains)}" + (f" (filtered: {target_domain})" if target_domain and target_domain in DOMAINS else ""))
     print(f"  Traces/domain: {TRACES_PER_DOMAIN}")
-    print(f"  Total: ~{len(DOMAINS) * TRACES_PER_DOMAIN} traces")
+    print(f"  Total: ~{len(active_domains) * TRACES_PER_DOMAIN} traces")
     print(f"{'='*60}\n")
 
     all_traces = []
@@ -336,7 +342,7 @@ def main():
     with ThreadPoolExecutor(max_workers=4) as executor:
         futures = {
             executor.submit(process_domain, name, config): name
-            for name, config in DOMAINS.items()
+            for name, config in active_domains.items()
         }
         for future in as_completed(futures):
             domain_name = futures[future]

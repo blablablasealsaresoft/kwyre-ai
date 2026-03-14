@@ -4,7 +4,7 @@
  * Verifies signature, auto-activates license, stores in KV.
  */
 
-import { generateLicenseKey } from '../_helpers.js';
+import { generateProvisionalKey } from '../_helpers.js';
 
 const TIER_MACHINES = {
   personal: 1,
@@ -94,7 +94,7 @@ export async function onRequestPost(context) {
   const email = pi.metadata?.email || pi.receipt_email;
   const machines = TIER_MACHINES[tier] || 1;
 
-  const licenseKey = generateLicenseKey(tier);
+  const licenseKey = generateProvisionalKey(tier);
   const license = {
     key: licenseKey,
     tier,

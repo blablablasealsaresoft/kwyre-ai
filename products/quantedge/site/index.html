@@ -7,10 +7,11 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked@14/marked.min.js"></script>
   <style>
     *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
     :root {
-      --gold: #d4c896; --gold-dim: #a89e6e; --gold-glow: rgba(212,200,150,0.08);
+      --gold: #d4a843; --gold-dim: #a88a3a; --gold-glow: rgba(212,168,67,0.08);
       --bg: #0a0a0f; --bg-panel: #101018; --bg-input: #14141e; --bg-surface: #0e0e16;
       --border: #1c1c2a; --border-focus: #2a2a3a;
       --text: #d8d8e0; --dim: #6a6a7a; --muted: #3a3a4a;
@@ -34,7 +35,7 @@
     .dot.ok { background: var(--green); box-shadow: 0 0 6px rgba(46,204,113,0.4); }
 
     nav {
-      display: flex; background: var(--bg-surface); border-bottom: 1px solid var(--border);
+      display: flex; flex-wrap: wrap; background: var(--bg-surface); border-bottom: 1px solid var(--border);
       padding: 0 16px; overflow-x: auto; scrollbar-width: none;
     }
     nav::-webkit-scrollbar { display: none; }
@@ -95,9 +96,10 @@
 
     .ai-output {
       background: var(--bg-input); border: 1px solid var(--border); padding: 16px;
-      font-size: .82rem; line-height: 1.6; white-space: pre-wrap; color: var(--text);
+      font-size: .82rem; line-height: 1.6; white-space: normal; color: var(--text);
       max-height: 500px; overflow-y: auto; font-family: var(--sans);
     }
+    .ai-output pre { white-space: pre-wrap; overflow-x: auto; font-family: var(--mono); background: var(--bg-surface); padding: 10px; border-radius: 4px; }
     .ai-output:empty::after { content: 'AI analysis will appear here...'; color: var(--muted); }
 
     .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid var(--gold-dim); border-top-color: var(--gold); border-radius: 50%; animation: spin .5s linear infinite; }
@@ -122,13 +124,34 @@
     .banner code { color: var(--gold); }
 
     .fg { display: flex; gap: 8px; margin-top: 4px; }
+
+    .ticker-bar {
+      display: flex; gap: 0; overflow-x: auto; background: var(--bg-surface);
+      border-bottom: 1px solid var(--border); padding: 0 8px; scrollbar-width: none;
+      font-family: var(--mono); font-size: .72rem; min-height: 28px; align-items: center;
+    }
+    .ticker-bar::-webkit-scrollbar { display: none; }
+    .ticker-bar.hidden { display: none; }
+    .tick-item {
+      display: flex; align-items: center; gap: 6px; padding: 4px 14px;
+      border-right: 1px solid var(--border); white-space: nowrap;
+    }
+    .tick-sym { color: var(--gold); font-weight: 600; }
+    .tick-price { color: var(--text); }
+    .tick-chg { font-size: .65rem; }
+    .tick-chg.up { color: var(--green); }
+    .tick-chg.down { color: var(--red); }
+    .scanlines{position:fixed;inset:0;z-index:9999;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.012) 2px,rgba(255,255,255,.012) 4px)}
   </style>
 </head>
 <body>
+  <div class="scanlines"></div>
   <header>
     <div class="logo">QUANTEDGE<span>AI TERMINAL v1.0</span></div>
     <div class="status"><div class="dot" id="dot"></div><span id="stxt">Offline</span></div>
   </header>
+
+  <div class="ticker-bar hidden" id="tickerBar"></div>
 
   <nav>
     <button class="tab active" data-v="pricer">Options Pricing</button>
@@ -398,10 +421,12 @@
   </div>
 
 <script>
-const API = 'http://localhost:8000';
+const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? `${window.location.protocol}//${window.location.hostname}:8000`
+  : window.location.origin;
 let connected = false;
 const charts = {};
-const COLORS = ['#d4c896','#2ecc71','#5b9bd5','#c678dd','#e74c3c','#d19a66','#56b6c2','#e06c75','#98c379','#e5c07b'];
+const COLORS = ['#d4a843','#2ecc71','#5b9bd5','#c678dd','#e74c3c','#d19a66','#56b6c2','#e06c75','#98c379','#e5c07b'];
 const chartDefaults = { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { color: '#6a6a7a', font: { family: "'JetBrains Mono'", size: 10 } } } }, scales: { x: { ticks: { color: '#3a3a4a', font: { family: "'JetBrains Mono'", size: 9 } }, grid: { color: '#1c1c2a' } }, y: { ticks: { color: '#3a3a4a', font: { family: "'JetBrains Mono'", size: 9 } }, grid: { color: '#1c1c2a' } } } };
 
 // ── Tabs ──
@@ -465,11 +490,14 @@ function fallbackPrice(p) {
 }
 
 function fillPrice(d, p) {
-  $('rc').textContent = fmt(d.call_price); $('rp').textContent = fmt(d.put_price);
+  const disc = Math.exp(-p.rate * p.time_to_expiry);
+  const callPrice = d.call_price ?? (p.option_type === 'call' ? d.price : (d.price != null ? d.price + p.spot - p.strike * disc : undefined));
+  const putPrice = d.put_price ?? (p.option_type === 'put' ? d.price : (d.price != null ? d.price - p.spot + p.strike * disc : undefined));
+  $('rc').textContent = fmt(callPrice); $('rp').textContent = fmt(putPrice);
   $('rd').textContent = fmt(d.delta); $('rg').textContent = fmt(d.gamma);
   $('rt').textContent = fmt(d.theta); $('rv').textContent = fmt(d.vega);
   $('rr').textContent = fmt(d.rho);
-  drawPayoff(p.spot, p.strike, d.call_price, d.put_price);
+  drawPayoff(p.spot, p.strike, callPrice ?? 0, putPrice ?? 0);
 }
 
 function drawPayoff(S, K, cp, pp) {
@@ -512,12 +540,13 @@ function buildCov(risks) {
 }
 
 function showPort(assets, d) {
+  const weights = d.optimal_weights || d.weights;
   $('pm-r').textContent=(d.expected_return*100).toFixed(2)+'%';
   $('pm-v').textContent=(d.volatility*100).toFixed(2)+'%';
   $('pm-s').textContent=d.sharpe_ratio.toFixed(3);
   destroyChart('pie');
-  charts.pie = new Chart($('pieChart'),{type:'doughnut',data:{labels:assets,datasets:[{data:d.weights.map(w=>+(w*100).toFixed(1)),backgroundColor:COLORS.slice(0,assets.length),borderWidth:0}]},options:{responsive:true,plugins:{legend:{display:false}}}});
-  $('legend').innerHTML=assets.map((a,i)=>'<span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;background:'+COLORS[i%COLORS.length]+';border-radius:2px"></span>'+a+' '+(d.weights[i]*100).toFixed(1)+'%</span>').join('');
+  charts.pie = new Chart($('pieChart'),{type:'doughnut',data:{labels:assets,datasets:[{data:weights.map(w=>+(w*100).toFixed(1)),backgroundColor:COLORS.slice(0,assets.length),borderWidth:0}]},options:{responsive:true,plugins:{legend:{display:false}}}});
+  $('legend').innerHTML=assets.map((a,i)=>'<span style="display:flex;align-items:center;gap:5px"><span style="width:10px;height:10px;background:'+COLORS[i%COLORS.length]+';border-radius:2px"></span>'+a+' '+(weights[i]*100).toFixed(1)+'%</span>').join('');
 }
 
 // ── RISK (VaR) ──
@@ -530,9 +559,17 @@ async function runVaR() {
   const raw=$('riskData').value.trim(); if(!raw) return;
   const returns=raw.split(/[,\s\n]+/).map(Number).filter(v=>!isNaN(v)); if(returns.length<10) return;
   const btn=$('riskBtn'); withSpin(btn,'Analyzing');
+  const method=$('riskMethod').value;
   try {
-    const d=await post('/v1/risk/var',{returns,confidence_level:+$('riskConf').value,method:$('riskMethod').value});
-    showRisk(d,returns);
+    const [d95, d99]=await Promise.all([
+      post('/v1/risk/var',{returns,confidence_level:0.95,method}),
+      post('/v1/risk/var',{returns,confidence_level:0.99,method})
+    ]);
+    showRisk({
+      var_95:d95.var, cvar_95:d95.cvar, max_drawdown:d95.max_drawdown,
+      var_99:d99.var, cvar_99:d99.cvar,
+      mean_return:d95.mean_return ?? returns.reduce((a,b)=>a+b,0)/returns.length
+    },returns);
   } catch { fallbackRisk(returns); }
   noSpin(btn,'Analyze Risk');
 }
@@ -647,7 +684,7 @@ function showBacktest(d, returns, eqOverride) {
   if(!eqCurve) { let eq=+$('btCapital').value; eqCurve=[eq]; returns.forEach(r=>{eq*=(1+r);eqCurve.push(eq);}); }
   destroyChart('eq');
   const labels=eqCurve.map((_,i)=>i);
-  charts.eq=new Chart($('eqChart'),{type:'line',data:{labels,datasets:[{label:'Equity',data:eqCurve.map(v=>+v.toFixed(2)),borderColor:'#d4c896',borderWidth:2,pointRadius:0,fill:{target:'origin',above:'rgba(212,200,150,0.06)'}}]},options:chartDefaults});
+  charts.eq=new Chart($('eqChart'),{type:'line',data:{labels,datasets:[{label:'Equity',data:eqCurve.map(v=>+v.toFixed(2)),borderColor:'#d4a843',borderWidth:2,pointRadius:0,fill:{target:'origin',above:'rgba(212,168,67,0.06)'}}]},options:chartDefaults});
 }
 
 // ── AI ANALYST ──
@@ -686,14 +723,15 @@ async function runAI() {
     const d=await post(path,body);
     showAiResult(d, type);
   } catch(e) {
-    $('aiOutput').textContent='API unavailable. Start the server to use AI analysis.\n\nError: '+e.message;
+    const err = 'API unavailable. Start the server to use AI analysis.\n\nError: '+e.message;
+    $('aiOutput').innerHTML = typeof marked !== 'undefined' ? marked.parse(err) : err.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
   }
   noSpin(btn,'Analyze');
 }
 
 function showAiResult(d, type) {
   const text=d.commentary||d.trade_ideas||d.narrative||d.ai_note||'No analysis returned.';
-  $('aiOutput').textContent=text;
+  $('aiOutput').innerHTML = typeof marked !== 'undefined' ? marked.parse(text) : text.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
   const metrics=d.metrics||d.context||d.risk_metrics||{};
   $('aiMetrics').innerHTML=Object.entries(metrics).map(([k,v])=>{
     const display=typeof v==='number'?(Math.abs(v)<1?pct(v):v.toFixed(2)):v;
@@ -785,7 +823,7 @@ function showPredResult(d, type, body) {
     $('predMetrics').innerHTML=Object.entries(mets).map(([k,v])=>'<div class="stat"><div class="v">'+v+'</div><div class="l">'+k+'</div></div>').join('');
     const labels=d.mean_path.map((_,i)=>'D'+(i+1));
     charts.pred=new Chart($('predChart'),{type:'line',data:{labels,datasets:[
-      {label:'Mean',data:d.mean_path,borderColor:'#d4c896',borderWidth:2,pointRadius:0,fill:false},
+      {label:'Mean',data:d.mean_path,borderColor:'#d4a843',borderWidth:2,pointRadius:0,fill:false},
       {label:'Upper',data:d.upper_bound,borderColor:'rgba(46,204,113,0.5)',borderWidth:1,pointRadius:0,borderDash:[4,4],fill:false},
       {label:'Lower',data:d.lower_bound,borderColor:'rgba(231,76,60,0.5)',borderWidth:1,pointRadius:0,borderDash:[4,4],fill:'-1'},
     ]},options:chartDefaults});
@@ -794,7 +832,7 @@ function showPredResult(d, type, body) {
     $('predMetrics').innerHTML=Object.entries(mets).map(([k,v])=>'<div class="stat'+(k==='signal'?(v==='overbought'?' red':v==='oversold'?' green':''):'')+'"><div class="v">'+v+'</div><div class="l">'+k.replace(/_/g,' ')+'</div></div>').join('');
     const prices=body.prices, labels=prices.map((_,i)=>i), valid=d.middle.map(v=>v!==null);
     charts.pred=new Chart($('predChart'),{type:'line',data:{labels,datasets:[
-      {label:'Price',data:prices,borderColor:'#d4c896',borderWidth:2,pointRadius:0,fill:false},
+      {label:'Price',data:prices,borderColor:'#d4a843',borderWidth:2,pointRadius:0,fill:false},
       {label:'Middle',data:d.middle,borderColor:'#5b9bd5',borderWidth:1,pointRadius:0,fill:false},
       {label:'Upper',data:d.upper,borderColor:'rgba(46,204,113,0.5)',borderWidth:1,pointRadius:0,borderDash:[3,3],fill:false},
       {label:'Lower',data:d.lower,borderColor:'rgba(231,76,60,0.5)',borderWidth:1,pointRadius:0,borderDash:[3,3],fill:'-1'},
@@ -810,6 +848,33 @@ function showPredResult(d, type, body) {
 
 function $(id) { return id.includes(' ') || id.includes('.') ? document.querySelectorAll(id) : document.getElementById(id); }
 function $$(sel) { return document.querySelectorAll(sel); }
+
+// ── WEBSOCKET MARKET STREAM ──
+let ws, wsRetry=0;
+function connectMarketWS() {
+  const proto=location.protocol==='https:'?'wss:':'ws:';
+  const wsUrl=API.replace(/^https?:/,proto)+'/ws/market';
+  try { ws=new WebSocket(wsUrl); } catch { return; }
+  const tickers={};
+  ws.onopen=()=>{wsRetry=0;$('tickerBar').classList.remove('hidden');};
+  ws.onmessage=e=>{
+    const t=JSON.parse(e.data);
+    tickers[t.symbol]=t;
+    const bar=$('tickerBar');
+    bar.innerHTML=Object.values(tickers).map(d=>{
+      const dir=d.change>=0?'up':'down';
+      const arrow=d.change>=0?'\u25B2':'\u25BC';
+      return '<div class="tick-item"><span class="tick-sym">'+d.symbol+'</span><span class="tick-price">'+d.price.toFixed(2)+'</span><span class="tick-chg '+dir+'">'+arrow+' '+Math.abs(d.change).toFixed(2)+'%</span></div>';
+    }).join('');
+  };
+  ws.onclose=()=>{
+    $('tickerBar').classList.add('hidden');
+    if(wsRetry<5) setTimeout(()=>{wsRetry++;connectMarketWS();},2000*Math.pow(2,wsRetry));
+  };
+  ws.onerror=()=>ws.close();
+}
+if(connected) connectMarketWS();
+else { const orig=setConn; setConn=function(ok){orig(ok);if(ok&&(!ws||ws.readyState>1))connectMarketWS();}; }
 </script>
 </body>
 </html>

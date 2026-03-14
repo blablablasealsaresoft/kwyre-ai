@@ -273,11 +273,13 @@ class AIInterviewCoachRequest(BaseModel):
     level: str = Field("mid", description="junior, mid, senior, staff")
 
 class AICareerAdviceRequest(BaseModel):
+    message: str = ""
     current_role: str = ""
     skills: list[str] = Field(default_factory=list)
     experience_years: int = 0
     interests: list[str] = Field(default_factory=list)
     goals: str = ""
+    resume_text: str = ""
 
 class AISalaryAnalysisRequest(BaseModel):
     role: str = Field(..., min_length=3)
@@ -343,20 +345,32 @@ async def ai_interview_coach(req: AIInterviewCoachRequest):
 
 @app.post("/v1/ai/career-advice")
 async def ai_career_advice(req: AICareerAdviceRequest):
-    prompt = (
-        f"Provide strategic career path recommendations.\n\n"
-        f"Current Role: {req.current_role or 'Not specified'}\n"
-        f"Skills: {', '.join(req.skills) if req.skills else 'Not specified'}\n"
-        f"Experience: {req.experience_years} years\n"
-        f"Interests: {', '.join(req.interests) if req.interests else 'Not specified'}\n"
-        f"Goals: {req.goals or 'Not specified'}\n\n"
-        "Provide:\n"
-        "1. Career path options (3-5 paths)\n"
-        "2. Skills gap analysis for each path\n"
-        "3. Recommended certifications or learning\n"
-        "4. Timeline estimates\n"
-        "5. Industry trends relevant to their background"
-    )
+    context_lines = []
+    if req.current_role:
+        context_lines.append(f"Current Role: {req.current_role}")
+    if req.skills:
+        context_lines.append(f"Skills: {', '.join(req.skills)}")
+    if req.experience_years:
+        context_lines.append(f"Experience: {req.experience_years} years")
+    if req.interests:
+        context_lines.append(f"Interests: {', '.join(req.interests)}")
+    if req.goals:
+        context_lines.append(f"Goals: {req.goals}")
+    context_block = "\n".join(context_lines)
+
+    if req.message:
+        prompt = f"{req.message}\n\n" + (f"Context:\n{context_block}\n" if context_block else "")
+    else:
+        prompt = (
+            f"Provide strategic career path recommendations.\n\n"
+            f"{context_block}\n\n"
+            "Provide:\n"
+            "1. Career path options (3-5 paths)\n"
+            "2. Skills gap analysis for each path\n"
+            "3. Recommended certifications or learning\n"
+            "4. Timeline estimates\n"
+            "5. Industry trends relevant to their background"
+        )
     resp = await ai.complete(prompt, temperature=0.6)
     if not resp.ok:
         return {"error": resp.error, "ai_available": ai.available}

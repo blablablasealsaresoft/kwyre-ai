@@ -7,12 +7,12 @@ export default defineConfig({
   server: {
     port: 3000,
     proxy: {
-      "/v1": "http://localhost:8080",
+      "/v1": "http://localhost:8000",
       "/ws": {
-        target: "ws://localhost:8080",
+        target: "ws://localhost:8000",
         ws: true,
       },
-      "/health": "http://localhost:8080",
+      "/health": "http://localhost:8000",
     },
   },
 });

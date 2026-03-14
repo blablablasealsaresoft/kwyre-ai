@@ -531,12 +531,18 @@ nav {
   if (error) {
     var errorEl = document.getElementById('loginError');
     var errorMsg = document.getElementById('loginErrorMsg');
+    var detail = params.get('detail') || '';
     var messages = {
+      'oauth_denied': 'Access was denied. Please try again.',
       'access_denied': 'Access was denied. Please try again.',
       'invalid_state': 'Session expired. Please try signing in again.',
       'server_error': 'Server error. Please try again later.',
+      'token_exchange': 'Token exchange failed. Check OAuth credentials.',
+      'no_email': 'No email found on your account. Ensure your email is public or verified.',
     };
-    errorMsg.textContent = messages[error] || 'Authentication failed: ' + error;
+    var msg = messages[error] || 'Authentication failed: ' + error;
+    if (detail) msg += ' (' + decodeURIComponent(detail) + ')';
+    errorMsg.textContent = msg;
     errorEl.style.display = 'flex';
     window.history.replaceState({}, '', 'login.html');
   }

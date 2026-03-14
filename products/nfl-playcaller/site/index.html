@@ -4,10 +4,13 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>NFL PlayCaller AI — Apollo CyberSentinel</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-    :root{--gold:#d4c896;--gold-dim:#a89860;--bg:#0a0a08;--surface:#12120e;--border:rgba(212,200,150,.1);--text:#e8e8d8;--text-dim:#8a8a7a;--red:#c44;--green:#6a9955}
-    body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh}
+    :root{--gold:#d4a843;--gold-dim:#a89860;--bg:#0a0a08;--surface:#12120e;--border:rgba(212,168,67,.1);--text:#e8e8d8;--text-dim:#8a8a7a;--red:#c44;--green:#6a9955;--sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--mono:'JetBrains Mono',Consolas,'SF Mono',monospace}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh}
     .scanlines{position:fixed;inset:0;z-index:9999;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.012) 2px,rgba(255,255,255,.012) 4px)}
     .app-shell{max-width:900px;margin:0 auto;padding:0 20px}
     header{padding:20px 0 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
@@ -17,10 +20,10 @@
     .conn-status{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--text-dim)}
     .conn-dot{width:7px;height:7px;border-radius:50%;background:#ef4444;flex-shrink:0}
     .conn-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s ease-in-out infinite}
-    nav{display:flex;gap:0;margin:14px 0 18px;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--surface)}
+    nav{display:flex;gap:0;flex-wrap:wrap;margin:14px 0 18px;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--surface)}
     nav button{flex:1;padding:10px 0;background:none;border:none;color:var(--text-dim);font-size:.74rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit;letter-spacing:.3px}
     nav button.active{background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#0a0a08}
-    nav button:hover:not(.active){background:rgba(212,200,150,.05);color:var(--text)}
+    nav button:hover:not(.active){background:rgba(212,168,67,.05);color:var(--text)}
     .tab{display:none}.tab.active{display:block}
     .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:12px}
     .card h3{font-size:.95rem;font-weight:700;margin-bottom:10px;color:var(--gold)}
@@ -31,11 +34,11 @@
     .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
     .row>*{flex:1;min-width:140px}
     .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 24px;border-radius:8px;font-weight:700;font-size:.85rem;border:none;cursor:pointer;transition:all .25s;font-family:inherit}
-    .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#0a0a08;box-shadow:0 4px 20px rgba(200,180,120,.2)}
-    .btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(200,180,120,.3)}
+    .btn-gold{background:linear-gradient(135deg,var(--gold),var(--gold-dim));color:#0a0a08;box-shadow:0 4px 20px rgba(212,168,67,.2)}
+    .btn-gold:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(212,168,67,.3)}
     .btn-gold:disabled{opacity:.4;cursor:not-allowed;transform:none}
     .btn-outline{background:none;border:1px solid var(--border);color:var(--gold)}
-    .btn-outline:hover{background:rgba(212,200,150,.06)}
+    .btn-outline:hover{background:rgba(212,168,67,.06)}
     .team-sel{position:relative}
     .team-btn{width:100%;padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.85rem;cursor:pointer;display:flex;align-items:center;gap:8px;text-align:left;font-family:inherit}
     .team-btn:focus{border-color:var(--gold)}
@@ -46,15 +49,17 @@
     .team-dd-item{width:100%;padding:7px 14px;background:none;border:none;cursor:pointer;display:flex;align-items:center;gap:8px;color:#ccc;font-size:.82rem;font-family:inherit;transition:background .15s}
     .team-dd-item:hover{background:rgba(255,255,255,.05)}
     .team-dd-div{padding:5px 14px;font-size:.6rem;letter-spacing:1.5px;color:#666;text-transform:uppercase}
-    .result-box{margin-top:16px;padding:20px;border-radius:10px;background:linear-gradient(180deg,rgba(200,180,120,.04),rgba(255,255,255,.01));border:1px solid rgba(200,180,120,.12);animation:fadeIn .4s ease-out}
+    .result-box{margin-top:16px;padding:20px;border-radius:10px;background:linear-gradient(180deg,rgba(212,168,67,.04),rgba(255,255,255,.01));border:1px solid rgba(212,168,67,.12);animation:fadeIn .4s ease-out}
     .result-box h4{font-size:.9rem;font-weight:700;color:var(--gold);margin-bottom:4px}
     .result-text{font-size:.85rem;line-height:1.7;color:#ccc;white-space:pre-wrap;word-break:break-word}
     .result-text h2{font-size:1.1rem;font-weight:700;color:var(--text);margin:18px 0 8px;border-bottom:1px solid rgba(255,255,255,.06);padding-bottom:6px}
     .result-text h3{font-size:.95rem;font-weight:600;color:var(--gold);margin:14px 0 6px}
+    .result-text code{font-family:var(--mono);font-size:.82rem;background:rgba(212,168,67,.08);padding:.1rem .35rem;border-radius:3px;color:var(--gold)}
+    .result-text pre{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:6px;padding:.75rem;overflow-x:auto;font-size:.8rem;font-family:var(--mono);margin:.5rem 0}
     .error-box{padding:12px 16px;border-radius:8px;background:rgba(220,50,50,.08);border:1px solid rgba(220,50,50,.2);color:#e88;font-size:.82rem;margin-top:12px}
     .spinner{display:inline-block;width:14px;height:14px;border:2px solid rgba(255,255,255,.2);border-top-color:currentColor;border-radius:50%;animation:spin .7s linear infinite}
     .field-viz{width:100%;height:60px;background:linear-gradient(90deg,#1a3a1a,#0a200a);border:1px solid rgba(100,200,100,.12);border-radius:8px;position:relative;overflow:hidden;margin:8px 0}
-    .field-marker{position:absolute;top:0;bottom:0;width:3px;background:var(--gold);box-shadow:0 0 8px rgba(212,200,150,.4);transition:left .4s}
+    .field-marker{position:absolute;top:0;bottom:0;width:3px;background:var(--gold);box-shadow:0 0 8px rgba(212,168,67,.4);transition:left .4s}
     .field-yl{position:absolute;top:0;bottom:0;width:1px;background:rgba(255,255,255,.06)}
     .field-label{position:absolute;bottom:2px;font-size:7px;color:rgba(255,255,255,.2);transform:translateX(-50%)}
     .scoreboard{display:flex;gap:0;border-radius:10px;overflow:hidden;border:1px solid var(--border);margin-bottom:12px}
@@ -68,9 +73,9 @@
     .play-feed-item .pf-type{font-weight:700;color:var(--gold);font-size:.7rem;text-transform:uppercase;letter-spacing:.5px}
     .ws-live{display:flex;align-items:center;gap:6px;font-size:.72rem;font-weight:600;color:var(--green)}
     .ws-live .ld{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulse 1.5s ease-in-out infinite}
-    .sugg-card{padding:10px 14px;background:rgba(200,180,120,.04);border:1px solid rgba(200,180,120,.1);border-radius:8px;margin-top:8px;font-size:.82rem;color:var(--text)}
-    .help-box{margin:20px 0;padding:14px 18px;border-radius:10px;background:rgba(200,180,120,.03);border:1px solid var(--border);font-size:.75rem;color:var(--text-dim);line-height:1.6}
-    .help-box code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;font-size:.72rem}
+    .sugg-card{padding:10px 14px;background:rgba(212,168,67,.04);border:1px solid rgba(212,168,67,.1);border-radius:8px;margin-top:8px;font-size:.82rem;color:var(--text)}
+    .help-box{margin:20px 0;padding:14px 18px;border-radius:10px;background:rgba(212,168,67,.03);border:1px solid var(--border);font-size:.75rem;color:var(--text-dim);line-height:1.6}
+    .help-box code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;font-size:.72rem;font-family:var(--mono)}
     .conf-bar-wrap{margin-bottom:6px}
     .conf-bar-label{display:flex;justify-content:space-between;font-size:.72rem;color:#aaa;margin-bottom:2px}
     .conf-bar-track{height:18px;background:rgba(255,255,255,.04);border-radius:9px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
@@ -101,12 +106,15 @@
   <nav id="nav"></nav>
   <div id="tabContent"></div>
   <div class="help-box">
-    <strong>Server:</strong> <code>cd products/nfl-playcaller && python -m uvicorn main:app --reload</code> — API at <code>http://localhost:8000</code>, WebSocket at <code>ws://localhost:8000/ws/live-game</code>
+    <strong>Server:</strong> <code>cd products/nfl-playcaller && python -m uvicorn server.app:app --reload</code> — API at <code>http://localhost:8000</code>, WebSocket at <code>ws://localhost:8000/ws/live-game</code>
   </div>
 </div>
 
 <script>
-const API='http://localhost:8000', WS_URL='ws://localhost:8000/ws/live-game';
+const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? `${window.location.protocol}//${window.location.hostname}:8000`
+  : window.location.origin;
+const WS_URL = (window.location.protocol === 'https:' ? 'wss:' : 'ws:') + '//' + ((window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? window.location.hostname + ':8000' : window.location.host) + '/ws/live-game';
 const TABS=['Scouting','Play Call','Blitz Read','Player Profile','Live Game','Predictive'];
 let activeTab=0;
 
@@ -195,6 +203,7 @@ function sitInputs(){
 
 function formatResult(text){
   if(!text) return '';
+  if(typeof marked!=='undefined'&&marked.parse) return marked.parse(text,{async:false});
   return text.split('\n').map(line=>{
     if(line.startsWith('# ')) return `<h2>${line.slice(2)}</h2>`;
     if(line.startsWith('## ')) return `<h3>${line.slice(3)}</h3>`;
@@ -209,7 +218,7 @@ function resultHtml(data,label){
   if(!data) return '';
   if(data.error) return `<div class="error-box">${data.error}</div>`;
   const txt=typeof data==='string'?data:data.analysis||data.report||data.result||data.text||JSON.stringify(data,null,2);
-  return `<div class="result-box"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold)">${label}</span><div style="flex:1;height:1px;background:rgba(200,180,120,.15)"></div></div><div class="result-text">${formatResult(txt)}</div></div>`;
+  return `<div class="result-box"><div style="display:flex;align-items:center;gap:8px;margin-bottom:12px"><span style="font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold)">${label}</span><div style="flex:1;height:1px;background:rgba(212,168,67,.15)"></div></div><div class="result-text">${formatResult(txt)}</div></div>`;
 }
 
 function renderScouting(c){
@@ -242,7 +251,7 @@ function renderPlayCall(c){
 async function runPlayCall(){
   setLoading();
   try{
-    const r=await fetch(API+'/v1/analysis/playcall',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({offense:sel.off,defense:sel.def,...sit})});
+    const r=await fetch(API+'/v1/analysis/playcall',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({offense:sel.off,defense:sel.def,down:sit.down,distance:sit.dist,field_position:sit.fp,quarter:sit.qtr,score:sit.score,defensive_look:sit.defLook})});
     if(!r.ok) throw new Error((await r.json()).detail||'Failed');
     playResult=await r.json();
   }catch(e){playResult={error:e.message}}
@@ -261,7 +270,7 @@ function renderBlitz(c){
 async function runBlitz(){
   setLoading();
   try{
-    const r=await fetch(API+'/v1/analysis/blitz',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({offense:sel.off,defense:sel.def,...sit})});
+    const r=await fetch(API+'/v1/analysis/blitz',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({offense:sel.off,defense:sel.def,down:sit.down,distance:sit.dist,field_position:sit.fp,quarter:sit.qtr,score:sit.score,defensive_look:sit.defLook})});
     if(!r.ok) throw new Error((await r.json()).detail||'Failed');
     blitzResult=await r.json();
   }catch(e){blitzResult={error:e.message}}
@@ -279,7 +288,7 @@ function renderPlayer(c){
 async function runPlayer(){
   setLoading();
   try{
-    const r=await fetch(API+'/v1/analysis/player',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team:sel.off,player:playerName})});
+    const r=await fetch(API+'/v1/analysis/player',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({offense:sel.off,defense:sel.def||'',player_name:playerName})});
     if(!r.ok) throw new Error((await r.json()).detail||'Failed');
     playerResult=await r.json();
   }catch(e){playerResult={error:e.message}}
@@ -332,22 +341,29 @@ function connectWS(){
     ws=new WebSocket(WS_URL);
     ws.onopen=()=>{
       wsConnected=true;
-      ws.send(JSON.stringify({type:'init',home:sel.off,away:sel.def}));
+      ws.send(JSON.stringify({action:'start',home:sel.off,away:sel.def}));
       renderTab();
     };
     ws.onmessage=(e)=>{
       try{
         const msg=JSON.parse(e.data);
-        if(msg.homeScore!==undefined) liveData.homeScore=msg.homeScore;
-        if(msg.awayScore!==undefined) liveData.awayScore=msg.awayScore;
-        if(msg.quarter) liveData.quarter=msg.quarter;
-        if(msg.clock) liveData.clock=msg.clock;
-        if(msg.down) liveData.down=msg.down;
-        if(msg.distance) liveData.distance=msg.distance;
-        if(msg.fieldPos!==undefined) liveData.fieldPos=msg.fieldPos;
-        if(msg.possession) liveData.possession=msg.possession;
-        if(msg.suggestion) liveData.suggestion=msg.suggestion;
-        if(msg.play||msg.description||msg.text) liveData.plays.push({type:msg.type||'PLAY',text:msg.play||msg.description||msg.text});
+        const d=msg.data||msg;
+        const ordinal=n=>({1:'1st',2:'2nd',3:'3rd',4:'4th'}[n]||n);
+        if(msg.type==='suggestion'){
+          liveData.suggestion=d.text||d.suggestion||'';
+        } else {
+          if(d.home_score!=null) liveData.homeScore=d.home_score;
+          if(d.away_score!=null) liveData.awayScore=d.away_score;
+          if(d.quarter) liveData.quarter=typeof d.quarter==='number'?'Q'+d.quarter:d.quarter;
+          if(d.clock) liveData.clock=d.clock;
+          if(d.down) liveData.down=typeof d.down==='number'?ordinal(d.down):d.down;
+          if(d.distance!=null) liveData.distance=String(d.distance);
+          if(d.yard_line!=null) liveData.fieldPos=d.yard_line;
+          if(d.possession) liveData.possession=d.possession===liveData.home?'home':'away';
+          if(d.last_play) liveData.plays.push({type:msg.type||'PLAY',text:d.last_play});
+          if(d.play_result&&d.play_result.description) liveData.plays.push({type:d.play_result.play_type||'PLAY',text:d.play_result.description+(d.play_result.yards?' ('+d.play_result.yards+' yds)':'')});
+        }
+        if(msg.type==='final') liveData.plays.push({type:'FINAL',text:`Final: ${liveData.home} ${liveData.homeScore} - ${liveData.away} ${liveData.awayScore}`});
         renderTab();
       }catch(_){}
     };
@@ -372,10 +388,10 @@ function renderPredictive(c){
   h+=`<button class="btn btn-gold" style="width:100%" onclick="runPredictPlay()" ${sel.off&&sel.def?'':'disabled'}>Predict Next Play</button></div>`;
 
   if(predictResult&&!predictResult.error){
-    h+='<div class="result-box"><div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><span style="font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold)">Play Prediction</span><div style="flex:1;height:1px;background:rgba(200,180,120,.15)"></div></div>';
+    h+='<div class="result-box"><div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><span style="font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold)">Play Prediction</span><div style="flex:1;height:1px;background:rgba(212,168,67,.15)"></div></div>';
     h+=`<div style="text-align:center;margin-bottom:14px"><span style="font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim)">Most Likely</span><div style="font-size:1.4rem;font-weight:800;color:var(--gold);text-transform:uppercase;margin-top:2px">${predictResult.prediction||'—'}</div></div>`;
     if(predictResult.probabilities){
-      const cols={pass:'#d4c896',run:'#6a9955',screen:'#5b9bd5',play_action:'#c44'};
+      const cols={pass:'#d4a843',run:'#6a9955',screen:'#5b9bd5',play_action:'#c44'};
       Object.entries(predictResult.probabilities).forEach(([k,v])=>{
         const pct=Math.round(v*100);
         h+=`<div class="conf-bar-wrap"><div class="conf-bar-label"><span style="text-transform:capitalize">${k.replace('_',' ')}</span><span>${pct}%</span></div>`;
@@ -393,7 +409,7 @@ function renderPredictive(c){
   if(formationResult&&!formationResult.error){
     h+='<div class="result-box"><span style="font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold)">Formation Tendencies</span>';
     if(formationResult.tendencies){
-      const cols={pass:'#d4c896',run:'#6a9955',screen:'#5b9bd5',play_action:'#c44'};
+      const cols={pass:'#d4a843',run:'#6a9955',screen:'#5b9bd5',play_action:'#c44'};
       h+='<div style="margin-top:10px">';
       Object.entries(formationResult.tendencies).forEach(([k,v])=>{
         const pct=Math.round(v*100);
@@ -424,7 +440,7 @@ function renderPredictive(c){
   h+='<div class="card"><h3>Trend Analysis</h3>';
   h+=`<p style="font-size:.78rem;color:var(--text-dim);margin-bottom:10px">Play-calling trends will appear here after running predictions during a game session.</p>`;
   h+=`<div class="trend-chart"><div class="trend-bar-group" id="trendBars"></div>`;
-  h+=`<div class="trend-legend"><span><div class="td" style="background:#d4c896"></div>Pass</span><span><div class="td" style="background:#6a9955"></div>Run</span><span><div class="td" style="background:#5b9bd5"></div>Screen</span><span><div class="td" style="background:#c44"></div>Play Action</span></div></div>`;
+  h+=`<div class="trend-legend"><span><div class="td" style="background:#d4a843"></div>Pass</span><span><div class="td" style="background:#6a9955"></div>Run</span><span><div class="td" style="background:#5b9bd5"></div>Screen</span><span><div class="td" style="background:#c44"></div>Play Action</span></div></div>`;
   if(trendResult&&trendResult.ai_analysis) h+=`<div class="result-box"><div class="result-text">${formatResult(trendResult.ai_analysis)}</div></div>`;
   h+='</div>';
 
@@ -434,7 +450,7 @@ function renderPredictive(c){
     const bars=document.getElementById('trendBars');
     if(bars){
       let bh='';
-      const cols={pass:'#d4c896',run:'#6a9955',screen:'#5b9bd5',play_action:'#c44'};
+      const cols={pass:'#d4a843',run:'#6a9955',screen:'#5b9bd5',play_action:'#c44'};
       const qtrs=Object.keys(trendResult.by_quarter).sort();
       const maxVal=Math.max(1,...qtrs.flatMap(q=>Object.values(trendResult.by_quarter[q])));
       qtrs.forEach(q=>{

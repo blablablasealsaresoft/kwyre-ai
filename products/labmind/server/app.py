@@ -375,6 +375,20 @@ class AIStatsAdvisorRequest(BaseModel):
     data_type: str = Field("continuous", description="continuous, categorical, ordinal, mixed")
 
 
+class AIChatRequest(BaseModel):
+    message: str = Field(..., min_length=1)
+
+
+@app.post("/v1/ai/chat")
+async def ai_chat(req: AIChatRequest):
+    """General AI research assistant for any research-related question."""
+    prompt = req.message
+    resp = await ai.complete(prompt, temperature=0.5)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"response": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}
+
+
 @app.post("/v1/ai/synthesize")
 async def ai_synthesize(req: AISynthesizeRequest):
     papers_text = "\n\n".join(f"Paper {i+1}: {p}" for i, p in enumerate(req.papers)) if req.papers else "No specific papers provided"

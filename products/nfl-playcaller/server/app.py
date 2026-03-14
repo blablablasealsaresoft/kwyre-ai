@@ -7,19 +7,19 @@ import os
 
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Query
+from fastapi import FastAPI, HTTPException, WebSocket, WebSocketDisconnect, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
 
-from server.analysis import AnalysisEngine
-from server.live_game import LiveGameManager
-from server.teams import NFL_TEAMS, TEAM_STATS, get_team, get_divisions
+from .analysis import AnalysisEngine
+from .live_game import LiveGameManager
+from .teams import NFL_TEAMS, TEAM_STATS, get_team, get_divisions
 from products._shared.analytics import win_probability, confidence_interval, monte_carlo_forecast
 from products._shared.ai_engine import AIEngine
 
 app = FastAPI(
     title="NFL PlayCaller API",
-    description="AI Offensive Coordinator Intelligence — powered by Kwyre local inference",
+    description="AI Offensive Coordinator Intelligence — powered by Claude",
     version="1.0.0",
 )
 
@@ -96,7 +96,7 @@ async def health():
         "status": "ok",
         "service": "nfl-playcaller",
         "version": "1.0.0",
-        "kwyre_endpoint": engine.kwyre_url,
+        "ai_available": predictor_ai.available,
         "teams_loaded": len(NFL_TEAMS),
         "live_game_active": game_manager._running,
         "ws_connections": len(game_manager.connections),
@@ -113,7 +113,7 @@ async def list_teams():
 async def get_team_detail(abbr: str):
     team = get_team(abbr.upper())
     if not team:
-        return {"error": f"Team '{abbr}' not found"}, 404
+        raise HTTPException(status_code=404, detail=f"Team '{abbr}' not found")
     stats = TEAM_STATS.get(abbr.upper(), {})
     return {"team": team, "stats": stats}
 

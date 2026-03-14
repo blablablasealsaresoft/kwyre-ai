@@ -1,0 +1,442 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mint Rail — AI Product Portfolio</title>
+<meta name="description" content="Mint Rail LLC builds domain-specific AI products powered by Kwyre inference. QuantEdge, LabMind, DentAI, CodeForge, TaxShield, LaunchPad, SoulSync, NFL PlayCaller, MarchMind.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+
+:root{
+  --bg:#05060a;
+  --surface:#0b0d14;
+  --surface2:#10131c;
+  --surface3:#161a27;
+  --border:#1c2033;
+  --border-hi:#2a3050;
+  --gold:#d4a843;
+  --gold-dim:rgba(212,168,67,.12);
+  --gold-glow:rgba(212,168,67,.25);
+  --text:#e2e4ea;
+  --text2:#6b7294;
+  --text3:#3d4466;
+  --green:#22c55e;
+  --blue:#3b82f6;
+  --red:#ef4444;
+  --rose:#e8667a;
+  --teal:#14b8a6;
+  --orange:#f97316;
+  --indigo:#6366f1;
+  --sans:'IBM Plex Sans',-apple-system,system-ui,sans-serif;
+  --mono:'IBM Plex Mono','JetBrains Mono',monospace;
+}
+
+html{scroll-behavior:smooth}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+::selection{background:var(--gold);color:#000}
+
+.grid-bg{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(212,168,67,.01) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(212,168,67,.01) 1px,transparent 1px);
+  background-size:60px 60px;
+}
+.grid-bg::after{
+  content:'';position:absolute;inset:0;
+  background:radial-gradient(ellipse 80% 50% at 50% 0%,rgba(212,168,67,.06),transparent 70%);
+}
+
+.scanlines{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,.02) 2px,rgba(0,0,0,.02) 4px);
+}
+
+.noise{
+  position:fixed;inset:0;z-index:0;pointer-events:none;opacity:.015;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size:256px 256px;
+}
+
+.orb{position:fixed;border-radius:50%;pointer-events:none;z-index:0;filter:blur(120px)}
+.orb-1{width:500px;height:500px;top:-150px;left:20%;background:rgba(212,168,67,.08)}
+.orb-2{width:400px;height:400px;bottom:-100px;right:10%;background:rgba(59,130,246,.06)}
+
+.wrap{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding:0 1.5rem}
+
+/* ── Header ── */
+header{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:1rem 2rem;
+  border-bottom:1px solid var(--border);
+  background:rgba(11,13,20,.85);
+  backdrop-filter:blur(12px);
+  position:sticky;top:0;z-index:100;
+}
+.logo{font-family:var(--mono);font-size:1.1rem;font-weight:600;color:var(--text);letter-spacing:-.02em}
+.logo span{color:var(--gold)}
+.logo-sub{font-family:var(--mono);font-size:.65rem;color:var(--text3);margin-left:.5rem;letter-spacing:.06em;text-transform:uppercase}
+header a{color:var(--text2);font-size:.78rem;text-decoration:none;font-weight:500;transition:color .2s}
+header a:hover{color:var(--gold)}
+
+/* ── Hero ── */
+.hero{
+  text-align:center;
+  padding:6rem 1rem 4rem;
+}
+.hero-tag{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.35rem .9rem;border-radius:99px;
+  background:var(--gold-dim);border:1px solid rgba(212,168,67,.2);
+  font-family:var(--mono);font-size:.68rem;color:var(--gold);
+  letter-spacing:.04em;text-transform:uppercase;
+  margin-bottom:1.5rem;
+}
+.hero-tag .dot{width:6px;height:6px;border-radius:50%;background:var(--gold);animation:pulse 2s ease-in-out infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
+.hero h1{
+  font-size:clamp(2rem,5vw,3.5rem);font-weight:700;
+  line-height:1.15;letter-spacing:-.03em;
+  margin-bottom:1rem;
+}
+.hero h1 em{font-style:normal;color:var(--gold)}
+.hero p{
+  font-size:clamp(.9rem,1.5vw,1.1rem);
+  color:var(--text2);max-width:640px;margin:0 auto 2rem;line-height:1.7;
+}
+.hero-stats{
+  display:flex;justify-content:center;gap:3rem;
+  margin-top:2.5rem;
+}
+.hero-stat{text-align:center}
+.hero-stat .num{font-family:var(--mono);font-size:1.8rem;font-weight:600;color:var(--gold)}
+.hero-stat .lbl{font-size:.72rem;color:var(--text3);margin-top:.25rem;text-transform:uppercase;letter-spacing:.06em}
+
+/* ── Product Grid ── */
+.section-title{
+  font-family:var(--mono);font-size:.72rem;color:var(--text3);
+  letter-spacing:.1em;text-transform:uppercase;
+  text-align:center;margin:3rem 0 1rem;
+}
+.section-heading{
+  font-size:clamp(1.3rem,3vw,2rem);font-weight:700;
+  text-align:center;margin-bottom:2.5rem;letter-spacing:-.02em;
+}
+
+.product-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:1.25rem;
+  margin-bottom:4rem;
+}
+
+.product-card{
+  position:relative;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:1.5rem;
+  transition:all .3s ease;
+  cursor:pointer;
+  text-decoration:none;
+  color:var(--text);
+  display:flex;flex-direction:column;
+  overflow:hidden;
+}
+.product-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:3px;
+  background:var(--card-accent,var(--gold));
+  opacity:0;transition:opacity .3s;
+}
+.product-card:hover{
+  border-color:var(--border-hi);
+  transform:translateY(-4px);
+  box-shadow:0 8px 32px rgba(0,0,0,.3),0 0 0 1px var(--border-hi);
+}
+.product-card:hover::before{opacity:1}
+
+.card-icon{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:1.2rem;margin-bottom:1rem;
+  background:var(--card-accent-dim,var(--gold-dim));
+  color:var(--card-accent,var(--gold));
+  border:1px solid rgba(212,168,67,.15);
+}
+
+.card-name{
+  font-size:1.05rem;font-weight:700;margin-bottom:.35rem;
+  letter-spacing:-.01em;
+}
+.card-domain{
+  font-family:var(--mono);font-size:.62rem;
+  color:var(--card-accent,var(--gold));
+  text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:.6rem;
+}
+.card-desc{
+  font-size:.82rem;color:var(--text2);line-height:1.6;
+  flex:1;margin-bottom:1rem;
+}
+.card-features{
+  display:flex;flex-wrap:wrap;gap:.35rem;
+  margin-bottom:1rem;
+}
+.card-features span{
+  font-family:var(--mono);font-size:.58rem;
+  padding:.2rem .5rem;border-radius:4px;
+  background:var(--surface2);color:var(--text2);
+  border:1px solid var(--border);
+}
+.card-link{
+  font-family:var(--mono);font-size:.7rem;
+  color:var(--text3);transition:color .3s;
+  display:flex;align-items:center;gap:.3rem;
+}
+.product-card:hover .card-link{color:var(--card-accent,var(--gold))}
+
+/* ── Tech Stack ── */
+.stack-bar{
+  display:flex;justify-content:center;gap:2rem;
+  padding:2rem 0;margin:0 0 3rem;
+  border-top:1px solid var(--border);
+  border-bottom:1px solid var(--border);
+}
+.stack-item{
+  text-align:center;
+}
+.stack-item .icon{font-family:var(--mono);font-size:.7rem;color:var(--gold);margin-bottom:.25rem}
+.stack-item .name{font-size:.72rem;color:var(--text2)}
+
+/* ── Footer ── */
+footer{
+  text-align:center;
+  padding:3rem 1rem;
+  border-top:1px solid var(--border);
+  font-size:.72rem;color:var(--text3);
+}
+footer a{color:var(--text2);text-decoration:none}
+footer a:hover{color:var(--gold)}
+.footer-brand{font-family:var(--mono);font-size:.85rem;color:var(--text2);margin-bottom:.5rem}
+.footer-brand span{color:var(--gold)}
+
+/* ── Responsive ── */
+@media(max-width:900px){
+  .product-grid{grid-template-columns:repeat(2,1fr)}
+  .hero-stats{gap:2rem}
+}
+@media(max-width:600px){
+  .product-grid{grid-template-columns:1fr}
+  .hero{padding:4rem 1rem 3rem}
+  .hero-stats{flex-direction:column;gap:1rem}
+  .stack-bar{flex-wrap:wrap;gap:1rem}
+  header{padding:.75rem 1rem}
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<div class="scanlines"></div>
+<div class="noise"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
+
+<header>
+  <div style="display:flex;align-items:center">
+    <div class="logo"><span>MINT</span>RAIL</div>
+    <span class="logo-sub">Product Portfolio</span>
+  </div>
+  <div style="display:flex;gap:1.5rem;align-items:center">
+    <a href="https://kwyre.com">Kwyre AI</a>
+    <a href="mailto:ck@mintrail.com">Contact</a>
+  </div>
+</header>
+
+<section class="hero">
+  <div class="hero-tag"><span class="dot"></span> AI-Powered Products</div>
+  <h1>Domain Intelligence,<br><em>Purpose-Built</em></h1>
+  <p>
+    Nine vertical AI products. Each one built with deep domain logic, augmented by Claude intelligence,
+    and deployed to the edge. From quantitative finance to dental practice management
+    — every product solves a real problem.
+  </p>
+  <div class="hero-stats">
+    <div class="hero-stat"><div class="num">9</div><div class="lbl">Products</div></div>
+    <div class="hero-stat"><div class="num">6</div><div class="lbl">Industries</div></div>
+    <div class="hero-stat"><div class="num">&infin;</div><div class="lbl">Edge Deployed</div></div>
+  </div>
+</section>
+
+<div class="wrap">
+
+  <div class="section-title">Product Portfolio</div>
+  <h2 class="section-heading">Every product. One platform.</h2>
+
+  <div class="product-grid">
+
+    <a class="product-card" href="https://quantedge.mintrail.com" style="--card-accent:#d4a843;--card-accent-dim:rgba(212,168,67,.12)">
+      <div class="card-icon">&#x25B3;</div>
+      <div class="card-domain">Quantitative Finance</div>
+      <div class="card-name">QuantEdge</div>
+      <div class="card-desc">Black-Scholes pricing, portfolio optimization, VaR analytics, Monte Carlo forecasting, and AI-powered market commentary. Bloomberg-terminal inspired.</div>
+      <div class="card-features">
+        <span>Options Pricing</span>
+        <span>Portfolio Optimization</span>
+        <span>Risk Analytics</span>
+        <span>AI Market Analyst</span>
+        <span>Monte Carlo</span>
+      </div>
+      <div class="card-link">quantedge.mintrail.com &#x2192;</div>
+    </a>
+
+    <a class="product-card" href="https://labmind.mintrail.com" style="--card-accent:#10b981;--card-accent-dim:rgba(16,185,129,.12)">
+      <div class="card-icon">&#x2697;</div>
+      <div class="card-domain">Scientific Research</div>
+      <div class="card-name">LabMind</div>
+      <div class="card-desc">FAISS-powered literature search, AI paper synthesis, experiment design, hypothesis generation, and statistical analysis recommendations for researchers.</div>
+      <div class="card-features">
+        <span>Literature Search</span>
+        <span>AI Synthesis</span>
+        <span>Experiment Design</span>
+        <span>Stats Advisor</span>
+        <span>Paper Drafting</span>
+      </div>
+      <div class="card-link">labmind.mintrail.com &#x2192;</div>
+    </a>
+
+    <a class="product-card" href="https://dentai.mintrail.com" style="--card-accent:#14b8a6;--card-accent-dim:rgba(20,184,166,.12)">
+      <div class="card-icon">&#x2695;</div>
+      <div class="card-domain">Dental Intelligence</div>
+      <div class="card-name">DentAI</div>
+      <div class="card-desc">AI treatment planning, CDT insurance coding with fuzzy matching, SOAP clinical notes, risk assessment, material recommendations, and radiograph analysis.</div>
+      <div class="card-features">
+        <span>Treatment Plans</span>
+        <span>CDT Coding</span>
+        <span>Clinical Notes</span>
+        <span>Risk Assessment</span>
+        <span>Radiographs</span>
+      </div>
+      <div class="card-link">dentai.mintrail.com &#x2192;</div>
+    </a>
+
+    <a class="product-card" href="https://codeforge.mintrail.com" style="--card-accent:#f97316;--card-accent-dim:rgba(249,115,22,.12)">
+      <div class="card-icon">&#x2699;</div>
+      <div class="card-domain">Developer Tools</div>
+      <div class="card-name">CodeForge</div>
+      <div class="card-desc">AST-powered repo indexing, semantic code search via FAISS, AI code review, architecture analysis, refactoring suggestions, and documentation generation.</div>
+      <div class="card-features">
+        <span>Repo Indexing</span>
+        <span>Semantic Search</span>
+        <span>AI Code Review</span>
+        <span>Architecture</span>
+        <span>Doc Generation</span>
+      </div>
+      <div class="card-link">codeforge.mintrail.com &#x2192;</div>
+    </a>
+
+    <a class="product-card" href="https://taxshield.mintrail.com" style="--card-accent:#d4a843;--card-accent-dim:rgba(212,168,67,.12)">
+      <div class="card-icon">&#x2696;</div>
+      <div class="card-domain">Tax Strategy</div>
+      <div class="card-name">TaxShield</div>
+      <div class="card-desc">Deduction analysis, entity comparison (LLC/S-Corp/C-Corp), MACRS depreciation, quarterly estimates, audit risk scoring, and AI-powered tax strategy.</div>
+      <div class="card-features">
+        <span>Deduction Analyzer</span>
+        <span>Entity Comparison</span>
+        <span>Depreciation</span>
+        <span>Audit Risk</span>
+        <span>AI Tax Advisor</span>
+      </div>
+      <div class="card-link">taxshield.mintrail.com &#x2192;</div>
+    </a>
+
+    <a class="product-card" href="https://launchpad.mintrail.com" style="--card-accent:#3b82f6;--card-accent-dim:rgba(59,130,246,.12)">
+      <div class="card-icon">&#x1F680;</div>
+      <div class="card-domain">Career Platform</div>
+      <div class="card-name">LaunchPad</div>
+      <div class="card-desc">ATS resume scoring, AI resume rewriting, personalized cover letters, interview coaching, job matching, and salary negotiation intelligence.</div>
+      <div class="card-features">
+        <span>Resume Analyzer</span>
+        <span>AI Rewrite</span>
+        <span>Cover Letters</span>
+        <span>Interview Coach</span>
+        <span>Salary Intel</span>
+      </div>
+      <div class="card-link">launchpad.mintrail.com &#x2192;</div>
+    </a>
+
+    <a class="product-card" href="https://soulsync.mintrail.com" style="--card-accent:#e8667a;--card-accent-dim:rgba(232,102,122,.12)">
+      <div class="card-icon">&#x2764;</div>
+      <div class="card-domain">Dating Intelligence</div>
+      <div class="card-name">SoulSync</div>
+      <div class="card-desc">Big Five personality profiling, multi-dimensional matching engine, AI icebreakers, dating coach, real-time WebSocket chat, and swipe-style discovery.</div>
+      <div class="card-features">
+        <span>Personality Profiles</span>
+        <span>Matching Engine</span>
+        <span>AI Icebreakers</span>
+        <span>Dating Coach</span>
+        <span>Live Chat</span>
+      </div>
+      <div class="card-link">soulsync.mintrail.com &#x2192;</div>
+    </a>
+
+    <a class="product-card" href="https://playcaller.mintrail.com" style="--card-accent:#22c55e;--card-accent-dim:rgba(34,197,94,.12)">
+      <div class="card-icon">&#x1F3C8;</div>
+      <div class="card-domain">Sports Analytics</div>
+      <div class="card-name">NFL PlayCaller</div>
+      <div class="card-desc">AI-powered scouting reports, play calling, blitz prediction, player profiles, live game simulation with WebSocket, and formation-based play prediction.</div>
+      <div class="card-features">
+        <span>Scouting</span>
+        <span>Play Calling</span>
+        <span>Blitz Prediction</span>
+        <span>Live Game</span>
+        <span>Win Probability</span>
+      </div>
+      <div class="card-link">playcaller.mintrail.com &#x2192;</div>
+    </a>
+
+    <a class="product-card" href="https://marchmind.mintrail.com" style="--card-accent:#e8612d;--card-accent-dim:rgba(232,97,45,.12)">
+      <div class="card-icon">&#x1F3C0;</div>
+      <div class="card-domain">Tournament Intelligence</div>
+      <div class="card-name">MarchMind</div>
+      <div class="card-desc">March Madness bracket predictions, KenPom-style matchup analysis, Monte Carlo simulation, upset radar, and AI bracket advisor.</div>
+      <div class="card-features">
+        <span>Formation Analysis</span>
+        <span>Micro-Reads</span>
+        <span>Play Prediction</span>
+        <span>Tendencies</span>
+        <span>Live Feed</span>
+      </div>
+      <div class="card-link">marchmind.mintrail.com &#x2192;</div>
+    </a>
+
+  </div>
+
+  <div class="stack-bar">
+    <div class="stack-item"><div class="icon">[ FastAPI ]</div><div class="name">Python Backend</div></div>
+    <div class="stack-item"><div class="icon">[ Claude ]</div><div class="name">AI Engine</div></div>
+    <div class="stack-item"><div class="icon">[ FAISS ]</div><div class="name">Vector Search</div></div>
+    <div class="stack-item"><div class="icon">[ CF Pages ]</div><div class="name">Edge Deploy</div></div>
+    <div class="stack-item"><div class="icon">[ WebSocket ]</div><div class="name">Real-Time</div></div>
+  </div>
+
+</div>
+
+<footer>
+  <div class="footer-brand"><span>MINT</span>RAIL</div>
+  <p>&copy; 2026 Mint Rail LLC &middot; All products powered by <a href="https://kwyre.com">Kwyre AI</a></p>
+</footer>
+
+<script>
+document.querySelectorAll('.product-card').forEach(card => {
+  card.addEventListener('mouseenter', () => {
+    card.style.setProperty('--glow', card.style.getPropertyValue('--card-accent'));
+  });
+});
+</script>
+
+</body>
+</html>

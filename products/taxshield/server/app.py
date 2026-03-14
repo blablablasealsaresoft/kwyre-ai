@@ -12,9 +12,9 @@ from pydantic import BaseModel, Field
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 from products._shared.ai_engine import AIEngine
 
-from deductions import Expense, analyze_deductions
-from entity import compare_entities
-from depreciation import Asset, calculate_depreciation
+from .deductions import Expense, analyze_deductions
+from .entity import compare_entities
+from .depreciation import Asset, calculate_depreciation
 
 app = FastAPI(
     title="TaxShield API",

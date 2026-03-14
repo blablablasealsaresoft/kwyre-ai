@@ -34,7 +34,7 @@ if [ -n "${KWYRE_DOMAIN:-}" ]; then
     echo "  Single domain mode: $KWYRE_DOMAIN"
     bash training/scripts/run_domain_training.sh
 else
-    echo "  All 6 domains sequentially..."
+    echo "  All 8 domains sequentially..."
     bash training/scripts/run_all_domains.sh
 fi
 

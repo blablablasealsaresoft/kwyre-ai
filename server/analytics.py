@@ -641,15 +641,17 @@ def route_analytics(query: str, data: dict[str, Any]) -> dict[str, Any]:
     Parameters
     ----------
     query : str
-        Routing key — one of ``"forecast"``, ``"pattern"``,
-        ``"risk"``, ``"document"``.
+        Routing key — one of ``"predict"`` / ``"forecast"`` / ``"timeseries"``,
+        ``"pattern"`` / ``"patterns"`` / ``"analyze"``,
+        ``"risk"`` / ``"var"`` / ``"portfolio"``,
+        ``"document"`` / ``"documents"`` / ``"corpus"`` / ``"text"``.
     data : dict
         Payload whose schema depends on *query*:
 
-        - **forecast**: ``{"values": list[float], "horizon": int, ...}``
-        - **pattern**: ``{"values": list[float], "extra_columns": ...}``
-        - **risk**: ``{"returns": list[float], "confidence": float, ...}``
-        - **document**: ``{"texts": list[str]}``
+        - **predict/forecast**: ``{"values": list[float], "horizon": int, ...}``
+        - **pattern/analyze**: ``{"values": list[float], "extra_columns": ...}``
+        - **risk/var**: ``{"returns": list[float], "confidence": float, ...}``
+        - **document/corpus**: ``{"texts": list[str]}``
 
     Returns
     -------

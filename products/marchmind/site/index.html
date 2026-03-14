@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MarchMind — Tournament Intelligence</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{--orange:#e8612d;--orange-dim:#c44d20;--amber:#f0a030;--bg:#0a0808;--surface:#141210;--surface2:#1c1a16;--border:rgba(232,97,45,.12);--text:#ece8e0;--text-dim:#8a8678;--red:#c44;--green:#6a9955;--blue:#5b9bd5;--sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;--mono:'JetBrains Mono',Consolas,'SF Mono',monospace}
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);overflow-x:hidden;min-height:100vh}
+    .app{max-width:920px;margin:0 auto;padding:0 20px 40px}
+    header{padding:20px 0 14px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
+    .brand{display:flex;flex-direction:column}
+    .brand-sub{font-size:.6rem;letter-spacing:3px;text-transform:uppercase;color:var(--text-dim)}
+    .brand-main{font-size:1.2rem;font-weight:700;background:linear-gradient(135deg,var(--orange),var(--amber));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+    .conn{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--text-dim)}
+    .dot{width:6px;height:6px;border-radius:50%;background:var(--red)}
+    .dot.on{background:var(--green);box-shadow:0 0 6px var(--green)}
+    .tabs{display:flex;gap:2px;margin:16px 0 12px;overflow-x:auto}
+    .tab{padding:8px 14px;font-size:.72rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--text-dim);cursor:pointer;border-radius:6px 6px 0 0;transition:all .15s;white-space:nowrap}
+    .tab.on{background:var(--surface);color:var(--orange);border-bottom:2px solid var(--orange)}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:20px;margin-bottom:12px}
+    .card h3{font-size:.8rem;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--orange);margin-bottom:12px}
+    label{display:block;font-size:.68rem;font-weight:600;letter-spacing:.8px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px}
+    input,select,textarea{width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:4px;color:var(--text);font-family:var(--mono);font-size:.78rem;outline:none;margin-bottom:8px}
+    input:focus,select:focus,textarea:focus{border-color:var(--orange)}
+    .btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;background:var(--orange);color:#fff;border:none;border-radius:4px;font-family:var(--mono);font-size:.72rem;font-weight:600;letter-spacing:.5px;text-transform:uppercase;cursor:pointer;transition:all .15s}
+    .btn:hover{background:var(--orange-dim);transform:translateY(-1px)}
+    .actions{display:flex;gap:8px;margin:10px 0}
+    .output{margin-top:12px;padding:14px;background:var(--bg);border:1px solid var(--border);border-radius:6px;font-family:var(--mono);font-size:.75rem;line-height:1.6;white-space:pre-wrap;min-height:60px;max-height:500px;overflow-y:auto}
+    .output h1,.output h2,.output h3{color:var(--orange);margin:8px 0 4px}
+    .output strong{color:var(--amber)}
+    .output ul,.output ol{margin-left:16px}
+    .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+    .stat{text-align:center;padding:10px;background:var(--surface2);border-radius:6px}
+    .stat-val{font-family:var(--mono);font-size:1.4rem;font-weight:700;color:var(--orange)}
+    .stat-label{font-size:.6rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+    .upset-card{display:flex;justify-content:space-between;align-items:center;padding:10px;background:var(--surface2);border-radius:6px;margin-bottom:6px}
+    .upset-teams{font-size:.8rem}
+    .upset-prob{font-family:var(--mono);font-size:.9rem;font-weight:700;color:var(--amber)}
+    .help-box{margin-top:20px;padding:10px 14px;background:var(--surface);border:1px dashed var(--border);border-radius:6px;font-size:.68rem;color:var(--text-dim);font-family:var(--mono);line-height:1.6}
+    @media(max-width:600px){.grid-2{grid-template-columns:1fr}.app{padding:0 12px 30px}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="brand">
+      <span class="brand-sub">Mint Rail LLC</span>
+      <span class="brand-main">MarchMind</span>
+    </div>
+    <div class="conn"><div class="dot" id="connDot"></div><span id="connLabel">Connecting...</span></div>
+  </header>
+  <div class="tabs" id="tabs"></div>
+  <div id="content"></div>
+  <div class="help-box">
+    <strong>Server:</strong> <code>cd products/marchmind && python -m uvicorn server.app:app --reload</code> — API at <code>http://localhost:8000</code>
+  </div>
+</div>
+
+<script>
+const API=window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'?`${window.location.protocol}//${window.location.hostname}:8000`:window.location.origin;
+const WS_URL=`${window.location.protocol==='https:'?'wss':'ws'}://${window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'?window.location.hostname+':8000':window.location.host}/ws/bracket-live`;
+const TABS=['Matchup Predictor','Upset Radar','Bracket Simulator','Conference Power','AI Analyst','Teams'];
+let tab=0;
+const $=s=>document.querySelector(s);
+
+function renderTabs(){
+  $('#tabs').innerHTML=TABS.map((t,i)=>`<div class="tab${i===tab?' on':''}" onclick="switchTab(${i})">${t}</div>`).join('');
+}
+function switchTab(i){tab=i;renderTabs();renderContent();}
+
+async function checkHealth(){
+  try{const r=await fetch(API+'/health');const d=await r.json();$('#connDot').className='dot on';$('#connLabel').textContent=`${d.teams} teams · ${d.ai_backend}`;} catch{$('#connDot').className='dot';$('#connLabel').textContent='Offline';}
+}
+
+function renderContent(){
+  const el=$('#content');
+  if(tab===0) renderMatchup(el);
+  else if(tab===1) renderUpsets(el);
+  else if(tab===2) renderBracket(el);
+  else if(tab===3) renderConference(el);
+  else if(tab===4) renderAI(el);
+  else if(tab===5) renderTeams(el);
+}
+
+function renderMatchup(el){
+  el.innerHTML=`<div class="card"><h3>🏀 Head-to-Head Matchup Prediction</h3>
+    <div class="grid-2">
+      <div><label>Team A</label><input type="text" id="mTeamA" value="UConn" placeholder="e.g. UConn"></div>
+      <div><label>Team B</label><input type="text" id="mTeamB" value="Alabama" placeholder="e.g. Alabama"></div>
+    </div>
+    <label style="margin-top:.3rem">Round (optional)</label><input type="text" id="mRound" placeholder="e.g. Sweet 16">
+    <div class="actions"><button class="btn" onclick="runMatchup()">Predict Matchup</button><button class="btn" onclick="runAIMatchup()" style="background:var(--amber)">AI Breakdown</button></div>
+    <div class="output" id="matchOut">Select two teams and click Predict.</div></div>`;
+}
+
+async function runMatchup(){
+  const o=$('#matchOut');o.textContent='Analyzing matchup...';
+  try{
+    const r=await fetch(API+'/v1/predict/matchup',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team_a:$('#mTeamA').value,team_b:$('#mTeamB').value,round_name:$('#mRound').value})});
+    const d=await r.json();
+    if(d.error){o.textContent=d.error;return;}
+    const m=d.matchup;
+    let html=`<strong>${m.team_a}</strong> vs <strong>${m.team_b}</strong>\n${'━'.repeat(40)}\n\n`;
+    html+=`Win Probability:  ${m.team_a} ${(m.win_prob_a*100).toFixed(1)}%  —  ${m.team_b} ${(m.win_prob_b*100).toFixed(1)}%\n`;
+    html+=`Predicted Winner: ${m.predicted_winner} by ${m.margin} pts\n`;
+    html+=`Confidence: ${(m.confidence*100).toFixed(0)}%${m.upset?' ⚡ UPSET ALERT':''}}\n\n`;
+    if(m.key_factors.length){html+=`Key Factors:\n`;m.key_factors.forEach(f=>html+=`  • ${f}\n`);}
+    o.innerHTML=html;
+  }catch{o.textContent='Could not connect to API.';}
+}
+
+async function runAIMatchup(){
+  const o=$('#matchOut');o.textContent='Getting AI breakdown...';
+  try{
+    const r=await fetch(API+'/v1/ai/matchup-breakdown',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({team_a:$('#mTeamA').value,team_b:$('#mTeamB').value,question:$('#mRound').value?'Round: '+$('#mRound').value:''})});
+    const d=await r.json();
+    if(d.analysis) o.innerHTML=marked.parse(d.analysis);
+    else o.textContent=d.error||'AI not available. Set ANTHROPIC_API_KEY or KWYRE_API_URL.';
+  }catch{o.textContent='Could not connect to API.';}
+}
+
+function renderUpsets(el){
+  el.innerHTML=`<div class="card"><h3>⚡ Upset Radar — First Round</h3>
+    <div class="actions"><button class="btn" onclick="loadUpsets()">Scan for Upsets</button></div>
+    <div id="upsetList"><p style="color:var(--text-dim);font-size:.8rem">Click to scan all first-round matchups for upset potential.</p></div></div>`;
+}
+
+async function loadUpsets(){
+  const el=$('#upsetList');el.innerHTML='<p style="color:var(--text-dim)">Scanning...</p>';
+  try{
+    const r=await fetch(API+'/v1/predict/upsets?top_n=12');
+    const d=await r.json();
+    if(!d.upsets||!d.upsets.length){el.innerHTML='<p>No data</p>';return;}
+    el.innerHTML=d.upsets.map(u=>`<div class="upset-card">
+      <div class="upset-teams"><strong>(${u.underdog.seed}) ${u.underdog.name}</strong> over (${u.favored.seed}) ${u.favored.name}</div>
+      <div class="upset-prob">${(u.upset_probability*100).toFixed(0)}%</div>
+    </div>`).join('');
+  }catch{el.innerHTML='<p>Could not connect to API.</p>';}
+}
+
+function renderBracket(el){
+  el.innerHTML=`<div class="card"><h3>📊 Monte Carlo Bracket Simulation</h3>
+    <div class="grid-2">
+      <div><label>Region</label><select id="simRegion"><option>East</option><option>West</option><option>South</option><option>Midwest</option></select></div>
+      <div><label>Simulations</label><input type="number" id="simRuns" value="10000" min="100" max="100000"></div>
+    </div>
+    <div class="actions"><button class="btn" onclick="runSim()">Simulate Bracket</button></div>
+    <div class="output" id="simOut">Select a region and run the simulation.</div></div>`;
+}
+
+async function runSim(){
+  const o=$('#simOut');o.textContent='Running simulation...';
+  try{
+    const r=await fetch(API+'/v1/predict/bracket',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({region:$('#simRegion').value,simulations:parseInt($('#simRuns').value)})});
+    const d=await r.json();
+    if(d.error){o.textContent=d.error;return;}
+    let html=`<strong>${d.region} Region — ${d.simulations.toLocaleString()} Simulations</strong>\n${'━'.repeat(40)}\n\n`;
+    html+=`${'Team'.padEnd(20)} ${'Seed'.padEnd(6)} ${'Win %'.padEnd(8)} Sims\n`;
+    html+=`${'─'.repeat(48)}\n`;
+    d.champion_probabilities.forEach(t=>{
+      const bar='█'.repeat(Math.round(t.probability*30));
+      html+=`${t.team.padEnd(20)} ${String(t.seed).padEnd(6)} ${(t.probability*100).toFixed(1).padStart(5)}%   ${bar}\n`;
+    });
+    o.innerHTML=html;
+  }catch{o.textContent='Could not connect to API.';}
+}
+
+function renderConference(el){
+  el.innerHTML=`<div class="card"><h3>🏛 Conference Power Rankings</h3>
+    <div class="actions"><button class="btn" onclick="loadConf()">Load Rankings</button></div>
+    <div class="output" id="confOut">Click to load conference strength analysis.</div></div>`;
+}
+
+async function loadConf(){
+  const o=$('#confOut');o.textContent='Loading...';
+  try{
+    const r=await fetch(API+'/v1/analytics/conference-strength');
+    const d=await r.json();
+    let html=`${'#'.padEnd(4)} ${'Conference'.padEnd(16)} ${'Teams'.padEnd(7)} ${'Avg Eff'.padEnd(9)} ${'Avg Seed'.padEnd(9)} Best Team\n`;
+    html+=`${'─'.repeat(65)}\n`;
+    d.conferences.forEach((c,i)=>{
+      html+=`${String(i+1).padEnd(4)} ${c.conference.padEnd(16)} ${String(c.teams_in_tournament).padEnd(7)} ${String(c.avg_efficiency).padEnd(9)} ${String(c.avg_seed).padEnd(9)} ${c.best_team}\n`;
+    });
+    o.innerHTML=html;
+  }catch{o.textContent='Could not connect to API.';}
+}
+
+function renderAI(el){
+  el.innerHTML=`<div class="card"><h3>🤖 AI Bracket Advisor</h3>
+    <label>Ask about March Madness</label>
+    <textarea id="aiQ" rows="3" placeholder="e.g. Who should I pick to win the East region? What are the best upset picks?">Give me your top 5 upset picks for the first round and explain why each is likely.</textarea>
+    <label style="margin-top:.3rem">Region Focus (optional)</label>
+    <select id="aiRegion"><option value="">All Regions</option><option>East</option><option>West</option><option>South</option><option>Midwest</option></select>
+    <div class="actions"><button class="btn" onclick="runAIAdvice()">Get AI Advice</button></div>
+    <div class="output" id="aiOut">Ask anything about March Madness brackets, matchups, or strategy.</div></div>`;
+}
+
+async function runAIAdvice(){
+  const o=$('#aiOut');o.textContent='Thinking...';
+  try{
+    const region=$('#aiRegion').value;
+    const endpoint=region?'/v1/ai/bracket-advice':'/v1/ai/chat';
+    const body=region?{region,question:$('#aiQ').value,team_a:'',team_b:''}:{question:$('#aiQ').value,team_a:'',team_b:''};
+    const r=await fetch(API+endpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
+    const d=await r.json();
+    const text=d.advice||d.response;
+    if(text) o.innerHTML=marked.parse(text);
+    else o.textContent=d.error||'AI not available. Set ANTHROPIC_API_KEY or KWYRE_API_URL.';
+  }catch{o.textContent='Could not connect to API.';}
+}
+
+function renderTeams(el){
+  el.innerHTML=`<div class="card"><h3>🏫 Tournament Teams</h3>
+    <label>Search</label><input type="text" id="teamSearch" placeholder="Team name, conference, or tag..." oninput="filterTeams()">
+    <div id="teamList" style="margin-top:8px"></div></div>`;
+  loadTeams();
+}
+
+async function loadTeams(){
+  try{
+    const r=await fetch(API+'/v1/teams');const d=await r.json();
+    window._allTeams=d.teams;filterTeams();
+  }catch{$('#teamList').innerHTML='<p>Could not connect to API.</p>';}
+}
+
+function filterTeams(){
+  const q=($('#teamSearch')||{}).value||'';const ql=q.toLowerCase();
+  const teams=(window._allTeams||[]).filter(t=>!q||t.name.toLowerCase().includes(ql)||t.conference.toLowerCase().includes(ql)||(t.tags||[]).some(tag=>tag.includes(ql)));
+  const el=$('#teamList');
+  if(!teams.length){el.innerHTML='<p style="color:var(--text-dim)">No teams found.</p>';return;}
+  el.innerHTML=teams.slice(0,32).map(t=>`<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;border-bottom:1px solid var(--border)">
+    <div><strong>(${t.seed}) ${t.name}</strong> <span style="color:var(--text-dim);font-size:.7rem">${t.conference} · ${t.record}</span></div>
+    <div style="font-family:var(--mono);font-size:.75rem;color:var(--orange)">${t.adj_efficiency.toFixed(1)} AdjEM</div>
+  </div>`).join('');
+}
+
+renderTabs();renderContent();checkHealth();setInterval(checkHealth,15000);
+</script>
+</body>
+</html>

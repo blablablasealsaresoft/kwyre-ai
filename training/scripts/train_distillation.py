@@ -35,6 +35,8 @@ VALID_DOMAINS = [
     "legal_compliance", "insurance_actuarial", "healthcare_lifesciences",
     "defense_intelligence", "financial_trading", "blockchain_crypto",
     "sports_analytics", "relationship_matching",
+    "software_engineering", "scientific_research", "career_placement",
+    "college_basketball", "dental_clinical",
 ]
 
 if DOMAIN and DOMAIN not in VALID_DOMAINS:

@@ -1,7 +1,7 @@
 """
 Shared Predictive Analytics — Monte Carlo, regression, time series utilities.
 
-Used by QuantEdge, NFL PlayCaller, NFLonr, and other products needing
+Used by QuantEdge, NFL PlayCaller, MarchMind, and other products needing
 statistical forecasting and predictive modeling.
 """
 

@@ -6,12 +6,13 @@
 <title>TaxShield — AI-Powered Tax Strategy</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
   --bg:#0f1724;--bg2:#141e30;--bg3:#192438;--surface:#1c2940;--surface2:#223350;
-  --border:rgba(200,169,96,.12);--border-h:rgba(200,169,96,.25);
-  --gold:#c8a960;--gold-dim:rgba(200,169,96,.1);--gold-glow:rgba(200,169,96,.2);--gold-bright:#dfc07a;
+  --border:rgba(212,168,67,.12);--border-h:rgba(212,168,67,.25);
+  --gold:#d4a843;--gold-dim:rgba(212,168,67,.1);--gold-glow:rgba(212,168,67,.2);--gold-bright:#e4b853;
   --green:#22c55e;--green-glow:rgba(34,197,94,.1);
   --red:#ef4444;--red-glow:rgba(239,68,68,.1);
   --amber:#f59e0b;--amber-glow:rgba(245,158,11,.1);
@@ -22,7 +23,7 @@
 }
 body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
 
-header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2)}
+header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:.5rem;padding:.75rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2)}
 .logo{display:flex;align-items:center;gap:.6rem;font-size:1.15rem;font-weight:700;color:var(--white);letter-spacing:-.01em}
 .logo svg{flex-shrink:0}
 .logo span{color:var(--gold)}
@@ -48,6 +49,7 @@ label{display:block;font-size:.72rem;font-weight:600;color:var(--text-dim);text-
 input[type="text"],input[type="number"],input[type="date"],select,textarea{width:100%;padding:.55rem .75rem;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--white);font-size:.88rem;font-family:var(--sans);outline:none;transition:border-color .15s}
 input[type="number"]{font-family:var(--mono)}
 input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-glow)}
+input[type="checkbox"]{width:16px;height:16px;accent-color:var(--gold);cursor:pointer}
 select{cursor:pointer}
 option{background:var(--bg2)}
 textarea{resize:vertical;min-height:80px}
@@ -71,7 +73,7 @@ textarea{resize:vertical;min-height:80px}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
 th{text-align:left;padding:.55rem .75rem;background:var(--bg3);color:var(--text-dim);font-weight:600;text-transform:uppercase;font-size:.7rem;letter-spacing:.04em}
 td{padding:.55rem .75rem;border-top:1px solid var(--border)}
-tr:hover td{background:rgba(200,169,96,.03)}
+tr:hover td{background:rgba(212,168,67,.03)}
 .text-right{text-align:right}
 .text-center{text-align:center}
 td.mono{font-family:var(--mono);font-weight:600}
@@ -158,16 +160,18 @@ footer{text-align:center;padding:1.5rem;border-top:1px solid var(--border);font-
   .chat-msg{max-width:95%}
   .strategy-header{flex-direction:column;align-items:flex-start}
 }
+.scanlines{position:fixed;inset:0;z-index:9999;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.012) 2px,rgba(255,255,255,.012) 4px)}
 </style>
 </head>
 <body>
+  <div class="scanlines"></div>
 
 <header>
   <div class="logo">
     <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
-      <rect width="32" height="32" rx="7" fill="#c8a960" fill-opacity=".12"/>
-      <path d="M16 4L26 10V22L16 28L6 22V10Z" stroke="#c8a960" stroke-width="1.8" fill="none"/>
-      <path d="M12 16h8M16 12v8" stroke="#c8a960" stroke-width="1.5" stroke-linecap="round"/>
+      <rect width="32" height="32" rx="7" fill="#d4a843" fill-opacity=".12"/>
+      <path d="M16 4L26 10V22L16 28L6 22V10Z" stroke="#d4a843" stroke-width="1.8" fill="none"/>
+      <path d="M12 16h8M16 12v8" stroke="#d4a843" stroke-width="1.5" stroke-linecap="round"/>
     </svg>
     Tax<span>Shield</span>
   </div>
@@ -249,10 +253,16 @@ footer{text-align:center;padding:1.5rem;border-top:1px solid var(--border);font-
       <select id="dep-class">
         <option value="computer">Computer (5-yr)</option>
         <option value="vehicle">Vehicle (5-yr)</option>
-        <option value="furniture">Furniture (7-yr)</option>
-        <option value="equipment">Equipment (7-yr)</option>
-        <option value="improvement">Improvement (15-yr)</option>
+        <option value="office_furniture">Furniture (7-yr)</option>
+        <option value="machinery">Equipment (7-yr)</option>
+        <option value="building_improvement">Improvement (15-yr)</option>
       </select>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group" style="display:flex;flex-direction:row;gap:1rem;align-items:center;flex-wrap:wrap">
+      <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;margin:0"><input type="checkbox" id="dep-use-bonus" checked> Bonus depreciation</label>
+      <label style="display:flex;align-items:center;gap:.4rem;cursor:pointer;margin:0"><input type="checkbox" id="dep-use-179"> Section 179</label>
     </div>
   </div>
   <button class="btn btn-gold btn-sm" onclick="addAsset()" style="margin-bottom:1rem">+ Add Asset</button>
@@ -397,6 +407,9 @@ function showLoading(el) { el.innerHTML = '<div class="loading-msg"><span class=
 function showError(el, msg) { el.innerHTML = `<div class="error-box">${esc(msg)}</div><div class="server-hint">Start the API server: <code>cd products/taxshield && uvicorn server.app:app --reload --port 8000</code></div>`; }
 
 function formatAI(text) {
+  if (typeof marked !== 'undefined' && marked.parse) {
+    return marked.parse(text, { async: false });
+  }
   let s = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   s = s.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre>$2</pre>');
   s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
@@ -583,8 +596,9 @@ function renderAssets() {
 function addAsset() {
   const name = $('dep-name').value.trim(), cost = parseFloat($('dep-cost').value) || 0;
   const dt = $('dep-date').value, cls = $('dep-class').value;
+  const useBonus = $('dep-use-bonus').checked, use179 = $('dep-use-179').checked;
   if (!name || cost <= 0) return;
-  assets.push({name, cost, placed_in_service: dt || new Date().toISOString().split('T')[0], asset_class: cls, use_bonus: true, use_section_179: false});
+  assets.push({name, cost, placed_in_service: dt || new Date().toISOString().split('T')[0], asset_class: cls, use_bonus: useBonus, use_section_179: use179});
   $('dep-name').value = ''; $('dep-cost').value = '';
   renderAssets();
 }
@@ -799,11 +813,18 @@ async function optimizeStrategy() {
   setLoading('btn-strategy', true);
   showLoading(el);
   try {
+    const strategyAssets = assets.map(a => ({
+      name: a.name, cost: a.cost, placed_in_service: a.placed_in_service,
+      asset_class: a.asset_class, use_section_179: a.use_section_179, use_bonus: a.use_bonus
+    }));
+    const strategyExpenses = deductions.map(d => ({
+      description: d.description, amount: d.amount, vendor: d.vendor || ''
+    }));
     let data = await apiPost('/v1/strategy/optimize', {
       gross_income: num('str-income'), business_expenses: num('str-expenses'),
       owner_salary: num('str-salary'), filing_status: $('str-filing').value,
       entity_type: $('str-entity').value, state: $('str-state').value,
-      assets: [], expenses: []
+      assets: strategyAssets, expenses: strategyExpenses
     });
     if (!data) data = demoStrategy();
     renderStrategyResults(data, el);

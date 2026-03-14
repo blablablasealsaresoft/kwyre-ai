@@ -431,11 +431,9 @@ class KwyreHandlerMixin:
         self.send_header("X-XSS-Protection", "1; mode=block")  # Enable browser XSS filter
         self.send_header("Referrer-Policy", "no-referrer")  # Strip referrer on navigation
         self.send_header("Permissions-Policy", "camera=(), microphone=(), geolocation=()")  # Disable sensitive browser APIs
-        script_src = "'self'"  # Allow scripts from same origin only
-        if nonce:  # Add nonce for inline script authorization
+        script_src = "'self'"
+        if nonce:
             script_src += f" 'nonce-{nonce}'"
-        else:  # Fall back to unsafe-inline when no nonce provided
-            script_src += " 'unsafe-inline'"
         if extra_script_src:  # Append additional allowed script sources
             script_src += f" {extra_script_src}"
         self.send_header(
@@ -450,7 +448,11 @@ class KwyreHandlerMixin:
             f"base-uri 'self'; "
             f"form-action 'self'",
         )  # Set comprehensive Content-Security-Policy header
-        self.send_header("Access-Control-Allow-Origin", f"http://{self._bind_host}:{self._port}")  # Restrict CORS to server origin
+        origin = self.headers.get("Origin", "")
+        if origin and origin in (f"http://{self._bind_host}:{self._port}", f"https://{self._bind_host}:{self._port}"):
+            self.send_header("Access-Control-Allow-Origin", origin)
+        else:
+            self.send_header("Access-Control-Allow-Origin", f"http://{self._bind_host}:{self._port}")
 
     def _serve_html(self, filename: str):
         filepath = os.path.join(self._chat_dir, filename)  # Build full path to HTML file

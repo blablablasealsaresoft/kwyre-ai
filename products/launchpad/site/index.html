@@ -5,46 +5,47 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LaunchPad — AI Career Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
     :root{
-      --bg:#0b1120;--surface:#111827;--surface2:#1e293b;--border:rgba(148,163,184,.12);
+      --bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a24;--border:rgba(148,163,184,.12);
+      --gold:#d4a843;--gold-dim:rgba(212,168,67,.15);
       --blue:#3b82f6;--blue-dim:#2563eb;--blue-glow:rgba(59,130,246,.12);
       --amber:#f59e0b;--amber-dim:rgba(245,158,11,.12);
-      --text:#f1f5f9;--text-dim:#94a3b8;--white:#fff;
+      --text:#e2e4ea;--text-dim:#6a6a7a;--white:#fff;
       --green:#22c55e;--red:#ef4444;
-      --sans:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+      --sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
     }
     body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
     input,select,textarea,button{font-family:inherit}
 
     header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;border-bottom:1px solid var(--border);background:var(--surface)}
-    .logo{font-size:1.2rem;font-weight:800;color:var(--white)}.logo span{color:var(--amber)}
+    .logo{font-family:var(--mono);font-size:1.2rem;font-weight:600;color:var(--white)}.logo span{color:var(--gold)}
     .conn{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--text-dim)}
     .conn-dot{width:7px;height:7px;border-radius:50%;background:var(--red);transition:background .3s}
     .conn-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
 
     .shell{max-width:960px;margin:0 auto;padding:0 1rem}
-    nav{display:flex;gap:0;margin:1rem 0;border-radius:8px;overflow-x:auto;border:1px solid var(--border);background:var(--surface)}
+    nav{display:flex;gap:0;flex-wrap:wrap;margin:1rem 0;border-radius:8px;overflow-x:auto;border:1px solid var(--border);background:var(--surface)}
     nav button{flex:1;min-width:0;padding:.6rem .15rem;background:none;border:none;color:var(--text-dim);font-size:.7rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
     nav button:hover{color:var(--text);background:var(--surface2)}
-    nav button.active{background:var(--blue);color:var(--white)}
+    nav button.active{background:var(--gold);color:var(--white)}
 
     .tab{display:none}.tab.active{display:block}
     .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1rem}
-    .card h3{font-size:.95rem;color:var(--blue);margin-bottom:.75rem;font-weight:700}
+    .card h3{font-size:.95rem;color:var(--gold);margin-bottom:.75rem;font-weight:600;font-family:var(--mono)}
     label{display:block;font-size:.78rem;color:var(--text-dim);margin-bottom:.3rem;font-weight:500}
     input[type=text],input[type=number],textarea,select{width:100%;padding:.55rem .75rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;outline:none;transition:border .2s}
-    input:focus,textarea:focus,select:focus{border-color:var(--blue)}
+    input:focus,textarea:focus,select:focus{border-color:var(--gold)}
     textarea{resize:vertical;min-height:100px;font-family:var(--mono);font-size:.8rem}
     .row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
-    .btn{padding:.55rem 1.1rem;background:var(--blue);color:var(--white);border:none;border-radius:6px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s}
+    .btn{padding:.55rem 1.1rem;background:var(--gold);color:var(--white);border:none;border-radius:6px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s}
     .btn:hover{filter:brightness(1.15)}.btn:disabled{opacity:.5;cursor:not-allowed}
     .btn-sm{padding:.4rem .8rem;font-size:.75rem}
-    .btn-amber{background:var(--amber);color:#000}
-    .btn-outline{background:transparent;border:1px solid var(--blue);color:var(--blue)}
-    .btn-outline:hover{background:var(--blue-glow)}
+    .btn-amber{background:var(--gold);color:var(--white)}
+    .btn-outline{background:transparent;border:1px solid var(--gold);color:var(--gold)}
+    .btn-outline:hover{background:var(--gold-dim)}
     .actions{display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap}
     .output{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.75rem;font-family:var(--mono);font-size:.8rem;white-space:pre-wrap;line-height:1.7;max-height:500px;overflow-y:auto}
     .output:empty{display:none}
@@ -53,38 +54,41 @@
     .gauge{position:relative;width:140px;height:140px}
     .gauge svg{transform:rotate(-90deg)}
     .gauge-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
-    .gauge-score{font-size:2rem;font-weight:800;color:var(--blue)}
+    .gauge-score{font-size:2rem;font-weight:800;color:var(--gold)}
     .gauge-text{font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em}
 
     .job-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:.6rem;transition:border .2s}
-    .job-card:hover{border-color:var(--blue)}
+    .job-card:hover{border-color:var(--gold)}
     .job-header{display:flex;justify-content:space-between;align-items:flex-start}
-    .job-header h4{font-size:.9rem;margin:0;color:var(--white)}.job-header .match-pct{font-size:.8rem;font-weight:700;color:var(--amber)}
+    .job-header h4{font-size:.9rem;margin:0;color:var(--white)}.job-header .match-pct{font-size:.8rem;font-weight:700;color:var(--gold)}
     .job-meta{font-size:.75rem;color:var(--text-dim);margin:.3rem 0}
     .job-tags{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem}
-    .job-tag{padding:.15rem .5rem;border-radius:4px;font-size:.68rem;font-weight:600;background:var(--blue-glow);color:var(--blue)}
+    .job-tag{padding:.15rem .5rem;border-radius:4px;font-size:.68rem;font-weight:600;background:var(--gold-dim);color:var(--gold)}
 
-    .interview-q{background:var(--surface2);border-left:3px solid var(--blue);padding:.8rem 1rem;border-radius:0 8px 8px 0;margin-bottom:.6rem}
-    .interview-q .q-type{font-size:.68rem;color:var(--amber);text-transform:uppercase;font-weight:700;margin-bottom:.2rem}
+    .interview-q{background:var(--surface2);border-left:3px solid var(--gold);padding:.8rem 1rem;border-radius:0 8px 8px 0;margin-bottom:.6rem}
+    .interview-q .q-type{font-size:.68rem;color:var(--gold);text-transform:uppercase;font-weight:700;margin-bottom:.2rem}
     .interview-q .q-text{font-size:.88rem;color:var(--white)}
 
     .chat-box{display:flex;flex-direction:column;height:420px;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
     .chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.6rem}
     .msg{max-width:80%;padding:.6rem .9rem;border-radius:10px;font-size:.84rem;line-height:1.5}
-    .msg.user{align-self:flex-end;background:var(--blue);color:var(--white);border-bottom-right-radius:3px}
+    .msg.user{align-self:flex-end;background:var(--gold);color:var(--white);border-bottom-right-radius:3px}
     .msg.ai{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:3px}
     .msg.system{align-self:center;color:var(--text-dim);font-size:.75rem;font-style:italic}
     .chat-input{display:flex;gap:.5rem;padding:.75rem;border-top:1px solid var(--border);background:var(--surface2)}
     .chat-input input{flex:1;padding:.5rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;outline:none}
-    .chat-input input:focus{border-color:var(--blue)}
+    .chat-input input:focus{border-color:var(--gold)}
 
-    .loading{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .6s linear infinite}
+    .loading,.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     footer{text-align:center;padding:2rem 1rem;color:var(--text-dim);font-size:.72rem;border-top:1px solid var(--border);margin-top:2rem}
     @media(max-width:640px){.row{grid-template-columns:1fr}nav{flex-wrap:wrap}nav button{flex:none;width:25%}}
+    .scanlines{position:fixed;inset:0;z-index:9999;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.012) 2px,rgba(255,255,255,.012) 4px)}
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked@14/marked.min.js"></script>
 </head>
 <body>
+  <div class="scanlines"></div>
 <header>
   <div class="logo">Launch<span>Pad</span></div>
   <div class="conn"><div class="conn-dot" id="connDot"></div><span id="connLabel">Connecting…</span></div>
@@ -95,9 +99,9 @@
 </div>
 <footer>&copy; 2026 Mint Rail LLC &middot; LaunchPad v1.0.0</footer>
 <script>
-const API=localStorage.getItem('launchpad_api')||'http://localhost:8000';
+const API=localStorage.getItem('launchpad_api')||(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'?`${window.location.protocol}//${window.location.hostname}:8000`:window.location.origin);
 const TABS=['Resume Analyzer','Resume Optimizer','Cover Letter','Interview Coach','Job Matcher','Salary Negotiator','AI Career Coach'];
-let activeTab=0,chatHistory=[];
+let activeTab=0,chatHistory=[],userContext={resumeText:'',skills:[],experienceYears:0};
 
 const SAMPLE_RESUME=`JANE DOE
 Senior Software Engineer | jane.doe@email.com | (555) 123-4567
@@ -126,7 +130,7 @@ function initNav(){
   const nav=$('#nav');
   TABS.forEach((t,i)=>{const b=ce('button','',t);if(i===0)b.classList.add('active');b.onclick=()=>switchTab(i);nav.appendChild(b);});
 }
-function switchTab(i){activeTab=i;document.querySelectorAll('nav button').forEach((b,j)=>b.classList.toggle('active',i===j));renderTab(i);}
+function switchTab(i){if(activeTab===0){const r=$('#resText');if(r)userContext.resumeText=r.value;}if(activeTab===4){const s=$('#jmSkills'),e=$('#jmExp');if(s)userContext.skills=s.value.split(',').map(x=>x.trim()).filter(Boolean);if(e)userContext.experienceYears=+e.value;}activeTab=i;document.querySelectorAll('nav button').forEach((b,j)=>b.classList.toggle('active',i===j));renderTab(i);}
 function renderTab(i){const m=$('#main');m.innerHTML='';const d=ce('div','tab active');[renderAnalyzer,renderOptimizer,renderCoverLetter,renderInterview,renderJobMatch,renderSalary,renderChat][i](d);m.appendChild(d);}
 
 function gaugeHTML(score){
@@ -147,7 +151,7 @@ async function analyzeResume(){
   const o=$('#resOut');o.innerHTML='<div class="loading" style="margin:1rem auto;display:block"></div>';
   const body={resume_text:$('#resText').value,job_description:$('#resJD').value};
   try{const r=await fetch(API+'/v1/resume/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();
-    o.innerHTML=gaugeHTML(d.ats_score)+`<div class="output"><h4 style="color:var(--blue);margin-bottom:.4rem">Breakdown</h4>Keyword Match: ${d.breakdown.keyword_match}%\nFormatting: ${d.breakdown.formatting}%\nAchievements: ${d.breakdown.achievements}%\nAction Verbs: ${d.breakdown.action_verbs}%\n\nSections Found: ${d.sections_found.join(', ')}\n${d.missing_keywords.length?'\nMissing Keywords: '+d.missing_keywords.join(', '):''}\n\nImprovements:\n${d.improvements.map(i=>'• '+i).join('\n')}</div>`;
+    o.innerHTML=gaugeHTML(d.ats_score)+`<div class="output"><h4 style="color:var(--gold);margin-bottom:.4rem">Breakdown</h4>Keyword Match: ${d.breakdown.keyword_match}%\nFormatting: ${d.breakdown.formatting}%\nAchievements: ${d.breakdown.achievements}%\nAction Verbs: ${d.breakdown.action_verbs}%\n\nSections Found: ${d.sections_found.join(', ')}\n${d.missing_keywords.length?'\nMissing Keywords: '+d.missing_keywords.join(', '):''}\n\nImprovements:\n${d.improvements.map(i=>'• '+i).join('\n')}</div>`;
   }catch{o.innerHTML=gaugeHTML(72)+`<div class="output">Demo Analysis (offline)\n\nKeyword Match: 68%\nFormatting: 80%\nAchievements: 75%\n\nConnect to API for full analysis.</div>`;}
 }
 
@@ -156,10 +160,15 @@ function renderOptimizer(el){
     <label>Your Resume</label><textarea id="optRes" rows="8">${SAMPLE_RESUME}</textarea>
     <label style="margin-top:.5rem">Target Role</label><input type="text" id="optRole" placeholder="e.g. Senior Backend Engineer" value="Staff Software Engineer">
     <label style="margin-top:.3rem">Target Company</label><input type="text" id="optCo" placeholder="e.g. Google (optional)">
-    <div class="actions"><button class="btn" onclick="optimizeResume()">Rewrite Resume with AI</button></div>
+    <div class="actions"><button class="btn" onclick="optimizeResumeRule()">Rule-based Optimize</button><button class="btn btn-amber" onclick="optimizeResume()">AI Rewrite</button></div>
     <div class="output" id="optOut"></div></div>`;
 }
 
+async function optimizeResumeRule(){
+  const o=$('#optOut');o.textContent='Optimizing with rules…';
+  try{const role=$('#optRole').value,co=$('#optCo').value;const jd=`Target Role: ${role}${co?' at '+co:''}`;const r=await fetch(API+'/v1/resume/optimize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resume_text:$('#optRes').value,job_description:jd})});const d=await r.json();o.textContent=d.optimized_resume||d.optimized||d.error||'No response';}
+  catch{o.textContent='Connect to API for rule-based optimization.';}
+}
 async function optimizeResume(){
   const o=$('#optOut');o.textContent='AI is rewriting your resume…';
   try{const r=await fetch(API+'/v1/ai/resume-rewrite',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resume_text:$('#optRes').value,target_role:$('#optRole').value,target_company:$('#optCo').value})});const d=await r.json();o.textContent=d.rewritten_resume||d.error||'No response';}
@@ -203,7 +212,7 @@ function renderInterview(el){
 async function genQuestions(){
   const o=$('#ivQuestions');o.innerHTML='<div class="loading" style="margin:.5rem"></div>';
   try{const r=await fetch(API+'/v1/interview/prepare',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:$('#ivRole').value.toLowerCase().replace(/ /g,'_'),level:$('#ivLevel').value,count:6})});const d=await r.json();
-    o.innerHTML=d.questions.map(q=>`<div class="interview-q" onclick="document.getElementById('ivQ').value='${q.question.replace(/'/g,"\\'")}'" style="cursor:pointer"><div class="q-type">${q.category}</div><div class="q-text">${q.question}</div></div>`).join('');
+    o.innerHTML=d.questions.map(q=>`<div class="interview-q" onclick="document.getElementById('ivQ').value='${q.question.replace(/'/g,"\\'")}'" style="cursor:pointer"><div class="q-type">${q.category||q.type||'Practice'}</div><div class="q-text">${q.question}</div></div>`).join('');
   }catch{o.innerHTML=['Tell me about yourself','Describe a challenging bug you solved','How do you handle disagreements with teammates?','Walk me through your system design process','What\'s your greatest technical achievement?','Why should we hire you?'].map(q=>`<div class="interview-q" onclick="document.getElementById('ivQ').value='${q}'" style="cursor:pointer"><div class="q-type">Practice</div><div class="q-text">${q}</div></div>`).join('');}
 }
 
@@ -228,7 +237,7 @@ async function matchJobs(){
   const o=$('#jmOut');o.innerHTML='<div class="loading" style="margin:.5rem"></div>';
   const skills=$('#jmSkills').value.split(',').map(s=>s.trim()).filter(Boolean);
   try{const r=await fetch(API+'/v1/match/jobs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({skills,experience_years:+$('#jmExp').value,preferred_locations:[$('#jmLoc').value].filter(Boolean),salary_min:+$('#jmSalMin').value,salary_max:+$('#jmSalMax').value,limit:8})});const d=await r.json();
-    o.innerHTML=d.matches.map(j=>`<div class="job-card"><div class="job-header"><h4>${j.title}</h4><span class="match-pct">${j.match_score}% match</span></div><div class="job-meta">${j.company} · ${j.location} · $${(j.salary_min/1000).toFixed(0)}K–$${(j.salary_max/1000).toFixed(0)}K</div><div class="job-tags">${j.matching_skills.map(s=>`<span class="job-tag">${s}</span>`).join('')}</div></div>`).join('');
+    o.innerHTML=d.matches.map(j=>{const score=j.match_score||j.overall_score;const skills=(j.matching_skills||j.matched_skills||[]);const salStr=typeof j.salary_range==='string'?j.salary_range:(j.salary_min!=null&&j.salary_max!=null?`$${(j.salary_min/1000).toFixed(0)}K–$${(j.salary_max/1000).toFixed(0)}K`:j.salary_range||'—');return`<div class="job-card"><div class="job-header"><h4>${j.title}</h4><span class="match-pct">${score}% match</span></div><div class="job-meta">${j.company} · ${j.location} · ${salStr}</div><div class="job-tags">${skills.map(s=>`<span class="job-tag">${s}</span>`).join('')}</div></div>`}).join('');
   }catch{o.innerHTML=[{title:'Senior Software Engineer',company:'TechCorp',location:'Remote',match:92,salary:'140K–180K',skills:['Python','AWS','Docker']},{title:'Staff Engineer',company:'StartupAI',location:'San Francisco',match:87,salary:'160K–220K',skills:['React','PostgreSQL','Python']},{title:'Platform Engineer',company:'CloudScale',location:'Remote',match:78,salary:'130K–170K',skills:['Docker','AWS','JavaScript']}].map(j=>`<div class="job-card"><div class="job-header"><h4>${j.title}</h4><span class="match-pct">${j.match}% match</span></div><div class="job-meta">${j.company} · ${j.location} · $${j.salary}</div><div class="job-tags">${j.skills.map(s=>`<span class="job-tag">${s}</span>`).join('')}</div></div>`).join('');}
 }
 
@@ -261,7 +270,7 @@ function renderChat(el){
   el.innerHTML=`<div class="card"><h3>AI Career Coach</h3><p style="font-size:.8rem;color:var(--text-dim);margin-bottom:.75rem">Get personalized career advice, skill gap analysis, and strategic guidance.</p>
     <div class="chat-box"><div class="chat-messages" id="chatMsgs"><div class="msg system">Hi! I'm your AI career coach. Ask me about career transitions, skill development, interview prep, salary negotiation, or anything career-related.</div></div>
     <div class="chat-input"><input type="text" id="chatIn" placeholder="Ask your career coach…" onkeydown="if(event.key==='Enter')sendChat()"><button class="btn btn-sm" onclick="sendChat()">Send</button></div></div></div>`;
-  chatHistory.forEach(m=>{const d=ce('div','msg '+(m.role==='user'?'user':'ai'),m.text);$('#chatMsgs').appendChild(d);});
+  chatHistory.forEach(m=>{const html=m.role==='ai'&&typeof marked!=='undefined'?marked.parse(m.text):m.text;const d=ce('div','msg '+(m.role==='user'?'user':'ai'),html);$('#chatMsgs').appendChild(d);});
 }
 
 async function sendChat(){
@@ -270,9 +279,9 @@ async function sendChat(){
   const msgs=$('#chatMsgs');msgs.appendChild(ce('div','msg user',txt));
   const thinking=ce('div','msg ai','<div class="loading"></div> Thinking…');msgs.appendChild(thinking);msgs.scrollTop=msgs.scrollHeight;
   try{
-    const r=await fetch(API+'/v1/ai/career-advice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({current_role:'',skills:[],experience_years:0,interests:[],goals:txt})});
+    const body={message:txt};if(userContext.resumeText)body.resume_text=userContext.resumeText;if(userContext.skills.length)body.skills=userContext.skills;if(userContext.experienceYears)body.experience_years=userContext.experienceYears;const r=await fetch(API+'/v1/ai/career-advice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
     const d=await r.json();const reply=d.career_advice||d.error||'No response';
-    thinking.innerHTML=reply.replace(/\n/g,'<br>');chatHistory.push({role:'ai',text:reply});
+    thinking.innerHTML=typeof marked!=='undefined'?marked.parse(reply):reply.replace(/\n/g,'<br>');chatHistory.push({role:'ai',text:reply});
   }catch{thinking.innerHTML='I\'m currently offline. Please ensure the LaunchPad server is running.';chatHistory.push({role:'ai',text:'Offline'});}
   msgs.scrollTop=msgs.scrollHeight;
 }

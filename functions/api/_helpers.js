@@ -6,6 +6,12 @@
 const ALLOWED_ORIGINS = [
   'https://kwyre.com',
   'https://www.kwyre.com',
+  'https://mintrail.io',
+  'https://www.mintrail.io',
+  'https://mintrail.com',
+  'https://www.mintrail.com',
+  'http://localhost:8788',
+  'http://localhost:3000',
 ];
 
 export function corsHeaders(origin) {
@@ -93,9 +99,11 @@ export async function verifyJWT(token, secret) {
   return payload;
 }
 
-// --- License Key ---
+// --- Provisional License Key ---
+// Generates a placeholder key for immediate display after purchase.
+// Real Ed25519-signed licenses are issued by security/license.py.
 
-export function generateLicenseKey(tier) {
+export function generateProvisionalKey(tier) {
   const prefix = tier.toUpperCase().slice(0, 4);
   const segments = Array.from({ length: 4 }, () =>
     crypto.getRandomValues(new Uint8Array(2))

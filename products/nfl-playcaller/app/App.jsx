@@ -53,8 +53,8 @@ const FIELD_POSITIONS = [
 ];
 const QUARTERS = ["1st Quarter", "2nd Quarter", "3rd Quarter", "4th Quarter", "OT"];
 
-const API_BASE = "http://localhost:8080";
-const WS_URL = "ws://localhost:8080/ws/live-game";
+const API_BASE = "http://localhost:8000";
+const WS_URL = "ws://localhost:8000/ws/live-game";
 
 function TeamSelector({ label, value, onChange, otherTeam }) {
   const [open, setOpen] = useState(false);
@@ -452,7 +452,7 @@ export default function NFLPlaycaller() {
     { delay: 5500, type: "rule", text: "5. Chain of analysis: Shell \u2192 Blitz \u2192 Coverage \u2192 Matchup \u2192 Play call." },
     { delay: 6200, type: "divider", text: "" },
     { delay: 6600, type: "section", text: "INTELLIGENCE COLLECTION:" },
-    { delay: 7100, type: "status", text: "Connecting to Kwyre local inference engine..." },
+    { delay: 7100, type: "status", text: "Connecting to Claude inference engine..." },
     { delay: 8000, type: "status", text: "Scanning defensive coordinator tendencies..." },
     { delay: 9200, type: "status", text: "Reverse-engineering playbook from alignment data..." },
     { delay: 10500, type: "status", text: "Mapping player movement profiles..." },
@@ -514,7 +514,7 @@ export default function NFLPlaycaller() {
       setResult(data.result || "No analysis generated.");
       setTimeout(() => resultRef.current?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
     } catch (err) {
-      setError(err.message || "Analysis failed. Ensure the Kwyre server and PlayCaller API are running.");
+      setError(err.message || "Analysis failed. Ensure the PlayCaller API server is running.");
     } finally {
       setLoading(false);
     }
@@ -577,7 +577,7 @@ export default function NFLPlaycaller() {
             </div>
             <div style={{ marginTop: 10, fontFamily: "'JetBrains Mono', monospace", fontSize: 10, color: "#555", letterSpacing: 1, display: "flex", justifyContent: "space-between" }}>
               <span>ELAPSED: {(elapsed / 1000).toFixed(1)}s</span>
-              <span>KWYRE LOCAL INFERENCE</span>
+              <span>CLAUDE AI INFERENCE</span>
             </div>
           </div>
         </div>
@@ -591,7 +591,7 @@ export default function NFLPlaycaller() {
         <div style={{ maxWidth: 900, margin: "0 auto" }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 4 }}>
             <span style={{ fontSize: 10, fontFamily: "monospace", letterSpacing: 3, color: "#8a8a7a", textTransform: "uppercase" }}>Apollo CyberSentinel</span>
-            <span style={{ fontSize: 9, fontFamily: "monospace", color: "#555", marginLeft: "auto" }}>POWERED BY KWYRE LOCAL AI</span>
+            <span style={{ fontSize: 9, fontFamily: "monospace", color: "#555", marginLeft: "auto" }}>POWERED BY CLAUDE AI</span>
           </div>
           <h1 style={{
             fontSize: 32, fontWeight: 700, margin: 0, letterSpacing: -0.5,
@@ -709,7 +709,7 @@ export default function NFLPlaycaller() {
               {loading ? (
                 <span style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 10 }}>
                   <span style={{ display: "inline-block", width: 16, height: 16, border: "2px solid rgba(0,0,0,0.2)", borderTopColor: "#111", borderRadius: "50%", animation: "spin 0.8s linear infinite" }} />
-                  Analyzing matchup via Kwyre...
+                  Analyzing matchup via Claude...
                 </span>
               ) : `Run ${ANALYSIS_TYPES.find(a => a.id === analysis)?.label || "Analysis"}`}
             </button>
@@ -731,7 +731,7 @@ export default function NFLPlaycaller() {
                 <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 18 }}>
                   <span style={{ fontSize: 11, fontFamily: "monospace", letterSpacing: 2, textTransform: "uppercase", color: "#d4c896" }}>Analysis Complete</span>
                   <div style={{ flex: 1, height: 1, background: "rgba(200,180,120,0.15)" }} />
-                  <span style={{ fontSize: 9, fontFamily: "monospace", color: "#555" }}>via Kwyre Local AI</span>
+                  <span style={{ fontSize: 9, fontFamily: "monospace", color: "#555" }}>via Claude AI</span>
                 </div>
                 <div style={{
                   fontSize: 14, lineHeight: 1.75, color: "#ccc", fontFamily: "'IBM Plex Sans', sans-serif",

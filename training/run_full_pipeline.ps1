@@ -16,7 +16,7 @@ if (-not $env:ANTHROPIC_API_KEY) {
     Write-Host "ERROR: ANTHROPIC_API_KEY not set. Set it before running this script." -ForegroundColor Red
     exit 1
 }
-$env:KWYRE_TRACES_PER_DOMAIN = '50'
+if (-not $env:KWYRE_TRACES_PER_DOMAIN) { $env:KWYRE_TRACES_PER_DOMAIN = '1000' }
 $env:PYTHONUNBUFFERED = '1'
 
 $LogDir = Join-Path $HOME '.kwyre\logs'
@@ -38,7 +38,7 @@ Write-Host "  STEP 1: Generating reasoning traces via Claude" -ForegroundColor C
 Write-Host "  Target: $env:KWYRE_TRACES_PER_DOMAIN traces per domain" -ForegroundColor White
 Write-Host "========================================" -ForegroundColor Cyan
 
-python "$PSScriptRoot\scripts\generate_traces_parallel.py" 2>&1 | Tee-Object -FilePath (Join-Path $LogDir '01-traces.log')
+python "$PSScriptRoot\scripts\generate_traces_batch.py" 2>&1 | Tee-Object -FilePath (Join-Path $LogDir '01-traces.log')
 
 Write-Host ""
 Write-Host "  Traces complete. Files:" -ForegroundColor Green
@@ -70,6 +70,31 @@ Write-Host "========================================" -ForegroundColor Cyan
 python "$PSScriptRoot\scripts\train_grpo.py" 2>&1 | Tee-Object -FilePath (Join-Path $LogDir '03-grpo.log')
 
 Write-Host "`n  GRPO complete.`n" -ForegroundColor Green
+
+# ── STEP 4: Merge LoRA + Export ──────────────────────────────────────────────
+Write-Host "========================================" -ForegroundColor Cyan
+Write-Host "  STEP 4: Merging LoRA adapters and exporting" -ForegroundColor Cyan
+Write-Host "========================================" -ForegroundColor Cyan
+
+$MergeScript = Join-Path $PSScriptRoot '..\model\merge_and_export.py'
+$GrpoLora = Join-Path $HOME '.kwyre\lora-adapters\kwyre-grpo'
+$MergedOut = Join-Path $HOME '.kwyre\models\trained\kwyre-9b-merged'
+
+if ((Test-Path $MergeScript) -and (Test-Path $GrpoLora)) {
+    python $MergeScript `
+        --adapter_path $GrpoLora `
+        --output_dir $MergedOut `
+        --merge_method adapter_only `
+        2>&1 | Tee-Object -FilePath (Join-Path $LogDir '04-merge-export.log')
+    Write-Host "`n  Merge + export complete.`n" -ForegroundColor Green
+}
+elseif (Test-Path $MergeScript) {
+    Write-Host "  SKIPPED - GRPO adapter not found at $GrpoLora" -ForegroundColor Yellow
+    Write-Host "  Run Step 3 first to generate GRPO LoRA." -ForegroundColor Yellow
+}
+else {
+    Write-Host "  SKIPPED - model/merge_and_export.py not found" -ForegroundColor Yellow
+}
 
 # ── SUMMARY ───────────────────────────────────────────────────────────────────
 Write-Host "========================================" -ForegroundColor Cyan

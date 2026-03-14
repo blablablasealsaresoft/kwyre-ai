@@ -1,9 +1,9 @@
 # NFL PlayCaller AI
 ### AI Offensive Coordinator Intelligence
 
-> Blitz prediction, play optimization, scouting reports, and live game analysis — all running on Kwyre's local inference engine. Your data never leaves your machine.
+> Blitz prediction, play optimization, scouting reports, and live game analysis — powered by Claude AI.
 
-[![Kwyre](https://img.shields.io/badge/inference-Kwyre%20Local%20AI-d4c896.svg)]()
+[![Claude](https://img.shields.io/badge/inference-Claude%20AI-d4c896.svg)]()
 [![Teams](https://img.shields.io/badge/coverage-32%20NFL%20teams-blue.svg)]()
 [![WebSocket](https://img.shields.io/badge/live-WebSocket%20game%20feed-green.svg)]()
 [![FastAPI](https://img.shields.io/badge/API-FastAPI-009688.svg)]()
@@ -13,9 +13,7 @@
 
 ## What Is NFL PlayCaller
 
-NFL PlayCaller is an AI-powered NFL analysis platform that acts as your personal offensive coordinator and defensive analyst. It uses Kwyre's local AI inference engine to generate professional coaching staff-level analysis — scouting reports, situational play calls, blitz predictions, player movement profiles, playbook reverse engineering, and post-game breakdowns.
-
-All analysis runs locally through Kwyre. No data is sent to third-party cloud AI providers.
+NFL PlayCaller is an AI-powered NFL analysis platform that acts as your personal offensive coordinator and defensive analyst. It uses Claude AI (via the shared Anthropic engine) to generate professional coaching staff-level analysis — scouting reports, situational play calls, blitz predictions, player movement profiles, playbook reverse engineering, and post-game breakdowns.
 
 **Built by Mint Rail LLC.**
 
@@ -33,6 +31,10 @@ All analysis runs locally through Kwyre. No data is sent to third-party cloud AI
 | **Player Movement Profile** | Deep dive on any player's route tree, tendencies by down/distance, red zone behavior, injury impact, and containment strategy |
 | **Playbook Reverse Engineer** | Reconstruct a team's offensive scheme from formation frequencies, motion patterns, run/pass splits, and 5-year evolution |
 | **Post-Game Breakdown** | Analyze completed games with drive-by-drive critical sequence analysis, scheme evaluation, and adjustment recommendations |
+
+### Predictive Analytics
+
+Formation-based play prediction with situation modifiers, AI-augmented analysis, win probability modeling, and trend analytics.
 
 ### Live Game Mode
 
@@ -54,14 +56,13 @@ Complete tendency data for every team across all 8 divisions:
 - Offensive tempo
 - 5-year historical baseline
 
-### Kwyre Integration
+### AI Integration
 
-All AI analysis routes through Kwyre's local inference API at `localhost:8000`:
+All AI analysis routes through the shared Anthropic engine (`products/_shared/ai_engine.py`):
 
-- OpenAI-compatible `/v1/chat/completions` endpoint
-- No data leaves your machine
-- Works with Kwyre Personal (4B), Professional (9B), or Cloud
-- RAM-only processing — analysis never touches disk
+- Claude API with retry logic and graceful fallback
+- Set `ANTHROPIC_API_KEY` environment variable to enable AI features
+- Deterministic analysis (team stats, formation tendencies) works without an API key
 
 ---
 
@@ -71,11 +72,12 @@ All AI analysis routes through Kwyre's local inference API at `localhost:8000`:
 ┌─────────────────────────────────────────────────────────┐
 │  React App (Vite)          port 3000                    │
 │  ├── Analysis Tab → POST /v1/analysis/*                 │
+│  ├── Predictive Tab → POST /v1/predict/*                │
 │  └── Live Game Tab → WS /ws/live-game                   │
 └───────────────────────┬─────────────────────────────────┘
                         │
 ┌───────────────────────▼─────────────────────────────────┐
-│  FastAPI Server                port 8080                │
+│  FastAPI Server                port 8000                │
 │  ├── /health                                            │
 │  ├── /v1/teams, /v1/divisions                           │
 │  ├── /v1/analysis/scouting                              │
@@ -84,14 +86,16 @@ All AI analysis routes through Kwyre's local inference API at `localhost:8000`:
 │  ├── /v1/analysis/player                                │
 │  ├── /v1/analysis/playbook                              │
 │  ├── /v1/analysis/postgame                              │
+│  ├── /v1/predict/play, /v1/predict/formation            │
+│  ├── /v1/analytics/win-probability, /v1/analytics/trends│
 │  ├── /ws/live-game (WebSocket)                          │
-│  ├── AnalysisEngine → builds prompts, calls Kwyre       │
+│  ├── AnalysisEngine → builds prompts, calls Claude AI   │
 │  └── LiveGameManager → game state, demo simulation      │
 └───────────────────────┬─────────────────────────────────┘
                         │
 ┌───────────────────────▼─────────────────────────────────┐
-│  Kwyre Local AI                port 8000                │
-│  └── /v1/chat/completions (OpenAI-compatible)           │
+│  Anthropic Claude API (cloud)                           │
+│  └── /v1/messages                                       │
 └─────────────────────────────────────────────────────────┘
 ```
 
@@ -103,26 +107,20 @@ All AI analysis routes through Kwyre's local inference API at `localhost:8000`:
 
 - Python 3.10+
 - Node.js 18+
-- Kwyre running at `localhost:8000` (any tier — Personal, Professional, Air, or Cloud)
+- `ANTHROPIC_API_KEY` environment variable (for AI features)
 
-### 1. Start Kwyre
-
-```bash
-# Kwyre should already be running at localhost:8000
-curl http://localhost:8000/health
-```
-
-### 2. Start the API Server
+### 1. Start the API Server
 
 ```bash
 cd products/nfl-playcaller
 
 pip install -r requirements.txt
 
-uvicorn server.app:app --host 0.0.0.0 --port 8080 --reload
+export ANTHROPIC_API_KEY=your-key-here
+uvicorn server.app:app --host 0.0.0.0 --reload
 ```
 
-### 3. Start the React App
+### 2. Start the React App
 
 ```bash
 npm install
@@ -131,7 +129,7 @@ npm run dev
 
 Open `http://localhost:3000` in your browser.
 
-### 4. Landing Page (Static)
+### 3. Landing Page (Static)
 
 The marketing landing page is at `site/index.html`. Deploy to Cloudflare Pages:
 
@@ -149,7 +147,7 @@ npx wrangler pages deploy site
 GET /health
 ```
 
-Returns service status, Kwyre endpoint, team count, and live game state.
+Returns service status, AI availability, team count, and live game state.
 
 ### Teams
 
@@ -172,15 +170,13 @@ POST /v1/analysis/playbook     → { offense, defense, notes }
 POST /v1/analysis/postgame     → { offense, defense, notes }
 ```
 
-Response:
+### Predictive Analytics
 
-```json
-{
-  "analysis_type": "scouting",
-  "offense": "KC",
-  "defense": "SF",
-  "result": "## Pre-Game Scouting Report\n\n..."
-}
+```
+POST /v1/predict/play          → { offense, defense, formation, down, distance, ... }
+POST /v1/predict/formation     → { formation, personnel, offense, notes }
+POST /v1/analytics/win-probability → { home_score, away_score, quarter, clock, possession }
+POST /v1/analytics/trends      → { offense, defense, plays, notes }
 ```
 
 ### WebSocket: Live Game
@@ -215,7 +211,7 @@ Receive events:
 products/nfl-playcaller/
 ├── server/
 │   ├── app.py              # FastAPI server — routes, WebSocket, CORS
-│   ├── analysis.py          # AnalysisEngine — prompt building, Kwyre integration
+│   ├── analysis.py          # AnalysisEngine — prompt building, Claude AI integration
 │   ├── live_game.py         # LiveGameManager — game state, WebSocket, demo sim
 │   ├── teams.py             # All 32 NFL teams + tendency stats
 │   └── __init__.py
@@ -238,10 +234,10 @@ products/nfl-playcaller/
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| Kwyre API URL | `http://localhost:8000` | Set in `server/analysis.py` — `KWYRE_BASE_URL` |
-| API server port | `8080` | Set in `uvicorn` command |
+| `ANTHROPIC_API_KEY` | (none) | Set as environment variable to enable AI features |
+| API server port | `8000` | Default uvicorn port (override with `--port`) |
 | React dev port | `3000` | Set in `vite.config.js` |
-| WebSocket URL | `ws://localhost:8080/ws/live-game` | Set in `app/App.jsx` — `WS_URL` |
+| WebSocket URL | `ws://localhost:8000/ws/live-game` | Set in `app/App.jsx` — `WS_URL` |
 
 ---
 
@@ -249,8 +245,4 @@ products/nfl-playcaller/
 
 **Mint Rail LLC** — AI infrastructure, blockchain forensics, and applied machine learning.
 
-NFL PlayCaller is a Kwyre product. Visit [kwyre.com](https://kwyre.com) for the full platform.
-
----
-
-*All analysis runs locally through Kwyre. No data leaves your machine.*
+NFL PlayCaller is a Mint Rail product. Visit [kwyre.com](https://kwyre.com) for the full platform.

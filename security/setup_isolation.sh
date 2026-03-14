@@ -83,8 +83,11 @@ install_linux() {
     cat > /usr/local/bin/kwyre-serve << 'EOF'
 #!/usr/bin/env bash
 # Kwyre server launcher — runs inference process as restricted user
-KWYRE_DIR="$(dirname "$(readlink -f "$0")")/../kwyre"
-exec sudo -u kwyre python "$KWYRE_DIR/serve_local_4bit.py" "$@"
+KWYRE_DIR="${KWYRE_INSTALL_DIR:-$(dirname "$(readlink -f "$0")")/../kwyre}"
+if [ ! -d "$KWYRE_DIR" ]; then
+    KWYRE_DIR="/opt/kwyre"
+fi
+exec sudo -u kwyre python "$KWYRE_DIR/server/serve_local_4bit.py" "$@"
 EOF
     chmod +x /usr/local/bin/kwyre-serve
 

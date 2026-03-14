@@ -1,8 +1,10 @@
-import httpx
+import sys
+import os
 
-from server.teams import get_team, get_team_stats
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
 
-KWYRE_BASE_URL = "http://localhost:8000"
+from products._shared.ai_engine import AIEngine
+from .teams import get_team, get_team_stats
 
 SYSTEM_PROMPT = (
     "You are an elite NFL offensive coordinator and defensive analyst AI with deep "
@@ -16,8 +18,8 @@ SYSTEM_PROMPT = (
 
 
 class AnalysisEngine:
-    def __init__(self, kwyre_url: str = KWYRE_BASE_URL):
-        self.kwyre_url = kwyre_url.rstrip("/")
+    def __init__(self):
+        self.ai = AIEngine(default_system=SYSTEM_PROMPT)
 
     def build_prompt(self, analysis_type: str, params: dict) -> str:
         off_abbr = params.get("offense", "")
@@ -157,30 +159,9 @@ class AnalysisEngine:
             f"{tendency_ctx}"
         )
 
-    async def call_kwyre(self, prompt: str, max_tokens: int = 4000) -> str:
-        payload = {
-            "model": "kwyre",
-            "messages": [
-                {"role": "system", "content": SYSTEM_PROMPT},
-                {"role": "user", "content": prompt},
-            ],
-            "max_tokens": max_tokens,
-            "temperature": 0.7,
-            "stream": False,
-        }
-        async with httpx.AsyncClient(timeout=120.0) as client:
-            resp = await client.post(
-                f"{self.kwyre_url}/v1/chat/completions",
-                json=payload,
-            )
-            resp.raise_for_status()
-            data = resp.json()
-
-        choices = data.get("choices", [])
-        if not choices:
-            return "No analysis generated."
-        return choices[0].get("message", {}).get("content", "No analysis generated.")
-
     async def run(self, analysis_type: str, params: dict) -> str:
         prompt = self.build_prompt(analysis_type, params)
-        return await self.call_kwyre(prompt)
+        resp = await self.ai.complete(prompt)
+        if resp.ok:
+            return resp.text
+        return resp.error or "No analysis generated."

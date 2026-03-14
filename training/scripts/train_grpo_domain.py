@@ -31,6 +31,9 @@ _model_tag = "4b" if "4B" in BASE_MODEL else "9b"
 VALID_DOMAINS = [
     "legal_compliance", "insurance_actuarial", "healthcare_lifesciences",
     "defense_intelligence", "financial_trading", "blockchain_crypto",
+    "sports_analytics", "relationship_matching",
+    "software_engineering", "scientific_research", "career_placement",
+    "college_basketball", "dental_clinical",
 ]
 
 if not DOMAIN or DOMAIN not in VALID_DOMAINS:
@@ -63,6 +66,13 @@ DOMAIN_STEPS = {
     "defense_intelligence": 500,
     "financial_trading": 500,
     "blockchain_crypto": 500,
+    "sports_analytics": 500,
+    "relationship_matching": 500,
+    "software_engineering": 500,
+    "scientific_research": 500,
+    "career_placement": 500,
+    "college_basketball": 500,
+    "dental_clinical": 400,
 }
 NUM_STEPS = DOMAIN_STEPS.get(DOMAIN, 500)
 
@@ -77,53 +87,43 @@ print(f"""
 {'='*60}
 """)
 
-# ── Step 1: Load model ──────────────────────────────────────────────────────
-print("[1/4] Loading model...")
-from transformers import AutoModelForCausalLM, AutoTokenizer, BitsAndBytesConfig
-from peft import LoraConfig, get_peft_model, prepare_model_for_kbit_training, PeftModel
+# ── Step 1: Load model (Unsloth for 2x faster training + 60% less VRAM) ────
+print("[1/4] Loading model with Unsloth...")
+from unsloth import FastModel
+from peft import PeftModel
 
-quant_config = BitsAndBytesConfig(
+# Start from distilled model if available
+_load_model = BASE_MODEL
+
+model, tokenizer = FastModel.from_pretrained(
+    model_name=_load_model,
+    max_seq_length=MAX_SEQ_LENGTH,
     load_in_4bit=True,
-    bnb_4bit_compute_dtype=torch.bfloat16,
-    bnb_4bit_quant_type="nf4",
-    bnb_4bit_use_double_quant=True,
+    full_finetuning=False,
 )
 
-# Start from distilled model if available, otherwise base
 if os.path.isdir(DISTILLED_LORA) and os.path.exists(
     os.path.join(DISTILLED_LORA, "adapter_config.json")
 ):
-    print(f"  Loading base + distilled adapter from {DISTILLED_LORA}")
-    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=True)
-    model = AutoModelForCausalLM.from_pretrained(
-        BASE_MODEL, quantization_config=quant_config,
-        device_map="auto", torch_dtype=torch.bfloat16, trust_remote_code=True,
-    )
+    print(f"  Loading distilled adapter from {DISTILLED_LORA}")
     model = PeftModel.from_pretrained(model, DISTILLED_LORA)
     model = model.merge_and_unload()
     print("  Distilled adapter merged.")
 else:
     print(f"  No distilled adapter found, using base: {BASE_MODEL}")
-    tokenizer = AutoTokenizer.from_pretrained(BASE_MODEL, trust_remote_code=True)
-    model = AutoModelForCausalLM.from_pretrained(
-        BASE_MODEL, quantization_config=quant_config,
-        device_map="auto", torch_dtype=torch.bfloat16, trust_remote_code=True,
-    )
 
-if tokenizer.pad_token is None:
-    tokenizer.pad_token = tokenizer.eos_token
-
-model = prepare_model_for_kbit_training(model)
-
-# Apply fresh LoRA for GRPO
-lora_config = LoraConfig(
-    r=LORA_RANK, lora_alpha=LORA_RANK,
+model = FastModel.get_peft_model(
+    model,
+    r=LORA_RANK,
     target_modules=["q_proj", "k_proj", "v_proj", "o_proj",
                      "gate_proj", "up_proj", "down_proj"],
-    lora_dropout=0, bias="none", task_type="CAUSAL_LM",
+    lora_alpha=LORA_RANK,
+    lora_dropout=0,
+    bias="none",
+    use_gradient_checkpointing="unsloth",
+    random_state=42,
+    max_seq_length=MAX_SEQ_LENGTH,
 )
-model = get_peft_model(model, lora_config)
-model.gradient_checkpointing_enable()
 
 trainable = sum(p.numel() for p in model.parameters() if p.requires_grad)
 total = sum(p.numel() for p in model.parameters())
@@ -316,6 +316,136 @@ def blockchain_correctness_reward(completions, **kwargs):
         rewards.append(min(score, 1.0))
     return rewards
 
+def sports_correctness_reward(completions, **kwargs):
+    """Reward use of NFL analytics terminology and statistical reasoning."""
+    rewards = []
+    terms = ["EPA", "DVOA", "formation", "personnel", "blitz", "coverage",
+             "pre-snap", "route", "tendency", "win probability", "down and distance"]
+    for texts in completions:
+        text = texts[0]["content"] if isinstance(texts, list) else texts
+        score = 0.0
+        term_count = sum(1 for t in terms if t.lower() in text.lower())
+        score += min(term_count * 0.12, 0.5)
+        if re.search(r"\d+\.?\d*%", text):
+            score += 0.15
+        if any(w in text.lower() for w in ["11 personnel", "12 personnel", "21 personnel", "shotgun", "under center"]):
+            score += 0.15
+        if "<think>" in text:
+            score += 0.2
+        rewards.append(min(score, 1.0))
+    return rewards
+
+def relationship_correctness_reward(completions, **kwargs):
+    """Reward use of personality psychology and relationship science terminology."""
+    rewards = []
+    terms = ["Big Five", "OCEAN", "attachment", "love language", "compatibility",
+             "openness", "conscientiousness", "extraversion", "agreeableness", "neuroticism"]
+    hedge_phrases = ["research suggests", "evidence indicates", "studies show",
+                     "individual differences", "context-dependent"]
+    for texts in completions:
+        text = texts[0]["content"] if isinstance(texts, list) else texts
+        score = 0.0
+        term_count = sum(1 for t in terms if t.lower() in text.lower())
+        score += min(term_count * 0.12, 0.5)
+        hedge_count = sum(1 for h in hedge_phrases if h.lower() in text.lower())
+        score += min(hedge_count * 0.1, 0.3)
+        if "<think>" in text:
+            score += 0.2
+        rewards.append(min(score, 1.0))
+    return rewards
+
+def software_engineering_reward(completions, **kwargs):
+    rewards = []
+    terms = ["refactor", "SOLID", "dependency injection", "API", "REST", "microservice",
+             "CI/CD", "test", "coverage", "security", "OWASP", "latency", "cache"]
+    for texts in completions:
+        text = texts[0]["content"] if isinstance(texts, list) else texts
+        score = 0.0
+        term_count = sum(1 for t in terms if t.lower() in text.lower())
+        score += min(term_count * 0.1, 0.5)
+        if re.search(r"```\w+\n", text):
+            score += 0.15
+        if any(w in text.lower() for w in ["o(n)", "o(1)", "time complexity", "space complexity"]):
+            score += 0.15
+        if "<think>" in text:
+            score += 0.2
+        rewards.append(min(score, 1.0))
+    return rewards
+
+def scientific_research_reward(completions, **kwargs):
+    rewards = []
+    terms = ["hypothesis", "p-value", "confidence interval", "control group",
+             "randomized", "peer-reviewed", "methodology", "reproducibility",
+             "statistical significance", "effect size", "sample size"]
+    for texts in completions:
+        text = texts[0]["content"] if isinstance(texts, list) else texts
+        score = 0.0
+        term_count = sum(1 for t in terms if t.lower() in text.lower())
+        score += min(term_count * 0.12, 0.5)
+        if re.search(r"n\s*=\s*\d+", text, re.IGNORECASE):
+            score += 0.1
+        if any(w in text.lower() for w in ["limitation", "future work", "caveat"]):
+            score += 0.2
+        if "<think>" in text:
+            score += 0.2
+        rewards.append(min(score, 1.0))
+    return rewards
+
+def career_placement_reward(completions, **kwargs):
+    rewards = []
+    terms = ["ATS", "resume", "quantify", "impact", "STAR", "behavioral",
+             "compensation", "equity", "negotiation", "LinkedIn", "portfolio"]
+    for texts in completions:
+        text = texts[0]["content"] if isinstance(texts, list) else texts
+        score = 0.0
+        term_count = sum(1 for t in terms if t.lower() in text.lower())
+        score += min(term_count * 0.12, 0.5)
+        if re.search(r"\d+%|\$\d+[kKmM]?", text):
+            score += 0.15
+        if any(w in text.lower() for w in ["action verb", "metric", "achievement", "tailored"]):
+            score += 0.15
+        if "<think>" in text:
+            score += 0.2
+        rewards.append(min(score, 1.0))
+    return rewards
+
+def college_basketball_reward(completions, **kwargs):
+    rewards = []
+    terms = ["KenPom", "AdjEM", "seed", "bracket", "upset", "tempo",
+             "efficiency", "conference", "tournament", "March Madness",
+             "Sweet 16", "Final Four", "selection committee"]
+    for texts in completions:
+        text = texts[0]["content"] if isinstance(texts, list) else texts
+        score = 0.0
+        term_count = sum(1 for t in terms if t.lower() in text.lower())
+        score += min(term_count * 0.1, 0.5)
+        if re.search(r"\d+\.?\d*%", text):
+            score += 0.15
+        if re.search(r"#?\d+\s+seed", text, re.IGNORECASE):
+            score += 0.15
+        if "<think>" in text:
+            score += 0.2
+        rewards.append(min(score, 1.0))
+    return rewards
+
+def dental_clinical_reward(completions, **kwargs):
+    rewards = []
+    terms = ["CDT", "treatment plan", "SOAP", "radiograph", "caries",
+             "periodontal", "crown", "implant", "endodontic", "prophylaxis"]
+    hedge_phrases = ["informed consent", "referral", "follow-up", "prognosis",
+                     "differential diagnosis", "contraindication"]
+    for texts in completions:
+        text = texts[0]["content"] if isinstance(texts, list) else texts
+        score = 0.0
+        term_count = sum(1 for t in terms if t.lower() in text.lower())
+        score += min(term_count * 0.12, 0.5)
+        hedge_count = sum(1 for h in hedge_phrases if h.lower() in text.lower())
+        score += min(hedge_count * 0.1, 0.3)
+        if "<think>" in text:
+            score += 0.2
+        rewards.append(min(score, 1.0))
+    return rewards
+
 # ── Domain-to-reward mapping ────────────────────────────────────────────────
 DOMAIN_REWARDS = {
     "legal_compliance": [legal_correctness_reward, reasoning_reward],
@@ -324,6 +454,13 @@ DOMAIN_REWARDS = {
     "defense_intelligence": [defense_correctness_reward, reasoning_reward],
     "financial_trading": [trading_correctness_reward, reasoning_reward],
     "blockchain_crypto": [blockchain_correctness_reward, reasoning_reward],
+    "sports_analytics": [sports_correctness_reward, reasoning_reward],
+    "relationship_matching": [relationship_correctness_reward, reasoning_reward],
+    "software_engineering": [software_engineering_reward, reasoning_reward],
+    "scientific_research": [scientific_research_reward, reasoning_reward],
+    "career_placement": [career_placement_reward, reasoning_reward],
+    "college_basketball": [college_basketball_reward, reasoning_reward],
+    "dental_clinical": [dental_clinical_reward, reasoning_reward],
 }
 
 reward_funcs = DOMAIN_REWARDS.get(DOMAIN, [correctness_reward, reasoning_reward])

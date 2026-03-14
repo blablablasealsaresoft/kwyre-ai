@@ -1,100 +1,50 @@
 {
-  "_comment": "Kwyre domain adapter CDN manifest — served at https://kwyre.com/adapters/manifest.json",
-  "_updated": "2026-03-12",
-  "blockchain_crypto": {
-    "version": "1.0.0",
-    "display_name": "Blockchain & Crypto Forensics",
-    "description": "on-chain tracing, smart contract analysis, DeFi forensics, RICO/BSA/AML compliance",
-    "url": "https://cdn.kwyre.com/adapters/blockchain-crypto-4b-v1.0.0.zip",
-    "sha256": "989077952745bf73b093218e004716481ab392e72d0a98acd676452b96633415",
-    "model_tier": "4b",
-    "estimated_size_mb": 162,
-    "base_model": "Qwen/Qwen3.5-4B",
-    "lora_rank": 32,
-    "training_traces": 1000
+  "legal-compliance": {
+    "display_name": "Legal Compliance",
+    "domain": "legal_compliance",
+    "description": "NDA analysis, privilege screening, SEC/FINRA compliance, contract review",
+    "version": "1.0.0"
   },
-  "legal_compliance": {
-    "version": "1.0.0",
-    "display_name": "Legal & Compliance",
-    "description": "NDA analysis, contract review, privilege screening, SEC/FINRA compliance, regulatory citations",
-    "url": "https://cdn.kwyre.com/adapters/legal-compliance-4b-v1.0.0.zip",
-    "sha256": "4c8c68d37354a15d974db91b914c10c20709b0b13dcb69049bd818443d80d618",
-    "model_tier": "4b",
-    "estimated_size_mb": 162,
-    "base_model": "Qwen/Qwen3.5-4B",
-    "lora_rank": 32,
-    "training_traces": 1000
-  },
-  "insurance_actuarial": {
-    "version": "1.0.0",
+  "insurance-actuarial": {
     "display_name": "Insurance & Actuarial",
-    "description": "reinsurance treaties, loss development, IBNR reserving, catastrophe modeling, Solvency II/RBC",
-    "url": "https://cdn.kwyre.com/adapters/insurance-actuarial-4b-v1.0.0.zip",
-    "sha256": "71fec6e92a6f1ed5c8822dcb2100110a127b360e6a1832df5a045fcbb2ce4223",
-    "model_tier": "4b",
-    "estimated_size_mb": 162,
-    "base_model": "Qwen/Qwen3.5-4B",
-    "lora_rank": 32,
-    "training_traces": 1000
+    "domain": "insurance_actuarial",
+    "description": "Reinsurance treaties, loss development, IBNR reserving, catastrophe modeling",
+    "version": "1.0.0"
   },
-  "defense_intelligence": {
-    "version": "1.0.0",
-    "display_name": "Defense & Intelligence",
-    "description": "CUI handling, OSINT methodology, MITRE ATT&CK, NIST 800-171, intel product formats",
-    "url": "https://cdn.kwyre.com/adapters/defense-intelligence-4b-v1.0.0.zip",
-    "sha256": "6ef8c08e9f4485d196f9b890d2b3145f96b24b5182167de652d916a3ef346e98",
-    "model_tier": "4b",
-    "estimated_size_mb": 162,
-    "base_model": "Qwen/Qwen3.5-4B",
-    "lora_rank": 32,
-    "training_traces": 1000
-  },
-  "financial_trading": {
-    "version": "1.0.0",
-    "display_name": "Financial Trading & Algorithms",
-    "description": "options pricing, statistical arbitrage, risk management, execution algorithms, regulatory compliance",
-    "url": "https://cdn.kwyre.com/adapters/financial-trading-4b-v1.0.0.zip",
-    "sha256": "1c08284de5a98b293e0c554b2fa0505fcc00879fe291fe1af489f1b94900f354",
-    "model_tier": "4b",
-    "estimated_size_mb": 162,
-    "base_model": "Qwen/Qwen3.5-4B",
-    "lora_rank": 32,
-    "training_traces": 1000
-  },
-  "healthcare_lifesciences": {
-    "version": "1.0.0",
+  "healthcare-lifesciences": {
     "display_name": "Healthcare & Life Sciences",
-    "description": "HIPAA compliance, clinical trials, FDA submissions, medical coding, drug interactions",
-    "url": "https://cdn.kwyre.com/adapters/healthcare-lifesciences-4b-v1.0.0.zip",
-    "sha256": "6b14aec3964eb0106afbe46aac15a4c4f45e7f542dcadb9a27a1958c0b7e056f",
-    "model_tier": "4b",
-    "estimated_size_mb": 162,
-    "base_model": "Qwen/Qwen3.5-4B",
-    "lora_rank": 32,
-    "training_traces": 1000
+    "domain": "healthcare_lifesciences",
+    "description": "HIPAA/PHI compliance, clinical trials, FDA submissions, medical coding",
+    "version": "1.0.0"
   },
-  "sports_analytics": {
-    "version": "1.0.0",
+  "defense-intelligence": {
+    "display_name": "Defense & Intelligence",
+    "domain": "defense_intelligence",
+    "description": "CUI handling, NIST 800-171, MITRE ATT&CK, OSINT methodology",
+    "version": "1.0.0"
+  },
+  "financial-trading": {
+    "display_name": "Financial Trading",
+    "domain": "financial_trading",
+    "description": "Algorithmic trading, VaR/CVaR, options pricing, market microstructure",
+    "version": "1.0.0"
+  },
+  "blockchain-crypto": {
+    "display_name": "Blockchain & Crypto",
+    "domain": "blockchain_crypto",
+    "description": "On-chain tracing, MEV analysis, RICO/BSA/AML, wallet clustering",
+    "version": "1.0.0"
+  },
+  "sports-analytics": {
     "display_name": "Sports Analytics",
-    "description": "player performance, team strategy, injury prediction, betting models, scouting",
-    "url": "https://cdn.kwyre.com/adapters/sports-analytics-4b-v1.0.0.zip",
-    "sha256": "dae7fd52751da41f7c0dd3e250c904afd6a5a9a83d7b0efaff94cfc74b350331",
-    "model_tier": "4b",
-    "estimated_size_mb": 162,
-    "base_model": "Qwen/Qwen3.5-4B",
-    "lora_rank": 32,
-    "training_traces": 1000
+    "domain": "sports_analytics",
+    "description": "NFL play calling, blitz prediction, scouting, game theory",
+    "version": "1.0.0"
   },
-  "relationship_matching": {
-    "version": "1.0.0",
+  "relationship-matching": {
     "display_name": "Relationship Matching",
-    "description": "compatibility scoring, recommendation systems, user preferences, matching algorithms",
-    "url": "https://cdn.kwyre.com/adapters/relationship-matching-4b-v1.0.0.zip",
-    "sha256": "b2240003a341360f326907e4575005d6f6df8df1c646177de0ed10e010e69d17",
-    "model_tier": "4b",
-    "estimated_size_mb": 162,
-    "base_model": "Qwen/Qwen3.5-4B",
-    "lora_rank": 32,
-    "training_traces": 1000
+    "domain": "relationship_matching",
+    "description": "Big Five personality, attachment styles, compatibility scoring",
+    "version": "1.0.0"
   }
 }

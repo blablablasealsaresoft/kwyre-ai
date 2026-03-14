@@ -75,7 +75,6 @@ if not _skip_dep_check:
 
 try:
     from vllm import LLM, SamplingParams
-    from vllm.utils import random_uuid
     _VLLM_AVAILABLE = True
 except ImportError:
     _VLLM_AVAILABLE = False
@@ -171,8 +170,9 @@ _inference_lock = threading.Lock()
 
 
 def _shutdown_handler(signum, frame):
-    print("\n[Shutdown] Wiping all sessions before exit...")
+    print("\n[Shutdown] Wiping all sessions and documents before exit...")
     watchdog.stop()
+    rag_store.wipe_all(reason="server_shutdown")
     session_store.wipe_all(reason="server_shutdown")
     sys.exit(0)
 
@@ -335,8 +335,22 @@ class VllmChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
             except Exception as e:
                 print(f"[tools] error: {e}")
 
+        rag_chunks = []
+        if rag_store.has_documents(session_id):
+            try:
+                query_emb = encode_texts([last_user_msg])
+                if query_emb is not None:
+                    rag_chunks = rag_store.retrieve(session_id, query_emb[0])
+            except Exception as e:
+                print(f"[RAG] retrieval error: {e}")
+
+        ctx_parts = []
         if tool_data:
-            ctx = "\n\n[Live data]\n\n" + "\n\n".join(tool_data)
+            ctx_parts.append("[Live data]\n\n" + "\n\n".join(tool_data))
+        if rag_chunks:
+            ctx_parts.append("[Retrieved document context]\n\n" + "\n\n---\n\n".join(rag_chunks))
+        if ctx_parts:
+            ctx = "\n\n" + "\n\n".join(ctx_parts)
             for i in range(len(augmented) - 1, -1, -1):
                 if augmented[i].get("role") == "user":
                     augmented[i] = {"role": "user", "content": augmented[i]["content"] + ctx}
@@ -418,31 +432,34 @@ class VllmChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
 
         try:
             with _inference_lock:
-                outputs = llm.generate([prompt], sampling)
+                request_id = f"kwyre-{session_id[:8]}-{int(time.time())}"
+                results_gen = llm.generate([prompt], sampling, request_id=[request_id], use_tqdm=False)
 
-            reply = outputs[0].outputs[0].text
-            token_ids = outputs[0].outputs[0].token_ids
-            n_tokens = len(token_ids)
+            for output in results_gen if hasattr(results_gen, '__iter__') and not isinstance(results_gen, list) else [results_gen] if not isinstance(results_gen, list) else results_gen:
+                reply = output.outputs[0].text if hasattr(output, 'outputs') else output[0].outputs[0].text if isinstance(output, list) else output.outputs[0].text
+                token_ids = output.outputs[0].token_ids if hasattr(output, 'outputs') else output[0].outputs[0].token_ids if isinstance(output, list) else output.outputs[0].token_ids
+                n_tokens = len(token_ids)
 
-            words = reply.split(" ")
-            for i, word in enumerate(words):
-                chunk = word + (" " if i < len(words) - 1 else "")
-                full_reply.append(chunk)
-                sse_data = json.dumps({
-                    "choices": [{"delta": {"content": chunk}}],
-                    "model": model_name,
-                    "session_id": session_id,
-                })
-                self.wfile.write(f"data: {sse_data}\n\n".encode())
-                self.wfile.flush()
+                reply = re.sub(r"<think>.*?</think>", "", reply, flags=re.DOTALL)
+                reply = re.sub(r"<think>.*", "", reply, flags=re.DOTALL)
+                reply = reply.strip()
+
+                words = reply.split(" ")
+                for i, word in enumerate(words):
+                    chunk = word + (" " if i < len(words) - 1 else "")
+                    full_reply.append(chunk)
+                    sse_data = json.dumps({
+                        "choices": [{"delta": {"content": chunk}}],
+                        "model": model_name,
+                        "session_id": session_id,
+                    })
+                    self.wfile.write(f"data: {sse_data}\n\n".encode())
+                    self.wfile.flush()
 
             elapsed = time.time() - t0
             tps = n_tokens / elapsed if elapsed > 0 else 0
 
             reply_text = "".join(full_reply)
-            reply_text = re.sub(r"<think>.*?</think>", "", reply_text, flags=re.DOTALL)
-            reply_text = re.sub(r"<think>.*", "", reply_text, flags=re.DOTALL)
-            reply_text = reply_text.strip()
             session.add_message("assistant", reply_text)
             audit_log.record_request(self._current_user, self._current_user, tokens=n_tokens)
 

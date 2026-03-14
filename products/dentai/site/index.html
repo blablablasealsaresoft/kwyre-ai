@@ -5,50 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>DentAI — Dental Practice Intelligence</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
     :root{
       --bg:#0d1117;--surface:#161b22;--surface2:#1c2333;--border:#30363d;
+      --gold:#d4a843;--gold-dim:rgba(212,168,67,.12);--gold-glow:rgba(212,168,67,.25);
       --teal:#14b8a6;--teal-dim:rgba(20,184,166,.12);--teal-glow:rgba(20,184,166,.25);
       --text:#e6edf3;--text-dim:#7d8590;--white:#fff;
       --red:#f85149;--amber:#d29922;--green:#3fb950;--blue:#58a6ff;
-      --sans:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+      --sans:'IBM Plex Sans',-apple-system,sans-serif;--mono:'JetBrains Mono',monospace;
     }
     body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
     input,select,textarea,button{font-family:inherit}
 
     header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;border-bottom:1px solid var(--border);background:var(--surface)}
     .logo{font-size:1.25rem;font-weight:700;color:var(--white);letter-spacing:-.02em}
-    .logo span{color:var(--teal)}
+    .logo span{color:var(--gold)}
     .conn{display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--text-dim)}
     .conn-dot{width:7px;height:7px;border-radius:50%;background:var(--red);transition:background .3s}
     .conn-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
 
     .shell{max-width:960px;margin:0 auto;padding:0 1rem}
-    nav{display:flex;gap:0;margin:1rem 0;border-radius:8px;overflow-x:auto;border:1px solid var(--border);background:var(--surface)}
+    nav{display:flex;flex-wrap:wrap;gap:0;margin:1rem 0;border-radius:8px;overflow-x:auto;border:1px solid var(--border);background:var(--surface)}
     nav button{flex:1;min-width:0;padding:.6rem .2rem;background:none;border:none;color:var(--text-dim);font-size:.72rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
     nav button:hover{color:var(--text);background:var(--surface2)}
-    nav button.active{background:var(--teal);color:var(--white)}
+    nav button.active{background:var(--gold);color:var(--white)}
 
     .tab{display:none}.tab.active{display:block}
     .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1rem}
-    .card h3{font-size:.95rem;color:var(--teal);margin-bottom:.75rem;font-weight:600}
+    .card h3{font-size:.95rem;color:var(--gold);margin-bottom:.75rem;font-weight:600}
     label{display:block;font-size:.78rem;color:var(--text-dim);margin-bottom:.3rem;font-weight:500}
     input[type=text],input[type=number],textarea,select{width:100%;padding:.55rem .75rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;outline:none;transition:border .2s}
-    input:focus,textarea:focus,select:focus{border-color:var(--teal)}
+    input:focus,textarea:focus,select:focus{border-color:var(--gold)}
     textarea{resize:vertical;min-height:80px;font-family:var(--mono);font-size:.8rem}
     .row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
-    .btn{padding:.55rem 1.1rem;background:var(--teal);color:var(--white);border:none;border-radius:6px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s}
+    .btn{padding:.55rem 1.1rem;background:var(--gold);color:var(--white);border:none;border-radius:6px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s}
     .btn:hover{filter:brightness(1.15)}.btn:disabled{opacity:.5;cursor:not-allowed}
     .btn-sm{padding:.4rem .8rem;font-size:.75rem}
-    .btn-outline{background:transparent;border:1px solid var(--teal);color:var(--teal)}
-    .btn-outline:hover{background:var(--teal-dim)}
+    .btn-outline{background:transparent;border:1px solid var(--gold);color:var(--gold)}
+    .btn-outline:hover{background:var(--gold-dim)}
     .actions{display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap}
 
-    .output{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.75rem;font-family:var(--mono);font-size:.8rem;white-space:pre-wrap;line-height:1.7;max-height:500px;overflow-y:auto;color:var(--text)}
+    .output{background:#0d1117;border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.75rem;font-family:var(--sans);font-size:.8rem;line-height:1.7;max-height:500px;overflow-y:auto;color:var(--text)}
     .output:empty{display:none}
-    .output h4{color:var(--teal);margin:0 0 .3rem;font-size:.85rem}
+    .output h4{color:var(--gold);margin:0 0 .3rem;font-size:.85rem}
     .badge{display:inline-block;padding:.15rem .5rem;border-radius:4px;font-size:.7rem;font-weight:600}
     .badge-low{background:rgba(63,185,80,.15);color:var(--green)}
     .badge-mod{background:rgba(210,153,34,.15);color:var(--amber)}
@@ -56,38 +57,41 @@
 
     .check-group{display:flex;flex-wrap:wrap;gap:.5rem;margin:.4rem 0}
     .check-group label{display:flex;align-items:center;gap:.3rem;font-size:.8rem;color:var(--text);cursor:pointer;padding:.3rem .6rem;border:1px solid var(--border);border-radius:5px;transition:all .15s}
-    .check-group label:hover{border-color:var(--teal)}
-    .check-group input:checked+span{color:var(--teal)}
-    .check-group input{accent-color:var(--teal)}
+    .check-group label:hover{border-color:var(--gold)}
+    .check-group input:checked+span{color:var(--gold)}
+    .check-group input{accent-color:var(--gold)}
 
     .tooth-grid{display:grid;grid-template-columns:repeat(8,1fr);gap:4px;margin:.5rem 0}
     .tooth-btn{padding:.35rem;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text-dim);font-size:.65rem;cursor:pointer;text-align:center;transition:all .15s;font-family:var(--mono)}
-    .tooth-btn.selected{background:var(--teal);color:var(--white);border-color:var(--teal)}
-    .tooth-btn:hover{border-color:var(--teal)}
+    .tooth-btn.selected{background:var(--gold);color:var(--white);border-color:var(--gold)}
+    .tooth-btn:hover{border-color:var(--gold)}
 
     .chat-box{display:flex;flex-direction:column;height:450px;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
     .chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.6rem}
     .msg{max-width:80%;padding:.6rem .9rem;border-radius:10px;font-size:.84rem;line-height:1.5}
-    .msg.user{align-self:flex-end;background:var(--teal);color:var(--white);border-bottom-right-radius:3px}
+    .msg.user{align-self:flex-end;background:var(--gold);color:var(--white);border-bottom-right-radius:3px}
     .msg.ai{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:3px}
     .msg.system{align-self:center;color:var(--text-dim);font-size:.75rem;font-style:italic}
     .chat-input{display:flex;gap:.5rem;padding:.75rem;border-top:1px solid var(--border);background:var(--surface2)}
     .chat-input input{flex:1;padding:.5rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;outline:none}
-    .chat-input input:focus{border-color:var(--teal)}
+    .chat-input input:focus{border-color:var(--gold)}
 
     .table-wrap{overflow-x:auto;margin-top:.5rem}
     table{width:100%;border-collapse:collapse;font-size:.8rem}
-    th{text-align:left;padding:.5rem .6rem;border-bottom:2px solid var(--border);color:var(--teal);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
+    th{text-align:left;padding:.5rem .6rem;border-bottom:2px solid var(--border);color:var(--gold);font-weight:600;font-size:.75rem;text-transform:uppercase;letter-spacing:.04em}
     td{padding:.45rem .6rem;border-bottom:1px solid var(--border);color:var(--text)}
-    tr:hover td{background:var(--teal-dim)}
+    tr:hover td{background:var(--gold-dim)}
 
-    .loading{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--teal);border-radius:50%;animation:spin .6s linear infinite}
+    .loading{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     footer{text-align:center;padding:2rem 1rem;color:var(--text-dim);font-size:.72rem;border-top:1px solid var(--border);margin-top:2rem}
-    @media(max-width:640px){.row{grid-template-columns:1fr}nav{flex-wrap:wrap}nav button{flex:none;width:33.33%}.tooth-grid{grid-template-columns:repeat(4,1fr)}}
+    .output pre{white-space:pre-wrap;overflow-x:auto;font-family:var(--mono);background:var(--surface2);padding:.5rem;border-radius:4px;margin:.5rem 0}
+    @media(max-width:640px){.row{grid-template-columns:1fr}nav{display:flex;flex-wrap:wrap}nav button{flex:none;width:33.33%}.tooth-grid{grid-template-columns:repeat(4,1fr)}}
+    .scanlines{position:fixed;inset:0;z-index:9999;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.012) 2px,rgba(255,255,255,.012) 4px)}
   </style>
 </head>
 <body>
+  <div class="scanlines"></div>
 <header>
   <div class="logo">Dent<span>AI</span></div>
   <div class="conn"><div class="conn-dot" id="connDot"></div><span id="connLabel">Connecting…</span></div>
@@ -97,8 +101,11 @@
   <main id="main"></main>
 </div>
 <footer>&copy; 2026 Mint Rail LLC &middot; DentAI v1.0.0</footer>
+<script src="https://cdn.jsdelivr.net/npm/marked@14/marked.min.js"></script>
 <script>
-const API=localStorage.getItem('dentai_api')||'http://localhost:8000';
+const API = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')
+  ? `${window.location.protocol}//${window.location.hostname}:8000`
+  : window.location.origin;
 const TABS=['Treatment Planner','Insurance Coding','Clinical Notes','Risk Assessment','Materials','Radiograph Analysis','AI Dentist'];
 let activeTab=0,selectedTeeth=new Set();
 
@@ -165,13 +172,25 @@ async function runTreatmentPlan(){
   const o=$('#tpOut');o.textContent='Generating AI treatment plan…';
   const body={symptoms:getChecked('symptoms'),findings:getChecked('findings'),tooth_numbers:[...selectedTeeth].map(String),patient_age:+$('#tpAge').value||35,medical_history:$('#tpHx').value};
   if(!body.symptoms.length){o.textContent='Please select at least one symptom.';return;}
-  try{const r=await fetch(API+'/v1/ai/treatment-plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();o.textContent=d.treatment_plan||d.error||'No response';}catch(e){o.textContent='API offline. Use Quick Local Plan for demo data.';}
+  try{const r=await fetch(API+'/v1/ai/treatment-plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();const t=d.treatment_plan||d.error||'No response';o.innerHTML=typeof marked!=='undefined'?marked.parse(t):t.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}catch(e){o.textContent='API offline. Use Quick Local Plan for demo data.';}
 }
 
+function formatTreatmentPlan(d){
+  if(!d||typeof d!=='object')return String(d);
+  let out='';
+  if(d.chief_complaint)out+=`Chief Complaint: ${d.chief_complaint}\n`;
+  if(d.summary)out+=`Summary: ${d.summary}\n`;
+  if(d.phases&&d.phases.length){out+='\n';d.phases.forEach(ph=>{out+=`\n${ph.label||ph.phase}\n${'─'.repeat(40)}\n`;if(ph.procedures)ph.procedures.forEach(pr=>{out+=`  • ${pr.name}${pr.cdt_code?' ('+pr.cdt_code+')':''} — $${pr.estimated_cost} (${pr.duration_minutes} min)\n    ${pr.rationale}\n`;});});}
+  if(d.total_estimated_cost!=null)out+=`\nTotal Estimated Cost: $${d.total_estimated_cost}\n`;
+  if(d.notes&&d.notes.length)out+=`\nNotes:\n${d.notes.map(n=>'  • '+n).join('\n')}\n`;
+  return out||JSON.stringify(d,null,2);
+}
 async function runLocalTreatment(){
-  const symptoms=getChecked('symptoms'),teeth=[...selectedTeeth].map(String);
+  const symptoms=getChecked('symptoms'),teeth=[...selectedTeeth].map(String),patientAge=+$('#tpAge').value||35;
   if(!symptoms.length){$('#tpOut').textContent='Select at least one symptom.';return;}
-  try{const r=await fetch(API+'/v1/treatment/plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({symptoms,teeth:teeth.length?teeth:['14'],patient_age:+$('#tpAge').value||35})});const d=await r.json();$('#tpOut').textContent=JSON.stringify(d,null,2);}
+  const chief_complaint=symptoms.join(', ');
+  const body={chief_complaint,symptoms,findings:teeth.length?[`Teeth involved: ${teeth.join(', ')}`]:[],dental_history:[`Patient age: ${patientAge}`]};
+  try{const r=await fetch(API+'/v1/treatment/plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();const t=formatTreatmentPlan(d);$('#tpOut').innerHTML=typeof marked!=='undefined'?marked.parse(t):t.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
   catch{$('#tpOut').textContent=`Demo Treatment Plan\n━━━━━━━━━━━━━━━━━\nSymptoms: ${symptoms.join(', ')}\nTeeth: ${teeth.join(', ')||'General'}\n\nDiagnosis: Requires clinical evaluation\nPhase 1: Acute care — address pain/infection\nPhase 2: Definitive treatment\nPhase 3: Maintenance and follow-up\n\nNote: Connect to API for detailed plans.`;}
 }
 
@@ -187,7 +206,7 @@ function renderCoding(el){
 async function runCoding(){
   const o=$('#cdtOut');o.textContent='Analyzing procedure for CDT codes…';
   const body={procedure_description:$('#cdtProc').value,diagnosis:$('#cdtDx').value,tooth_numbers:$('#cdtTeeth').value.split(',').map(s=>s.trim()).filter(Boolean)};
-  try{const r=await fetch(API+'/v1/ai/coding-rationale',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();o.textContent=d.coding_rationale||d.error||'No response';}
+  try{const r=await fetch(API+'/v1/ai/coding-rationale',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();const t=d.coding_rationale||d.error||'No response';o.innerHTML=typeof marked!=='undefined'?marked.parse(t):t.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
   catch{o.textContent=`Demo CDT Coding\n━━━━━━━━━━━━━━\nProcedure: ${body.procedure_description.substring(0,60)}…\n\nD2740 — Crown, porcelain/ceramic substrate\n  Rationale: Extensive caries necessitating full-coverage restoration\n  Documentation: Pre-op radiograph, caries documentation\n\nD3330 — Root canal, molar (if applicable)\n  Rationale: Pulp involvement confirmed\n\nConnect to API for full AI-powered coding analysis.`;}
 }
 
@@ -206,7 +225,7 @@ async function runNotes(){
   const bullets=$('#notesBullets').value.split('\n').map(s=>s.trim()).filter(Boolean);
   if(!bullets.length){o.textContent='Enter at least one bullet point.';return;}
   const body={bullet_points:bullets,visit_type:$('#notesType').value,provider_name:$('#notesDoc').value};
-  try{const r=await fetch(API+'/v1/ai/clinical-notes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();o.textContent=d.soap_note||d.error||'No response';}
+  try{const r=await fetch(API+'/v1/ai/clinical-notes',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();const t=d.soap_note||d.error||'No response';o.innerHTML=typeof marked!=='undefined'?marked.parse(t):t.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
   catch{o.textContent=`SOAP NOTE — ${body.visit_type.toUpperCase()}\n${'━'.repeat(40)}\n\nSUBJECTIVE:\nPatient presents with chief complaint as noted.\n${bullets.slice(0,2).map(b=>'• '+b).join('\n')}\n\nOBJECTIVE:\nClinical examination findings documented.\n${bullets.slice(2,4).map(b=>'• '+b).join('\n')}\n\nASSESSMENT:\nClinical findings consistent with reported symptoms.\n\nPLAN:\n${bullets.slice(4).map(b=>'• '+b).join('\n')||'• Treatment plan to be determined'}\n\nConnect to API for AI-generated SOAP notes.`;}
 }
 
@@ -272,7 +291,7 @@ async function runRadiograph(){
   const o=$('#radOut');o.textContent='Analyzing radiograph findings…';
   const body={findings_description:$('#radFindings').value,radiograph_type:$('#radType').value};
   if(body.findings_description.length<10){o.textContent='Please describe the radiographic findings (min 10 characters).';return;}
-  try{const r=await fetch(API+'/v1/ai/radiograph-analysis',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();o.textContent=d.analysis||d.error||'No response';}
+  try{const r=await fetch(API+'/v1/ai/radiograph-analysis',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();const t=d.analysis||d.error||'No response';o.innerHTML=typeof marked!=='undefined'?marked.parse(t):t.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');}
   catch{o.textContent=`Demo Radiograph Analysis\n${'━'.repeat(35)}\nType: ${body.radiograph_type}\n\nInterpretation:\nFindings suggest periapical pathology consistent with pulp necrosis.\n\nDifferential Diagnosis:\n1. Periapical abscess\n2. Periapical granuloma\n3. Periapical cyst\n\nRecommendations:\n• Vitality testing recommended\n• Consider CBCT for 3D assessment\n• Root canal therapy likely indicated\n\nConnect to API for detailed AI analysis.`;}
 }
 
@@ -281,7 +300,7 @@ function renderChat(el){
   el.innerHTML=`<div class="card"><h3>AI Dental Assistant</h3><p style="font-size:.8rem;color:var(--text-dim);margin-bottom:.75rem">Ask any dental question — treatment options, patient management, clinical guidelines, or coding queries.</p>
     <div class="chat-box"><div class="chat-messages" id="chatMsgs"><div class="msg system">Hello! I'm your AI dental assistant. Ask me anything about dental care, treatment planning, coding, or clinical guidelines.</div></div>
     <div class="chat-input"><input type="text" id="chatIn" placeholder="Ask a dental question…" onkeydown="if(event.key==='Enter')sendChat()"><button class="btn btn-sm" onclick="sendChat()">Send</button></div></div></div>`;
-  chatHistory.forEach(m=>{const d=ce('div','msg '+(m.role==='user'?'user':'ai'),m.text);$('#chatMsgs').appendChild(d);});
+  chatHistory.forEach(m=>{const d=ce('div','msg '+(m.role==='user'?'user':'ai'));d.innerHTML=m.role==='ai'&&typeof marked!=='undefined'?marked.parse(m.text):m.text.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');$('#chatMsgs').appendChild(d);});
 }
 
 async function sendChat(){
@@ -290,9 +309,9 @@ async function sendChat(){
   const msgs=$('#chatMsgs');msgs.appendChild(ce('div','msg user',txt));
   const thinking=ce('div','msg ai','<div class="loading"></div> Thinking…');msgs.appendChild(thinking);msgs.scrollTop=msgs.scrollHeight;
   try{
-    const r=await fetch(API+'/v1/ai/patient-education',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({treatment:txt,patient_age:35,language_level:'moderate'})});
-    const d=await r.json();const reply=d.education||d.error||'No response';
-    thinking.innerHTML=reply.replace(/\n/g,'<br>');chatHistory.push({role:'ai',text:reply});
+    const r=await fetch(API+'/v1/ai/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:txt})});
+    const d=await r.json();const reply=d.reply||d.error||'No response';
+    thinking.innerHTML=typeof marked!=='undefined'?marked.parse(reply):reply.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');chatHistory.push({role:'ai',text:reply});
   }catch{thinking.innerHTML='I\'m currently offline. Please ensure the DentAI server is running and try again.';chatHistory.push({role:'ai',text:'Offline — server not connected.'});}
   msgs.scrollTop=msgs.scrollHeight;
 }

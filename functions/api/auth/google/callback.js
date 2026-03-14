@@ -7,47 +7,76 @@ import { generateJWT } from '../../_helpers.js';
 
 export async function onRequestGet(context) {
   const { GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, GOOGLE_REDIRECT_URI, JWT_SECRET, KV } = context.env;
-  const url = new URL(context.request.url);
-  const code = url.searchParams.get('code');
-  const error = url.searchParams.get('error');
+  const reqUrl = new URL(context.request.url);
+  const siteOrigin = reqUrl.origin;
+  const code = reqUrl.searchParams.get('code');
+  const error = reqUrl.searchParams.get('error');
 
   if (error || !code) {
-    return Response.redirect('https://kwyre.com/login.html?error=oauth_denied', 302);
+    const desc = reqUrl.searchParams.get('error_description') || error || 'unknown';
+    return Response.redirect(`${siteOrigin}/login.html?error=oauth_denied&detail=${encodeURIComponent(desc)}`, 302);
   }
 
-  const redirectUri = GOOGLE_REDIRECT_URI || 'https://kwyre.com/api/auth/google/callback';
+  if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
+    return Response.redirect(`${siteOrigin}/login.html?error=server_error&detail=${encodeURIComponent('Google OAuth credentials not configured')}`, 302);
+  }
+
+  if (!JWT_SECRET) {
+    return Response.redirect(`${siteOrigin}/login.html?error=server_error&detail=${encodeURIComponent('JWT_SECRET not configured')}`, 302);
+  }
+
+  const redirectUri = GOOGLE_REDIRECT_URI || `${siteOrigin}/api/auth/google/callback`;
 
   // Exchange code for tokens
-  const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-    body: new URLSearchParams({
-      code,
-      client_id: GOOGLE_CLIENT_ID,
-      client_secret: GOOGLE_CLIENT_SECRET,
-      redirect_uri: redirectUri,
-      grant_type: 'authorization_code',
-    }),
-  });
+  let tokens;
+  try {
+    const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+      body: new URLSearchParams({
+        code,
+        client_id: GOOGLE_CLIENT_ID,
+        client_secret: GOOGLE_CLIENT_SECRET,
+        redirect_uri: redirectUri,
+        grant_type: 'authorization_code',
+      }),
+    });
 
-  const tokens = await tokenRes.json();
-  if (!tokenRes.ok || !tokens.access_token) {
-    return Response.redirect('https://kwyre.com/login.html?error=token_exchange', 302);
+    tokens = await tokenRes.json();
+    if (!tokenRes.ok || !tokens.access_token) {
+      const detail = tokens.error_description || tokens.error || `HTTP ${tokenRes.status}`;
+      return Response.redirect(`${siteOrigin}/login.html?error=token_exchange&detail=${encodeURIComponent(detail)}`, 302);
+    }
+  } catch (err) {
+    return Response.redirect(`${siteOrigin}/login.html?error=token_exchange&detail=${encodeURIComponent(err.message)}`, 302);
   }
 
   // Fetch user profile
-  const profileRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
-    headers: { Authorization: `Bearer ${tokens.access_token}` },
-  });
-  const profile = await profileRes.json();
+  let profile;
+  try {
+    const profileRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
+      headers: { Authorization: `Bearer ${tokens.access_token}` },
+    });
+    profile = await profileRes.json();
+  } catch (err) {
+    return Response.redirect(`${siteOrigin}/login.html?error=server_error&detail=${encodeURIComponent('Failed to fetch profile: ' + err.message)}`, 302);
+  }
 
   if (!profile.email) {
-    return Response.redirect('https://kwyre.com/login.html?error=no_email', 302);
+    return Response.redirect(`${siteOrigin}/login.html?error=no_email`, 302);
   }
 
   // Upsert user in KV
+  if (!KV) {
+    return Response.redirect(`${siteOrigin}/login.html?error=server_error&detail=${encodeURIComponent('KV namespace not bound')}`, 302);
+  }
+
   const kvKey = `user:${profile.email}`;
-  const existing = await KV.get(kvKey, 'json');
+  let existing = null;
+  try {
+    existing = await KV.get(kvKey, 'json');
+  } catch { /* first user */ }
+
   const user = {
     email: profile.email,
     name: profile.name || '',
@@ -57,6 +86,7 @@ export async function onRequestGet(context) {
     updated_at: new Date().toISOString(),
     licenses: existing?.licenses || [],
     addons: existing?.addons || [],
+    stripe_customer_id: existing?.stripe_customer_id || null,
   };
   await KV.put(kvKey, JSON.stringify(user));
 
@@ -68,7 +98,7 @@ export async function onRequestGet(context) {
   );
 
   return Response.redirect(
-    `https://kwyre.com/login.html?token=${encodeURIComponent(jwt)}`,
+    `${siteOrigin}/login.html?token=${encodeURIComponent(jwt)}`,
     302,
   );
 }

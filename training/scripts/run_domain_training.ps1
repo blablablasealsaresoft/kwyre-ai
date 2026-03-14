@@ -29,6 +29,13 @@ if (-not $Domain) {
     Write-Host "  defense_intelligence" -ForegroundColor Yellow
     Write-Host "  financial_trading" -ForegroundColor Yellow
     Write-Host "  blockchain_crypto" -ForegroundColor Yellow
+    Write-Host "  sports_analytics" -ForegroundColor Yellow
+    Write-Host "  relationship_matching" -ForegroundColor Yellow
+    Write-Host "  software_engineering" -ForegroundColor Yellow
+    Write-Host "  scientific_research" -ForegroundColor Yellow
+    Write-Host "  career_placement" -ForegroundColor Yellow
+    Write-Host "  college_basketball" -ForegroundColor Yellow
+    Write-Host "  dental_clinical" -ForegroundColor Yellow
     exit 1
 }
 

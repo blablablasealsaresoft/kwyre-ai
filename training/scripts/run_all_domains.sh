@@ -1,14 +1,14 @@
 #!/bin/bash
 ################################################################################
-# KWYRE AI — Train All 8 Domain Adapters
+# KWYRE AI — Train All 13 Domain Adapters
 # Runs the full pipeline for each domain sequentially on a single GPU.
 #
 # Usage:
 #   export ANTHROPIC_API_KEY=sk-ant-...
 #   bash run_all_domains.sh
 #
-# Total time estimate: ~48-64 hours on H100
-# Total cost estimate: ~$90 API + ~$200 GPU = ~$290
+# Total time estimate: ~80-100 hours on H100
+# Total cost estimate: ~$120 API + ~$300 GPU = ~$420
 ################################################################################
 set -euo pipefail
 
@@ -27,6 +27,11 @@ DOMAINS=(
     "healthcare_lifesciences"
     "sports_analytics"
     "relationship_matching"
+    "software_engineering"
+    "scientific_research"
+    "career_placement"
+    "college_basketball"
+    "dental_clinical"
 )
 
 echo "========================================"

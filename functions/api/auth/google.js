@@ -7,10 +7,13 @@ export async function onRequestGet(context) {
   const { GOOGLE_CLIENT_ID, GOOGLE_REDIRECT_URI } = context.env;
 
   if (!GOOGLE_CLIENT_ID) {
-    return new Response('GOOGLE_CLIENT_ID not configured', { status: 503 });
+    return new Response(
+      JSON.stringify({ error: 'GOOGLE_CLIENT_ID not configured. Set it in Cloudflare Pages → Settings → Environment Variables.' }),
+      { status: 503, headers: { 'Content-Type': 'application/json' } },
+    );
   }
 
-  const redirectUri = GOOGLE_REDIRECT_URI || 'https://kwyre.com/api/auth/google/callback';
+  const redirectUri = GOOGLE_REDIRECT_URI || `${new URL(context.request.url).origin}/api/auth/google/callback`;
 
   const params = new URLSearchParams({
     client_id: GOOGLE_CLIENT_ID,

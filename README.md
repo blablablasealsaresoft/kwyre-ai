@@ -434,30 +434,31 @@ Analytics Engine (v1.6):
   RiskEngine:          VaR/CVaR, Monte Carlo simulation, portfolio risk, tail risk
   DocumentAnalytics:   Entity extraction, topic modeling, similarity scoring, summarization
 
-Domain Adapters (v1.5):
+Domain Adapters (v1.7):
   Format:              PEFT LoRA checkpoint (safetensors)
   Size per adapter:    ~150 MB
-  Total (8 adapters):  ~1200 MB
-  Domains:             legal_compliance, insurance_actuarial, healthcare_lifesciences,
+  Total (13 adapters): ~1950 MB
+  Core domains:        legal_compliance, insurance_actuarial, healthcare_lifesciences,
                        defense_intelligence, financial_trading, blockchain_crypto,
                        sports_analytics, relationship_matching
+  Product domains:     software_engineering (CodeForge), scientific_research (LabMind),
+                       career_placement (LaunchPad), college_basketball (MarchMind),
+                       dental_clinical (DentAI)
   Base model:          Qwen/Qwen3.5-4B (4B adapters) | Qwen/Qwen3.5-9B (9B adapters)
   LoRA rank:           32 (distillation)
   LoRA targets:        q_proj, k_proj, v_proj, o_proj, gate_proj, up_proj, down_proj
-  Training traces:     1,000 per domain (8,000 total)
-  Trace generation:    Anthropic Batch API — 2-phase (expansion + generation), ~$32 total
+  Training traces:     5,000 per domain (65,000 total)
+  Trace generation:    Anthropic Batch API — 2-phase (expansion + generation), ~$390 total
   Distillation:        Unsloth QLoRA on H100 80GB, 3 epochs, 375 steps/domain
-  Loss per domain:     1.2 → 0.53 (consistent convergence across all 8 domains)
-  Training time:       ~2h per domain × 6 = ~12h total on H100 80GB
+  GRPO RL:             Unsloth + TRL GRPOTrainer, 500 steps, LoRA rank 16
+  Training time:       ~10h per domain × 13 = ~130h total on H100 80GB
 
 Custom Training Pipeline (Professional 9B):
-  Pipeline:            Claude traces → Unsloth QLoRA distillation → GRPO RL → GGUF export
+  Pipeline:            Claude traces → Unsloth QLoRA distillation → Unsloth GRPO RL → GGUF export
   Trace generation:    Anthropic Batch API (resumable, 50% cheaper than real-time)
   Distillation:        Unsloth QLoRA on H100 80GB, LoRA rank 32
-  GRPO RL:             HuggingFace + TRL, 500 steps, LoRA rank 16
-  Domains:             legal_compliance, insurance_actuarial, healthcare_lifesciences,
-                       defense_intelligence, financial_trading, blockchain_crypto,
-                       sports_analytics, relationship_matching
+  GRPO RL:             Unsloth + TRL, 500 steps, LoRA rank 16
+  Domains:             13 domains (8 core + 5 product-specific)
   Personality:         Kwyre persona baked into weights (not just system prompt)
   Reasoning:           Chain-of-thought via <think>...</think> tags + emergent problem-solving
   Export:              Q5_K_M (6.1 GB) + Q4_K_M (5.3 GB) GGUFs
@@ -541,15 +542,19 @@ kwyre/
 │   ├── setup_gpu.sh           # AMD ROCm GPU environment setup
 │   ├── setup_gpu.ps1          # NVIDIA CUDA GPU environment setup (Windows)
 │   └── scripts/
-│       ├── generate_traces_batch.py    # Batch API trace generation (1,000/domain, resumable)
+│       ├── generate_traces_batch.py    # Batch API trace generation (5,000/domain, 13 domains, resumable)
 │       ├── generate_traces_parallel.py # Real-time parallel trace generation (fallback)
 │       ├── train_distillation.py       # Unsloth QLoRA domain adapter distillation
-│       ├── train_grpo_domain.py        # Domain-specific GRPO with custom reward functions
+│       ├── train_grpo_domain.py        # Unsloth GRPO with domain-specific reward functions
 │       ├── train_grpo.py               # Base GRPO training
+│       ├── product_domains.py          # Product-to-domain mapping (9 products → 13 domains)
+│       ├── scrape_repos.py             # GitHub repo scraper for training context enrichment
+│       ├── train_all_products.sh       # Batch train all 13 product domains
+│       ├── train_all_products.ps1      # Windows: batch train all 13 product domains
 │       ├── run_domain_training.sh      # Single-domain pipeline runner
 │       ├── run_domain_training.ps1     # Windows: single-domain pipeline runner
-│       ├── run_all_domains.sh          # All 8 domains sequentially
-│       └── run_all_domains.ps1         # Windows: all 8 domains sequentially
+│       ├── run_all_domains.sh          # All 13 domains sequentially
+│       └── run_all_domains.ps1         # Windows: all 13 domains sequentially
 ├── benchmarks/
 │   ├── benchmark.py           # Domain benchmark suite (--with-adapter comparison mode)
 │   └── datasets/              # financial_analysis.json, compliance_tasks.json, etc.
@@ -574,7 +579,7 @@ kwyre/
 │   └── install_freebsd.sh     # FreeBSD installer (rc.d + PF)
 ├── products/
 │   ├── _shared/
-│   │   ├── ai_engine.py         # Shared Anthropic Claude API client (all products)
+│   │   ├── ai_engine.py         # Dual-backend AI client: local Kwyre + Anthropic Claude
 │   │   └── analytics.py         # Shared predictive analytics (Monte Carlo, regression, Bollinger)
 │   ├── quantedge/               # QuantEdge — quantitative finance platform
 │   ├── labmind/                 # LabMind — scientific research platform
@@ -584,7 +589,7 @@ kwyre/
 │   ├── launchpad/               # LaunchPad — AI career platform
 │   ├── soulsync/                # SoulSync — AI dating & matching
 │   ├── nfl-playcaller/          # NFL PlayCaller — sports analytics
-│   └── nflonr/                  # NFLonr — formation-based play prediction
+│   └── marchmind/               # MarchMind — March Madness tournament intelligence
 ├── finetune/                  # Domain-specific fine-tuning pipeline
 ├── docs/                      # Compliance documentation package
 ├── tests/                     # 110 security tests + integration suite
@@ -606,8 +611,13 @@ kwyre/
 │   ├── financial-trading-4b/
 │   ├── blockchain-crypto-4b/
 │   ├── sports-analytics-4b/
-│   └── relationship-matching-4b/
-├── training-data/kwyre-traces/ # 8,000 Claude reasoning traces
+│   ├── relationship-matching-4b/
+│   ├── software-engineering-4b/  # CodeForge
+│   ├── scientific-research-4b/   # LabMind
+│   ├── career-placement-4b/      # LaunchPad
+│   ├── college-basketball-4b/    # MarchMind
+│   └── dental-clinical-4b/       # DentAI
+├── training-data/kwyre-traces/ # 65,000 Claude reasoning traces (13 domains)
 └── logs/                       # Training logs
 ```
 
@@ -619,7 +629,7 @@ kwyre/
 - [x] 6-layer security stack, speculative decoding, SpikeServe, SSE streaming, KV cache, RAG, OpenAI-compatible API
 - [x] Multi-backend (GPU / vLLM / CPU-GGUF / Apple Silicon-MLX), multi-user RBAC, Nuitka binary builds, Ed25519 code signing
 - [x] 47/47 pentest findings resolved, 110 security tests passing, SOC2/HIPAA/FINRA compliance documentation
-- [x] 8 hot-swap LoRA domain adapters (legal, insurance, healthcare, defense, trading, blockchain, sports_analytics, relationship_matching) + adapter stacking, CDN versioning, customer fine-tuning endpoint
+- [x] 8 hot-swap LoRA domain adapters (legal, insurance, healthcare, defense, trading, blockchain, sports, relationships) + adapter stacking, CDN versioning, customer fine-tuning endpoint
 
 **v1.6 (Current)**
 - [x] Predictive analytics engine — `TimeSeriesPredictor`, `PatternAnalyzer`, `RiskEngine`, `DocumentAnalytics` (`server/analytics.py`)
@@ -632,22 +642,32 @@ kwyre/
 - [x] macOS Apple Silicon + MLX support — `.pkg` installer + portable tarball, Metal MPS acceleration, native MLX inference
 - [x] FreeBSD amd64 + NVIDIA CUDA support — `.txz` package + portable tarball, PF firewall isolation, rc.d service management
 
-**v1.6.1 (Current)**
-- [x] 9 AI-backed product applications — QuantEdge, LabMind, DentAI, CodeForge, TaxShield, LaunchPad, SoulSync, NFL PlayCaller, NFLonr
-- [x] Shared AI engine — Anthropic Claude API client with retry, rate limiting, and graceful fallback (`products/_shared/ai_engine.py`)
+**v1.6.1 (Complete)**
+- [x] 9 AI-backed product applications — QuantEdge, LabMind, DentAI, CodeForge, TaxShield, LaunchPad, SoulSync, NFL PlayCaller, MarchMind
+- [x] Shared AI engine — Dual-backend client: local Kwyre inference + Anthropic Claude API (`products/_shared/ai_engine.py`)
 - [x] Shared predictive analytics — Monte Carlo forecasting, regime detection, Bollinger Bands, win probability (`products/_shared/analytics.py`)
 - [x] Production frontends — dark-themed SPAs with domain-specific UIs, Chart.js visualizations, WebSocket real-time feeds
 - [x] AI endpoints wired into all 9 product backends — 40+ new AI-powered API endpoints across all products
-- [x] NFLonr — new formation-based play prediction app with 200+ formation DB and micro-read analysis engine
+- [x] MarchMind — March Madness tournament intelligence with KenPom-style metrics, Monte Carlo simulation, and upset radar
 
-**v1.7 (Planned)**
+**v1.7 (Current)**
+- [x] 13 domain adapters — expanded from 8 core to 13 (added software_engineering, scientific_research, career_placement, college_basketball, dental_clinical)
+- [x] Product-specific training pipeline — each product mapped to its own domain adapter (`product_domains.py`)
+- [x] 65,000 reasoning traces — 5,000 per domain via Anthropic Batch API, 2x previous quality
+- [x] Unsloth GRPO — upgraded from HuggingFace + bitsandbytes to Unsloth FastModel (2x faster, 60% less VRAM)
+- [x] GitHub repo scraping — external training context from OSINT, public-apis, face_recognition repos
+- [x] Batch product training — `train_all_products.sh` trains all 13 domains with auto-resume
+- [x] RAG parity — all 4 backends (GPU, vLLM, CPU, MLX) now use RAG in chat
+- [x] Payment flow fixed — field name alignment, auth headers, tier mapping for all products
+- [x] CI/CD pipeline — GitHub Actions for lint, test, build, Docker push, Helm package
+- [x] Customer adapter fine-tuning API — POST /v1/adapter/train with background job system
+
+**v1.8 (Planned)**
 - [ ] Kwyre Cloud launch — 32B/72B models on Lambda/DO H100 GPU clusters, API access, subscription billing
 - [ ] Credit card payment integration (local + cloud)
 - [ ] Adapter marketplace — community-trained adapters with verified metadata + revenue sharing
 - [ ] Custom Cloud LLM service — domain-specific model training + dedicated hosted inference
-- [x] CI/CD pipeline — GitHub Actions for lint, test, build, Docker push, Helm package
-- [ ] Backend feature parity — RAG, adapters, analytics across all inference backends (vLLM, CPU, MLX)
-- [x] Customer adapter fine-tuning API — POST /v1/adapter/train with background job system
+- [ ] Backend feature parity — adapters, analytics across CPU and MLX inference backends
 - [ ] 7B SpikingBrain model — custom architecture with sliding-window attention and GLA
 - [ ] SpikingBrain VLM — 7B vision-language model for multimodal inference
 
@@ -739,7 +759,7 @@ Kwyre is one product in the Mint Rail family. Each product is a fully functional
 | **LaunchPad** | Job placement | ATS resume scoring, cover letter generation, interview coaching, AI career advisor | FastAPI + Anthropic AI |
 | **SoulSync** | Dating & relationships | Big Five personality matching, swipe-style discovery, WebSocket chat, AI dating coach | FastAPI + WebSocket + Anthropic AI |
 | **NFL PlayCaller** | Sports analytics | AI scouting reports, play calling, blitz prediction, live game feed, predictive analytics | FastAPI + WebSocket + Anthropic AI |
-| **NFLonr** | Play prediction | Formation-based play prediction, pre-snap micro-read analysis, player tendency profiling | FastAPI + WebSocket + Anthropic AI |
+| **MarchMind** | March Madness | AI bracket predictions, matchup analysis, upset radar, Monte Carlo bracket simulation | FastAPI + WebSocket + Anthropic AI |
 
 All products live under `products/` in this repo. Each has a FastAPI backend (`server/app.py`), production frontend (`site/index.html`), and Cloudflare Pages deployment config (`wrangler.toml`). Visit [mintrail.com](https://mintrail.com) for the full portfolio.
 

@@ -493,6 +493,25 @@ class AIPatientEducationRequest(BaseModel):
     language_level: str = Field("simple", description="simple, moderate, detailed")
 
 
+class AIChatRequest(BaseModel):
+    message: str = Field(..., min_length=1)
+
+
+@app.post("/v1/ai/chat")
+async def ai_chat(req: AIChatRequest):
+    """General AI dental assistant chat — answers questions about treatment, coding, guidelines."""
+    prompt = (
+        f"You are DentAI, a helpful dental AI assistant. Answer the following question "
+        f"concisely and accurately. Reference ADA guidelines where applicable. "
+        f"Note: AI advice should be reviewed by a licensed dentist.\n\n"
+        f"Question: {req.message}"
+    )
+    resp = await ai.complete(prompt, temperature=0.5)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"reply": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}
+
+
 @app.post("/v1/ai/treatment-plan")
 async def ai_treatment_plan(req: AITreatmentPlanRequest):
     prompt = (

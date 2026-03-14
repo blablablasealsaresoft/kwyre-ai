@@ -490,15 +490,19 @@ async function handlePay() {
 }
 
 async function onSuccess(piId) {
-  try {
+  if (!piId) { /* no payment_intent in URL — show generic success */ }
+  else try {
+    var headers = { 'Content-Type': 'application/json' };
+    var token = localStorage.getItem('kwyre_token');
+    if (token) headers['Authorization'] = 'Bearer ' + token;
     var resp = await fetch('/api/license/activate', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ paymentIntentId: piId }),
+      headers: headers,
+      body: JSON.stringify({ payment_intent_id: piId }),
     });
     var data = await resp.json();
-    if (data.licenseKey) {
-      document.getElementById('licenseKeyVal').textContent = data.licenseKey;
+    if (data.license_key) {
+      document.getElementById('licenseKeyVal').textContent = data.license_key;
       document.getElementById('licenseBox').style.display = 'block';
     }
   } catch(e) {}
@@ -548,7 +552,8 @@ renderProducts();
   var params = new URLSearchParams(window.location.search);
   if (params.get('payment_success') === 'true') {
     state.selected = params.get('tier') || 'professional';
-    onSuccess(params.get('payment_intent') || '');
+    var pi = params.get('payment_intent');
+    onSuccess(pi || '');
     return;
   }
   var pre = params.get('tier');

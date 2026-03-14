@@ -230,8 +230,9 @@ _inference_lock = threading.Lock()
 
 
 def _shutdown_handler(signum, frame):
-    print("\n[Shutdown] Wiping all sessions before exit...")
+    print("\n[Shutdown] Wiping all sessions and documents before exit...")
     watchdog.stop()
+    rag_store.wipe_all(reason="server_shutdown")
     session_store.wipe_all(reason="server_shutdown")
     sys.exit(0)
 
@@ -489,12 +490,27 @@ class ChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 except Exception as e:
                     print(f"[tools] error: {e}")
 
+            rag_chunks = []
+            if rag_store.has_documents(session_id):
+                try:
+                    query_emb = encode_texts([last_user_msg])
+                    if query_emb is not None:
+                        rag_chunks = rag_store.retrieve(session_id, query_emb[0])
+                except Exception as e:
+                    print(f"[RAG] retrieval error: {e}")
+
             augmented = list(messages)
             if not any(m.get("role") == "system" for m in augmented):
                 augmented.insert(0, {"role": "system", "content": DEFAULT_SYSTEM_PROMPT})
+            ctx_parts = []
             if tool_data:
-                ctx = ("\n\n[Live data — use directly, be concise]\n\n"
-                       + "\n\n".join(tool_data))
+                ctx_parts.append("[Live data — use directly, be concise]\n\n"
+                                 + "\n\n".join(tool_data))
+            if rag_chunks:
+                ctx_parts.append("[Retrieved document context]\n\n"
+                                 + "\n\n---\n\n".join(rag_chunks))
+            if ctx_parts:
+                ctx = "\n\n" + "\n\n".join(ctx_parts)
                 for i in range(len(augmented) - 1, -1, -1):
                     if augmented[i].get("role") == "user":
                         augmented[i] = {

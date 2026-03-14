@@ -49,7 +49,7 @@ print("[1/4] Loading model...")
 from unsloth import FastModel
 
 model, tokenizer = FastModel.from_pretrained(
-    model_name="Qwen/Qwen3.5-9B",
+    model_name=MODEL_NAME,
     max_seq_length=MAX_SEQ_LENGTH,
     load_in_4bit=True,
     full_finetuning=False,
@@ -184,7 +184,7 @@ grpo_config = GRPOConfig(
 
 trainer = GRPOTrainer(
     model=model,
-    tokenizer=tokenizer,
+    processing_class=tokenizer,
     args=grpo_config,
     train_dataset=dataset,
     reward_funcs=[correctness_reward, reasoning_quality_reward, length_penalty_reward],

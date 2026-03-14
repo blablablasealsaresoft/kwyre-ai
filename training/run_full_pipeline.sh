@@ -10,7 +10,7 @@ if [ -z "${ANTHROPIC_API_KEY:-}" ]; then
     echo "ERROR: ANTHROPIC_API_KEY not set. Export it before running this script."
     exit 1
 fi
-export KWYRE_TRACES_PER_DOMAIN=50
+export KWYRE_TRACES_PER_DOMAIN=${KWYRE_TRACES_PER_DOMAIN:-1000}
 export PYTHONUNBUFFERED=1
 
 LOGDIR="$HOME/.kwyre/logs"
@@ -32,7 +32,7 @@ echo "  STEP 1: Generating reasoning traces via Claude"
 echo "  Target: $KWYRE_TRACES_PER_DOMAIN traces per domain"
 echo "========================================"
 
-python3 "$SCRIPT_DIR/scripts/generate_traces_parallel.py" 2>&1 | tee "$LOGDIR/01-traces.log"
+python3 "$SCRIPT_DIR/scripts/generate_traces_batch.py" 2>&1 | tee "$LOGDIR/01-traces.log"
 
 echo ""
 echo "  Traces complete. Files:"
@@ -61,6 +61,30 @@ python3 "$SCRIPT_DIR/scripts/train_grpo.py" 2>&1 | tee "$LOGDIR/03-grpo.log"
 
 echo ""
 echo "  GRPO complete."
+echo ""
+
+# ── STEP 4: Merge LoRA + Export ──────────────────────────────────────────────
+echo "========================================"
+echo "  STEP 4: Merging LoRA adapters and exporting"
+echo "========================================"
+
+GRPO_LORA="$HOME/.kwyre/lora-adapters/kwyre-grpo"
+MERGED_OUT="$HOME/.kwyre/models/trained/kwyre-9b-merged"
+
+if [ -f "$SCRIPT_DIR/../model/merge_and_export.py" ] && [ -d "$GRPO_LORA" ]; then
+    python3 "$SCRIPT_DIR/../model/merge_and_export.py" \
+        --adapter_path "$GRPO_LORA" \
+        --output_dir "$MERGED_OUT" \
+        --merge_method adapter_only \
+        2>&1 | tee "$LOGDIR/04-merge-export.log"
+    echo ""
+    echo "  Merge + export complete."
+elif [ -f "$SCRIPT_DIR/../model/merge_and_export.py" ]; then
+    echo "  SKIPPED — GRPO adapter not found at $GRPO_LORA"
+    echo "  Run Step 3 first to generate GRPO LoRA."
+else
+    echo "  SKIPPED — model/merge_and_export.py not found"
+fi
 echo ""
 
 # ── SUMMARY ─────────────────────────────────────────────────────────────────

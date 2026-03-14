@@ -8,8 +8,8 @@ from dataclasses import dataclass, field, asdict
 
 from fastapi import WebSocket
 
-from server.analysis import AnalysisEngine
-from server.teams import get_team
+from .analysis import AnalysisEngine
+from .teams import get_team
 
 
 @dataclass

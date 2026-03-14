@@ -23,9 +23,9 @@ Usage:
     KWYRE_SKIP_EXPANSION=1 python3 generate_traces_batch.py
 
 Cost estimate (claude-sonnet-4, batch pricing):
-    Phase 1 (expansion):  ~$1-2
-    Phase 2 (6000 traces): ~$28-35
-    Total: ~$30-37 for 6,000 traces across 6 domains
+    Phase 1 (expansion):  ~$8-15
+    Phase 2 (65000 traces): ~$300-390
+    Total: ~$310-400 for 65,000 traces across 13 domains
 """
 
 import json
@@ -44,7 +44,7 @@ OUTPUT_DIR  = Path(KWYRE_HOME) / "training-data" / "kwyre-traces"
 STATE_FILE  = Path(KWYRE_HOME) / "training-data" / "batch-state.json"
 OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-TRACES_PER_DOMAIN = int(os.environ.get("KWYRE_TRACES_PER_DOMAIN", "1000"))
+TRACES_PER_DOMAIN = int(os.environ.get("KWYRE_TRACES_PER_DOMAIN", "5000"))
 SKIP_EXPANSION    = os.environ.get("KWYRE_SKIP_EXPANSION", "0") == "1"
 MODEL             = os.environ.get("KWYRE_MODEL_NAME", "claude-sonnet-4-20250514")
 POLL_INTERVAL     = int(os.environ.get("KWYRE_POLL_INTERVAL", "60"))  # seconds
@@ -58,7 +58,7 @@ COT_INSTRUCTION = (
 )
 
 # ---------------------------------------------------------------------------
-# Domain definitions (6 professional verticals)
+# Domain definitions (13 professional verticals — 8 core + 5 product-specific)
 # ---------------------------------------------------------------------------
 DOMAINS = {
     "legal_compliance": {
@@ -197,6 +197,167 @@ DOMAINS = {
             "Evaluate a DeFi protocol's smart contracts for flash loan attack vulnerabilities. Walk through the attack vector, price oracle manipulation, and how protocol developers should implement safeguards.",
             "Design an on-chain monitoring system for a fraud investigation tracking $50M across 200+ wallets. What graph database do you use and how do you visualize the flow for a jury?",
             "Walk through building an expert witness report for a cryptocurrency fraud case. What methodology section is required and what are the Daubert standard requirements for blockchain analysis testimony?",
+        ],
+    },
+    "sports_analytics": {
+        "system": (
+            "You are an expert sports analytics specialist with deep knowledge of "
+            "NFL strategy, play calling, formation analysis, game theory, scouting, "
+            "player evaluation, and statistical modeling. You understand offensive and "
+            "defensive schemes, blitz packages, coverage shells, personnel groupings, "
+            "and situational football decision-making."
+        ),
+        "prompts": [
+            "Analyze the optimal play-calling strategy for a team facing 3rd-and-7 at the opponent's 35-yard line with 2 minutes left in the first half, trailing by 4. Consider formation tendencies, defensive coverage likelihood, and risk-reward tradeoffs.",
+            "Walk through building a blitz prediction model using pre-snap alignment data. What features are most predictive of an incoming blitz and how do you handle the class imbalance problem?",
+            "Design a scouting report template for evaluating an opposing team's red zone offense. What statistical metrics, formation tendencies, and personnel packages should be analyzed?",
+            "Evaluate a quarterback's decision-making using expected points added (EPA) per play. How do you decompose EPA into pre-snap read quality, throw accuracy, and receiver contribution?",
+            "Walk through reverse-engineering a team's playbook from All-22 film. How do you identify route concepts, blocking schemes, and motion patterns to build a tendency database?",
+            "Analyze the game theory of fourth-down decision-making. When should a team go for it vs punt vs attempt a field goal, and how does the current analytical consensus differ from traditional coaching?",
+            "Design a player movement profiling system using tracking data. How do you measure burst, change of direction, and route-running precision from Next Gen Stats coordinates?",
+            "Evaluate a defense's coverage shell tendencies from pre-snap alignment. How do you distinguish between Cover 1, Cover 2, Cover 3, Cover 4, and Cover 6 before the snap?",
+            "Walk through building a win probability model for NFL games. What in-game features are most important and how do you handle situational dependencies like score differential and time remaining?",
+            "Analyze the impact of personnel groupings (11, 12, 21, 22, 13) on offensive success rate. How do defensive adjustments to different groupings create exploitable tendencies?",
+            "Design a post-game analysis framework that goes beyond box score stats. How do you identify schematic advantages, individual matchup wins, and coaching adjustments?",
+            "Walk through the process of identifying a team's offensive tendencies by down and distance. What sample size is needed and how do you account for score differential and game context?",
+        ],
+    },
+    "relationship_matching": {
+        "system": (
+            "You are an expert relationship psychologist and compatibility analyst "
+            "with deep knowledge of personality psychology (Big Five / OCEAN model), "
+            "attachment theory, love language frameworks, communication styles, and "
+            "evidence-based relationship science. You provide analytical, research-backed "
+            "insights while maintaining sensitivity and ethical boundaries."
+        ),
+        "prompts": [
+            "Analyze the compatibility between two individuals based on their Big Five personality profiles. Person A scores high in Openness and Extraversion but low in Agreeableness. Person B scores high in Conscientiousness and Agreeableness but low in Openness. What are the key compatibility factors and potential friction points?",
+            "Walk through the process of identifying attachment styles from behavioral patterns in dating contexts. What are the key markers for secure, anxious-preoccupied, dismissive-avoidant, and fearful-avoidant attachment?",
+            "Design a compatibility scoring algorithm based on the Big Five personality model, love languages, and attachment styles. What weights should each factor receive and how do you handle complementary vs similar trait matching?",
+            "Analyze the role of love languages in long-term relationship satisfaction. When a Words of Affirmation person is paired with an Acts of Service person, what communication strategies improve mutual understanding?",
+            "Walk through generating personalized conversation starters for two people who have matched. Given their personality profiles and shared interests, how do you create questions that build genuine connection?",
+            "Evaluate the research evidence for personality-based matching vs interest-based matching in dating platforms. What does the literature say about which factors best predict long-term relationship success?",
+            "Design a relationship coaching framework for couples experiencing communication breakdowns. How do you identify the root cause — attachment mismatch, love language disconnect, or personality conflict?",
+            "Analyze how cultural background interacts with personality traits in romantic compatibility. What additional factors should a matching algorithm consider for cross-cultural relationships?",
+            "Walk through detecting patterns of avoidant attachment in early dating behavior. What behavioral signals indicate someone is dismissive-avoidant and how does this affect matching recommendations?",
+            "Evaluate the ethical considerations of AI-powered relationship matching. What biases can emerge in personality assessment algorithms and how do you ensure fair matching across demographics?",
+            "Design an icebreaker generation system that adapts to both participants' personality profiles. How do questions differ for two introverts vs two extraverts vs a mixed pair?",
+            "Analyze the predictive validity of self-reported vs behavioral personality assessments in dating contexts. How do you account for social desirability bias in personality questionnaires?",
+        ],
+    },
+    "software_engineering": {
+        "system": (
+            "You are an expert software architect and code intelligence specialist. "
+            "You have deep expertise in AST analysis, semantic code search, code review, "
+            "refactoring patterns, architecture analysis, API design, security auditing, "
+            "and developer tooling. You reason through code problems with precision, "
+            "citing design patterns, SOLID principles, and language-specific best practices."
+        ),
+        "prompts": [
+            "Walk through performing a security audit on a Python FastAPI application. What OWASP Top 10 vulnerabilities do you check for, how do you test for injection attacks, and what automated tools complement manual review?",
+            "Analyze the architecture of a monolithic Django application that needs to be decomposed into microservices. How do you identify service boundaries, handle shared data, and plan the migration without downtime?",
+            "Design a code review checklist for a team working on a financial trading platform. What security, performance, and correctness checks are critical, and how do you handle code reviews for concurrent systems?",
+            "Walk through refactoring a 2000-line function into clean, testable modules. What patterns do you apply, how do you identify extract-method candidates, and how do you ensure behavioral equivalence?",
+            "Evaluate the API design of a REST service with 50+ endpoints. What naming conventions, versioning strategies, pagination patterns, and error response formats constitute best practices?",
+            "Walk through building a semantic code search engine using AST parsing and embeddings. How do you chunk code for embedding, handle multiple languages, and rank search results by relevance?",
+            "Analyze a React application for performance bottlenecks. How do you identify unnecessary re-renders, optimize bundle size, implement code splitting, and measure Core Web Vitals improvements?",
+            "Design a CI/CD pipeline for a polyglot microservices architecture. How do you handle dependency management, test orchestration, canary deployments, and rollback procedures?",
+            "Walk through debugging a race condition in a Go concurrent system. What tools and techniques do you use to reproduce, diagnose, and fix data races, and how do you write tests that catch concurrency bugs?",
+            "Evaluate a database schema migration strategy for a high-traffic production system. How do you handle zero-downtime migrations, backward compatibility, and data backfill for 100M+ row tables?",
+            "Design an observability stack for a distributed system. How do you implement structured logging, distributed tracing, metrics collection, and alerting that actually catches real issues without alert fatigue?",
+            "Walk through implementing a plugin architecture for an extensible application. What design patterns enable safe third-party extensions, how do you sandbox plugins, and how do you handle versioning?",
+        ],
+    },
+    "scientific_research": {
+        "system": (
+            "You are an expert scientific research methodologist with deep knowledge of "
+            "experimental design, statistical analysis, literature review, hypothesis "
+            "generation, and academic writing. You understand research methodologies across "
+            "biology, chemistry, physics, and data science. You help researchers design "
+            "rigorous experiments, analyze results, and write compelling papers."
+        ),
+        "prompts": [
+            "Design a randomized controlled trial to evaluate a new drug for treatment-resistant depression. Walk through power analysis, randomization strategy, blinding, primary and secondary endpoints, and interim analysis rules.",
+            "Walk through conducting a systematic literature review on CRISPR gene therapy efficacy. What databases do you search, how do you define inclusion/exclusion criteria, and how do you assess risk of bias using PRISMA guidelines?",
+            "Analyze the statistical methodology for a genomics study with 50,000 samples. When do you use Bonferroni vs FDR correction for multiple testing, and how do you handle population stratification in GWAS?",
+            "Design an experiment to test whether a new machine learning model outperforms existing baselines. How do you handle dataset splits, cross-validation, statistical significance testing, and ablation studies?",
+            "Walk through writing the Methods section of a Nature-quality paper. What level of detail is required for reproducibility, how do you handle supplementary materials, and what are common reviewer objections?",
+            "Evaluate the experimental design of a clinical trial that found a surprising positive result. What statistical artifacts could explain the finding (p-hacking, HARKing, garden of forking paths), and how do you assess replication likelihood?",
+            "Design a multi-omics integration study combining proteomics, transcriptomics, and metabolomics data. What normalization approaches, integration methods, and pathway analysis tools do you use?",
+            "Walk through hypothesis generation for a novel research direction using computational approaches. How do you use knowledge graphs, literature mining, and AI-assisted ideation to identify promising research questions?",
+            "Analyze the reproducibility of a computational biology pipeline. What containerization, version pinning, workflow management, and documentation practices ensure another lab can reproduce your results?",
+            "Design a Bayesian adaptive clinical trial for a rare disease with small patient populations. How does the adaptive design differ from frequentist approaches, and what are the regulatory considerations?",
+            "Walk through building a scientific figure that clearly communicates complex multi-dimensional data. What visualization principles apply, how do you handle colorblindness accessibility, and what makes a figure publication-ready?",
+            "Evaluate the grant proposal structure for an NIH R01 application. What makes the Specific Aims page compelling, how do you frame significance and innovation, and what preliminary data is expected?",
+        ],
+    },
+    "career_placement": {
+        "system": (
+            "You are an expert career strategist and professional development specialist. "
+            "You have deep expertise in resume optimization, ATS (Applicant Tracking System) "
+            "scoring, interview coaching, salary negotiation, career transitions, and "
+            "professional branding. You understand hiring processes across tech, finance, "
+            "healthcare, and consulting industries."
+        ),
+        "prompts": [
+            "Walk through optimizing a software engineer's resume for ATS systems. What keywords, formatting, and structure maximize pass-through rates, and how do you quantify achievements for maximum impact?",
+            "Design an interview preparation strategy for a senior product manager role at a FAANG company. What behavioral, case study, and technical questions should they prepare for, and how do you structure STAR responses?",
+            "Analyze a salary negotiation scenario: a candidate has competing offers from two companies at different compensation levels. Walk through the negotiation strategy, including base, equity, signing bonus, and benefits.",
+            "Walk through a career transition from investment banking to product management in tech. What transferable skills to highlight, what gaps to fill, what networking strategy to pursue, and what timeline to expect?",
+            "Design a LinkedIn profile optimization strategy for a data scientist seeking principal-level roles. What headline, summary, experience descriptions, and content strategy maximize recruiter engagement?",
+            "Evaluate a cover letter for a competitive consulting position. What structure, tone, and content elements make it compelling, and how do you tailor it to specific firms (McKinsey vs BCG vs Bain)?",
+            "Walk through preparing for a system design interview at a top tech company. What framework do you use, how do you handle scale estimation, and how do you communicate trade-offs clearly?",
+            "Design a job search strategy for a recent PhD graduate entering industry. How do you translate academic experience, what industries value PhDs, and how do you network effectively outside academia?",
+            "Analyze the effectiveness of different resume formats (chronological, functional, hybrid) for various career situations. When is each appropriate, and how do you handle employment gaps or career pivots?",
+            "Walk through building a professional portfolio for a UX designer. What case studies to include, how to present the design process, and how to demonstrate business impact and user research skills?",
+            "Design a mentorship and sponsorship strategy for career advancement. How do you identify mentors, what questions to ask, and how does sponsorship differ from mentorship in driving promotions?",
+            "Evaluate a candidate's career trajectory and recommend the optimal next move. Given 5 years in software engineering at a startup, should they go to big tech, pursue management, start a company, or specialize deeper?",
+        ],
+    },
+    "college_basketball": {
+        "system": (
+            "You are an expert college basketball analytics specialist with deep knowledge of "
+            "March Madness tournament prediction, KenPom-style efficiency metrics, bracket "
+            "strategy, historical seed-line performance, coaching matchups, conference strength "
+            "analysis, and situational basketball analytics. You combine statistical modeling "
+            "with basketball knowledge to provide expert bracket predictions."
+        ),
+        "prompts": [
+            "Walk through building a March Madness bracket prediction model using KenPom-style adjusted efficiency metrics. What features matter most, how do you handle the difference between regular season and tournament performance, and what historical patterns should inform the model?",
+            "Analyze the optimal bracket strategy for a large office pool vs a small pool. How does pool size affect whether you should pick chalk or upsets, and what game theory principles apply to bracket construction?",
+            "Walk through the historical performance of each seed line (1-16) in the NCAA tournament. What are the upset rates per round, which seed matchups are most volatile, and what are the key 5-12 and 7-10 upset patterns?",
+            "Design an upset detection model for March Madness first-round games. What statistical indicators predict upsets (tempo mismatch, experience, free throw rate, three-point variance), and how do you separate noise from signal?",
+            "Analyze the impact of conference strength on tournament performance. How do you evaluate whether the Big 12 vs SEC debate matters for bracket picks, and what's the historical relationship between conference RPI and tournament success?",
+            "Walk through evaluating a coaching matchup in the tournament. Which coaches consistently overperform their seed, what tactical adjustments matter in single-elimination, and how does coaching experience affect late-game execution?",
+            "Design a Monte Carlo simulation for bracket prediction. How do you model game outcomes, propagate uncertainty through rounds, and calculate championship probability for each team?",
+            "Analyze the role of tempo and style matchups in tournament outcomes. When does a slow-paced defensive team have an advantage over a fast-paced offensive team, and how do you quantify style compatibility?",
+            "Walk through the analytics behind the mid-major vs power conference debate. What metrics best identify mid-majors that will succeed in the tournament, and what are the common failure modes for highly-seeded mid-majors?",
+            "Design a real-time bracket adjustment strategy as the tournament progresses. How should you update your remaining picks based on early-round results, and what Bayesian updating approaches apply?",
+            "Analyze the relationship between regular season metrics and tournament success. Which stats (AdjO, AdjD, turnover rate, offensive rebounding) are most predictive in March, and which are misleading?",
+            "Walk through building a player impact model for March Madness. How do you measure individual player contribution to team success, account for injuries, and identify teams most vulnerable to a single player's absence?",
+        ],
+    },
+    "dental_clinical": {
+        "system": (
+            "You are an expert dental clinical intelligence specialist with deep knowledge of "
+            "CDT coding, treatment planning, SOAP documentation, radiograph interpretation, "
+            "patient education, infection control, dental materials science, and practice "
+            "management. You understand clinical workflows, insurance billing, and regulatory "
+            "compliance for dental practices."
+        ),
+        "prompts": [
+            "Walk through creating a comprehensive treatment plan for a patient presenting with multiple carious lesions, periodontal disease (Stage III, Grade B), and a missing molar. Sequence the treatment phases and explain the rationale for each step.",
+            "Analyze the CDT coding for a complex restorative case involving a crown lengthening, post and core buildup, and PFM crown. What codes apply, how do you handle bundling rules, and what documentation supports medical necessity?",
+            "Walk through writing a SOAP note for a patient presenting with acute pulpitis in tooth #19. What subjective, objective, assessment, and plan elements are required, and how do you document informed consent for root canal therapy?",
+            "Design a radiographic interpretation protocol for a full-mouth series. How do you systematically evaluate periapical, bitewing, and panoramic images for pathology, bone loss, caries, and anatomical anomalies?",
+            "Evaluate the material selection decision between composite, ceramic, and gold for a posterior restoration. What patient factors, occlusal considerations, and longevity data inform the choice, and how do you present options to patients?",
+            "Walk through infection control protocols for a dental operatory. What OSHA and CDC guidelines apply, how do you handle instrument sterilization monitoring, and what are the documentation requirements?",
+            "Analyze a complex insurance pre-authorization scenario. A patient needs implant placement, bone grafting, and a custom abutment. How do you navigate medical vs dental insurance, write narrative reports, and handle denials?",
+            "Design a patient education approach for explaining periodontal disease progression to a patient with early Stage II periodontitis. What visual aids, motivational interviewing techniques, and home care instructions are most effective?",
+            "Walk through emergency dental triage for a patient presenting with a swollen face, fever, and trismus. What is your differential diagnosis, what imaging do you order, and when do you refer to oral surgery vs manage in-office?",
+            "Evaluate the biomechanical considerations for an implant-supported fixed bridge replacing teeth #3-5. What implant diameter, length, and angulation optimize success, and how do you plan for the prosthetic phase?",
+            "Walk through a pediatric dental assessment for a 6-year-old with mixed dentition. How do you evaluate development, identify orthodontic concerns, apply sealants, and discuss fluoride therapy with parents?",
+            "Analyze the clinical decision-making process for a tooth with a vertical root fracture vs cracked tooth syndrome. What diagnostic tests differentiate the conditions, and how do you present the prognosis and treatment options?",
         ],
     },
 }

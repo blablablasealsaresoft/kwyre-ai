@@ -31,6 +31,11 @@ if [ -z "$DOMAIN" ]; then
     echo "  blockchain_crypto"
     echo "  sports_analytics"
     echo "  relationship_matching"
+    echo "  software_engineering"
+    echo "  scientific_research"
+    echo "  career_placement"
+    echo "  college_basketball"
+    echo "  dental_clinical"
     exit 1
 fi
 

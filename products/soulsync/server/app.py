@@ -48,7 +48,9 @@ personality_engine = PersonalityEngine()
 matching_engine = MatchingEngine()
 icebreaker_generator = IcebreakerGenerator()
 
-# In-memory stores (swap for a real DB in production)
+# WARNING: In-memory stores — all data is lost on server restart.
+# For production, replace with a database (SQLite, PostgreSQL, or KV store).
+# See: https://docs.sqlalchemy.org/en/20/dialects/sqlite.html
 profiles_db: dict[str, dict[str, Any]] = {}
 profile_objects: dict[str, PersonalityProfile] = {}
 

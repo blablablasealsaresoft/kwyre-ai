@@ -159,8 +159,9 @@ _trial_tracker: dict[str, int] = {}
 
 
 def _shutdown_handler(signum, frame):
-    print("\n[Shutdown] Wiping all sessions before exit...")
+    print("\n[Shutdown] Wiping all sessions and documents before exit...")
     watchdog.stop()
+    rag_store.wipe_all(reason="server_shutdown")
     session_store.wipe_all(reason="server_shutdown")
     sys.exit(0)
 
@@ -246,8 +247,22 @@ class CpuChatHandler(KwyreHandlerMixin, BaseHTTPRequestHandler):
                 except Exception as e:
                     print(f"[tools] error: {e}")
 
+            rag_chunks = []
+            if rag_store.has_documents(session_id):
+                try:
+                    query_emb = encode_texts([last_user_msg])
+                    if query_emb is not None:
+                        rag_chunks = rag_store.retrieve(session_id, query_emb[0])
+                except Exception as e:
+                    print(f"[RAG] retrieval error: {e}")
+
+            ctx_parts = []
             if tool_data:
-                ctx = "\n\n[Live data]\n\n" + "\n\n".join(tool_data)
+                ctx_parts.append("[Live data]\n\n" + "\n\n".join(tool_data))
+            if rag_chunks:
+                ctx_parts.append("[Retrieved document context]\n\n" + "\n\n---\n\n".join(rag_chunks))
+            if ctx_parts:
+                ctx = "\n\n" + "\n\n".join(ctx_parts)
                 for i in range(len(inference_msgs) - 1, -1, -1):
                     if inference_msgs[i].get("role") == "user":
                         inference_msgs[i] = {"role": "user", "content": inference_msgs[i]["content"] + ctx}

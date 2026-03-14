@@ -5,52 +5,53 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LabMind — Scientific Research Platform</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
     :root{
-      --bg:#0c0f17;--surface:#131824;--surface2:#1a2035;--border:#252d44;
+      --bg:#0a0a0f;--surface:#12121a;--surface2:#1a1a24;--border:#252d44;
+      --gold:#d4a843;--gold-dim:rgba(212,168,67,.15);
       --green:#10b981;--green-dim:rgba(16,185,129,.12);
       --indigo:#6366f1;--indigo-dim:rgba(99,102,241,.12);
-      --text:#e2e8f0;--text-dim:#7c8db5;--white:#fff;
+      --text:#e2e4ea;--text-dim:#6a6a7a;--white:#fff;
       --red:#f87171;--amber:#fbbf24;
-      --sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',monospace;
+      --sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
     }
     body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
     input,select,textarea,button{font-family:inherit}
 
     header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;border-bottom:1px solid var(--border);background:var(--surface)}
-    .logo{font-family:var(--mono);font-size:1.2rem;font-weight:600;color:var(--white)}.logo span{color:var(--green)}
+    .logo{font-family:var(--mono);font-size:1.2rem;font-weight:600;color:var(--white)}.logo span{color:var(--gold)}
     .conn{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--text-dim)}
     .conn-dot{width:7px;height:7px;border-radius:50%;background:var(--red);transition:background .3s}
     .conn-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
 
     .shell{max-width:960px;margin:0 auto;padding:0 1rem}
-    nav{display:flex;gap:0;margin:1rem 0;border-radius:8px;overflow-x:auto;border:1px solid var(--border);background:var(--surface)}
+    nav{display:flex;gap:0;flex-wrap:wrap;margin:1rem 0;border-radius:8px;overflow-x:auto;border:1px solid var(--border);background:var(--surface)}
     nav button{flex:1;min-width:0;padding:.6rem .15rem;background:none;border:none;color:var(--text-dim);font-size:.68rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
     nav button:hover{color:var(--text);background:var(--surface2)}
-    nav button.active{background:var(--green);color:var(--white)}
+    nav button.active{background:var(--gold);color:var(--white)}
 
     .tab{display:none}.tab.active{display:block}
     .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1rem}
-    .card h3{font-size:.95rem;color:var(--green);margin-bottom:.75rem;font-weight:600;font-family:var(--mono)}
+    .card h3{font-size:.95rem;color:var(--gold);margin-bottom:.75rem;font-weight:600;font-family:var(--mono)}
     label{display:block;font-size:.78rem;color:var(--text-dim);margin-bottom:.3rem;font-weight:500}
     input[type=text],input[type=number],textarea,select{width:100%;padding:.55rem .75rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;outline:none;transition:border .2s;font-family:var(--sans)}
-    input:focus,textarea:focus,select:focus{border-color:var(--green)}
+    input:focus,textarea:focus,select:focus{border-color:var(--gold)}
     textarea{resize:vertical;min-height:80px;font-family:var(--mono);font-size:.8rem}
     .row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
-    .btn{padding:.55rem 1.1rem;background:var(--green);color:var(--white);border:none;border-radius:6px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s}
+    .btn{padding:.55rem 1.1rem;background:var(--gold);color:var(--white);border:none;border-radius:6px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s}
     .btn:hover{filter:brightness(1.15)}.btn:disabled{opacity:.5;cursor:not-allowed}
     .btn-sm{padding:.4rem .8rem;font-size:.75rem}
     .btn-indigo{background:var(--indigo)}
-    .btn-outline{background:transparent;border:1px solid var(--green);color:var(--green)}
-    .btn-outline:hover{background:var(--green-dim)}
+    .btn-outline{background:transparent;border:1px solid var(--gold);color:var(--gold)}
+    .btn-outline:hover{background:var(--gold-dim)}
     .actions{display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap}
     .output{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.75rem;font-family:var(--mono);font-size:.8rem;white-space:pre-wrap;line-height:1.7;max-height:500px;overflow-y:auto}
     .output:empty{display:none}
 
     .result-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:.6rem;transition:border .2s}
-    .result-card:hover{border-color:var(--green)}
+    .result-card:hover{border-color:var(--gold)}
     .result-card h4{font-size:.88rem;color:var(--white);margin:0 0 .3rem}
     .result-card .score{font-size:.75rem;font-weight:600;color:var(--green)}
     .result-card p{font-size:.8rem;color:var(--text-dim);margin:.3rem 0 0}
@@ -60,27 +61,30 @@
     .stat-card .desc{font-size:.8rem;color:var(--text-dim)}
     .stat-card .when{font-size:.75rem;color:var(--green);margin-top:.3rem;font-weight:600}
 
-    .section-block{background:var(--surface2);border-left:3px solid var(--green);padding:.8rem 1rem;border-radius:0 8px 8px 0;margin-bottom:.6rem}
+    .section-block{background:var(--surface2);border-left:3px solid var(--gold);padding:.8rem 1rem;border-radius:0 8px 8px 0;margin-bottom:.6rem}
     .section-block h4{font-size:.85rem;color:var(--white);margin:0 0 .2rem;font-family:var(--mono)}
     .section-block p{font-size:.8rem;color:var(--text-dim);margin:0}
 
     .chat-box{display:flex;flex-direction:column;height:440px;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
     .chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.6rem}
     .msg{max-width:80%;padding:.6rem .9rem;border-radius:10px;font-size:.84rem;line-height:1.5}
-    .msg.user{align-self:flex-end;background:var(--green);color:var(--white);border-bottom-right-radius:3px}
+    .msg.user{align-self:flex-end;background:var(--gold);color:var(--white);border-bottom-right-radius:3px}
     .msg.ai{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:3px}
     .msg.system{align-self:center;color:var(--text-dim);font-size:.75rem;font-style:italic}
     .chat-input{display:flex;gap:.5rem;padding:.75rem;border-top:1px solid var(--border);background:var(--surface2)}
     .chat-input input{flex:1;padding:.5rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;outline:none;font-family:var(--sans)}
-    .chat-input input:focus{border-color:var(--green)}
+    .chat-input input:focus{border-color:var(--gold)}
 
-    .loading{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite}
+    .loading,.spinner{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     footer{text-align:center;padding:2rem 1rem;color:var(--text-dim);font-size:.72rem;border-top:1px solid var(--border);margin-top:2rem}
     @media(max-width:640px){.row{grid-template-columns:1fr}nav{flex-wrap:wrap}nav button{flex:none;width:25%}}
+    .scanlines{position:fixed;inset:0;z-index:9999;pointer-events:none;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(255,255,255,.012) 2px,rgba(255,255,255,.012) 4px)}
   </style>
+  <script src="https://cdn.jsdelivr.net/npm/marked@14/marked.min.js"></script>
 </head>
 <body>
+  <div class="scanlines"></div>
 <header>
   <div class="logo">Lab<span>Mind</span></div>
   <div class="conn"><div class="conn-dot" id="connDot"></div><span id="connLabel">Connecting…</span></div>
@@ -91,7 +95,7 @@
 </div>
 <footer>&copy; 2026 Mint Rail LLC &middot; LabMind v1.0.0</footer>
 <script>
-const API=localStorage.getItem('labmind_api')||'http://localhost:8000';
+const API=localStorage.getItem('labmind_api')||(window.location.hostname==='localhost'||window.location.hostname==='127.0.0.1'?`${window.location.protocol}//${window.location.hostname}:8000`:window.location.origin);
 const TABS=['Literature Search','Synthesis','Experiment Design','Hypothesis Generator','Stats Advisor','Paper Drafting','AI Research Assistant'];
 let activeTab=0,chatHistory=[];
 
@@ -134,7 +138,7 @@ async function searchLit(){
   const o=$('#litResults');o.innerHTML='<div class="loading" style="margin:.5rem"></div>';
   try{const r=await fetch(API+'/v1/literature/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:$('#litQuery').value,k:+$('#litK').value})});const d=await r.json();
     if(!d.results.length){o.innerHTML='<div class="output">No results found. Add documents to the index first.</div>';return;}
-    o.innerHTML=d.results.map(r=>`<div class="result-card"><div style="display:flex;justify-content:space-between"><h4>Document ${r.doc_id}</h4><span class="score">Score: ${r.score.toFixed(3)}</span></div><p>${r.text.substring(0,200)}${r.text.length>200?'…':''}</p></div>`).join('');
+    o.innerHTML=d.results.map(r=>{const s=r.snippet||r.text||'';return`<div class="result-card"><div style="display:flex;justify-content:space-between"><h4>Document ${r.doc_id}</h4><span class="score">Score: ${r.score.toFixed(3)}</span></div><p>${s.substring(0,200)}${s.length>200?'…':''}</p></div>`}).join('');
   }catch{o.innerHTML=[{id:'DOC-001',score:.892,text:'CRISPR-Cas9 gene editing has revolutionized molecular biology…'},{id:'DOC-002',score:.745,text:'Machine learning approaches for protein structure prediction…'},{id:'DOC-003',score:.631,text:'The gut microbiome\'s influence on mental health…'}].map(r=>`<div class="result-card"><div style="display:flex;justify-content:space-between"><h4>${r.id}</h4><span class="score">Score: ${r.score.toFixed(3)}</span></div><p>${r.text}</p></div>`).join('');}
 }
 
@@ -227,7 +231,7 @@ function renderStats(el){
 async function getStatsPlan(){
   const o=$('#statOut');o.innerHTML='<div class="loading" style="margin:.5rem"></div>';
   try{const r=await fetch(API+'/v1/stats/plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sample_size:+$('#statN').value,groups:+$('#statGroups').value,data_type:$('#statType').value,paired:$('#statPaired').value==='true'})});const d=await r.json();
-    o.innerHTML=(d.recommended_tests||[]).map(t=>`<div class="stat-card"><h4>${t.test}</h4><div class="desc">${t.description||''}</div><div class="when">When: ${t.when||'Based on your data characteristics'}</div></div>`).join('')+`<div class="output">${JSON.stringify(d,null,2)}</div>`;
+    o.innerHTML=(d.recommended_tests||[]).map(t=>`<div class="stat-card"><h4>${t.name||t.test}</h4><div class="desc">${t.use_case||t.description||''}</div><div class="when">When: ${t.when||'Based on your data characteristics'}</div></div>`).join('')+`<div class="output">${JSON.stringify(d,null,2)}</div>`;
   }catch{o.innerHTML=[{test:'Independent t-test',desc:'Compare means of two independent groups',when:'Normal data, equal variance, 2 groups'},{test:'Mann-Whitney U',desc:'Non-parametric alternative if normality violated',when:'Non-normal data, ordinal or continuous'},{test:"Welch's t-test",desc:'Does not assume equal variances',when:'Unequal variance between groups'}].map(t=>`<div class="stat-card"><h4>${t.test}</h4><div class="desc">${t.desc}</div><div class="when">When: ${t.when}</div></div>`).join('');}
 }
 
@@ -272,7 +276,7 @@ function renderChat(el){
   el.innerHTML=`<div class="card"><h3>// AI Research Assistant</h3><p style="font-size:.8rem;color:var(--text-dim);margin-bottom:.75rem">Ask about experimental design, statistical methods, literature interpretation, or any research question.</p>
     <div class="chat-box"><div class="chat-messages" id="chatMsgs"><div class="msg system">Hello, researcher! I'm your AI assistant with expertise across biology, chemistry, physics, and data science. How can I help with your research today?</div></div>
     <div class="chat-input"><input type="text" id="chatIn" placeholder="Ask a research question…" onkeydown="if(event.key==='Enter')sendChat()"><button class="btn btn-sm" onclick="sendChat()">Send</button></div></div></div>`;
-  chatHistory.forEach(m=>{const d=ce('div','msg '+(m.role==='user'?'user':'ai'),m.text);$('#chatMsgs').appendChild(d);});
+  chatHistory.forEach(m=>{const html=m.role==='ai'&&typeof marked!=='undefined'?marked.parse(m.text):m.text;const d=ce('div','msg '+(m.role==='user'?'user':'ai'),html);$('#chatMsgs').appendChild(d);});
 }
 
 async function sendChat(){
@@ -281,9 +285,9 @@ async function sendChat(){
   const msgs=$('#chatMsgs');msgs.appendChild(ce('div','msg user',txt));
   const thinking=ce('div','msg ai','<div class="loading"></div> Analyzing…');msgs.appendChild(thinking);msgs.scrollTop=msgs.scrollHeight;
   try{
-    const r=await fetch(API+'/v1/ai/stats-advisor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({research_question:txt,data_description:'',sample_size:0,variables:[],data_type:'continuous'})});
-    const d=await r.json();const reply=d.stats_advice||d.error||'No response';
-    thinking.innerHTML=reply.replace(/\n/g,'<br>');chatHistory.push({role:'ai',text:reply});
+    const r=await fetch(API+'/v1/ai/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({message:txt})});
+    const d=await r.json();const reply=d.response||d.error||'No response';
+    thinking.innerHTML=typeof marked!=='undefined'?marked.parse(reply):reply.replace(/\n/g,'<br>');chatHistory.push({role:'ai',text:reply});
   }catch{thinking.innerHTML='I\'m currently offline. Please ensure the LabMind server is running.';chatHistory.push({role:'ai',text:'Offline'});}
   msgs.scrollTop=msgs.scrollHeight;
 }

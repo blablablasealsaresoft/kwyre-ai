@@ -47,7 +47,7 @@ ai = AIEngine(
 
 def _get_search_engine() -> SemanticSearch:
     global _search_engine
-    if _search_engine is None or indexer.faiss_index is None:
+    if indexer.faiss_index is None:
         raise HTTPException(
             status_code=400,
             detail="No repository indexed yet. Call /v1/index/repo first.",
