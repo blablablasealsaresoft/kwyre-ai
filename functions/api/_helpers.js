@@ -116,6 +116,12 @@ export function generateProvisionalKey(tier) {
 
 export function extractBearer(request) {
   const auth = request.headers.get('Authorization') || '';
-  if (!auth.startsWith('Bearer ')) return null;
-  return auth.slice(7);
+  if (auth.startsWith('Bearer ')) return auth.slice(7);
+  return extractCookie(request, 'kwyre_token');
+}
+
+export function extractCookie(request, name) {
+  const cookies = request.headers.get('Cookie') || '';
+  const match = cookies.split(';').map(c => c.trim()).find(c => c.startsWith(name + '='));
+  return match ? match.slice(name.length + 1) : null;
 }

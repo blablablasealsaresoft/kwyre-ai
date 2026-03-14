@@ -71,7 +71,10 @@ export default {
       }
     }
 
-    const upstream = (env.UPSTREAM_URL || 'http://165.227.47.89:8080') + path + url.search;
+    if (!env.UPSTREAM_URL) {
+      return Response.json({ error: 'UPSTREAM_URL not configured' }, { status: 503, headers: cors });
+    }
+    const upstream = env.UPSTREAM_URL + path + url.search;
     const headers = new Headers(request.headers);
     headers.set('Authorization', 'Bearer ' + upstreamKey);
     headers.delete('Host');
@@ -85,10 +88,12 @@ export default {
 
       const respHeaders = new Headers(res.headers);
       for (const [k, v] of Object.entries(cors)) respHeaders.set(k, v);
+      respHeaders.set('X-Content-Type-Options', 'nosniff');
+      respHeaders.set('X-Frame-Options', 'DENY');
 
       return new Response(res.body, { status: res.status, headers: respHeaders });
     } catch (e) {
-      return Response.json({ error: 'upstream: ' + e.message, url: upstream }, { status: 502, headers: cors });
+      return Response.json({ error: 'Upstream unavailable' }, { status: 502, headers: cors });
     }
   },
 };

@@ -570,6 +570,9 @@ kwyre/
 │   ├── benchmark.py           # Domain benchmark suite (--with-adapter comparison mode)
 │   └── datasets/              # financial_analysis.json, compliance_tasks.json, etc.
 ├── deploy/
+│   ├── cloud/
+│   │   ├── wrangler.toml        # Cloudflare Worker config (api.kwyre.com proxy)
+│   │   └── src/worker.js        # API proxy: JWT auth, CORS, SSE streaming, security headers
 │   └── helm/kwyre/            # Kubernetes Helm chart (GPU, probes, PVC)
 ├── chat/
 │   ├── index.html             # Cinematic intro sequence
@@ -581,6 +584,22 @@ kwyre/
 │   ├── security.html          # Penetration testing + compliance
 │   ├── platform.html          # Installation + deployment guides
 │   └── pay.html               # Payment + license download gate
+├── functions/                   # Cloudflare Pages Functions (serverless API layer)
+│   ├── api/
+│   │   ├── _helpers.js            # Shared CORS, JWT (HMAC-SHA256), license key generation
+│   │   ├── auth/
+│   │   │   ├── google.js          # Google OAuth init (CSRF state + PKCE)
+│   │   │   ├── google/callback.js # Google OAuth callback (token exchange, user upsert, httpOnly JWT)
+│   │   │   ├── github.js          # GitHub OAuth init (CSRF state)
+│   │   │   ├── github/callback.js # GitHub OAuth callback (token exchange, user upsert, httpOnly JWT)
+│   │   │   └── refresh.js         # JWT refresh endpoint (access + refresh token rotation)
+│   │   ├── billing/portal.js      # Stripe Customer Portal redirect
+│   │   ├── create-payment-intent.js # Stripe PaymentIntent creation with idempotency
+│   │   ├── webhook/stripe.js      # Stripe webhook (payment success/failure, disputes)
+│   │   ├── user/profile.js        # Authenticated user profile with resolved licenses
+│   │   └── custom/request.js      # Custom LLM service request intake
+│   ├── v1/[[path]].js             # Inference API proxy (passthrough to upstream GPU server)
+│   └── health.js                  # Health check proxy
 ├── scripts/
 │   ├── package_adapter.sh     # Adapter packaging script (Linux / macOS / FreeBSD)
 │   └── package_adapter.ps1    # Adapter packaging script (Windows)
@@ -673,9 +692,18 @@ kwyre/
 - [x] CI/CD pipeline — GitHub Actions for lint, test, build, Docker push, Helm package
 - [x] Customer adapter fine-tuning API — POST /v1/adapter/train with background job system
 
+**v1.7.1 (Current)**
+- [x] Cloudflare Pages Functions API layer — serverless endpoints for auth, billing, user profiles, inference proxy
+- [x] Stripe payment integration — PaymentIntent creation, webhook verification (HMAC-SHA256), idempotency keys, billing portal
+- [x] OAuth authentication — Google (PKCE + CSRF state) and GitHub (CSRF state), httpOnly secure cookies
+- [x] JWT auth with refresh flow — 1h access token + 7d refresh token, `/api/auth/refresh` endpoint
+- [x] Cloudflare Worker API proxy — `api.kwyre.com` routes to upstream GPU server with JWT/API key auth, SSE streaming
+- [x] Security hardening — origin allowlist CORS, `X-Content-Type-Options`, `X-Frame-Options`, no hardcoded IPs
+- [x] Stripe webhook handlers — `payment_intent.succeeded`, `payment_intent.payment_failed`, `charge.dispute.created`
+- [x] User data model — provider array (multi-provider login), `stripe_customer_id` persistence, license resolution
+
 **v1.8 (Planned)**
-- [ ] Kwyre Cloud launch — 32B/72B models on Lambda/DO H100 GPU clusters, API access, subscription billing
-- [ ] Credit card payment integration (local + cloud)
+- [ ] Kwyre Cloud GA — 32B/72B models on Lambda/DO H100 GPU clusters, subscription billing, usage metering
 - [ ] Adapter marketplace — community-trained adapters with verified metadata + revenue sharing
 - [ ] Custom Cloud LLM service — domain-specific model training + dedicated hosted inference
 - [ ] Backend feature parity — adapters, analytics across CPU and MLX inference backends
@@ -792,6 +820,27 @@ We built Kwyre because we needed it ourselves. We cannot upload active federal i
 | Security | `/security.html` | Penetration testing, privacy guarantees, compliance |
 | Platform | `/platform.html` | Installation guides, deployment options, build pipeline |
 | Purchase | `/pay.html` | Payment, license verification, downloads |
+
+### API Layer (Cloudflare Pages Functions)
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/auth/google` | GET | Google OAuth init (PKCE + CSRF state) |
+| `/api/auth/google/callback` | GET | Google OAuth callback → httpOnly JWT cookie |
+| `/api/auth/github` | GET | GitHub OAuth init (CSRF state) |
+| `/api/auth/github/callback` | GET | GitHub OAuth callback → httpOnly JWT cookie |
+| `/api/auth/refresh` | POST | Refresh access token from refresh cookie |
+| `/api/create-payment-intent` | POST | Create Stripe PaymentIntent with idempotency |
+| `/api/webhook/stripe` | POST | Stripe webhook (HMAC-SHA256 verified) |
+| `/api/billing/portal` | GET | Redirect to Stripe Customer Portal |
+| `/api/user/profile` | GET | Authenticated user profile + resolved licenses |
+| `/api/custom/request` | POST | Custom LLM service intake form |
+| `/v1/*` | ANY | Inference API proxy to upstream GPU server |
+| `/health` | GET | Upstream health check proxy |
+
+### Cloud API Proxy (Cloudflare Worker)
+
+`api.kwyre.com` — Cloudflare Worker that proxies authenticated requests to the H100 inference cluster. Supports JWT auth (cloud users), API key passthrough (local license holders), SSE streaming, and path-based allowlisting.
 
 ---
 

@@ -38,13 +38,14 @@ export async function onRequestGet(context) {
     return jsonResponse({ error: 'No billing account linked. Purchase a product first.' }, 400, origin);
   }
 
+  const returnUrl = `${new URL(context.request.url).origin}/dashboard.html`;
   const res = await fetch('https://api.stripe.com/v1/billing_portal/sessions', {
     method: 'POST',
     headers: {
       'Authorization': `Bearer ${STRIPE_SECRET_KEY}`,
       'Content-Type': 'application/x-www-form-urlencoded',
     },
-    body: `customer=${encodeURIComponent(user.stripe_customer_id)}&return_url=${encodeURIComponent('https://kwyre.com/dashboard.html')}`,
+    body: `customer=${encodeURIComponent(user.stripe_customer_id)}&return_url=${encodeURIComponent(returnUrl)}`,
   });
 
   const session = await res.json();

@@ -1,6 +1,7 @@
 /**
  * Cloudflare Pages Function: GET /api/auth/google/callback
- * Exchanges Google OAuth code for tokens, upserts user, issues JWT.
+ * Validates CSRF state + PKCE, exchanges code for tokens, upserts user,
+ * issues JWT via httpOnly cookie, stores Google refresh token.
  */
 
 import { generateJWT } from '../../_helpers.js';
@@ -11,47 +12,65 @@ export async function onRequestGet(context) {
   const siteOrigin = reqUrl.origin;
   const code = reqUrl.searchParams.get('code');
   const error = reqUrl.searchParams.get('error');
+  const state = reqUrl.searchParams.get('state');
 
   if (error || !code) {
     const desc = reqUrl.searchParams.get('error_description') || error || 'unknown';
-    return Response.redirect(`${siteOrigin}/login.html?error=oauth_denied&detail=${encodeURIComponent(desc)}`, 302);
+    return Response.redirect(`${siteOrigin}/login.html?error=oauth_denied`, 302);
   }
 
   if (!GOOGLE_CLIENT_ID || !GOOGLE_CLIENT_SECRET) {
-    return Response.redirect(`${siteOrigin}/login.html?error=server_error&detail=${encodeURIComponent('Google OAuth credentials not configured')}`, 302);
+    return Response.redirect(`${siteOrigin}/login.html?error=server_error`, 302);
   }
 
   if (!JWT_SECRET) {
-    return Response.redirect(`${siteOrigin}/login.html?error=server_error&detail=${encodeURIComponent('JWT_SECRET not configured')}`, 302);
+    return Response.redirect(`${siteOrigin}/login.html?error=server_error`, 302);
+  }
+
+  if (!KV) {
+    return Response.redirect(`${siteOrigin}/login.html?error=server_error`, 302);
+  }
+
+  let codeVerifier = null;
+  if (state) {
+    const stateData = await KV.get(`oauth_state:${state}`, 'json');
+    if (!stateData) {
+      return Response.redirect(`${siteOrigin}/login.html?error=invalid_state`, 302);
+    }
+    codeVerifier = stateData.verifier || null;
+    await KV.delete(`oauth_state:${state}`);
   }
 
   const redirectUri = GOOGLE_REDIRECT_URI || `${siteOrigin}/api/auth/google/callback`;
 
-  // Exchange code for tokens
   let tokens;
   try {
+    const tokenParams = new URLSearchParams({
+      code,
+      client_id: GOOGLE_CLIENT_ID,
+      client_secret: GOOGLE_CLIENT_SECRET,
+      redirect_uri: redirectUri,
+      grant_type: 'authorization_code',
+    });
+    if (codeVerifier) {
+      tokenParams.set('code_verifier', codeVerifier);
+    }
+
     const tokenRes = await fetch('https://oauth2.googleapis.com/token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-      body: new URLSearchParams({
-        code,
-        client_id: GOOGLE_CLIENT_ID,
-        client_secret: GOOGLE_CLIENT_SECRET,
-        redirect_uri: redirectUri,
-        grant_type: 'authorization_code',
-      }),
+      body: tokenParams,
     });
 
     tokens = await tokenRes.json();
     if (!tokenRes.ok || !tokens.access_token) {
       const detail = tokens.error_description || tokens.error || `HTTP ${tokenRes.status}`;
-      return Response.redirect(`${siteOrigin}/login.html?error=token_exchange&detail=${encodeURIComponent(detail)}`, 302);
+      return Response.redirect(`${siteOrigin}/login.html?error=token_exchange`, 302);
     }
   } catch (err) {
-    return Response.redirect(`${siteOrigin}/login.html?error=token_exchange&detail=${encodeURIComponent(err.message)}`, 302);
+    return Response.redirect(`${siteOrigin}/login.html?error=token_exchange`, 302);
   }
 
-  // Fetch user profile
   let profile;
   try {
     const profileRes = await fetch('https://www.googleapis.com/oauth2/v2/userinfo', {
@@ -59,16 +78,11 @@ export async function onRequestGet(context) {
     });
     profile = await profileRes.json();
   } catch (err) {
-    return Response.redirect(`${siteOrigin}/login.html?error=server_error&detail=${encodeURIComponent('Failed to fetch profile: ' + err.message)}`, 302);
+    return Response.redirect(`${siteOrigin}/login.html?error=server_error`, 302);
   }
 
   if (!profile.email) {
     return Response.redirect(`${siteOrigin}/login.html?error=no_email`, 302);
-  }
-
-  // Upsert user in KV
-  if (!KV) {
-    return Response.redirect(`${siteOrigin}/login.html?error=server_error&detail=${encodeURIComponent('KV namespace not bound')}`, 302);
   }
 
   const kvKey = `user:${profile.email}`;
@@ -81,7 +95,8 @@ export async function onRequestGet(context) {
     email: profile.email,
     name: profile.name || '',
     picture: profile.picture || '',
-    provider: 'google',
+    providers: [...new Set([...(existing?.providers || []), 'google'])],
+    google_refresh_token: tokens.refresh_token || existing?.google_refresh_token || null,
     created_at: existing?.created_at || new Date().toISOString(),
     updated_at: new Date().toISOString(),
     licenses: existing?.licenses || [],
@@ -90,15 +105,22 @@ export async function onRequestGet(context) {
   };
   await KV.put(kvKey, JSON.stringify(user));
 
-  // Issue JWT (24h)
-  const jwt = await generateJWT(
+  const accessToken = await generateJWT(
     { email: user.email, name: user.name, picture: user.picture },
     JWT_SECRET,
-    86400,
+    3600,
   );
 
-  return Response.redirect(
-    `${siteOrigin}/login.html?token=${encodeURIComponent(jwt)}`,
-    302,
+  const refreshToken = await generateJWT(
+    { email: user.email, type: 'refresh' },
+    JWT_SECRET,
+    604800,
   );
+
+  const headers = new Headers();
+  headers.append('Set-Cookie', `kwyre_token=${accessToken}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=3600`);
+  headers.append('Set-Cookie', `kwyre_refresh=${refreshToken}; HttpOnly; Secure; SameSite=Strict; Path=/api/auth/refresh; Max-Age=604800`);
+  headers.set('Location', `${siteOrigin}/login.html`);
+
+  return new Response(null, { status: 302, headers });
 }

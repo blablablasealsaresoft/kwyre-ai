@@ -3,11 +3,17 @@
  * Proxies inference API requests to the upstream H100 GPU server.
  */
 
-const UPSTREAM = 'http://165.227.47.89:8080';
+import { corsHeaders } from '../api/_helpers.js';
 
 export async function onRequest(context) {
+  const upstreamBase = context.env.UPSTREAM_URL;
+  if (!upstreamBase) {
+    return Response.json({ error: 'UPSTREAM_URL not configured' }, { status: 503 });
+  }
+
   const url = new URL(context.request.url);
-  const upstream = UPSTREAM + url.pathname + url.search;
+  const origin = context.request.headers.get('Origin') || '';
+  const upstream = upstreamBase + url.pathname + url.search;
 
   const headers = new Headers(context.request.headers);
   headers.delete('Host');
@@ -21,12 +27,13 @@ export async function onRequest(context) {
     });
 
     const respHeaders = new Headers(res.headers);
-    respHeaders.set('Access-Control-Allow-Origin', url.origin);
-    respHeaders.set('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    respHeaders.set('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    const cors = corsHeaders(origin);
+    for (const [k, v] of Object.entries(cors)) respHeaders.set(k, v);
+    respHeaders.set('X-Content-Type-Options', 'nosniff');
+    respHeaders.set('X-Frame-Options', 'DENY');
 
     return new Response(res.body, { status: res.status, headers: respHeaders });
   } catch (e) {
-    return Response.json({ error: 'Upstream unavailable: ' + e.message }, { status: 502 });
+    return Response.json({ error: 'Upstream unavailable' }, { status: 502 });
   }
 }

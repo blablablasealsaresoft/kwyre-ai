@@ -8,6 +8,8 @@
  * Set STRIPE_SECRET_KEY in Cloudflare Pages → Settings → Environment Variables.
  */
 
+import { jsonResponse, optionsResponse } from './_helpers.js';
+
 const BASE_PRICES = {
   personal:       29900,
   professional:   79900,
@@ -51,42 +53,17 @@ const TIER_LABELS = {
   nfl_playcaller: 'NFL PlayCaller',
 };
 
-const ALLOWED_ORIGINS = [
-  'https://kwyre.com',
-  'https://www.kwyre.com',
-  'https://mintrail.io',
-  'https://www.mintrail.io',
-  'https://mintrail.com',
-  'https://www.mintrail.com',
-  'http://localhost:8788',
-  'http://localhost:3000',
-];
-
-function getCorsHeaders(request) {
-  const origin = request.headers.get('Origin') || '';
-  const allowed = ALLOWED_ORIGINS.includes(origin) ? origin : ALLOWED_ORIGINS[0];
-  return {
-    'Access-Control-Allow-Origin': allowed,
-    'Access-Control-Allow-Methods': 'POST, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Max-Age': '86400',
+async function stripeRequest(path, params, secretKey, idempotencyKey) {
+  const headers = {
+    Authorization: `Bearer ${secretKey}`,
+    'Content-Type': 'application/x-www-form-urlencoded',
   };
-}
-
-function json(data, status, corsHeaders) {
-  return new Response(JSON.stringify(data), {
-    status,
-    headers: { 'Content-Type': 'application/json', ...corsHeaders },
-  });
-}
-
-async function stripeRequest(path, params, secretKey) {
+  if (idempotencyKey) {
+    headers['Idempotency-Key'] = idempotencyKey;
+  }
   const resp = await fetch('https://api.stripe.com/v1' + path, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${secretKey}`,
-      'Content-Type': 'application/x-www-form-urlencoded',
-    },
+    headers,
     body: params.toString(),
   });
   return { ok: resp.ok, status: resp.status, data: await resp.json() };
@@ -111,18 +88,15 @@ async function findOrCreateCustomer(email, secretKey) {
 }
 
 export async function onRequestOptions(context) {
-  return new Response(null, {
-    status: 204,
-    headers: getCorsHeaders(context.request),
-  });
+  return optionsResponse(context.request.headers.get('Origin'));
 }
 
 export async function onRequestPost(context) {
-  const cors = getCorsHeaders(context.request);
+  const origin = context.request.headers.get('Origin');
   const { STRIPE_SECRET_KEY } = context.env;
 
   if (!STRIPE_SECRET_KEY || STRIPE_SECRET_KEY.startsWith('sk_live_REPLACE')) {
-    return json({ error: 'Stripe secret key not configured.' }, 503, cors);
+    return jsonResponse({ error: 'Stripe secret key not configured.' }, 503, origin);
   }
 
   let tier, addons, email;
@@ -132,12 +106,12 @@ export async function onRequestPost(context) {
     addons = body.addons || {};
     email  = body.email || '';
   } catch {
-    return json({ error: 'Invalid request body.' }, 400, cors);
+    return jsonResponse({ error: 'Invalid request body.' }, 400, origin);
   }
 
   const basePrice = BASE_PRICES[tier];
   if (basePrice === undefined) {
-    return json({ error: `Unknown tier: ${tier}` }, 400, cors);
+    return jsonResponse({ error: `Unknown tier: ${tier}` }, 400, origin);
   }
 
   const airgap        = !!addons.airgap;
@@ -159,7 +133,7 @@ export async function onRequestPost(context) {
   }
 
   if (total < 100) {
-    return json({ error: 'Invalid total amount.' }, 400, cors);
+    return jsonResponse({ error: 'Invalid total amount.' }, 400, origin);
   }
 
   const description = breakdown.map(b => b.item).join(' + ');
@@ -188,15 +162,16 @@ export async function onRequestPost(context) {
   if (email) params.set('receipt_email', email);
   if (customerId) params.set('customer', customerId);
 
-  const { ok, status, data } = await stripeRequest('/payment_intents', params, STRIPE_SECRET_KEY);
+  const idempotencyKey = `pi-${email || 'anon'}-${tier}-${total}-${Date.now()}`;
+  const { ok, status, data } = await stripeRequest('/payment_intents', params, STRIPE_SECRET_KEY, idempotencyKey);
 
   if (!ok) {
-    return json({ error: data.error?.message || 'Stripe error' }, status, cors);
+    return jsonResponse({ error: data.error?.message || 'Stripe error' }, status, origin);
   }
 
-  return json({
+  return jsonResponse({
     clientSecret: data.client_secret,
     amount: total,
     breakdown: breakdown.map(b => ({ ...b, amount: b.amount / 100 })),
-  }, 200, cors);
+  }, 200, origin);
 }
