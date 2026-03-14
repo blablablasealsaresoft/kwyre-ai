@@ -71,6 +71,20 @@
     .sugg-card{padding:10px 14px;background:rgba(200,180,120,.04);border:1px solid rgba(200,180,120,.1);border-radius:8px;margin-top:8px;font-size:.82rem;color:var(--text)}
     .help-box{margin:20px 0;padding:14px 18px;border-radius:10px;background:rgba(200,180,120,.03);border:1px solid var(--border);font-size:.75rem;color:var(--text-dim);line-height:1.6}
     .help-box code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;font-size:.72rem}
+    .conf-bar-wrap{margin-bottom:6px}
+    .conf-bar-label{display:flex;justify-content:space-between;font-size:.72rem;color:#aaa;margin-bottom:2px}
+    .conf-bar-track{height:18px;background:rgba(255,255,255,.04);border-radius:9px;overflow:hidden;border:1px solid rgba(255,255,255,.06)}
+    .conf-bar-fill{height:100%;border-radius:9px;transition:width .6s ease-out;display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:.6rem;font-weight:700;color:#0a0a08}
+    .wp-gauge{width:180px;height:90px;margin:12px auto;position:relative}
+    .wp-gauge svg{width:100%;height:100%}
+    .wp-gauge-label{position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-size:1.6rem;font-weight:800;color:var(--gold)}
+    .wp-gauge-sub{text-align:center;font-size:.68rem;color:var(--text-dim);margin-top:2px}
+    .trend-chart{width:100%;height:160px;background:rgba(0,0,0,.2);border:1px solid var(--border);border-radius:8px;position:relative;overflow:hidden;margin-top:8px}
+    .trend-bar-group{display:flex;align-items:flex-end;gap:2px;height:120px;padding:8px 12px 0}
+    .trend-bar{flex:1;border-radius:3px 3px 0 0;transition:height .4s;min-width:8px}
+    .trend-legend{display:flex;gap:12px;justify-content:center;padding:6px;font-size:.62rem;color:#888}
+    .trend-legend span{display:flex;align-items:center;gap:4px}
+    .trend-legend .td{width:8px;height:8px;border-radius:2px}
     @keyframes spin{to{transform:rotate(360deg)}}
     @keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
     @keyframes pulse{0%,100%{opacity:1}50%{opacity:.4}}
@@ -93,7 +107,7 @@
 
 <script>
 const API='http://localhost:8000', WS_URL='ws://localhost:8000/ws/live-game';
-const TABS=['Scouting','Play Call','Blitz Read','Player Profile','Live Game'];
+const TABS=['Scouting','Play Call','Blitz Read','Player Profile','Live Game','Predictive'];
 let activeTab=0;
 
 const TEAMS=[
@@ -120,8 +134,10 @@ const FIELD_POS=['Own 5','Own 10','Own 15','Own 20','Own 25','Own 30','Own 35','
 const QUARTERS=['Q1','Q2','Q3','Q4','OT'];
 
 let sel={off:'',def:''},openDD=null,ddSearch='';
-let scoutResult=null,playResult=null,blitzResult=null,playerResult=null;
+let scoutResult=null,playResult=null,blitzResult=null,playerResult=null,predictResult=null,formationResult=null,wpResult=null,trendResult=null;
 let sit={down:'',dist:'',fp:'',qtr:'',score:'',defLook:''}, playerName='';
+const FORMATIONS=['Shotgun','Under Center','Pistol','I-Formation','Singleback','Empty','Wildcat','Trips','Bunch','Jumbo','Goal Line','Spread'];
+let predForm='Shotgun',predSit={down:'',dist:'',fp:'',qtr:'',score:''};
 let ws=null,wsConnected=false,liveData={home:'',away:'',homeScore:0,awayScore:0,quarter:'Q1',clock:'15:00',down:'1st',distance:'10',fieldPos:50,possession:'home',plays:[],suggestion:null};
 
 function checkServer(){fetch(API+'/health').then(r=>{setConn(r.ok)}).catch(()=>setConn(false))}
@@ -137,7 +153,8 @@ function renderTab(){
   else if(activeTab===1) renderPlayCall(c);
   else if(activeTab===2) renderBlitz(c);
   else if(activeTab===3) renderPlayer(c);
-  else renderLive(c);
+  else if(activeTab===4) renderLive(c);
+  else if(activeTab===5) renderPredictive(c);
 }
 
 function teamOptHtml(id,label,exclude){
@@ -340,6 +357,134 @@ function connectWS(){
 }
 
 function disconnectWS(){if(ws){ws.close();ws=null}wsConnected=false;renderTab()}
+
+function renderPredictive(c){
+  let h='<div class="tab active">';
+
+  h+='<div class="card"><h3>Play Prediction</h3>';
+  h+=`<div class="row">${teamOptHtml('off','Offense','def')}${teamOptHtml('def','Defense','off')}</div>`;
+  h+=`<div class="row"><div><span class="sel-label">Formation</span><select onchange="predForm=this.value">${FORMATIONS.map(f=>`<option ${predForm===f?'selected':''}>${f}</option>`).join('')}</select></div>`;
+  h+=`<div><span class="sel-label">Down</span><select onchange="predSit.down=this.value"><option value="">—</option>${DOWNS.map(d=>`<option ${predSit.down===d?'selected':''}>${d}</option>`).join('')}</select></div>`;
+  h+=`<div><span class="sel-label">Distance</span><select onchange="predSit.dist=this.value"><option value="">—</option>${DISTANCES.map(d=>`<option ${predSit.dist===d?'selected':''}>${d}</option>`).join('')}</select></div></div>`;
+  h+=`<div class="row"><div><span class="sel-label">Field Position</span><select onchange="predSit.fp=this.value"><option value="">—</option>${FIELD_POS.map(d=>`<option ${predSit.fp===d?'selected':''}>${d}</option>`).join('')}</select></div>`;
+  h+=`<div><span class="sel-label">Quarter</span><select onchange="predSit.qtr=this.value"><option value="">—</option>${QUARTERS.map(d=>`<option ${predSit.qtr===d?'selected':''}>${d}</option>`).join('')}</select></div>`;
+  h+=`<div><span class="sel-label">Score</span><input type="text" value="${predSit.score}" onchange="predSit.score=this.value" placeholder="e.g. KC 21 - BAL 17"></div></div>`;
+  h+=`<button class="btn btn-gold" style="width:100%" onclick="runPredictPlay()" ${sel.off&&sel.def?'':'disabled'}>Predict Next Play</button></div>`;
+
+  if(predictResult&&!predictResult.error){
+    h+='<div class="result-box"><div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><span style="font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold)">Play Prediction</span><div style="flex:1;height:1px;background:rgba(200,180,120,.15)"></div></div>';
+    h+=`<div style="text-align:center;margin-bottom:14px"><span style="font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--text-dim)">Most Likely</span><div style="font-size:1.4rem;font-weight:800;color:var(--gold);text-transform:uppercase;margin-top:2px">${predictResult.prediction||'—'}</div></div>`;
+    if(predictResult.probabilities){
+      const cols={pass:'#d4c896',run:'#6a9955',screen:'#5b9bd5',play_action:'#c44'};
+      Object.entries(predictResult.probabilities).forEach(([k,v])=>{
+        const pct=Math.round(v*100);
+        h+=`<div class="conf-bar-wrap"><div class="conf-bar-label"><span style="text-transform:capitalize">${k.replace('_',' ')}</span><span>${pct}%</span></div>`;
+        h+=`<div class="conf-bar-track"><div class="conf-bar-fill" style="width:${pct}%;background:${cols[k]||'var(--gold)'}">${pct>15?pct+'%':''}</div></div></div>`;
+      });
+    }
+    if(predictResult.ai_analysis) h+=`<div style="margin-top:14px" class="result-text">${formatResult(predictResult.ai_analysis)}</div>`;
+    h+='</div>';
+  }
+  if(predictResult&&predictResult.error) h+=`<div class="error-box">${predictResult.error}</div>`;
+
+  h+='<div class="card"><h3>Formation Analysis</h3>';
+  h+=`<div class="row"><div><span class="sel-label">Formation</span><select id="formSel" onchange="document.getElementById(\'formSel\').dataset.val=this.value">${FORMATIONS.map(f=>`<option>${f}</option>`).join('')}</select></div></div>`;
+  h+=`<button class="btn btn-outline" style="width:100%" onclick="runFormationAnalysis()">Analyze Formation</button></div>`;
+  if(formationResult&&!formationResult.error){
+    h+='<div class="result-box"><span style="font-size:.68rem;letter-spacing:2px;text-transform:uppercase;color:var(--gold)">Formation Tendencies</span>';
+    if(formationResult.tendencies){
+      const cols={pass:'#d4c896',run:'#6a9955',screen:'#5b9bd5',play_action:'#c44'};
+      h+='<div style="margin-top:10px">';
+      Object.entries(formationResult.tendencies).forEach(([k,v])=>{
+        const pct=Math.round(v*100);
+        h+=`<div class="conf-bar-wrap"><div class="conf-bar-label"><span style="text-transform:capitalize">${k.replace('_',' ')}</span><span>${pct}%</span></div><div class="conf-bar-track"><div class="conf-bar-fill" style="width:${pct}%;background:${cols[k]||'var(--gold)'}">${pct>15?pct+'%':''}</div></div></div>`;
+      });
+      h+='</div>';
+    }
+    if(formationResult.ai_analysis) h+=`<div style="margin-top:12px" class="result-text">${formatResult(formationResult.ai_analysis)}</div>`;
+    h+='</div>';
+  }
+
+  h+='<div class="card"><h3>Win Probability</h3>';
+  h+=`<div class="row"><div><span class="sel-label">Home Score</span><input type="number" id="wpHome" value="0" min="0"></div>`;
+  h+=`<div><span class="sel-label">Away Score</span><input type="number" id="wpAway" value="0" min="0"></div>`;
+  h+=`<div><span class="sel-label">Quarter</span><select id="wpQtr">${QUARTERS.map(q=>`<option>${q}</option>`).join('')}</select></div>`;
+  h+=`<div><span class="sel-label">Clock</span><input type="text" id="wpClock" value="15:00" placeholder="MM:SS"></div></div>`;
+  h+=`<div class="row"><div><span class="sel-label">Possession</span><select id="wpPoss"><option value="home">Home</option><option value="away">Away</option></select></div><div></div></div>`;
+  h+=`<button class="btn btn-outline" style="width:100%" onclick="runWinProb()">Calculate</button>`;
+  if(wpResult){
+    const hp=Math.round(wpResult.home_win_probability*100), ap=Math.round(wpResult.away_win_probability*100);
+    const angle=hp/100*180;
+    h+=`<div style="margin-top:16px"><div class="wp-gauge"><svg viewBox="0 0 180 90"><path d="M10,85 A80,80 0 0,1 170,85" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="12" stroke-linecap="round"/><path d="M10,85 A80,80 0 0,1 170,85" fill="none" stroke="var(--gold)" stroke-width="12" stroke-linecap="round" stroke-dasharray="${angle/180*251.2} 251.2"/></svg><div class="wp-gauge-label">${hp}%</div></div>`;
+    h+=`<div class="wp-gauge-sub">Home Win Probability</div>`;
+    h+=`<div style="display:flex;justify-content:space-around;margin-top:10px;font-size:.78rem"><div style="text-align:center"><div style="color:var(--text-dim);font-size:.65rem">HOME</div><div style="font-weight:700;color:var(--gold)">${hp}%</div></div><div style="text-align:center"><div style="color:var(--text-dim);font-size:.65rem">AWAY</div><div style="font-weight:700;color:#c44">${ap}%</div></div></div></div>`;
+  }
+  h+='</div>';
+
+  h+='<div class="card"><h3>Trend Analysis</h3>';
+  h+=`<p style="font-size:.78rem;color:var(--text-dim);margin-bottom:10px">Play-calling trends will appear here after running predictions during a game session.</p>`;
+  h+=`<div class="trend-chart"><div class="trend-bar-group" id="trendBars"></div>`;
+  h+=`<div class="trend-legend"><span><div class="td" style="background:#d4c896"></div>Pass</span><span><div class="td" style="background:#6a9955"></div>Run</span><span><div class="td" style="background:#5b9bd5"></div>Screen</span><span><div class="td" style="background:#c44"></div>Play Action</span></div></div>`;
+  if(trendResult&&trendResult.ai_analysis) h+=`<div class="result-box"><div class="result-text">${formatResult(trendResult.ai_analysis)}</div></div>`;
+  h+='</div>';
+
+  h+='</div>';c.innerHTML=h;
+
+  if(trendResult&&trendResult.by_quarter){
+    const bars=document.getElementById('trendBars');
+    if(bars){
+      let bh='';
+      const cols={pass:'#d4c896',run:'#6a9955',screen:'#5b9bd5',play_action:'#c44'};
+      const qtrs=Object.keys(trendResult.by_quarter).sort();
+      const maxVal=Math.max(1,...qtrs.flatMap(q=>Object.values(trendResult.by_quarter[q])));
+      qtrs.forEach(q=>{
+        Object.entries(trendResult.by_quarter[q]).forEach(([k,v])=>{
+          if(k==='other') return;
+          const ht=Math.round(v/maxVal*100);
+          bh+=`<div class="trend-bar" style="height:${ht}%;background:${cols[k]||'#666'}" title="${q} ${k}: ${v}"></div>`;
+        });
+        bh+=`<div style="width:4px"></div>`;
+      });
+      bars.innerHTML=bh;
+    }
+  }
+}
+
+async function runPredictPlay(){
+  setLoading();
+  try{
+    const r=await fetch(API+'/v1/predict/play',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({offense:sel.off,defense:sel.def,formation:predForm,down:predSit.down,distance:predSit.dist,field_position:predSit.fp,quarter:predSit.qtr,score:predSit.score})});
+    if(!r.ok) throw new Error((await r.json()).detail||'Failed');
+    predictResult=await r.json();
+  }catch(e){predictResult={error:e.message}}
+  renderTab();
+}
+
+async function runFormationAnalysis(){
+  setLoading();
+  const formEl=document.getElementById('formSel');
+  const fm=formEl?formEl.value:'Shotgun';
+  try{
+    const r=await fetch(API+'/v1/predict/formation',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({formation:fm,offense:sel.off||''})});
+    if(!r.ok) throw new Error((await r.json()).detail||'Failed');
+    formationResult=await r.json();
+  }catch(e){formationResult={error:e.message}}
+  renderTab();
+}
+
+async function runWinProb(){
+  const hs=parseInt(document.getElementById('wpHome').value)||0;
+  const as=parseInt(document.getElementById('wpAway').value)||0;
+  const qtr=document.getElementById('wpQtr').value;
+  const clk=document.getElementById('wpClock').value||'15:00';
+  const poss=document.getElementById('wpPoss').value;
+  try{
+    const r=await fetch(API+'/v1/analytics/win-probability',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({home_score:hs,away_score:as,quarter:qtr,clock:clk,possession:poss})});
+    if(!r.ok) throw new Error((await r.json()).detail||'Failed');
+    wpResult=await r.json();
+  }catch(e){wpResult=null}
+  renderTab();
+}
 
 renderNav();renderTab();checkServer();setInterval(checkServer,10000);
 </script>

@@ -4,694 +4,296 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>LabMind — Scientific Research Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-    :root {
-      --bg: #0a0a14; --bg-panel: #12121e; --bg-input: #1a1a2e; --border: #252540;
-      --indigo: #7C6AFF; --indigo-dim: #5B4DC7; --indigo-glow: rgba(124,106,255,0.1);
-      --text: #E0E0F0; --dim: #7878A0; --accent: #A78BFA;
-      --green: #34D399; --red: #F87171; --white: #F8F8FF;
-      --sans: "Inter",system-ui,-apple-system,sans-serif;
-      --mono: "JetBrains Mono","Fira Code",monospace;
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#0c0f17;--surface:#131824;--surface2:#1a2035;--border:#252d44;
+      --green:#10b981;--green-dim:rgba(16,185,129,.12);
+      --indigo:#6366f1;--indigo-dim:rgba(99,102,241,.12);
+      --text:#e2e8f0;--text-dim:#7c8db5;--white:#fff;
+      --red:#f87171;--amber:#fbbf24;
+      --sans:'IBM Plex Sans',system-ui,sans-serif;--mono:'IBM Plex Mono',monospace;
     }
-    body { background: var(--bg); color: var(--text); font-family: var(--sans); line-height: 1.6; }
-    input, select, textarea, button { font-family: inherit; }
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+    input,select,textarea,button{font-family:inherit}
 
-    header {
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 24px; height: 52px;
-      background: #0e0e1a; border-bottom: 1px solid var(--border);
-    }
-    .logo { display: flex; align-items: center; gap: 10px; font-size: 1.05rem; font-weight: 700; color: var(--white); }
-    .logo svg { width: 24px; height: 24px; }
-    .logo span { color: var(--indigo); }
-    .status { display: flex; align-items: center; gap: 8px; font-size: .75rem; color: var(--dim); font-family: var(--mono); }
-    .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--red); flex-shrink: 0; }
-    .status-dot.ok { background: var(--green); }
+    header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;border-bottom:1px solid var(--border);background:var(--surface)}
+    .logo{font-family:var(--mono);font-size:1.2rem;font-weight:600;color:var(--white)}.logo span{color:var(--green)}
+    .conn{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--text-dim)}
+    .conn-dot{width:7px;height:7px;border-radius:50%;background:var(--red);transition:background .3s}
+    .conn-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
 
-    .tabs {
-      display: flex; background: #0e0e1a; border-bottom: 1px solid var(--border);
-      padding: 0 24px; gap: 0;
-    }
-    .tab {
-      padding: 12px 22px; font-size: .85rem; font-weight: 500;
-      color: var(--dim); cursor: pointer; border: none; background: none;
-      border-bottom: 2px solid transparent; transition: all .15s;
-    }
-    .tab:hover { color: var(--text); }
-    .tab.active { color: var(--indigo); border-bottom-color: var(--indigo); }
+    .shell{max-width:960px;margin:0 auto;padding:0 1rem}
+    nav{display:flex;gap:0;margin:1rem 0;border-radius:8px;overflow-x:auto;border:1px solid var(--border);background:var(--surface)}
+    nav button{flex:1;min-width:0;padding:.6rem .15rem;background:none;border:none;color:var(--text-dim);font-size:.68rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+    nav button:hover{color:var(--text);background:var(--surface2)}
+    nav button.active{background:var(--green);color:var(--white)}
 
-    .panel { display: none; padding: 24px; max-width: 1100px; margin: 0 auto; }
-    .panel.active { display: block; }
+    .tab{display:none}.tab.active{display:block}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1rem}
+    .card h3{font-size:.95rem;color:var(--green);margin-bottom:.75rem;font-weight:600;font-family:var(--mono)}
+    label{display:block;font-size:.78rem;color:var(--text-dim);margin-bottom:.3rem;font-weight:500}
+    input[type=text],input[type=number],textarea,select{width:100%;padding:.55rem .75rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;outline:none;transition:border .2s;font-family:var(--sans)}
+    input:focus,textarea:focus,select:focus{border-color:var(--green)}
+    textarea{resize:vertical;min-height:80px;font-family:var(--mono);font-size:.8rem}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+    .btn{padding:.55rem 1.1rem;background:var(--green);color:var(--white);border:none;border-radius:6px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s}
+    .btn:hover{filter:brightness(1.15)}.btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn-sm{padding:.4rem .8rem;font-size:.75rem}
+    .btn-indigo{background:var(--indigo)}
+    .btn-outline{background:transparent;border:1px solid var(--green);color:var(--green)}
+    .btn-outline:hover{background:var(--green-dim)}
+    .actions{display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap}
+    .output{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.75rem;font-family:var(--mono);font-size:.8rem;white-space:pre-wrap;line-height:1.7;max-height:500px;overflow-y:auto}
+    .output:empty{display:none}
 
-    .grid-2 { display: grid; grid-template-columns: 380px 1fr; gap: 24px; }
-    @media (max-width: 900px) { .grid-2 { grid-template-columns: 1fr; } }
+    .result-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:.6rem;transition:border .2s}
+    .result-card:hover{border-color:var(--green)}
+    .result-card h4{font-size:.88rem;color:var(--white);margin:0 0 .3rem}
+    .result-card .score{font-size:.75rem;font-weight:600;color:var(--green)}
+    .result-card p{font-size:.8rem;color:var(--text-dim);margin:.3rem 0 0}
 
-    .card {
-      background: var(--bg-panel); border: 1px solid var(--border); border-radius: 8px; padding: 20px;
-    }
-    .card h3 {
-      font-size: .8rem; color: var(--indigo); font-weight: 600; letter-spacing: .04em;
-      text-transform: uppercase; margin-bottom: 16px;
-    }
+    .stat-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:.6rem}
+    .stat-card h4{font-size:.85rem;color:var(--indigo);margin:0 0 .3rem;font-family:var(--mono)}
+    .stat-card .desc{font-size:.8rem;color:var(--text-dim)}
+    .stat-card .when{font-size:.75rem;color:var(--green);margin-top:.3rem;font-weight:600}
 
-    label { display: block; font-size: .8rem; color: var(--dim); margin-bottom: 4px; }
-    input[type="text"], input[type="number"], select, textarea {
-      width: 100%; padding: 9px 12px; background: var(--bg-input); border: 1px solid var(--border);
-      border-radius: 6px; color: var(--text); font-size: .875rem; margin-bottom: 12px; outline: none;
-      transition: border-color .15s;
-    }
-    input:focus, textarea:focus, select:focus { border-color: var(--indigo-dim); }
-    textarea { resize: vertical; font-family: var(--sans); min-height: 80px; }
+    .section-block{background:var(--surface2);border-left:3px solid var(--green);padding:.8rem 1rem;border-radius:0 8px 8px 0;margin-bottom:.6rem}
+    .section-block h4{font-size:.85rem;color:var(--white);margin:0 0 .2rem;font-family:var(--mono)}
+    .section-block p{font-size:.8rem;color:var(--text-dim);margin:0}
 
-    .btn {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 10px 22px; background: var(--indigo); color: var(--white);
-      border: none; border-radius: 6px; font-weight: 600; font-size: .85rem;
-      cursor: pointer; transition: background .15s;
-    }
-    .btn:hover { background: #6B5AE0; }
-    .btn:disabled { opacity: .4; cursor: not-allowed; }
-    .btn-outline { background: transparent; border: 1px solid var(--border); color: var(--indigo); }
-    .btn-outline:hover { background: var(--indigo-glow); border-color: var(--indigo-dim); }
-    .btn-sm { padding: 6px 14px; font-size: .75rem; }
-    .btn-copy { position: absolute; top: 12px; right: 12px; }
+    .chat-box{display:flex;flex-direction:column;height:440px;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+    .chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.6rem}
+    .msg{max-width:80%;padding:.6rem .9rem;border-radius:10px;font-size:.84rem;line-height:1.5}
+    .msg.user{align-self:flex-end;background:var(--green);color:var(--white);border-bottom-right-radius:3px}
+    .msg.ai{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:3px}
+    .msg.system{align-self:center;color:var(--text-dim);font-size:.75rem;font-style:italic}
+    .chat-input{display:flex;gap:.5rem;padding:.75rem;border-top:1px solid var(--border);background:var(--surface2)}
+    .chat-input input{flex:1;padding:.5rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;outline:none;font-family:var(--sans)}
+    .chat-input input:focus{border-color:var(--green)}
 
-    .search-bar {
-      display: flex; gap: 8px; margin-bottom: 16px;
-    }
-    .search-bar input { margin-bottom: 0; flex: 1; }
-
-    .result-card {
-      background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px;
-      padding: 14px; margin-bottom: 10px; transition: border-color .15s;
-    }
-    .result-card:hover { border-color: var(--indigo-dim); }
-    .result-card h4 { font-size: .9rem; color: var(--white); margin-bottom: 4px; }
-    .result-card p { font-size: .8rem; color: var(--dim); line-height: 1.5; }
-    .result-card .meta { display: flex; gap: 12px; margin-top: 8px; font-size: .7rem; color: var(--dim); }
-    .result-card .score { color: var(--green); font-weight: 600; font-family: var(--mono); }
-
-    .badge {
-      display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: .7rem;
-      font-weight: 600; background: var(--indigo-glow); color: var(--indigo); border: 1px solid var(--border);
-    }
-
-    .protocol-block {
-      background: var(--bg-input); border: 1px solid var(--border); border-radius: 6px;
-      padding: 16px; margin-bottom: 12px;
-    }
-    .protocol-block h4 { font-size: .8rem; color: var(--accent); margin-bottom: 8px; text-transform: uppercase; letter-spacing: .04em; }
-    .protocol-block p, .protocol-block li { font-size: .85rem; color: var(--text); }
-    .protocol-block ul { padding-left: 18px; }
-    .protocol-block li { margin-bottom: 4px; }
-
-    .draft-output {
-      position: relative; background: var(--bg-input); border: 1px solid var(--border);
-      border-radius: 6px; padding: 20px; min-height: 200px;
-      font-size: .9rem; line-height: 1.8; white-space: pre-wrap;
-    }
-
-    .collection-chips {
-      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px; min-height: 28px;
-    }
-    .chip {
-      display: inline-flex; align-items: center; gap: 4px;
-      padding: 4px 10px; background: var(--indigo-glow); border: 1px solid var(--border);
-      border-radius: 999px; font-size: .7rem; color: var(--indigo);
-    }
-    .chip button {
-      background: none; border: none; color: var(--red); cursor: pointer; font-size: .8rem;
-      padding: 0 2px;
-    }
-
-    .radio-group { display: flex; gap: 16px; margin-bottom: 12px; }
-    .radio-group label {
-      display: flex; align-items: center; gap: 6px; font-size: .8rem;
-      color: var(--text); cursor: pointer; margin-bottom: 0;
-    }
-    .radio-group input[type="radio"] { accent-color: var(--indigo); }
-    .checkbox-label {
-      display: flex; align-items: center; gap: 6px; font-size: .8rem;
-      color: var(--text); margin-bottom: 12px; cursor: pointer;
-    }
-    .checkbox-label input { accent-color: var(--indigo); }
-
-    .section-select { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 16px; }
-    .section-select button {
-      padding: 6px 14px; border: 1px solid var(--border); background: var(--bg-input);
-      color: var(--dim); border-radius: 6px; cursor: pointer; font-size: .8rem;
-      transition: all .15s;
-    }
-    .section-select button.active { background: var(--indigo); color: var(--white); border-color: var(--indigo); }
-
-    .error-banner {
-      display: none; padding: 12px 20px; background: #1a0e1e; border: 1px solid #3a1a3a;
-      border-radius: 6px; color: var(--red); font-size: .8rem; margin-bottom: 16px;
-    }
-    .error-banner.show { display: block; }
-    .error-banner code { color: var(--accent); }
-
-    .spinner { display: inline-block; width: 14px; height: 14px; border: 2px solid var(--indigo-dim); border-top-color: var(--white); border-radius: 50%; animation: spin .6s linear infinite; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .empty-state { text-align: center; padding: 40px 20px; color: var(--dim); font-size: .85rem; }
-    .empty-state .icon { font-size: 2rem; margin-bottom: 8px; }
+    .loading{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    footer{text-align:center;padding:2rem 1rem;color:var(--text-dim);font-size:.72rem;border-top:1px solid var(--border);margin-top:2rem}
+    @media(max-width:640px){.row{grid-template-columns:1fr}nav{flex-wrap:wrap}nav button{flex:none;width:25%}}
   </style>
 </head>
 <body>
-  <header>
-    <div class="logo">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round">
-        <path d="M12 2C12 2 8 6 8 10a4 4 0 0 0 8 0c0-4-4-8-4-8z" stroke="#7C6AFF"/>
-        <path d="M8 14v6a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2v-6" stroke="#A78BFA"/>
-        <line x1="10" y1="18" x2="14" y2="18" stroke="#5B4DC7"/>
-        <line x1="10" y1="21" x2="14" y2="21" stroke="#5B4DC7"/>
-      </svg>
-      <span>Lab</span>Mind
-    </div>
-    <div class="status"><div class="status-dot" id="statusDot"></div><span id="statusText">Disconnected</span></div>
-  </header>
-
-  <div class="tabs">
-    <button class="tab active" data-tab="literature">Literature</button>
-    <button class="tab" data-tab="experiments">Experiments</button>
-    <button class="tab" data-tab="statistics">Statistics</button>
-    <button class="tab" data-tab="paper">Paper Draft</button>
-  </div>
-
-  <div id="globalError" class="error-banner" style="max-width:1100px;margin:16px auto 0">
-    Server offline. Start with: <code>uvicorn server.app:app --port 8000</code>
-  </div>
-
-  <!-- LITERATURE -->
-  <div class="panel active" id="panel-literature">
-    <div class="grid-2">
-      <div>
-        <div class="card" style="margin-bottom:16px">
-          <h3>Search Literature</h3>
-          <div class="search-bar">
-            <input type="text" id="litQuery" placeholder="e.g. CRISPR off-target effects in vivo">
-            <button class="btn" id="litSearchBtn" onclick="searchLiterature()">Search</button>
-          </div>
-          <div id="litResults">
-            <div class="empty-state"><div class="icon">&#128270;</div>Enter a query to search the literature corpus</div>
-          </div>
-        </div>
-        <div class="card">
-          <h3>My Collection</h3>
-          <div id="collectionChips" class="collection-chips">
-            <span style="color:var(--dim);font-size:.8rem">No papers collected yet</span>
-          </div>
-          <button class="btn" id="synthBtn" onclick="synthesizePapers()" disabled>Synthesize Collection</button>
-        </div>
-      </div>
-      <div>
-        <div class="card">
-          <h3>Synthesis</h3>
-          <div id="synthesisOutput" class="draft-output" style="min-height:300px">
-            <div class="empty-state"><div class="icon">&#128301;</div>Collect papers and click "Synthesize" to generate a thematic summary</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- EXPERIMENTS -->
-  <div class="panel" id="panel-experiments">
-    <div class="grid-2">
-      <div class="card">
-        <h3>Design Experiment</h3>
-        <label>Research Question</label>
-        <textarea id="expQuestion" rows="2" placeholder="e.g. Does compound X reduce tumor growth in mouse models?"></textarea>
-        <label>Independent Variables (comma-separated)</label>
-        <input type="text" id="expIV" placeholder="e.g. compound_X_dose, treatment_duration">
-        <label>Dependent Variables (comma-separated)</label>
-        <input type="text" id="expDV" placeholder="e.g. tumor_volume, survival_rate">
-        <label>Hypothesis</label>
-        <textarea id="expHyp" rows="2" placeholder="e.g. Higher doses of compound X will reduce tumor volume"></textarea>
-        <button class="btn" id="expBtn" onclick="designExperiment()">Design Experiment</button>
-      </div>
-      <div>
-        <div class="card">
-          <h3>Experimental Protocol</h3>
-          <div id="expOutput">
-            <div class="empty-state"><div class="icon">&#129514;</div>Fill in your research parameters and click "Design Experiment"</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- STATISTICS -->
-  <div class="panel" id="panel-statistics">
-    <div class="grid-2">
-      <div class="card">
-        <h3>Describe Your Data</h3>
-        <label>Sample Size (per group)</label>
-        <input type="number" id="statN" value="30" min="2">
-        <label>Number of Groups</label>
-        <input type="number" id="statGroups" value="2" min="1">
-        <label>Data Type</label>
-        <div class="radio-group">
-          <label><input type="radio" name="dataType" value="continuous" checked> Continuous</label>
-          <label><input type="radio" name="dataType" value="categorical"> Categorical</label>
-          <label><input type="radio" name="dataType" value="ordinal"> Ordinal</label>
-        </div>
-        <label class="checkbox-label"><input type="checkbox" id="statPaired"> Paired / Repeated Measures</label>
-        <label>Research Question (optional)</label>
-        <textarea id="statQuestion" rows="2" placeholder="e.g. Is there a difference in reaction time between groups?"></textarea>
-        <button class="btn" id="statBtn" onclick="recommendTest()">Recommend Tests</button>
-      </div>
-      <div>
-        <div class="card">
-          <h3>Statistical Recommendation</h3>
-          <div id="statOutput">
-            <div class="empty-state"><div class="icon">&#128202;</div>Describe your data to get a statistical test recommendation</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- PAPER DRAFT -->
-  <div class="panel" id="panel-paper">
-    <div class="grid-2">
-      <div class="card">
-        <h3>Generate Section</h3>
-        <label>Section</label>
-        <div class="section-select" id="sectionBtns">
-          <button class="active" data-section="abstract">Abstract</button>
-          <button data-section="introduction">Introduction</button>
-          <button data-section="methods">Methods</button>
-          <button data-section="results">Results</button>
-          <button data-section="discussion">Discussion</button>
-        </div>
-        <label>Notes / Key Data</label>
-        <textarea id="paperNotes" rows="8" placeholder="Paste your findings, key data points, methodology notes, or any context for this section..."></textarea>
-        <label>Paper Topic</label>
-        <input type="text" id="paperTopic" placeholder="e.g. Effect of compound X on tumor growth">
-        <button class="btn" id="paperBtn" onclick="generateDraft()">Generate Draft</button>
-      </div>
-      <div>
-        <div class="card" style="position:relative">
-          <h3 id="draftSectionTitle">Draft — Abstract</h3>
-          <button class="btn btn-outline btn-sm btn-copy" onclick="copyDraft()" style="display:none" id="copyBtn">Copy</button>
-          <div id="paperOutput" class="draft-output">
-            <div class="empty-state"><div class="icon">&#128221;</div>Select a section, add your notes, and generate a draft</div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-
+<header>
+  <div class="logo">Lab<span>Mind</span></div>
+  <div class="conn"><div class="conn-dot" id="connDot"></div><span id="connLabel">Connecting…</span></div>
+</header>
+<div class="shell">
+  <nav id="nav"></nav>
+  <main id="main"></main>
+</div>
+<footer>&copy; 2026 Mint Rail LLC &middot; LabMind v1.0.0</footer>
 <script>
-const API = 'http://localhost:8000';
-let collection = [];
-let selectedSection = 'abstract';
+const API=localStorage.getItem('labmind_api')||'http://localhost:8000';
+const TABS=['Literature Search','Synthesis','Experiment Design','Hypothesis Generator','Stats Advisor','Paper Drafting','AI Research Assistant'];
+let activeTab=0,chatHistory=[];
 
-// --- Tabs ---
-document.querySelectorAll('.tab').forEach(t => {
-  t.addEventListener('click', () => {
-    document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-    document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
-    t.classList.add('active');
-    document.getElementById('panel-' + t.dataset.tab).classList.add('active');
-  });
-});
+const $=s=>document.querySelector(s);
+const ce=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h)e.innerHTML=h;return e};
 
-// --- Section selector ---
-document.querySelectorAll('#sectionBtns button').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('#sectionBtns button').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    selectedSection = b.dataset.section;
-    document.getElementById('draftSectionTitle').textContent = 'Draft — ' + capitalize(selectedSection);
-  });
-});
-
-// --- Connection ---
-async function checkConnection() {
-  try {
-    const r = await fetch(API + '/health', { signal: AbortSignal.timeout(2000) });
-    if (r.ok) { setStatus(true); return; }
-  } catch {}
-  setStatus(false);
+function initNav(){
+  const nav=$('#nav');
+  TABS.forEach((t,i)=>{const b=ce('button','',t);if(i===0)b.classList.add('active');b.onclick=()=>switchTab(i);nav.appendChild(b);});
 }
-function setStatus(ok) {
-  document.getElementById('statusDot').className = 'status-dot' + (ok ? ' ok' : '');
-  document.getElementById('statusText').textContent = ok ? 'Connected to localhost:8000' : 'Disconnected';
-  document.getElementById('globalError').classList.toggle('show', !ok);
-}
-checkConnection();
-setInterval(checkConnection, 10000);
+function switchTab(i){activeTab=i;document.querySelectorAll('nav button').forEach((b,j)=>b.classList.toggle('active',i===j));renderTab(i);}
+function renderTab(i){const m=$('#main');m.innerHTML='';const d=ce('div','tab active');[renderLitSearch,renderSynthesis,renderExperiment,renderHypothesis,renderStats,renderPaper,renderChat][i](d);m.appendChild(d);}
 
-async function apiPost(path, body) {
-  const r = await fetch(API + path, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body), signal: AbortSignal.timeout(30000)
-  });
-  if (!r.ok) throw new Error('API ' + r.status);
-  return r.json();
+function renderLitSearch(el){
+  el.innerHTML=`<div class="card"><h3>// Literature Index</h3>
+    <label>Add Documents to Index</label>
+    <textarea id="litDocs" rows="5" placeholder="Paste paper abstracts or text, one per paragraph…">CRISPR-Cas9 gene editing has revolutionized molecular biology, enabling precise genome modifications. Recent advances in base editing and prime editing have expanded the toolkit, allowing single-nucleotide changes without double-strand breaks.
+
+Machine learning approaches for protein structure prediction, exemplified by AlphaFold2, have achieved near-experimental accuracy. These methods leverage attention mechanisms and multiple sequence alignments to predict 3D protein conformations.
+
+The gut microbiome's influence on mental health through the gut-brain axis involves multiple pathways including vagus nerve signaling, immune modulation, and metabolite production. Psychobiotics represent an emerging therapeutic approach.</textarea>
+    <div class="actions"><button class="btn" onclick="addLitDocs()">Index Documents</button></div>
+    <div class="output" id="litAddOut"></div></div>
+    <div class="card"><h3>// Search Literature</h3>
+    <label>Search Query</label><input type="text" id="litQuery" placeholder="e.g. protein structure prediction methods" value="gene editing techniques">
+    <div class="row" style="margin-top:.3rem"><div><label>Results</label><input type="number" id="litK" value="5" min="1" max="20"></div><div></div></div>
+    <div class="actions"><button class="btn" onclick="searchLit()">Search</button></div>
+    <div id="litResults"></div></div>`;
 }
 
-// --- LITERATURE ---
-async function searchLiterature() {
-  const query = document.getElementById('litQuery').value.trim();
-  if (!query) return;
-  const btn = document.getElementById('litSearchBtn');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>';
+async function addLitDocs(){
+  const o=$('#litAddOut');o.textContent='Indexing documents…';
+  const texts=$('#litDocs').value.split('\n\n').map(s=>s.trim()).filter(s=>s.length>20);
+  if(!texts.length){o.textContent='Enter at least one document (paragraphs separated by blank lines).';return;}
+  try{const r=await fetch(API+'/v1/literature/add',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({texts})});const d=await r.json();o.textContent=`Indexed ${d.added} documents. Total in index: ${d.index_size}\nIDs: ${d.doc_ids.join(', ')}`;}
+  catch{o.textContent=`Demo: Would index ${texts.length} documents. Connect to API for real indexing.`;}
+}
 
-  try {
-    const data = await apiPost('/v1/literature/search', { query, k: 8 });
-    renderLitResults(data.results || data);
-  } catch {
-    renderLitResults(generateMockPapers(query));
+async function searchLit(){
+  const o=$('#litResults');o.innerHTML='<div class="loading" style="margin:.5rem"></div>';
+  try{const r=await fetch(API+'/v1/literature/search',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({query:$('#litQuery').value,k:+$('#litK').value})});const d=await r.json();
+    if(!d.results.length){o.innerHTML='<div class="output">No results found. Add documents to the index first.</div>';return;}
+    o.innerHTML=d.results.map(r=>`<div class="result-card"><div style="display:flex;justify-content:space-between"><h4>Document ${r.doc_id}</h4><span class="score">Score: ${r.score.toFixed(3)}</span></div><p>${r.text.substring(0,200)}${r.text.length>200?'…':''}</p></div>`).join('');
+  }catch{o.innerHTML=[{id:'DOC-001',score:.892,text:'CRISPR-Cas9 gene editing has revolutionized molecular biology…'},{id:'DOC-002',score:.745,text:'Machine learning approaches for protein structure prediction…'},{id:'DOC-003',score:.631,text:'The gut microbiome\'s influence on mental health…'}].map(r=>`<div class="result-card"><div style="display:flex;justify-content:space-between"><h4>${r.id}</h4><span class="score">Score: ${r.score.toFixed(3)}</span></div><p>${r.text}</p></div>`).join('');}
+}
+
+function renderSynthesis(el){
+  el.innerHTML=`<div class="card"><h3>// AI Literature Synthesis</h3>
+    <label>Research Topic</label><input type="text" id="synTopic" value="CRISPR gene editing therapeutic applications">
+    <label style="margin-top:.5rem">Paper Abstracts / Summaries (one per line)</label>
+    <textarea id="synPapers" rows="6" placeholder="Paste paper abstracts to synthesize…">CRISPR-Cas9 shows promise for treating sickle cell disease with 90% editing efficiency in hematopoietic stem cells
+Base editing enables correction of point mutations causing beta-thalassemia without inducing double-strand breaks
+In vivo CRISPR delivery using lipid nanoparticles achieved therapeutic editing levels in primate liver cells
+Clinical trial results for CRISPR-based treatment of transthyretin amyloidosis show sustained reduction in serum TTR levels</textarea>
+    <label style="margin-top:.3rem">Focus Area (optional)</label><input type="text" id="synFocus" placeholder="e.g. clinical translation challenges">
+    <div class="actions"><button class="btn" onclick="runSynthesis()">Synthesize with AI</button></div>
+    <div class="output" id="synOut"></div></div>`;
+}
+
+async function runSynthesis(){
+  const o=$('#synOut');o.textContent='Synthesizing literature…';
+  const papers=$('#synPapers').value.split('\n').map(s=>s.trim()).filter(Boolean);
+  try{const r=await fetch(API+'/v1/ai/synthesize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({topic:$('#synTopic').value,papers,focus:$('#synFocus').value})});const d=await r.json();o.textContent=d.synthesis||d.error||'No response';}
+  catch{o.textContent=`Demo Synthesis: ${$('#synTopic').value}\n${'━'.repeat(40)}\n\nThematic Summary:\nThe literature demonstrates converging evidence for CRISPR-based therapeutics across multiple disease models…\n\nConsensus:\n• High editing efficiency achievable in hematopoietic stem cells\n• Base editing offers safer alternative for point mutations\n\nGaps Identified:\n• Long-term safety data limited\n• Delivery optimization for in vivo applications\n\nConnect to API for full AI synthesis.`;}
+}
+
+function renderExperiment(el){
+  el.innerHTML=`<div class="card"><h3>// Experiment Design</h3>
+    <label>Research Question</label><textarea id="expRQ" rows="2">Does temperature affect the catalytic efficiency of enzyme X in breaking down substrate Y?</textarea>
+    <label style="margin-top:.5rem">Hypothesis</label><input type="text" id="expH" value="Higher temperatures (up to 45°C) will increase catalytic rate following Arrhenius kinetics">
+    <div class="row" style="margin-top:.5rem"><div><label>Independent Variables</label><textarea id="expIV" rows="2" placeholder="One per line">Temperature (25°C, 30°C, 35°C, 40°C, 45°C)</textarea></div>
+    <div><label>Dependent Variables</label><textarea id="expDV" rows="2" placeholder="One per line">Reaction rate (µmol/min)\nSubstrate conversion (%)</textarea></div></div>
+    <div class="row" style="margin-top:.3rem"><div><label>Expected Effect Size (Cohen's d)</label><input type="number" id="expES" value="0.5" step="0.1" min="0.1"></div>
+    <div><label>Significance Level (α)</label><select id="expAlpha"><option value="0.05" selected>0.05</option><option value="0.01">0.01</option><option value="0.001">0.001</option></select></div></div>
+    <div class="actions"><button class="btn" onclick="designExperiment()">Design Experiment</button><button class="btn btn-indigo" onclick="aiMethodology()">AI Methodology Review</button></div>
+    <div class="output" id="expOut"></div></div>`;
+}
+
+async function designExperiment(){
+  const o=$('#expOut');o.textContent='Designing experiment…';
+  const ivs=$('#expIV').value.split('\n').filter(Boolean),dvs=$('#expDV').value.split('\n').filter(Boolean);
+  try{const r=await fetch(API+'/v1/experiment/design',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({research_question:$('#expRQ').value,hypothesis:$('#expH').value,independent_vars:ivs,dependent_vars:dvs,expected_effect_size:+$('#expES').value,alpha:+$('#expAlpha').value,power:0.8})});const d=await r.json();o.textContent=JSON.stringify(d,null,2);}
+  catch{o.textContent='Connect to API for experiment design.';}
+}
+
+async function aiMethodology(){
+  const o=$('#expOut');o.textContent='AI is reviewing methodology…';
+  try{const r=await fetch(API+'/v1/ai/methodology',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({research_question:$('#expRQ').value,proposed_method:$('#expH').value,constraints:[]})});const d=await r.json();o.textContent=d.methodology||d.error||'No response';}
+  catch{o.textContent='Connect to API for AI methodology review.';}
+}
+
+function renderHypothesis(el){
+  el.innerHTML=`<div class="card"><h3>// Hypothesis Generator</h3>
+    <label>Observations (one per line)</label>
+    <textarea id="hypObs" rows="5" placeholder="Describe your observations…">Enzyme activity increases with temperature up to 40°C then sharply declines
+Adding substrate B at low concentrations enhances product yield but inhibits at high concentrations
+Cell viability decreases linearly with radiation dose above 2 Gy</textarea>
+    <div class="row" style="margin-top:.5rem"><div><label>Domain</label><select id="hypDomain"><option value="biochemistry">Biochemistry</option><option value="molecular_biology">Molecular Biology</option><option value="physics">Physics</option><option value="ecology">Ecology</option><option value="neuroscience">Neuroscience</option><option value="general">General</option></select></div>
+    <div><label>Max Hypotheses</label><input type="number" id="hypMax" value="3" min="1" max="10"></div></div>
+    <div class="actions"><button class="btn" onclick="genHypotheses()">Generate Hypotheses</button><button class="btn btn-indigo" onclick="aiHypothesis()">AI Refinement</button></div>
+    <div id="hypOut"></div></div>`;
+}
+
+async function genHypotheses(){
+  const o=$('#hypOut');o.innerHTML='<div class="loading" style="margin:.5rem"></div>';
+  const obs=$('#hypObs').value.split('\n').filter(Boolean);
+  if(!obs.length){o.innerHTML='<div class="output">Enter at least one observation.</div>';return;}
+  try{const r=await fetch(API+'/v1/hypothesis/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({observations:obs,domain:$('#hypDomain').value,max_hypotheses:+$('#hypMax').value})});const d=await r.json();
+    o.innerHTML=d.hypotheses.map(h=>`<div class="section-block"><h4>H${h.id}: ${h.type.toUpperCase()}</h4><p style="color:var(--green)">${h.alternative_hypothesis}</p><p style="color:var(--amber);font-size:.78rem;margin-top:.2rem">${h.null_hypothesis}</p><p style="margin-top:.3rem">Design: ${h.suggested_design}</p></div>`).join('');
+  }catch{o.innerHTML='<div class="output">Connect to API for hypothesis generation.</div>';}
+}
+
+async function aiHypothesis(){
+  const o=$('#hypOut');o.innerHTML='<div class="loading" style="margin:.5rem"></div>';
+  const obs=$('#hypObs').value.split('\n').filter(Boolean);
+  try{const r=await fetch(API+'/v1/ai/hypothesis',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({observations:obs,domain:$('#hypDomain').value,existing_theories:[]})});const d=await r.json();o.innerHTML=`<div class="output">${d.hypotheses||d.error||'No response'}</div>`;}
+  catch{o.innerHTML='<div class="output">Connect to API for AI hypothesis refinement.</div>';}
+}
+
+function renderStats(el){
+  el.innerHTML=`<div class="card"><h3>// Statistical Advisor</h3>
+    <label>Research Question</label><textarea id="statRQ" rows="2">Is there a significant difference in enzyme activity between the treatment and control groups?</textarea>
+    <label style="margin-top:.5rem">Data Description</label><textarea id="statDesc" rows="2" placeholder="Describe your data…">Continuous measurements of enzyme activity (U/mg) in two independent groups, n=30 per group, approximately normally distributed</textarea>
+    <div class="row" style="margin-top:.5rem"><div><label>Sample Size</label><input type="number" id="statN" value="60" min="2"></div>
+    <div><label>Number of Groups</label><input type="number" id="statGroups" value="2" min="1"></div></div>
+    <div class="row" style="margin-top:.3rem"><div><label>Data Type</label><select id="statType"><option value="continuous" selected>Continuous</option><option value="categorical">Categorical</option><option value="ordinal">Ordinal</option><option value="mixed">Mixed</option></select></div>
+    <div><label>Paired Data?</label><select id="statPaired"><option value="false" selected>No (Independent)</option><option value="true">Yes (Paired/Repeated)</option></select></div></div>
+    <label style="margin-top:.5rem">Variables (comma-separated)</label><input type="text" id="statVars" value="enzyme_activity, treatment_group, temperature">
+    <div class="actions"><button class="btn" onclick="getStatsPlan()">Get Stats Plan</button><button class="btn btn-indigo" onclick="aiStatsAdvice()">AI Deep Analysis</button></div>
+    <div id="statOut"></div></div>`;
+}
+
+async function getStatsPlan(){
+  const o=$('#statOut');o.innerHTML='<div class="loading" style="margin:.5rem"></div>';
+  try{const r=await fetch(API+'/v1/stats/plan',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({sample_size:+$('#statN').value,groups:+$('#statGroups').value,data_type:$('#statType').value,paired:$('#statPaired').value==='true'})});const d=await r.json();
+    o.innerHTML=(d.recommended_tests||[]).map(t=>`<div class="stat-card"><h4>${t.test}</h4><div class="desc">${t.description||''}</div><div class="when">When: ${t.when||'Based on your data characteristics'}</div></div>`).join('')+`<div class="output">${JSON.stringify(d,null,2)}</div>`;
+  }catch{o.innerHTML=[{test:'Independent t-test',desc:'Compare means of two independent groups',when:'Normal data, equal variance, 2 groups'},{test:'Mann-Whitney U',desc:'Non-parametric alternative if normality violated',when:'Non-normal data, ordinal or continuous'},{test:"Welch's t-test",desc:'Does not assume equal variances',when:'Unequal variance between groups'}].map(t=>`<div class="stat-card"><h4>${t.test}</h4><div class="desc">${t.desc}</div><div class="when">When: ${t.when}</div></div>`).join('');}
+}
+
+async function aiStatsAdvice(){
+  const o=$('#statOut');o.innerHTML='<div class="loading" style="margin:.5rem"></div>';
+  const vars=$('#statVars').value.split(',').map(s=>s.trim()).filter(Boolean);
+  try{const r=await fetch(API+'/v1/ai/stats-advisor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({research_question:$('#statRQ').value,data_description:$('#statDesc').value,sample_size:+$('#statN').value,variables:vars,data_type:$('#statType').value})});const d=await r.json();o.innerHTML=`<div class="output">${d.stats_advice||d.error||'No response'}</div>`;}
+  catch{o.innerHTML='<div class="output">Connect to API for AI stats advice.</div>';}
+}
+
+function renderPaper(el){
+  el.innerHTML=`<div class="card"><h3>// Paper Drafting</h3>
+    <label>Paper Title</label><input type="text" id="papTitle" value="Temperature-Dependent Catalytic Efficiency of Enzyme X: A Kinetic Analysis">
+    <div class="row" style="margin-top:.5rem"><div><label>Section to Draft</label><select id="papSection"><option value="introduction">Introduction</option><option value="methods">Methods</option><option value="results">Results</option><option value="discussion">Discussion</option></select></div>
+    <div><label>Draft Method</label><select id="papMethod"><option value="ai">AI Draft</option><option value="template">Template</option></select></div></div>
+    <label style="margin-top:.5rem">Key Points (one per line)</label>
+    <textarea id="papPoints" rows="5">Enzyme X shows optimal activity at 40°C
+Arrhenius plot reveals two distinct activation energy regimes
+Thermal denaturation begins above 45°C as confirmed by CD spectroscopy
+Km values decrease with temperature suggesting improved substrate binding
+Results support a two-state model of thermal enzyme regulation</textarea>
+    <label style="margin-top:.3rem">Additional Context</label><input type="text" id="papCtx" placeholder="e.g. target journal, related work…">
+    <div class="actions"><button class="btn" onclick="draftPaper()">Draft Section</button></div>
+    <div class="output" id="papOut"></div></div>`;
+}
+
+async function draftPaper(){
+  const o=$('#papOut');o.textContent='Drafting section…';
+  const points=$('#papPoints').value.split('\n').filter(Boolean);
+  const method=$('#papMethod').value;
+  if(method==='ai'){
+    try{const r=await fetch(API+'/v1/ai/paper-draft',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:$('#papTitle').value,section:$('#papSection').value,key_points:points,context:$('#papCtx').value})});const d=await r.json();o.textContent=d.draft||d.error||'No response';}
+    catch{o.textContent='Connect to API for AI paper drafting.';}
+  }else{
+    try{const r=await fetch(API+'/v1/paper/draft',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({title:$('#papTitle').value,authors:['Author'],abstract_summary:'Investigation of temperature-dependent enzyme kinetics',sections:[$('#papSection').value],key_findings:points})});const d=await r.json();
+      const sec=d.sections[0];o.textContent=`${sec.heading}\n${'━'.repeat(40)}\n\n${sec.template}\n\nGuidance: ${sec.guidance}`;
+    }catch{o.textContent='Connect to API for template generation.';}
   }
-  btn.disabled = false; btn.textContent = 'Search';
 }
 
-function generateMockPapers(query) {
-  const words = query.split(/\s+/);
-  const titles = [
-    'A Systematic Review of ' + capitalize(words.slice(0, 3).join(' ')),
-    'Novel Approaches to ' + capitalize(words.slice(0, 2).join(' ')) + ' Analysis',
-    'Quantitative Assessment of ' + capitalize(words[0]) + ' in Clinical Settings',
-    capitalize(words.slice(0, 2).join(' ')) + ': Mechanisms and Therapeutic Implications',
-    'Machine Learning Applications in ' + capitalize(words[0]) + ' Research',
-    'Comparative Study of ' + capitalize(words.slice(0, 2).join(' ')) + ' Methods'
-  ];
-  return titles.map((title, i) => ({
-    id: 'paper_' + Date.now() + '_' + i,
-    title,
-    snippet: 'This study examines ' + query.toLowerCase() + ' using advanced methodological frameworks. Results indicate significant findings relevant to current research directions in the field.',
-    relevance_score: (0.95 - i * 0.08).toFixed(2),
-    year: 2024 - Math.floor(Math.random() * 4),
-    authors: ['Smith et al.', 'Johnson & Lee', 'Chen, Wang et al.', 'Garcia-Lopez et al.', 'Nakamura et al.', 'Patel & Kumar'][i]
-  }));
+function renderChat(el){
+  el.innerHTML=`<div class="card"><h3>// AI Research Assistant</h3><p style="font-size:.8rem;color:var(--text-dim);margin-bottom:.75rem">Ask about experimental design, statistical methods, literature interpretation, or any research question.</p>
+    <div class="chat-box"><div class="chat-messages" id="chatMsgs"><div class="msg system">Hello, researcher! I'm your AI assistant with expertise across biology, chemistry, physics, and data science. How can I help with your research today?</div></div>
+    <div class="chat-input"><input type="text" id="chatIn" placeholder="Ask a research question…" onkeydown="if(event.key==='Enter')sendChat()"><button class="btn btn-sm" onclick="sendChat()">Send</button></div></div></div>`;
+  chatHistory.forEach(m=>{const d=ce('div','msg '+(m.role==='user'?'user':'ai'),m.text);$('#chatMsgs').appendChild(d);});
 }
 
-function renderLitResults(papers) {
-  const el = document.getElementById('litResults');
-  if (!papers.length) { el.innerHTML = '<div class="empty-state">No results found</div>'; return; }
-  el.innerHTML = papers.map(p =>
-    '<div class="result-card">'
-    + '<div style="display:flex;justify-content:space-between;align-items:start">'
-    + '<h4>' + esc(p.title) + '</h4>'
-    + '<span class="score">' + p.relevance_score + '</span>'
-    + '</div>'
-    + '<p>' + esc(p.snippet) + '</p>'
-    + '<div class="meta"><span>' + (p.authors || 'Unknown') + '</span><span>' + (p.year || '') + '</span>'
-    + '<button class="btn btn-outline btn-sm" onclick="addToCollection(\'' + esc(p.id) + '\',\'' + esc(p.title.replace(/'/g, '')) + '\')">+ Collect</button>'
-    + '</div></div>'
-  ).join('');
+async function sendChat(){
+  const inp=$('#chatIn'),txt=inp.value.trim();if(!txt)return;inp.value='';
+  chatHistory.push({role:'user',text:txt});
+  const msgs=$('#chatMsgs');msgs.appendChild(ce('div','msg user',txt));
+  const thinking=ce('div','msg ai','<div class="loading"></div> Analyzing…');msgs.appendChild(thinking);msgs.scrollTop=msgs.scrollHeight;
+  try{
+    const r=await fetch(API+'/v1/ai/stats-advisor',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({research_question:txt,data_description:'',sample_size:0,variables:[],data_type:'continuous'})});
+    const d=await r.json();const reply=d.stats_advice||d.error||'No response';
+    thinking.innerHTML=reply.replace(/\n/g,'<br>');chatHistory.push({role:'ai',text:reply});
+  }catch{thinking.innerHTML='I\'m currently offline. Please ensure the LabMind server is running.';chatHistory.push({role:'ai',text:'Offline'});}
+  msgs.scrollTop=msgs.scrollHeight;
 }
 
-function addToCollection(id, title) {
-  if (collection.find(c => c.id === id)) return;
-  collection.push({ id, title: title.substring(0, 50) });
-  renderCollection();
+async function checkHealth(){
+  try{const r=await fetch(API+'/health');if(r.ok){$('#connDot').classList.add('ok');$('#connLabel').textContent='Connected';return;}}catch{}
+  $('#connDot').classList.remove('ok');$('#connLabel').textContent='Offline';
 }
 
-function removeFromCollection(id) {
-  collection = collection.filter(c => c.id !== id);
-  renderCollection();
-}
-
-function renderCollection() {
-  const el = document.getElementById('collectionChips');
-  document.getElementById('synthBtn').disabled = collection.length === 0;
-  if (!collection.length) { el.innerHTML = '<span style="color:var(--dim);font-size:.8rem">No papers collected yet</span>'; return; }
-  el.innerHTML = collection.map(c =>
-    '<span class="chip">' + esc(c.title) + '<button onclick="removeFromCollection(\'' + c.id + '\')">&times;</button></span>'
-  ).join('');
-}
-
-async function synthesizePapers() {
-  if (!collection.length) return;
-  const btn = document.getElementById('synthBtn');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Synthesizing...';
-  const out = document.getElementById('synthesisOutput');
-
-  try {
-    const data = await apiPost('/v1/literature/synthesize', { paper_ids: collection.map(c => c.id) });
-    out.textContent = data.synthesis || data.text || JSON.stringify(data, null, 2);
-  } catch {
-    out.textContent = generateMockSynthesis();
-  }
-  btn.disabled = false; btn.textContent = 'Synthesize Collection';
-}
-
-function generateMockSynthesis() {
-  const titles = collection.map(c => c.title);
-  return 'THEMATIC SYNTHESIS\n'
-    + '═══════════════════\n\n'
-    + 'Based on analysis of ' + titles.length + ' collected papers:\n\n'
-    + '1. CONSENSUS FINDINGS\n'
-    + '   The reviewed literature consistently demonstrates significant\n'
-    + '   advances in the target domain. Multiple studies confirm\n'
-    + '   reproducible results across varied experimental conditions.\n\n'
-    + '2. KEY THEMES\n'
-    + '   • Methodological convergence toward quantitative approaches\n'
-    + '   • Increasing use of computational models for prediction\n'
-    + '   • Cross-disciplinary integration enhancing discovery rates\n\n'
-    + '3. RESEARCH GAPS\n'
-    + '   • Limited longitudinal data across populations\n'
-    + '   • Standardization of measurement protocols needed\n'
-    + '   • Translation from bench to clinical application remains slow\n\n'
-    + '4. RECOMMENDED DIRECTIONS\n'
-    + '   Future work should prioritize multi-center validation studies\n'
-    + '   and open data sharing to accelerate progress.\n\n'
-    + 'Papers analyzed: ' + titles.join('; ');
-}
-
-// --- EXPERIMENTS ---
-async function designExperiment() {
-  const question = document.getElementById('expQuestion').value.trim();
-  const iv = document.getElementById('expIV').value.trim();
-  const dv = document.getElementById('expDV').value.trim();
-  const hyp = document.getElementById('expHyp').value.trim();
-  if (!question) return;
-
-  const btn = document.getElementById('expBtn');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Designing...';
-
-  const payload = {
-    research_question: question,
-    independent_vars: iv.split(',').map(s => s.trim()).filter(Boolean),
-    dependent_vars: dv.split(',').map(s => s.trim()).filter(Boolean),
-    hypothesis: hyp
-  };
-
-  try {
-    const data = await apiPost('/v1/experiment/design', payload);
-    renderProtocol(data);
-  } catch {
-    renderProtocol(generateMockProtocol(payload));
-  }
-  btn.disabled = false; btn.textContent = 'Design Experiment';
-}
-
-function generateMockProtocol(p) {
-  const nGroups = Math.max(2, p.independent_vars.length + 1);
-  return {
-    design_type: p.independent_vars.length > 1 ? 'Factorial Design' : 'Randomized Controlled Trial',
-    sample_size: { per_group: 25, total: 25 * nGroups, power: 0.80, alpha: 0.05, effect_size: 0.5 },
-    groups: ['Control (placebo/vehicle)'].concat(p.independent_vars.map((v, i) => 'Treatment ' + (i + 1) + ' (' + v + ')')),
-    methodology: [
-      'Screen participants against inclusion/exclusion criteria',
-      'Randomize into ' + nGroups + ' groups using block randomization',
-      'Administer treatments per protocol schedule',
-      'Measure ' + (p.dependent_vars.join(', ') || 'dependent variables') + ' at baseline, midpoint, and endpoint',
-      'Perform intent-to-treat analysis with appropriate statistical tests',
-      'Report results following CONSORT or ARRIVE guidelines'
-    ],
-    controls: ['Placebo/vehicle control', 'Blinding (double-blind where possible)', 'Randomization with allocation concealment', 'Standardized measurement protocols'],
-    confounds: ['Selection bias — mitigated by randomization', 'Measurement bias — mitigated by blinding', 'Attrition — plan for ≥15% dropout rate', 'Batch effects — counterbalance timing across groups']
-  };
-}
-
-function renderProtocol(d) {
-  const el = document.getElementById('expOutput');
-  el.innerHTML =
-    '<div class="protocol-block"><h4>Design Type</h4><p><span class="badge">' + esc(d.design_type) + '</span></p></div>'
-    + '<div class="protocol-block"><h4>Sample Size</h4><p>'
-    + (d.sample_size ? d.sample_size.total + ' total (' + d.sample_size.per_group + ' per group) · Power: ' + d.sample_size.power + ' · α: ' + d.sample_size.alpha + ' · Effect size: ' + d.sample_size.effect_size : 'See API response')
-    + '</p></div>'
-    + '<div class="protocol-block"><h4>Groups</h4><ul>' + (d.groups || []).map(g => '<li>' + esc(g) + '</li>').join('') + '</ul></div>'
-    + '<div class="protocol-block"><h4>Methodology</h4><ol style="padding-left:18px">' + (d.methodology || []).map(s => '<li style="margin-bottom:6px">' + esc(s) + '</li>').join('') + '</ol></div>'
-    + '<div class="protocol-block"><h4>Controls</h4><ul>' + (d.controls || []).map(c => '<li>' + esc(c) + '</li>').join('') + '</ul></div>'
-    + '<div class="protocol-block"><h4>Potential Confounds</h4><ul>' + (d.confounds || []).map(c => '<li>' + esc(c) + '</li>').join('') + '</ul></div>';
-}
-
-// --- STATISTICS ---
-async function recommendTest() {
-  const n = +document.getElementById('statN').value;
-  const groups = +document.getElementById('statGroups').value;
-  const dataType = document.querySelector('input[name="dataType"]:checked').value;
-  const paired = document.getElementById('statPaired').checked;
-  const question = document.getElementById('statQuestion').value.trim();
-
-  const btn = document.getElementById('statBtn');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Analyzing...';
-
-  const payload = { sample_size: n, num_groups: groups, data_type: dataType, paired, research_question: question };
-
-  try {
-    const data = await apiPost('/v1/stats/plan', payload);
-    renderStatResult(data);
-  } catch {
-    renderStatResult(generateMockStat(payload));
-  }
-  btn.disabled = false; btn.textContent = 'Recommend Tests';
-}
-
-function generateMockStat(p) {
-  let test, rationale, assumptions, effectBenchmarks;
-
-  if (p.data_type === 'categorical') {
-    test = p.num_groups <= 2 ? "Chi-Square Test of Independence" : "Fisher's Exact Test / Chi-Square";
-    rationale = 'Categorical data with ' + p.num_groups + ' groups requires a test of association between categorical variables.';
-    assumptions = ['Expected cell frequencies ≥ 5 for Chi-Square', 'Independent observations', 'Mutually exclusive categories'];
-    effectBenchmarks = { small: 'Cramér\'s V = 0.10', medium: 'Cramér\'s V = 0.30', large: 'Cramér\'s V = 0.50' };
-  } else if (p.data_type === 'ordinal') {
-    test = p.num_groups === 2 ? (p.paired ? 'Wilcoxon Signed-Rank Test' : 'Mann-Whitney U Test') : (p.paired ? 'Friedman Test' : 'Kruskal-Wallis H Test');
-    rationale = 'Ordinal data does not meet normality assumptions; non-parametric tests are appropriate.';
-    assumptions = ['Independent observations (between groups)', 'Similar distribution shapes across groups', 'Ordinal or continuous measurement scale'];
-    effectBenchmarks = { small: 'r = 0.10', medium: 'r = 0.30', large: 'r = 0.50' };
-  } else {
-    if (p.num_groups === 1) {
-      test = 'One-Sample t-Test';
-      rationale = 'Single group continuous data compared against a known or hypothesized population value.';
-    } else if (p.num_groups === 2) {
-      test = p.paired ? 'Paired-Samples t-Test' : 'Independent-Samples t-Test';
-      rationale = p.paired ? 'Two related measurements on the same subjects require a paired comparison.' : 'Two independent groups with continuous outcome measured.';
-    } else {
-      test = p.paired ? 'Repeated-Measures ANOVA' : 'One-Way ANOVA';
-      rationale = p.num_groups + ' groups with continuous data. Post-hoc tests (Tukey HSD) recommended if significant.';
-    }
-    assumptions = ['Normal distribution within groups (check with Shapiro-Wilk)', 'Homogeneity of variances (check with Levene\'s test)', 'Independent observations', 'Continuous dependent variable'];
-    effectBenchmarks = { small: 'Cohen\'s d = 0.20', medium: 'Cohen\'s d = 0.50', large: 'Cohen\'s d = 0.80' };
-  }
-
-  const minN = Math.ceil(p.data_type === 'categorical' ? 5 * p.num_groups : (p.paired ? 20 : 25));
-  const adequate = p.sample_size >= minN;
-
-  return { recommended_test: test, rationale, assumptions, effect_size_benchmarks: effectBenchmarks, sample_adequate: adequate, minimum_recommended_n: minN };
-}
-
-function renderStatResult(d) {
-  const el = document.getElementById('statOutput');
-  el.innerHTML =
-    '<div class="protocol-block"><h4>Recommended Test</h4><p style="font-size:1.1rem;color:var(--white);font-weight:600">' + esc(d.recommended_test) + '</p></div>'
-    + '<div class="protocol-block"><h4>Rationale</h4><p>' + esc(d.rationale) + '</p></div>'
-    + '<div class="protocol-block"><h4>Assumptions to Check</h4><ul>' + (d.assumptions || []).map(a => '<li>' + esc(a) + '</li>').join('') + '</ul></div>'
-    + '<div class="protocol-block"><h4>Effect Size Benchmarks</h4><ul>'
-    + (d.effect_size_benchmarks ? Object.entries(d.effect_size_benchmarks).map(([k, v]) => '<li><strong>' + capitalize(k) + ':</strong> ' + esc(v) + '</li>').join('') : '')
-    + '</ul></div>'
-    + '<div class="protocol-block"><h4>Sample Size Assessment</h4><p>'
-    + (d.sample_adequate ? '<span style="color:var(--green)">✓ Sample size adequate</span>' : '<span style="color:var(--red)">⚠ Consider increasing sample size</span>')
-    + ' (minimum recommended: n = ' + d.minimum_recommended_n + ' per group)</p></div>';
-}
-
-// --- PAPER DRAFT ---
-async function generateDraft() {
-  const notes = document.getElementById('paperNotes').value.trim();
-  const topic = document.getElementById('paperTopic').value.trim();
-  if (!notes && !topic) return;
-
-  const btn = document.getElementById('paperBtn');
-  btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Generating...';
-
-  try {
-    const data = await apiPost('/v1/paper/draft', { section: selectedSection, notes, topic });
-    showDraft(data.text || data.draft || JSON.stringify(data, null, 2));
-  } catch {
-    showDraft(generateMockDraft(selectedSection, topic || 'the research topic', notes));
-  }
-  btn.disabled = false; btn.textContent = 'Generate Draft';
-}
-
-function generateMockDraft(section, topic, notes) {
-  const drafts = {
-    abstract: 'Background: ' + capitalize(topic) + ' represents a critical area of investigation with significant implications for the field. '
-      + 'This study aimed to investigate key aspects of ' + topic + ' through rigorous experimental methodology.\n\n'
-      + 'Methods: We employed a multi-phase approach combining quantitative analysis with systematic evaluation protocols. '
-      + 'Data were collected from carefully controlled experimental conditions and analyzed using appropriate statistical frameworks.\n\n'
-      + 'Results: Our findings demonstrate statistically significant outcomes (p < 0.05) across primary endpoints. '
-      + 'Effect sizes were consistent with medium-to-large practical significance.\n\n'
-      + 'Conclusion: These results provide compelling evidence supporting the primary hypothesis and suggest important '
-      + 'directions for future research in ' + topic + '.',
-
-    introduction: 'The study of ' + topic + ' has garnered increasing attention in recent years, driven by both '
-      + 'theoretical advances and practical applications [1]. Despite significant progress, several fundamental '
-      + 'questions remain unresolved.\n\n'
-      + 'Previous research has established key frameworks for understanding ' + topic + ' [2,3]. However, '
-      + 'methodological limitations in earlier studies have constrained the generalizability of findings.\n\n'
-      + 'This paper addresses these gaps by presenting a comprehensive investigation of ' + topic + '. '
-      + 'We hypothesize that our approach will yield novel insights with both theoretical and practical implications.\n\n'
-      + 'The remainder of this paper is organized as follows: Section 2 describes our methodology, Section 3 '
-      + 'presents results, and Section 4 discusses implications and future directions.',
-
-    methods: 'Study Design\n'
-      + 'We conducted a ' + (notes.includes('random') ? 'randomized controlled' : 'prospective observational') + ' study '
-      + 'to investigate ' + topic + '. The protocol was designed to minimize bias and maximize internal validity.\n\n'
-      + 'Participants\n'
-      + 'Participants were recruited based on predefined inclusion criteria. Sample size was determined via '
-      + 'a priori power analysis (α = 0.05, power = 0.80, expected effect size d = 0.5).\n\n'
-      + 'Procedure\n'
-      + 'Data collection followed standardized protocols. All measurements were taken by trained personnel '
-      + 'using calibrated instruments under controlled conditions.\n\n'
-      + 'Statistical Analysis\n'
-      + 'Data were analyzed using appropriate parametric and non-parametric tests as dictated by distributional '
-      + 'characteristics. All analyses were conducted at the α = 0.05 significance level.',
-
-    results: 'Descriptive Statistics\n'
-      + 'A total of N participants completed the study protocol. Baseline characteristics were balanced '
-      + 'across groups (Table 1).\n\n'
-      + 'Primary Outcome\n'
-      + 'Analysis of the primary endpoint revealed statistically significant differences between conditions '
-      + '(t(df) = X.XX, p < 0.05, Cohen\'s d = X.XX). The treatment group showed a meaningful improvement '
-      + 'compared to control.\n\n'
-      + 'Secondary Outcomes\n'
-      + 'Secondary analyses supported the primary findings. Subgroup analyses revealed consistent effects '
-      + 'across demographic categories.\n\n'
-      + '[Note: Replace placeholder values with your actual results. Include confidence intervals and effect sizes.]',
-
-    discussion: 'The present study examined ' + topic + ' and found significant support for our primary hypothesis. '
-      + 'These findings extend previous work by [specific contribution].\n\n'
-      + 'Our results are consistent with the theoretical framework proposed by [prior work], while providing '
-      + 'novel evidence for [specific mechanism or relationship].\n\n'
-      + 'Limitations\n'
-      + 'Several limitations should be noted. First, [limitation 1]. Second, [limitation 2]. These constraints '
-      + 'suggest caution in generalizing beyond the studied population.\n\n'
-      + 'Future Directions\n'
-      + 'Future research should explore [direction 1] and investigate whether [direction 2]. Longitudinal '
-      + 'studies would help establish causal relationships suggested by the current findings.\n\n'
-      + 'Conclusion\n'
-      + 'In summary, this study provides evidence that ' + topic + ' warrants continued investigation and '
-      + 'has practical implications for [applied domain].'
-  };
-  return drafts[section] || drafts.abstract;
-}
-
-function showDraft(text) {
-  document.getElementById('paperOutput').textContent = text;
-  document.getElementById('copyBtn').style.display = 'inline-flex';
-}
-
-function copyDraft() {
-  const text = document.getElementById('paperOutput').textContent;
-  navigator.clipboard.writeText(text).then(() => {
-    const btn = document.getElementById('copyBtn');
-    btn.textContent = 'Copied!';
-    setTimeout(() => { btn.textContent = 'Copy'; }, 1500);
-  });
-}
-
-// --- Helpers ---
-function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
-function capitalize(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+initNav();renderTab(0);checkHealth();setInterval(checkHealth,15000);
 </script>
 </body>
 </html>

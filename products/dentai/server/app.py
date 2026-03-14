@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import sys
+import os
 import shutil
 import tempfile
 import uuid
@@ -11,6 +13,9 @@ from typing import Optional
 from fastapi import FastAPI, File, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from products._shared.ai_engine import AIEngine
 
 from .coding import CodingRequest, CodingSuggestion, suggest_codes
 from .notes import NoteRequest, SOAPNote, generate_note
@@ -29,6 +34,16 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+ai = AIEngine(
+    default_system=(
+        "You are DentAI, a board-certified dental AI specialist. "
+        "Provide evidence-based treatment recommendations, accurate CDT coding "
+        "with rationale, comprehensive clinical notes, and risk assessments. "
+        "Reference ADA guidelines where applicable. "
+        "Note: AI-generated content should be reviewed by a licensed dentist."
+    )
 )
 
 
@@ -445,3 +460,127 @@ async def radiograph_upload(file: UploadFile = File(...)):
             "Manual review recommended pending model integration",
         ],
     )
+
+
+# ---------------------------------------------------------------------------
+# AI-Powered Endpoints
+# ---------------------------------------------------------------------------
+
+class AITreatmentPlanRequest(BaseModel):
+    symptoms: list[str] = Field(..., min_length=1)
+    findings: list[str] = Field(default_factory=list)
+    tooth_numbers: list[str] = Field(default_factory=list)
+    patient_age: int = 35
+    medical_history: str = ""
+
+class AIClinicalNotesRequest(BaseModel):
+    bullet_points: list[str] = Field(..., min_length=1)
+    visit_type: str = Field("routine", description="routine, emergency, follow_up, consultation")
+    provider_name: str = ""
+
+class AICodingRequest(BaseModel):
+    procedure_description: str = Field(..., min_length=5)
+    diagnosis: str = ""
+    tooth_numbers: list[str] = Field(default_factory=list)
+
+class AIRadiographRequest(BaseModel):
+    findings_description: str = Field(..., min_length=10)
+    radiograph_type: str = Field("periapical", description="periapical, panoramic, bitewing, cbct, cephalometric")
+
+class AIPatientEducationRequest(BaseModel):
+    treatment: str = Field(..., min_length=3)
+    patient_age: int = 35
+    language_level: str = Field("simple", description="simple, moderate, detailed")
+
+
+@app.post("/v1/ai/treatment-plan")
+async def ai_treatment_plan(req: AITreatmentPlanRequest):
+    prompt = (
+        f"Generate a comprehensive dental treatment plan.\n\n"
+        f"Symptoms: {', '.join(req.symptoms)}\n"
+        f"Clinical Findings: {', '.join(req.findings) if req.findings else 'Not specified'}\n"
+        f"Teeth Involved: {', '.join(req.tooth_numbers) if req.tooth_numbers else 'Not specified'}\n"
+        f"Patient Age: {req.patient_age}\n"
+        f"Medical History: {req.medical_history or 'Non-contributory'}\n\n"
+        "Provide: diagnosis, phased treatment plan with priorities, "
+        "prognosis, alternative options, estimated timeline, and any referral recommendations."
+    )
+    resp = await ai.complete(prompt, temperature=0.4)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"treatment_plan": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}
+
+
+@app.post("/v1/ai/clinical-notes")
+async def ai_clinical_notes(req: AIClinicalNotesRequest):
+    bullets = "\n".join(f"- {b}" for b in req.bullet_points)
+    prompt = (
+        f"Generate a professional SOAP clinical note from these bullet points:\n\n"
+        f"{bullets}\n\n"
+        f"Visit Type: {req.visit_type}\n"
+        f"Provider: {req.provider_name or 'Dr. [Provider]'}\n\n"
+        "Format as: Subjective, Objective, Assessment, Plan. "
+        "Use proper dental terminology and include relevant CDT codes where appropriate."
+    )
+    resp = await ai.complete(prompt, temperature=0.3)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"soap_note": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}
+
+
+@app.post("/v1/ai/coding-rationale")
+async def ai_coding_rationale(req: AICodingRequest):
+    prompt = (
+        f"Provide accurate CDT codes with insurance justification.\n\n"
+        f"Procedure: {req.procedure_description}\n"
+        f"Diagnosis: {req.diagnosis or 'Not specified'}\n"
+        f"Teeth: {', '.join(req.tooth_numbers) if req.tooth_numbers else 'Not specified'}\n\n"
+        "For each applicable CDT code, provide:\n"
+        "1. Code number and description\n"
+        "2. Medical necessity rationale for insurance\n"
+        "3. Supporting documentation requirements\n"
+        "4. Common denial reasons and how to address them"
+    )
+    resp = await ai.complete(prompt, temperature=0.3)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"coding_rationale": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}
+
+
+@app.post("/v1/ai/radiograph-analysis")
+async def ai_radiograph_analysis(req: AIRadiographRequest):
+    prompt = (
+        f"Analyze these dental radiograph findings and provide a structured interpretation.\n\n"
+        f"Radiograph Type: {req.radiograph_type}\n"
+        f"Findings Description: {req.findings_description}\n\n"
+        "Provide:\n"
+        "1. Systematic interpretation of findings\n"
+        "2. Differential diagnoses\n"
+        "3. Recommended additional imaging if needed\n"
+        "4. Clinical correlation suggestions\n"
+        "5. Follow-up recommendations"
+    )
+    resp = await ai.complete(prompt, temperature=0.4)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"analysis": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}
+
+
+@app.post("/v1/ai/patient-education")
+async def ai_patient_education(req: AIPatientEducationRequest):
+    prompt = (
+        f"Generate a patient-friendly explanation of the following dental treatment.\n\n"
+        f"Treatment: {req.treatment}\n"
+        f"Patient Age: {req.patient_age}\n"
+        f"Complexity Level: {req.language_level}\n\n"
+        "Include:\n"
+        "1. What the procedure involves in plain language\n"
+        "2. Why it's needed\n"
+        "3. What to expect during the procedure\n"
+        "4. Recovery and aftercare instructions\n"
+        "5. When to call the office"
+    )
+    resp = await ai.complete(prompt, temperature=0.6)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"education": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}

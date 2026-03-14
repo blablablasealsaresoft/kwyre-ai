@@ -1,0 +1,10 @@
+name = "nflonr"
+compatibility_date = "2026-03-13"
+pages_build_output_dir = "site"
+
+[site]
+bucket = "./site"
+
+[env.production]
+name = "nflonr-prod"
+route = "nflonr.mintrail.com/*"

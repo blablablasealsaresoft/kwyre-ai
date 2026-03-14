@@ -1,8 +1,14 @@
 from __future__ import annotations
 
+import sys
+import os
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from products._shared.ai_engine import AIEngine
 
 from .resume import ResumeAnalyzer
 from .interview import InterviewPrep
@@ -20,6 +26,15 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+ai = AIEngine(
+    default_system=(
+        "You are LaunchPad AI, a senior career strategist and executive recruiter. "
+        "Provide specific, actionable career advice including resume optimization with "
+        "measurable impact statements, tailored cover letters, behavioral interview "
+        "strategies with STAR examples, and data-driven salary negotiation tactics."
+    )
 )
 
 # ---------------------------------------------------------------------------
@@ -234,6 +249,146 @@ async def negotiate_salary(req: SalaryNegotiateRequest):
         "equity_notes": equity_notes,
         "confidence_level": "high" if req.years_experience >= 5 else "moderate",
     }
+
+
+# ---------------------------------------------------------------------------
+# AI-Powered Endpoints
+# ---------------------------------------------------------------------------
+
+class AIResumeRewriteRequest(BaseModel):
+    resume_text: str = Field(..., min_length=20)
+    target_role: str = Field(..., min_length=3)
+    target_company: str = ""
+
+class AICoverLetterRequest(BaseModel):
+    resume_text: str = Field(..., min_length=20)
+    job_description: str = Field(..., min_length=20)
+    company_name: str = ""
+    tone: str = Field("professional", description="professional, enthusiastic, conversational")
+
+class AIInterviewCoachRequest(BaseModel):
+    role: str = Field(..., min_length=3)
+    question: str = Field(..., min_length=5)
+    your_answer: str = ""
+    level: str = Field("mid", description="junior, mid, senior, staff")
+
+class AICareerAdviceRequest(BaseModel):
+    current_role: str = ""
+    skills: list[str] = Field(default_factory=list)
+    experience_years: int = 0
+    interests: list[str] = Field(default_factory=list)
+    goals: str = ""
+
+class AISalaryAnalysisRequest(BaseModel):
+    role: str = Field(..., min_length=3)
+    location: str = ""
+    experience_years: int = 0
+    current_salary: int = 0
+    offer_salary: int = 0
+    skills: list[str] = Field(default_factory=list)
+
+
+@app.post("/v1/ai/resume-rewrite")
+async def ai_resume_rewrite(req: AIResumeRewriteRequest):
+    prompt = (
+        f"Rewrite and optimize this resume for the target role.\n\n"
+        f"Target Role: {req.target_role}\n"
+        f"Target Company: {req.target_company or 'Not specified'}\n\n"
+        f"Current Resume:\n{req.resume_text}\n\n"
+        "Optimize for ATS, add measurable impact statements, use strong action verbs, "
+        "and tailor content to the target role. Return the full rewritten resume."
+    )
+    resp = await ai.complete(prompt, temperature=0.4)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"rewritten_resume": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}
+
+
+@app.post("/v1/ai/cover-letter")
+async def ai_cover_letter(req: AICoverLetterRequest):
+    prompt = (
+        f"Write a compelling, personalized cover letter.\n\n"
+        f"Company: {req.company_name or 'the hiring company'}\n"
+        f"Tone: {req.tone}\n\n"
+        f"Job Description:\n{req.job_description}\n\n"
+        f"Resume:\n{req.resume_text}\n\n"
+        "Connect specific resume achievements to job requirements. "
+        "Show genuine interest and cultural fit. Keep it under 400 words."
+    )
+    resp = await ai.complete(prompt, temperature=0.6)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"cover_letter": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}
+
+
+@app.post("/v1/ai/interview-coach")
+async def ai_interview_coach(req: AIInterviewCoachRequest):
+    prompt = (
+        f"Provide expert interview coaching.\n\n"
+        f"Role: {req.role} ({req.level} level)\n"
+        f"Interview Question: {req.question}\n"
+        f"Candidate's Answer: {req.your_answer or 'Not yet answered — provide a model answer'}\n\n"
+        "Provide:\n"
+        "1. Assessment of the answer (if provided) or a model STAR-format answer\n"
+        "2. Key points to hit\n"
+        "3. Common pitfalls to avoid\n"
+        "4. Follow-up questions the interviewer might ask\n"
+        "5. Tips for delivery and confidence"
+    )
+    resp = await ai.complete(prompt, temperature=0.5)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"coaching": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}
+
+
+@app.post("/v1/ai/career-advice")
+async def ai_career_advice(req: AICareerAdviceRequest):
+    prompt = (
+        f"Provide strategic career path recommendations.\n\n"
+        f"Current Role: {req.current_role or 'Not specified'}\n"
+        f"Skills: {', '.join(req.skills) if req.skills else 'Not specified'}\n"
+        f"Experience: {req.experience_years} years\n"
+        f"Interests: {', '.join(req.interests) if req.interests else 'Not specified'}\n"
+        f"Goals: {req.goals or 'Not specified'}\n\n"
+        "Provide:\n"
+        "1. Career path options (3-5 paths)\n"
+        "2. Skills gap analysis for each path\n"
+        "3. Recommended certifications or learning\n"
+        "4. Timeline estimates\n"
+        "5. Industry trends relevant to their background"
+    )
+    resp = await ai.complete(prompt, temperature=0.6)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"career_advice": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}
+
+
+@app.post("/v1/ai/salary-analysis")
+async def ai_salary_analysis(req: AISalaryAnalysisRequest):
+    salary_lines = [
+        f"Provide compensation analysis and negotiation strategy.\n",
+        f"Role: {req.role}",
+        f"Location: {req.location or 'Not specified'}",
+        f"Experience: {req.experience_years} years",
+        f"Skills: {', '.join(req.skills) if req.skills else 'Not specified'}",
+    ]
+    if req.current_salary:
+        salary_lines.append(f"Current Salary: ${req.current_salary:,}")
+    if req.offer_salary:
+        salary_lines.append(f"Offer: ${req.offer_salary:,}")
+    salary_lines.append(
+        "\nProvide:\n"
+        "1. Market salary range analysis\n"
+        "2. Negotiation script with talking points\n"
+        "3. Counter-offer strategy\n"
+        "4. Total compensation considerations\n"
+        "5. Walk-away analysis"
+    )
+    prompt = "\n".join(salary_lines)
+    resp = await ai.complete(prompt, temperature=0.5)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"salary_analysis": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}
 
 
 # ---------------------------------------------------------------------------

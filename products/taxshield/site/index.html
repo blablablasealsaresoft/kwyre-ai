@@ -3,113 +3,160 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>TaxShield — AI Tax Strategy</title>
+<title>TaxShield — AI-Powered Tax Strategy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
 :root{
-  --bg:#080c12;--bg2:#0d1420;--bg3:#111827;--surface:#151d2e;
-  --border:rgba(148,163,184,.1);--border-h:rgba(148,163,184,.2);
-  --green:#22c55e;--green-d:#16a34a;--green-glow:rgba(34,197,94,.12);
-  --red:#ef4444;--amber:#f59e0b;--white:#f1f5f9;--gray:#94a3b8;--gray-d:#64748b;
+  --bg:#0f1724;--bg2:#141e30;--bg3:#192438;--surface:#1c2940;--surface2:#223350;
+  --border:rgba(200,169,96,.12);--border-h:rgba(200,169,96,.25);
+  --gold:#c8a960;--gold-dim:rgba(200,169,96,.1);--gold-glow:rgba(200,169,96,.2);--gold-bright:#dfc07a;
+  --green:#22c55e;--green-glow:rgba(34,197,94,.1);
+  --red:#ef4444;--red-glow:rgba(239,68,68,.1);
+  --amber:#f59e0b;--amber-glow:rgba(245,158,11,.1);
+  --blue:#60a5fa;
+  --white:#f0ede6;--text:#d4cfc3;--text-dim:#7a7567;
+  --sans:'IBM Plex Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;
+  --mono:'JetBrains Mono',Consolas,'SF Mono',monospace;
 }
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--white);line-height:1.5;min-height:100vh}
-a{color:var(--green);text-decoration:none}
+body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
 
-/* Header */
-header{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2)}
-.logo{display:flex;align-items:center;gap:.5rem;font-size:1.2rem;font-weight:700}
+header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2)}
+.logo{display:flex;align-items:center;gap:.6rem;font-size:1.15rem;font-weight:700;color:var(--white);letter-spacing:-.01em}
 .logo svg{flex-shrink:0}
-.conn{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--gray-d)}
-.conn-dot{width:7px;height:7px;border-radius:50%;background:var(--red)}
+.logo span{color:var(--gold)}
+.header-right{display:flex;align-items:center;gap:1rem}
+.conn{display:flex;align-items:center;gap:.4rem;font-size:.75rem;color:var(--text-dim)}
+.conn-dot{width:7px;height:7px;border-radius:50%;background:var(--red);transition:background .3s}
 .conn-dot.ok{background:var(--green)}
+.version-badge{font-size:.65rem;padding:.15rem .45rem;border-radius:3px;background:var(--gold-dim);color:var(--gold);font-weight:600;font-family:var(--mono)}
 
-/* Tabs */
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg2);overflow-x:auto}
-.tab{padding:.7rem 1.2rem;font-size:.85rem;font-weight:600;color:var(--gray-d);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s}
-.tab:hover{color:var(--gray)}
-.tab.active{color:var(--green);border-bottom-color:var(--green)}
+.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg2);overflow-x:auto;scrollbar-width:none}
+.tabs::-webkit-scrollbar{display:none}
+.tab{padding:.65rem 1.1rem;font-size:.8rem;font-weight:600;color:var(--text-dim);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;white-space:nowrap;transition:all .15s;font-family:var(--sans)}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--gold);border-bottom-color:var(--gold);background:var(--gold-dim)}
 
-/* Layout */
 .panels{max-width:1100px;margin:0 auto;padding:1.5rem}
 .panel{display:none}
 .panel.active{display:block}
-.panel-title{font-size:1.3rem;font-weight:700;margin-bottom:.3rem}
-.panel-desc{color:var(--gray-d);font-size:.88rem;margin-bottom:1.5rem}
+.panel-title{font-size:1.2rem;font-weight:700;color:var(--white);margin-bottom:.25rem}
+.panel-desc{color:var(--text-dim);font-size:.85rem;margin-bottom:1.5rem}
 
-/* Forms */
-.form-row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
-.form-group{display:flex;flex-direction:column;gap:.3rem;flex:1;min-width:180px}
-.form-group label{font-size:.78rem;color:var(--gray);text-transform:uppercase;letter-spacing:.04em}
-input,select,textarea{padding:.55rem .8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--white);font-size:.9rem;outline:none;transition:border-color .15s}
-input:focus,select:focus,textarea:focus{border-color:var(--green)}
+label{display:block;font-size:.72rem;font-weight:600;color:var(--text-dim);text-transform:uppercase;letter-spacing:.06em;margin-bottom:.25rem}
+input[type="text"],input[type="number"],input[type="date"],select,textarea{width:100%;padding:.55rem .75rem;border-radius:5px;border:1px solid var(--border);background:var(--bg);color:var(--white);font-size:.88rem;font-family:var(--sans);outline:none;transition:border-color .15s}
+input[type="number"]{font-family:var(--mono)}
+input:focus,select:focus,textarea:focus{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold-glow)}
 select{cursor:pointer}
 option{background:var(--bg2)}
+textarea{resize:vertical;min-height:80px}
 
-.btn{padding:.55rem 1.3rem;border-radius:6px;border:none;font-weight:600;font-size:.88rem;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:.4rem}
-.btn-primary{background:var(--green);color:var(--bg)}
-.btn-primary:hover{background:var(--green-d)}
-.btn-primary:disabled{opacity:.5;cursor:not-allowed}
-.btn-sm{padding:.4rem .9rem;font-size:.8rem}
-.btn-danger{background:var(--red);color:#fff}
+.form-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1rem;margin-bottom:1rem}
+.form-group{display:flex;flex-direction:column;gap:.25rem}
+
+.btn{display:inline-flex;align-items:center;gap:.5rem;padding:.55rem 1.3rem;border-radius:5px;border:none;font-weight:600;font-size:.85rem;cursor:pointer;transition:all .15s;font-family:var(--sans)}
+.btn-gold{background:var(--gold);color:var(--bg)}
+.btn-gold:hover{background:var(--gold-bright);transform:translateY(-1px)}
+.btn-gold:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.btn-sm{padding:.35rem .8rem;font-size:.78rem}
+.btn-danger{background:var(--red);color:#fff;padding:.3rem .6rem;font-size:.75rem;border:none;border-radius:4px;cursor:pointer}
 .btn-danger:hover{opacity:.85}
+.btn .spinner{display:none;width:14px;height:14px;border:2px solid transparent;border-top-color:var(--bg);border-radius:50%;animation:spin .6s linear infinite}
+.btn.loading .spinner{display:block}
+.btn.loading .btn-text{display:none}
+@keyframes spin{to{transform:rotate(360deg)}}
 
-/* Tables */
-.tbl-wrap{overflow-x:auto;margin:1rem 0}
+.tbl-wrap{overflow-x:auto;margin:1rem 0;border:1px solid var(--border);border-radius:8px}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
-th{text-align:left;padding:.5rem .7rem;background:var(--bg2);color:var(--gray);font-weight:600;text-transform:uppercase;font-size:.72rem;letter-spacing:.04em;border-bottom:1px solid var(--border)}
-td{padding:.5rem .7rem;border-bottom:1px solid var(--border)}
-tr:hover td{background:rgba(255,255,255,.02)}
+th{text-align:left;padding:.55rem .75rem;background:var(--bg3);color:var(--text-dim);font-weight:600;text-transform:uppercase;font-size:.7rem;letter-spacing:.04em}
+td{padding:.55rem .75rem;border-top:1px solid var(--border)}
+tr:hover td{background:rgba(200,169,96,.03)}
 .text-right{text-align:right}
 .text-center{text-align:center}
+td.mono{font-family:var(--mono);font-weight:600}
 
-/* Cards */
-.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem}
-.card-title{font-size:.95rem;font-weight:700;margin-bottom:.6rem}
-.cards-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:1rem;margin:1rem 0}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:1rem;margin:1rem 0}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.1rem}
+.stat-label{font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem}
+.stat-val{font-size:1.7rem;font-weight:700;font-family:var(--mono);color:var(--gold)}
+.stat-detail{font-size:.78rem;color:var(--text-dim);margin-top:.2rem}
 
-/* Results */
-.results{margin-top:1.5rem}
-.result-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:1rem}
-.result-label{font-size:.72rem;color:var(--gray-d);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem}
-.result-value{font-size:1.6rem;font-weight:800;color:var(--green)}
-.result-detail{font-size:.82rem;color:var(--gray);margin-top:.2rem}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1.1rem;margin-bottom:1rem}
+.card-title{font-size:.92rem;font-weight:700;color:var(--white);margin-bottom:.5rem}
+.cards-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin:1rem 0}
 
-/* Gauge */
-.gauge-wrap{display:flex;flex-direction:column;align-items:center;margin:1.5rem 0}
-.gauge{position:relative;width:160px;height:80px;overflow:hidden}
-.gauge-bg,.gauge-fill{position:absolute;top:0;left:0;width:160px;height:160px;border-radius:50%;border:14px solid var(--border)}
-.gauge-bg{clip-path:polygon(0 0,100% 0,100% 50%,0 50%)}
-.gauge-fill{clip-path:polygon(0 0,100% 0,100% 50%,0 50%);border-color:var(--green);transform:rotate(var(--deg));transform-origin:center center;transition:transform .6s ease-out}
-.gauge-val{position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-size:1.8rem;font-weight:800}
-.gauge-label{font-size:.78rem;color:var(--gray-d);margin-top:.3rem}
+.result-box{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:1.1rem;margin-bottom:1rem}
 
-/* Tags */
-.tag{display:inline-block;padding:.2rem .6rem;border-radius:4px;font-size:.75rem;font-weight:600;margin:.15rem}
+.tag{display:inline-block;padding:.18rem .55rem;border-radius:4px;font-size:.72rem;font-weight:600;margin:.1rem}
+.tag-gold{background:var(--gold-dim);color:var(--gold)}
 .tag-green{background:var(--green-glow);color:var(--green)}
-.tag-amber{background:rgba(245,158,11,.12);color:var(--amber)}
-.tag-red{background:rgba(239,68,68,.12);color:var(--red)}
+.tag-amber{background:var(--amber-glow);color:var(--amber)}
+.tag-red{background:var(--red-glow);color:var(--red)}
+.tag-blue{background:rgba(96,165,250,.1);color:var(--blue)}
 
-/* Recommendation */
-.rec{padding:.8rem 1rem;border-left:3px solid var(--green);background:var(--green-glow);border-radius:0 6px 6px 0;margin:1rem 0;font-size:.88rem}
-.rec.warn{border-left-color:var(--amber);background:rgba(245,158,11,.08)}
+.rec{padding:.7rem 1rem;border-left:3px solid var(--gold);background:var(--gold-dim);border-radius:0 6px 6px 0;margin:.75rem 0;font-size:.85rem;line-height:1.6}
+.rec.warn{border-left-color:var(--amber);background:var(--amber-glow)}
+.rec.danger{border-left-color:var(--red);background:var(--red-glow)}
 
-/* Loading */
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--green);border-radius:50%;animation:spin .6s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-msg{display:flex;align-items:center;gap:.5rem;color:var(--gray);font-size:.88rem;margin:1rem 0}
+.gauge-wrap{display:flex;flex-direction:column;align-items:center;margin:1.5rem 0}
+.gauge{position:relative;width:180px;height:90px;overflow:hidden}
+.gauge-bg,.gauge-fill{position:absolute;top:0;left:0;width:180px;height:180px;border-radius:50%;border:16px solid var(--border)}
+.gauge-bg{clip-path:polygon(0 0,100% 0,100% 50%,0 50%)}
+.gauge-fill{clip-path:polygon(0 0,100% 0,100% 50%,0 50%);border-color:var(--gold);transform:rotate(var(--deg));transform-origin:center center;transition:transform .8s ease-out}
+.gauge-val{position:absolute;bottom:0;left:50%;transform:translateX(-50%);font-size:2rem;font-weight:800;font-family:var(--mono)}
+.gauge-label{font-size:.8rem;color:var(--text-dim);margin-top:.4rem;font-weight:600}
 
-/* Error */
-.error-box{padding:.8rem 1rem;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:6px;color:var(--red);font-size:.85rem;margin:1rem 0}
-.server-hint{margin-top:1.5rem;padding:1rem;background:var(--bg2);border:1px dashed var(--border-h);border-radius:8px;font-size:.82rem;color:var(--gray-d)}
-.server-hint code{background:var(--bg);padding:.15rem .4rem;border-radius:3px;font-size:.8rem;color:var(--green)}
+.bracket-bar{display:flex;height:28px;border-radius:4px;overflow:hidden;margin:.75rem 0}
+.bracket-seg{height:100%;display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:700;color:var(--bg);min-width:20px;transition:width .5s}
 
-/* Footer */
-footer{text-align:center;padding:2rem;border-top:1px solid var(--border);color:var(--gray-d);font-size:.78rem;margin-top:3rem}
+.loading-msg{display:flex;align-items:center;gap:.5rem;color:var(--text-dim);font-size:.85rem;margin:1rem 0}
+.loading-msg .spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--gold);border-radius:50%;animation:spin .6s linear infinite}
+
+.error-box{padding:.75rem 1rem;background:var(--red-glow);border:1px solid rgba(239,68,68,.2);border-radius:6px;color:var(--red);font-size:.85rem;margin:1rem 0}
+.server-hint{margin-top:1rem;padding:.8rem;background:var(--bg2);border:1px dashed var(--border-h);border-radius:6px;font-size:.8rem;color:var(--text-dim)}
+.server-hint code{background:var(--bg);padding:.12rem .4rem;border-radius:3px;font-size:.78rem;color:var(--gold);font-family:var(--mono)}
+
+/* AI Chat */
+.chat-container{display:flex;flex-direction:column;height:calc(100vh - 220px);max-height:650px}
+.chat-messages{flex:1;overflow-y:auto;padding:.5rem 0;display:flex;flex-direction:column;gap:.75rem}
+.chat-msg{max-width:85%;padding:.7rem 1rem;border-radius:8px;font-size:.85rem;line-height:1.7;word-wrap:break-word}
+.chat-msg.user{align-self:flex-end;background:var(--gold);color:var(--bg);border-bottom-right-radius:2px;font-weight:500}
+.chat-msg.assistant{align-self:flex-start;background:var(--surface);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:2px}
+.chat-msg.assistant strong{color:var(--gold)}
+.chat-msg.assistant pre{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:.5rem;margin:.4rem 0;overflow-x:auto;font-size:.78rem;font-family:var(--mono)}
+.chat-msg.assistant code{font-family:var(--mono);font-size:.8rem;background:var(--bg3);padding:.1rem .3rem;border-radius:3px}
+.chat-msg.system{align-self:center;color:var(--text-dim);font-size:.75rem;font-style:italic;padding:.3rem}
+.chat-input-area{display:flex;gap:.5rem;margin-top:.75rem;align-items:flex-end}
+.chat-input-area textarea{flex:1;min-height:44px;max-height:150px;resize:vertical;padding:.55rem .75rem;font-size:.85rem;font-family:var(--sans)}
+.chat-typing{display:flex;gap:4px;padding:.5rem 1rem;align-self:flex-start}
+.chat-typing span{width:6px;height:6px;background:var(--gold);border-radius:50%;opacity:.4;animation:typeBounce .6s ease-in-out infinite}
+.chat-typing span:nth-child(2){animation-delay:.15s}
+.chat-typing span:nth-child(3){animation-delay:.3s}
+@keyframes typeBounce{0%,100%{transform:translateY(0);opacity:.4}50%{transform:translateY(-4px);opacity:1}}
+
+/* Strategy cards */
+.strategy-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:.75rem;transition:border-color .15s}
+.strategy-card:hover{border-color:var(--gold)}
+.strategy-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:.5rem;flex-wrap:wrap;gap:.4rem}
+.strategy-name{font-weight:700;color:var(--white);font-size:.92rem}
+.strategy-savings{font-family:var(--mono);font-weight:700;color:var(--gold);font-size:1rem}
+.strategy-meta{display:flex;gap:.5rem;flex-wrap:wrap}
+
+/* AI Review section */
+.ai-section{margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem}
+.ai-header{font-size:.88rem;font-weight:700;color:var(--gold);margin-bottom:.6rem;display:flex;align-items:center;gap:.5rem}
+.ai-body{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:1rem;font-size:.85rem;line-height:1.7;white-space:pre-wrap;max-height:500px;overflow-y:auto}
+
+footer{text-align:center;padding:1.5rem;border-top:1px solid var(--border);font-size:.75rem;color:var(--text-dim);margin-top:2rem}
 
 @media(max-width:640px){
-  .tabs{gap:0}.tab{padding:.6rem .8rem;font-size:.78rem}
-  .form-row{flex-direction:column}.form-group{min-width:0}
-  .cards-row{grid-template-columns:1fr}
+  .tabs{gap:0}.tab{padding:.55rem .75rem;font-size:.72rem}
+  .form-row{grid-template-columns:1fr}
+  .stat-grid{grid-template-columns:1fr 1fr}
+  .cards-grid{grid-template-columns:1fr}
+  .chat-msg{max-width:95%}
+  .strategy-header{flex-direction:column;align-items:flex-start}
 }
 </style>
 </head>
@@ -117,448 +164,741 @@ footer{text-align:center;padding:2rem;border-top:1px solid var(--border);color:v
 
 <header>
   <div class="logo">
-    <svg width="28" height="28" viewBox="0 0 32 32" fill="none"><rect width="32" height="32" rx="8" fill="#22c55e" fill-opacity=".15"/><path d="M16 4L26 10V22L16 28L6 22V10Z" stroke="#22c55e" stroke-width="2" fill="none"/><path d="M14 15L15.5 16.5L19 13" stroke="#22c55e" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-    TaxShield
+    <svg width="28" height="28" viewBox="0 0 32 32" fill="none">
+      <rect width="32" height="32" rx="7" fill="#c8a960" fill-opacity=".12"/>
+      <path d="M16 4L26 10V22L16 28L6 22V10Z" stroke="#c8a960" stroke-width="1.8" fill="none"/>
+      <path d="M12 16h8M16 12v8" stroke="#c8a960" stroke-width="1.5" stroke-linecap="round"/>
+    </svg>
+    Tax<span>Shield</span>
   </div>
-  <div class="conn"><div class="conn-dot" id="connDot"></div><span id="connText">Checking...</span></div>
+  <div class="header-right">
+    <span class="version-badge">v0.2.0</span>
+    <div class="conn"><div class="conn-dot" id="connDot"></div><span id="connText">Checking...</span></div>
+  </div>
 </header>
 
 <div class="tabs" id="tabBar">
-  <div class="tab active" data-tab="deductions">Deductions</div>
-  <div class="tab" data-tab="entity">Entity Compare</div>
-  <div class="tab" data-tab="depreciation">Depreciation</div>
-  <div class="tab" data-tab="audit">Audit Risk</div>
-  <div class="tab" data-tab="quarterly">Quarterly Est.</div>
+  <button class="tab active" data-tab="deductions">Deduction Analyzer</button>
+  <button class="tab" data-tab="entity">Entity Comparison</button>
+  <button class="tab" data-tab="depreciation">Depreciation</button>
+  <button class="tab" data-tab="quarterly">Quarterly Estimates</button>
+  <button class="tab" data-tab="audit">Audit Risk</button>
+  <button class="tab" data-tab="strategy">Strategy Optimizer</button>
+  <button class="tab" data-tab="ai">AI Tax Advisor</button>
 </div>
 
-<!-- ═══ DEDUCTIONS ═══ -->
 <div class="panels">
+
+<!-- ═══ DEDUCTION ANALYZER ═══ -->
 <div class="panel active" id="p-deductions">
   <h2 class="panel-title">Deduction Analyzer</h2>
-  <p class="panel-desc">Add business expenses, then analyze for categorization and missed deduction opportunities.</p>
+  <p class="panel-desc">Add business expenses to categorize, optimize, and identify missed deductions.</p>
 
   <div class="form-row">
-    <div class="form-group" style="flex:2"><label>Description</label><input id="ded-desc" placeholder="Office supplies, software subscription..."></div>
-    <div class="form-group" style="flex:1"><label>Amount ($)</label><input type="number" id="ded-amt" placeholder="0.00"></div>
-    <div class="form-group" style="flex:1"><label>Category</label>
-      <select id="ded-cat">
-        <option>Office & Supplies</option><option>Software & Tech</option><option>Travel</option>
-        <option>Meals & Entertainment</option><option>Vehicle</option><option>Home Office</option>
-        <option>Marketing</option><option>Professional Services</option><option>Insurance</option>
-        <option>Education</option><option>Utilities</option><option>Other</option>
-      </select>
-    </div>
-    <div class="form-group" style="flex:0;align-self:flex-end"><button class="btn btn-primary" onclick="addDeduction()">Add</button></div>
+    <div class="form-group" style="grid-column:span 2"><label>Description</label><input type="text" id="ded-desc" placeholder="Office supplies, software license, travel expense..."></div>
+    <div class="form-group"><label>Amount ($)</label><input type="number" id="ded-amt" placeholder="0.00"></div>
+    <div class="form-group"><label>Vendor</label><input type="text" id="ded-vendor" placeholder="Amazon, Adobe..."></div>
   </div>
+  <button class="btn btn-gold btn-sm" onclick="addDeduction()" style="margin-bottom:1rem">+ Add Expense</button>
 
   <div class="tbl-wrap">
     <table>
-      <thead><tr><th>Description</th><th>Category</th><th class="text-right">Amount</th><th style="width:50px"></th></tr></thead>
+      <thead><tr><th>Description</th><th>Vendor</th><th class="text-right">Amount</th><th style="width:50px"></th></tr></thead>
       <tbody id="ded-tbody"></tbody>
-      <tfoot><tr><td colspan="2" style="font-weight:700">Total</td><td class="text-right" style="font-weight:700" id="ded-total">$0</td><td></td></tr></tfoot>
+      <tfoot><tr><td colspan="2" style="font-weight:700;color:var(--white)">Total</td><td class="text-right mono" style="font-weight:700;color:var(--gold)" id="ded-total">$0</td><td></td></tr></tfoot>
     </table>
   </div>
 
-  <button class="btn btn-primary" onclick="analyzeDeductions()" id="btn-analyze-ded">Analyze Deductions</button>
+  <div class="form-row" style="max-width:400px">
+    <div class="form-group"><label>Gross Income ($)</label><input type="number" id="ded-income" placeholder="100000" value="100000"></div>
+  </div>
+
+  <button class="btn btn-gold" id="btn-ded" onclick="analyzeDeductions()">
+    <div class="spinner"></div><span class="btn-text">Analyze Deductions</span>
+  </button>
   <div id="ded-results"></div>
 </div>
 
-<!-- ═══ ENTITY COMPARE ═══ -->
+<!-- ═══ ENTITY COMPARISON ═══ -->
 <div class="panel" id="p-entity">
   <h2 class="panel-title">Entity Structure Comparison</h2>
-  <p class="panel-desc">Compare tax liability across business entity types for your income profile.</p>
+  <p class="panel-desc">Compare tax liability across Sole Prop, LLC, S-Corp, and C-Corp structures.</p>
 
   <div class="form-row">
     <div class="form-group"><label>Gross Income ($)</label><input type="number" id="ent-income" placeholder="200000" value="200000"></div>
     <div class="form-group"><label>Business Expenses ($)</label><input type="number" id="ent-expenses" placeholder="40000" value="40000"></div>
-    <div class="form-group"><label>Owner Salary (S/C-Corp) ($)</label><input type="number" id="ent-salary" placeholder="80000" value="80000"></div>
+    <div class="form-group"><label>Owner Salary (S/C-Corp)</label><input type="number" id="ent-salary" placeholder="80000" value="80000"></div>
   </div>
-  <button class="btn btn-primary" onclick="compareEntities()" id="btn-entity">Compare Entities</button>
+
+  <button class="btn btn-gold" id="btn-entity" onclick="compareEntities()">
+    <div class="spinner"></div><span class="btn-text">Compare Entities</span>
+  </button>
   <div id="entity-results"></div>
 </div>
 
 <!-- ═══ DEPRECIATION ═══ -->
 <div class="panel" id="p-depreciation">
   <h2 class="panel-title">Depreciation Planner</h2>
-  <p class="panel-desc">Add assets and calculate MACRS, Section 179, and bonus depreciation schedules.</p>
+  <p class="panel-desc">MACRS, Section 179, and bonus depreciation schedules for business assets.</p>
 
   <div class="form-row">
-    <div class="form-group" style="flex:2"><label>Asset Name</label><input id="dep-name" placeholder="Laptop, Vehicle, Equipment..."></div>
+    <div class="form-group" style="grid-column:span 2"><label>Asset Name</label><input type="text" id="dep-name" placeholder="MacBook Pro, Delivery Van, Office Furniture..."></div>
     <div class="form-group"><label>Cost ($)</label><input type="number" id="dep-cost" placeholder="0"></div>
     <div class="form-group"><label>Date In Service</label><input type="date" id="dep-date"></div>
-    <div class="form-group"><label>Recovery Period</label>
-      <select id="dep-class"><option value="3">3-Year</option><option value="5" selected>5-Year</option><option value="7">7-Year</option><option value="10">10-Year</option><option value="15">15-Year</option><option value="20">20-Year</option></select>
+    <div class="form-group"><label>Asset Class</label>
+      <select id="dep-class">
+        <option value="computer">Computer (5-yr)</option>
+        <option value="vehicle">Vehicle (5-yr)</option>
+        <option value="furniture">Furniture (7-yr)</option>
+        <option value="equipment">Equipment (7-yr)</option>
+        <option value="improvement">Improvement (15-yr)</option>
+      </select>
     </div>
-    <div class="form-group" style="flex:0;align-self:flex-end"><button class="btn btn-primary" onclick="addAsset()">Add</button></div>
   </div>
+  <button class="btn btn-gold btn-sm" onclick="addAsset()" style="margin-bottom:1rem">+ Add Asset</button>
 
   <div class="tbl-wrap">
     <table>
-      <thead><tr><th>Asset</th><th>Cost</th><th>Date</th><th>Period</th><th style="width:50px"></th></tr></thead>
+      <thead><tr><th>Asset</th><th class="text-right">Cost</th><th>Date</th><th>Class</th><th style="width:50px"></th></tr></thead>
       <tbody id="dep-tbody"></tbody>
     </table>
   </div>
 
-  <button class="btn btn-primary" onclick="calcDepreciation()" id="btn-dep">Calculate Depreciation</button>
+  <button class="btn btn-gold" id="btn-dep" onclick="calcDepreciation()">
+    <div class="spinner"></div><span class="btn-text">Calculate Depreciation</span>
+  </button>
   <div id="dep-results"></div>
 </div>
 
-<!-- ═══ AUDIT RISK ═══ -->
-<div class="panel" id="p-audit">
-  <h2 class="panel-title">Audit Risk Scorer</h2>
-  <p class="panel-desc">Estimate your IRS audit risk based on return profile factors.</p>
-
-  <div class="form-row">
-    <div class="form-group"><label>Gross Income ($)</label><input type="number" id="aud-income" placeholder="150000" value="150000"></div>
-    <div class="form-group"><label>Total Deductions ($)</label><input type="number" id="aud-deductions" placeholder="45000" value="45000"></div>
-    <div class="form-group"><label>Business Type</label>
-      <select id="aud-biz"><option>Sole Proprietor</option><option>LLC</option><option>S-Corp</option><option>C-Corp</option><option>W-2 Employee</option></select>
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-group"><label>Cash-heavy Business?</label><select id="aud-cash"><option value="false">No</option><option value="true">Yes</option></select></div>
-    <div class="form-group"><label>Crypto Transactions?</label><select id="aud-crypto"><option value="false">No</option><option value="true">Yes</option></select></div>
-    <div class="form-group"><label>Foreign Accounts?</label><select id="aud-foreign"><option value="false">No</option><option value="true">Yes</option></select></div>
-    <div class="form-group"><label>Home Office Deduction?</label><select id="aud-home"><option value="false">No</option><option value="true">Yes</option></select></div>
-  </div>
-  <div class="form-row">
-    <div class="form-group"><label>Charitable Donations ($)</label><input type="number" id="aud-charity" placeholder="5000" value="5000"></div>
-    <div class="form-group"><label>Vehicle Deduction ($)</label><input type="number" id="aud-vehicle" placeholder="0" value="0"></div>
-    <div class="form-group"><label>Meals Deduction ($)</label><input type="number" id="aud-meals" placeholder="3000" value="3000"></div>
-  </div>
-
-  <button class="btn btn-primary" onclick="scoreAuditRisk()" id="btn-audit">Score Risk</button>
-  <div id="audit-results"></div>
-</div>
-
-<!-- ═══ QUARTERLY EST ═══ -->
+<!-- ═══ QUARTERLY ESTIMATES ═══ -->
 <div class="panel" id="p-quarterly">
   <h2 class="panel-title">Quarterly Tax Estimator</h2>
-  <p class="panel-desc">Calculate estimated quarterly payments with upcoming due dates.</p>
+  <p class="panel-desc">Calculate estimated quarterly payments with bracket visualization.</p>
 
   <div class="form-row">
     <div class="form-group"><label>Annual Gross Income ($)</label><input type="number" id="qtr-income" placeholder="150000" value="150000"></div>
     <div class="form-group"><label>Business Expenses ($)</label><input type="number" id="qtr-expenses" placeholder="30000" value="30000"></div>
     <div class="form-group"><label>Filing Status</label>
-      <select id="qtr-filing"><option value="single">Single</option><option value="married_joint">Married Filing Jointly</option><option value="married_separate">Married Filing Separately</option><option value="head_household">Head of Household</option></select>
+      <select id="qtr-filing">
+        <option value="single">Single</option>
+        <option value="married_joint">Married Filing Jointly</option>
+        <option value="married_separate">Married Filing Separately</option>
+        <option value="head_household">Head of Household</option>
+      </select>
     </div>
   </div>
   <div class="form-row">
-    <div class="form-group"><label>Additional Deductions ($)</label><input type="number" id="qtr-deductions" placeholder="0" value="0"></div>
-    <div class="form-group"><label>Self-Employment?</label><select id="qtr-se"><option value="true">Yes</option><option value="false">No</option></select></div>
-    <div class="form-group"><label>State</label>
-      <select id="qtr-state"><option value="none">No State Tax</option><option value="CA">California</option><option value="NY">New York</option><option value="TX">Texas</option><option value="FL">Florida</option><option value="IL">Illinois</option><option value="WA">Washington</option><option value="other">Other</option></select>
-    </div>
+    <div class="form-group"><label>Other Income ($)</label><input type="number" id="qtr-other" placeholder="0" value="0"></div>
+    <div class="form-group"><label>Withholding YTD ($)</label><input type="number" id="qtr-withholding" placeholder="0" value="0"></div>
+    <div class="form-group"><label>Credits ($)</label><input type="number" id="qtr-credits" placeholder="0" value="0"></div>
   </div>
 
-  <button class="btn btn-primary" onclick="calcQuarterly()" id="btn-qtr">Calculate Quarterly Payments</button>
+  <button class="btn btn-gold" id="btn-qtr" onclick="calcQuarterly()">
+    <div class="spinner"></div><span class="btn-text">Calculate Quarterly Payments</span>
+  </button>
   <div id="qtr-results"></div>
 </div>
+
+<!-- ═══ AUDIT RISK ═══ -->
+<div class="panel" id="p-audit">
+  <h2 class="panel-title">Audit Risk Scorer</h2>
+  <p class="panel-desc">Estimate your IRS audit probability based on return profile factors.</p>
+
+  <div class="form-row">
+    <div class="form-group"><label>Gross Income ($)</label><input type="number" id="aud-income" placeholder="150000" value="150000"></div>
+    <div class="form-group"><label>Total Deductions ($)</label><input type="number" id="aud-deductions" placeholder="45000" value="45000"></div>
+    <div class="form-group"><label>Entity Type</label>
+      <select id="aud-entity"><option value="individual">Individual</option><option value="sole_prop">Sole Proprietor</option><option value="llc">LLC</option><option value="s_corp">S-Corp</option><option value="c_corp">C-Corp</option></select>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>Home Office?</label><select id="aud-home"><option value="false">No</option><option value="true">Yes</option></select></div>
+    <div class="form-group"><label>Cash Business?</label><select id="aud-cash"><option value="false">No</option><option value="true">Yes</option></select></div>
+    <div class="form-group"><label>Foreign Accounts?</label><select id="aud-foreign"><option value="false">No</option><option value="true">Yes</option></select></div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>Charitable Donations ($)</label><input type="number" id="aud-charity" placeholder="5000" value="5000"></div>
+    <div class="form-group"><label>Crypto Transactions?</label><select id="aud-crypto"><option value="false">No</option><option value="true">Yes</option></select></div>
+    <div class="form-group"><label>Schedule C Loss?</label><select id="aud-loss"><option value="false">No</option><option value="true">Yes</option></select></div>
+  </div>
+
+  <button class="btn btn-gold" id="btn-audit" onclick="scoreAuditRisk()">
+    <div class="spinner"></div><span class="btn-text">Score Audit Risk</span>
+  </button>
+  <div id="audit-results"></div>
 </div>
 
-<footer>&copy; 2026 Mint Rail LLC. TaxShield is for informational purposes only — not tax advice.</footer>
+<!-- ═══ STRATEGY OPTIMIZER ═══ -->
+<div class="panel" id="p-strategy">
+  <h2 class="panel-title">Strategy Optimizer</h2>
+  <p class="panel-desc">Comprehensive tax optimization combining entity, deductions, depreciation, and retirement strategies.</p>
+
+  <div class="form-row">
+    <div class="form-group"><label>Gross Income ($)</label><input type="number" id="str-income" placeholder="200000" value="200000"></div>
+    <div class="form-group"><label>Business Expenses ($)</label><input type="number" id="str-expenses" placeholder="50000" value="50000"></div>
+    <div class="form-group"><label>Current Entity</label>
+      <select id="str-entity"><option value="sole_prop">Sole Proprietor</option><option value="llc">LLC</option><option value="s_corp">S-Corp</option><option value="c_corp">C-Corp</option></select>
+    </div>
+  </div>
+  <div class="form-row">
+    <div class="form-group"><label>Owner Salary ($)</label><input type="number" id="str-salary" placeholder="80000" value="80000"></div>
+    <div class="form-group"><label>Filing Status</label>
+      <select id="str-filing"><option value="single">Single</option><option value="married_joint">Married Filing Jointly</option><option value="head_household">Head of Household</option></select>
+    </div>
+    <div class="form-group"><label>State</label><input type="text" id="str-state" placeholder="CA, NY, TX..."></div>
+  </div>
+
+  <button class="btn btn-gold" id="btn-strategy" onclick="optimizeStrategy()">
+    <div class="spinner"></div><span class="btn-text">Optimize Strategy</span>
+  </button>
+  <div id="strategy-results"></div>
+</div>
+
+<!-- ═══ AI TAX ADVISOR ═══ -->
+<div class="panel" id="p-ai">
+  <h2 class="panel-title">AI Tax Advisor</h2>
+  <p class="panel-desc">Ask tax questions, get strategy advice, and explore planning scenarios with AI.</p>
+
+  <div class="chat-container">
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg system">Ask about tax strategies, deduction optimization, entity selection, audit defense, or any tax planning question.</div>
+    </div>
+    <div class="chat-input-area">
+      <textarea id="chatInput" placeholder="Ask a tax question... e.g. 'Should I switch from sole prop to S-Corp at $150k income?'" rows="2" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
+      <button class="btn btn-gold" id="btn-chat" onclick="sendChat()">
+        <div class="spinner"></div><span class="btn-text">Send</span>
+      </button>
+    </div>
+  </div>
+</div>
+
+</div><!-- /panels -->
+
+<footer>&copy; 2026 Mint Rail LLC &middot; TaxShield v0.2.0 &middot; For informational purposes only — not tax advice.</footer>
 
 <script>
-const API = window.location.origin;
+const API = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? `${window.location.protocol}//${window.location.hostname}:8000`
+  : window.location.origin;
+
+let apiOnline = false;
 const deductions = [];
 const assets = [];
 
+const $ = id => document.getElementById(id);
+const num = id => parseFloat($(id).value) || 0;
+const fmt = n => '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits: 0, maximumFractionDigits: 0});
+const fmtDec = n => '$' + Number(n).toLocaleString('en-US', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+const pct = n => (n * 100).toFixed(1) + '%';
+function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+
+function setLoading(id, on) { const b = $(id); b.classList.toggle('loading', on); b.disabled = on; }
+function showLoading(el) { el.innerHTML = '<div class="loading-msg"><span class="spinner"></span>Analyzing...</div>'; }
+function showError(el, msg) { el.innerHTML = `<div class="error-box">${esc(msg)}</div><div class="server-hint">Start the API server: <code>cd products/taxshield && uvicorn server.app:app --reload --port 8000</code></div>`; }
+
+function formatAI(text) {
+  let s = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  s = s.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre>$2</pre>');
+  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  return s;
+}
+
 /* ── Connection ── */
 async function checkConn() {
-  const dot = document.getElementById('connDot');
-  const txt = document.getElementById('connText');
   try {
     const r = await fetch(API + '/health', { signal: AbortSignal.timeout(3000) });
-    if (r.ok) { dot.classList.add('ok'); txt.textContent = 'API Connected'; return; }
+    if (r.ok) { apiOnline = true; $('connDot').classList.add('ok'); $('connText').textContent = 'API Online'; return; }
   } catch {}
-  dot.classList.remove('ok');
-  txt.textContent = 'API Offline';
+  apiOnline = false;
+  $('connDot').classList.remove('ok');
+  $('connText').textContent = 'Offline';
 }
 checkConn(); setInterval(checkConn, 15000);
 
 /* ── Tabs ── */
-document.getElementById('tabBar').addEventListener('click', e => {
+$('tabBar').addEventListener('click', e => {
   const t = e.target.closest('.tab');
   if (!t) return;
   document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
   document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
   t.classList.add('active');
-  document.getElementById('p-' + t.dataset.tab).classList.add('active');
+  $('p-' + t.dataset.tab).classList.add('active');
 });
 
-/* ── Helpers ── */
-const $ = id => document.getElementById(id);
-const fmt = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-const pct = n => (n * 100).toFixed(1) + '%';
-
-function showLoading(el) { el.innerHTML = '<div class="loading-msg"><span class="spinner"></span>Calling API...</div>'; }
-function showError(el, err) { el.innerHTML = `<div class="error-box">${err}</div><div class="server-hint">Make sure the API server is running:<br><code>cd products/taxshield && uvicorn server.app:app --reload --port 8000</code></div>`; }
-
+/* ── API Call ── */
 async function apiPost(endpoint, body) {
-  const r = await fetch(API + endpoint, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || `HTTP ${r.status}`); }
-  return r.json();
+  if (!apiOnline) return null;
+  try {
+    const r = await fetch(API + endpoint, {
+      method: 'POST', headers: {'Content-Type': 'application/json'},
+      body: JSON.stringify(body), signal: AbortSignal.timeout(60000)
+    });
+    if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || `HTTP ${r.status}`); }
+    return await r.json();
+  } catch (err) { throw err; }
 }
 
 /* ═══ DEDUCTIONS ═══ */
 function renderDeductions() {
-  const tb = $('ded-tbody');
-  tb.innerHTML = '';
+  const tb = $('ded-tbody'); tb.innerHTML = '';
   let total = 0;
   deductions.forEach((d, i) => {
     total += d.amount;
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${esc(d.description)}</td><td><span class="tag tag-green">${esc(d.category)}</span></td><td class="text-right">${fmt(d.amount)}</td><td><button class="btn btn-danger btn-sm" onclick="rmDed(${i})">×</button></td>`;
+    tr.innerHTML = `<td>${esc(d.description)}</td><td style="color:var(--text-dim)">${esc(d.vendor || '—')}</td><td class="text-right mono">${fmt(d.amount)}</td><td><button class="btn-danger" onclick="deductions.splice(${i},1);renderDeductions()">×</button></td>`;
     tb.appendChild(tr);
   });
   $('ded-total').textContent = fmt(total);
 }
 
 function addDeduction() {
-  const desc = $('ded-desc').value.trim();
-  const amt = parseFloat($('ded-amt').value) || 0;
-  const cat = $('ded-cat').value;
+  const desc = $('ded-desc').value.trim(), amt = parseFloat($('ded-amt').value) || 0, vendor = $('ded-vendor').value.trim();
   if (!desc || amt <= 0) return;
-  deductions.push({ description: desc, amount: amt, category: cat });
-  $('ded-desc').value = ''; $('ded-amt').value = '';
+  deductions.push({description: desc, amount: amt, vendor});
+  $('ded-desc').value = ''; $('ded-amt').value = ''; $('ded-vendor').value = '';
   renderDeductions();
 }
-
-function rmDed(i) { deductions.splice(i, 1); renderDeductions(); }
 
 async function analyzeDeductions() {
   if (!deductions.length) return;
   const el = $('ded-results');
+  setLoading('btn-ded', true);
   showLoading(el);
   try {
-    const data = await apiPost('/v1/deductions/analyze', { expenses: deductions });
-    let html = '<div class="results">';
-    if (data.categorized) {
-      html += '<div class="result-box"><div class="result-label">Categorized Expenses</div><div class="tbl-wrap"><table><thead><tr><th>Category</th><th class="text-right">Total</th><th class="text-right">Count</th></tr></thead><tbody>';
-      for (const [cat, info] of Object.entries(data.categorized)) {
-        html += `<tr><td>${esc(cat)}</td><td class="text-right">${fmt(info.total || info)}</td><td class="text-right">${info.count || ''}</td></tr>`;
-      }
-      html += '</tbody></table></div></div>';
-    }
-    if (data.savings_by_bracket) {
-      html += '<div class="result-box"><div class="result-label">Potential Savings by Tax Bracket</div><div class="cards-row">';
-      for (const [bracket, savings] of Object.entries(data.savings_by_bracket)) {
-        html += `<div class="card"><div class="card-title">${bracket}</div><div class="result-value">${fmt(savings)}</div></div>`;
-      }
-      html += '</div></div>';
-    }
-    if (data.missed_deductions && data.missed_deductions.length) {
-      html += '<div class="result-box"><div class="result-label">Missed Deduction Suggestions</div>';
-      data.missed_deductions.forEach(m => { html += `<div class="rec">${esc(typeof m === 'string' ? m : m.description || m.name)}</div>`; });
-      html += '</div>';
-    }
-    if (data.total_deductions != null) {
-      html += `<div class="result-box"><div class="result-label">Total Deductions</div><div class="result-value">${fmt(data.total_deductions)}</div></div>`;
-    }
-    html += '</div>';
-    el.innerHTML = html;
+    let data = await apiPost('/v1/deductions/analyze', {expenses: deductions, gross_income: num('ded-income')});
+    if (!data) data = demoDeductions();
+    renderDeductionResults(data, el);
   } catch (err) { showError(el, err.message); }
+  setLoading('btn-ded', false);
 }
 
-/* ═══ ENTITY COMPARE ═══ */
-async function compareEntities() {
-  const el = $('entity-results');
-  showLoading(el);
-  try {
-    const data = await apiPost('/v1/entity/compare', {
-      gross_income: num('ent-income'), business_expenses: num('ent-expenses'), owner_salary: num('ent-salary')
+function demoDeductions() {
+  const cats = {};
+  deductions.forEach(d => {
+    const c = d.description.toLowerCase().includes('software') ? 'Software & Tech' : d.description.toLowerCase().includes('office') ? 'Office Supplies' : 'Business Expense';
+    if (!cats[c]) cats[c] = {total: 0, count: 0};
+    cats[c].total += d.amount; cats[c].count++;
+  });
+  const total = deductions.reduce((s, d) => s + d.amount, 0);
+  return {
+    categorized: Object.entries(cats).map(([k, v]) => ({description: k, amount: v.total, category: k, confidence: 0.85})),
+    total_deductions: total,
+    category_totals: cats,
+    savings_by_bracket: [{bracket: '22%', rate: 0.22, estimated_savings: total * 0.22}, {bracket: '24%', rate: 0.24, estimated_savings: total * 0.24}, {bracket: '32%', rate: 0.32, estimated_savings: total * 0.32}],
+    missed_deductions: [{name: 'Health Insurance Premium', avg_savings: 2400}, {name: 'Home Office Deduction', avg_savings: 1500}, {name: 'Professional Development', avg_savings: 800}]
+  };
+}
+
+function renderDeductionResults(data, el) {
+  let html = !apiOnline ? '<div class="server-hint">Showing demo data — API offline</div>' : '';
+  html += `<div class="stat-grid"><div class="stat-card"><div class="stat-label">Total Deductions</div><div class="stat-val">${fmt(data.total_deductions || 0)}</div></div>`;
+  if (data.savings_by_bracket && data.savings_by_bracket.length) {
+    const best = data.savings_by_bracket[data.savings_by_bracket.length - 1];
+    html += `<div class="stat-card"><div class="stat-label">Max Potential Savings</div><div class="stat-val">${fmt(best.estimated_savings || 0)}</div><div class="stat-detail">at ${best.bracket || pct(best.rate)} bracket</div></div>`;
+  }
+  html += '</div>';
+  if (data.savings_by_bracket && data.savings_by_bracket.length) {
+    html += '<div class="result-box"><div class="stat-label" style="margin-bottom:.5rem">Savings by Tax Bracket</div><div class="cards-grid">';
+    data.savings_by_bracket.forEach(s => {
+      html += `<div class="card"><div class="card-title" style="color:var(--gold)">${s.bracket || pct(s.rate)}</div><div style="font-family:var(--mono);font-size:1.3rem;font-weight:700;color:var(--white)">${fmt(s.estimated_savings)}</div></div>`;
     });
-    const entities = data.entities || data.comparison || data;
-    const list = Array.isArray(entities) ? entities : Object.values(entities);
-    let best = list[0], html = '<div class="cards-row" style="margin-top:1.5rem">';
-    list.forEach(e => { if ((e.total_tax || 0) < (best.total_tax || Infinity)) best = e; });
-    list.forEach(e => {
-      const isBest = e === best;
-      html += `<div class="card" style="${isBest ? 'border-color:var(--green);box-shadow:0 0 20px var(--green-glow)' : ''}">
-        <div class="card-title" style="display:flex;justify-content:space-between;align-items:center">${esc(e.entity || e.name || e.type)}${isBest ? '<span class="tag tag-green">BEST</span>' : ''}</div>
-        <div style="margin:.8rem 0"><div class="result-label">Total Tax</div><div class="result-value" style="${isBest ? '' : 'color:var(--white)'}">${fmt(e.total_tax)}</div></div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;font-size:.82rem">
-          <div><span style="color:var(--gray-d)">Effective Rate</span><br><strong>${pct(e.effective_rate || 0)}</strong></div>
-          <div><span style="color:var(--gray-d)">SE Tax</span><br><strong>${fmt(e.se_tax || 0)}</strong></div>
-          <div><span style="color:var(--gray-d)">QBI Deduction</span><br><strong>${fmt(e.qbi_deduction || 0)}</strong></div>
-          <div><span style="color:var(--gray-d)">Income Tax</span><br><strong>${fmt(e.income_tax || e.federal_tax || 0)}</strong></div>
-        </div>
-      </div>`;
+    html += '</div></div>';
+  }
+  if (data.missed_deductions && data.missed_deductions.length) {
+    html += '<div class="result-box"><div class="stat-label" style="margin-bottom:.5rem">Missed Deduction Opportunities</div>';
+    data.missed_deductions.forEach(m => {
+      const name = typeof m === 'string' ? m : (m.name || m.description || '');
+      const savings = m.avg_savings ? ` — est. ${fmt(m.avg_savings)}/yr` : '';
+      html += `<div class="rec">${esc(name)}${savings}</div>`;
     });
     html += '</div>';
-    if (data.recommendation) html += `<div class="rec">${esc(data.recommendation)}</div>`;
-    el.innerHTML = html;
+  }
+  el.innerHTML = html;
+}
+
+/* ═══ ENTITY COMPARISON ═══ */
+async function compareEntities() {
+  const el = $('entity-results');
+  setLoading('btn-entity', true);
+  showLoading(el);
+  try {
+    let data = await apiPost('/v1/entity/compare', {gross_income: num('ent-income'), business_expenses: num('ent-expenses'), owner_salary: num('ent-salary')});
+    if (!data) data = demoEntityCompare();
+    renderEntityResults(data, el);
   } catch (err) { showError(el, err.message); }
+  setLoading('btn-entity', false);
+}
+
+function demoEntityCompare() {
+  const g = num('ent-income'), e = num('ent-expenses'), s = num('ent-salary') || g * 0.4;
+  const net = g - e;
+  return {
+    comparison: [
+      {entity_type: 'Sole Proprietorship', net_income: net, owner_salary: 0, federal_income_tax: net * 0.22, self_employment_tax: net * 0.153, corporate_tax: 0, dividend_tax: 0, total_tax: net * 0.22 + net * 0.153, effective_rate: 0.373, se_tax_savings_vs_sole_prop: 0, notes: 'Simplest structure, full SE tax exposure'},
+      {entity_type: 'LLC (pass-through)', net_income: net, owner_salary: 0, federal_income_tax: net * 0.22, self_employment_tax: net * 0.153, corporate_tax: 0, dividend_tax: 0, total_tax: net * 0.22 + net * 0.148, effective_rate: 0.368, se_tax_savings_vs_sole_prop: net * 0.005, notes: 'Liability protection, same tax treatment as sole prop'},
+      {entity_type: 'S-Corporation', net_income: net, owner_salary: s, federal_income_tax: net * 0.22, self_employment_tax: s * 0.153, corporate_tax: 0, dividend_tax: 0, total_tax: net * 0.22 + s * 0.153, effective_rate: (net * 0.22 + s * 0.153) / g, se_tax_savings_vs_sole_prop: (net - s) * 0.153, notes: 'SE tax only on salary portion'},
+      {entity_type: 'C-Corporation', net_income: net, owner_salary: s, federal_income_tax: 0, self_employment_tax: s * 0.153, corporate_tax: (net - s) * 0.21, dividend_tax: (net - s) * 0.21 * 0.15, total_tax: (net - s) * 0.21 + (net - s) * 0.21 * 0.15 + s * 0.22 + s * 0.153, effective_rate: 0.38, se_tax_savings_vs_sole_prop: 0, notes: 'Double taxation, best for retained earnings'}
+    ],
+    recommendation: 'S-Corporation'
+  };
+}
+
+function renderEntityResults(data, el) {
+  const entities = data.comparison || [];
+  let best = entities[0];
+  entities.forEach(e => { if ((e.total_tax || 0) < (best.total_tax || Infinity)) best = e; });
+  let html = !apiOnline ? '<div class="server-hint">Showing demo data — API offline</div>' : '';
+
+  html += '<div class="tbl-wrap"><table><thead><tr><th>Entity</th><th class="text-right">Income Tax</th><th class="text-right">SE Tax</th><th class="text-right">Corp Tax</th><th class="text-right">Total Tax</th><th class="text-right">Eff. Rate</th><th class="text-right">SE Savings</th></tr></thead><tbody>';
+  entities.forEach(e => {
+    const isBest = e.entity_type === best.entity_type;
+    const style = isBest ? 'background:var(--gold-dim);' : '';
+    html += `<tr style="${style}"><td style="font-weight:700;${isBest ? 'color:var(--gold)' : 'color:var(--white)'}">${esc(e.entity_type)}${isBest ? ' <span class="tag tag-gold">BEST</span>' : ''}</td>
+      <td class="text-right mono">${fmt(e.federal_income_tax)}</td>
+      <td class="text-right mono">${fmt(e.self_employment_tax)}</td>
+      <td class="text-right mono">${fmt((e.corporate_tax || 0) + (e.dividend_tax || 0))}</td>
+      <td class="text-right mono" style="font-weight:700;${isBest ? 'color:var(--gold)' : ''}">${fmt(e.total_tax)}</td>
+      <td class="text-right mono">${pct(e.effective_rate)}</td>
+      <td class="text-right mono" style="color:var(--green)">${e.se_tax_savings_vs_sole_prop > 0 ? fmt(e.se_tax_savings_vs_sole_prop) : '—'}</td></tr>`;
+  });
+  html += '</tbody></table></div>';
+
+  if (data.recommendation) {
+    html += `<div class="rec"><strong>Recommendation:</strong> ${esc(typeof data.recommendation === 'string' ? data.recommendation : data.recommendation.entity_type || '')}</div>`;
+  }
+  el.innerHTML = html;
 }
 
 /* ═══ DEPRECIATION ═══ */
 function renderAssets() {
-  const tb = $('dep-tbody');
-  tb.innerHTML = '';
+  const tb = $('dep-tbody'); tb.innerHTML = '';
   assets.forEach((a, i) => {
     const tr = document.createElement('tr');
-    tr.innerHTML = `<td>${esc(a.name)}</td><td>${fmt(a.cost)}</td><td>${a.date_placed || '—'}</td><td>${a.recovery_period}-Year</td><td><button class="btn btn-danger btn-sm" onclick="rmAsset(${i})">×</button></td>`;
+    tr.innerHTML = `<td>${esc(a.name)}</td><td class="text-right mono">${fmt(a.cost)}</td><td>${a.placed_in_service || '—'}</td><td><span class="tag tag-blue">${esc(a.asset_class)}</span></td><td><button class="btn-danger" onclick="assets.splice(${i},1);renderAssets()">×</button></td>`;
     tb.appendChild(tr);
   });
 }
 
 function addAsset() {
-  const name = $('dep-name').value.trim();
-  const cost = parseFloat($('dep-cost').value) || 0;
-  const date = $('dep-date').value;
-  const cls = parseInt($('dep-class').value);
+  const name = $('dep-name').value.trim(), cost = parseFloat($('dep-cost').value) || 0;
+  const dt = $('dep-date').value, cls = $('dep-class').value;
   if (!name || cost <= 0) return;
-  assets.push({ name, cost, date_placed: date, recovery_period: cls });
+  assets.push({name, cost, placed_in_service: dt || new Date().toISOString().split('T')[0], asset_class: cls, use_bonus: true, use_section_179: false});
   $('dep-name').value = ''; $('dep-cost').value = '';
   renderAssets();
 }
 
-function rmAsset(i) { assets.splice(i, 1); renderAssets(); }
-
 async function calcDepreciation() {
   if (!assets.length) return;
   const el = $('dep-results');
+  setLoading('btn-dep', true);
   showLoading(el);
   try {
-    const data = await apiPost('/v1/depreciation/plan', { assets });
-    let html = '<div class="results">';
-    const schedule = data.schedule || data.yearly_schedule || data;
-    if (data.summary) {
-      html += '<div class="cards-row">';
-      const s = data.summary;
-      html += `<div class="card"><div class="result-label">Total Cost</div><div class="result-value">${fmt(s.total_cost || 0)}</div></div>`;
-      html += `<div class="card"><div class="result-label">Section 179</div><div class="result-value">${fmt(s.section_179 || 0)}</div></div>`;
-      html += `<div class="card"><div class="result-label">Bonus Depreciation</div><div class="result-value">${fmt(s.bonus_depreciation || 0)}</div></div>`;
-      html += `<div class="card"><div class="result-label">Year 1 Total</div><div class="result-value">${fmt(s.year_1_total || s.first_year || 0)}</div></div>`;
-      html += '</div>';
-    }
-    if (Array.isArray(schedule) && schedule.length) {
-      html += '<div class="result-box"><div class="result-label">Year-by-Year Schedule</div><div class="tbl-wrap"><table><thead><tr><th>Year</th><th class="text-right">MACRS</th><th class="text-right">Sec. 179</th><th class="text-right">Bonus</th><th class="text-right">Total</th></tr></thead><tbody>';
-      schedule.forEach(y => {
-        html += `<tr><td>${y.year}</td><td class="text-right">${fmt(y.macrs || 0)}</td><td class="text-right">${fmt(y.section_179 || 0)}</td><td class="text-right">${fmt(y.bonus || 0)}</td><td class="text-right" style="font-weight:700">${fmt(y.total || 0)}</td></tr>`;
-      });
-      html += '</tbody></table></div></div>';
-    }
-    html += '</div>';
-    el.innerHTML = html;
+    let data = await apiPost('/v1/depreciation/plan', {assets});
+    if (!data) data = demoDepreciation();
+    renderDepResults(data, el);
   } catch (err) { showError(el, err.message); }
+  setLoading('btn-dep', false);
+}
+
+function demoDepreciation() {
+  const totalCost = assets.reduce((s, a) => s + a.cost, 0);
+  return {
+    assets: assets.map(a => ({
+      name: a.name, cost: a.cost, asset_class: a.asset_class, recovery_years: 5, method: 'MACRS 200% DB',
+      section_179: 0, bonus: a.cost * 0.6, depreciable_basis: a.cost * 0.4,
+      schedule: [{year: 2026, depreciation: a.cost * 0.6 + a.cost * 0.08, cumulative: a.cost * 0.68, remaining: a.cost * 0.32},
+        {year: 2027, depreciation: a.cost * 0.128, cumulative: a.cost * 0.808, remaining: a.cost * 0.192},
+        {year: 2028, depreciation: a.cost * 0.077, cumulative: a.cost * 0.885, remaining: a.cost * 0.115}]
+    })),
+    total_section_179_used: 0, section_179_remaining: 1220000,
+    total_first_year_deduction: totalCost * 0.68, total_all_years: totalCost,
+    summary_by_year: {2026: totalCost * 0.68, 2027: totalCost * 0.128, 2028: totalCost * 0.077}
+  };
+}
+
+function renderDepResults(data, el) {
+  let html = !apiOnline ? '<div class="server-hint">Showing demo data — API offline</div>' : '';
+  html += '<div class="stat-grid">';
+  html += `<div class="stat-card"><div class="stat-label">First Year Deduction</div><div class="stat-val">${fmt(data.total_first_year_deduction || 0)}</div></div>`;
+  html += `<div class="stat-card"><div class="stat-label">Total All Years</div><div class="stat-val">${fmt(data.total_all_years || 0)}</div></div>`;
+  html += `<div class="stat-card"><div class="stat-label">Sec. 179 Used</div><div class="stat-val">${fmt(data.total_section_179_used || 0)}</div></div>`;
+  html += '</div>';
+
+  if (data.assets) {
+    data.assets.forEach(a => {
+      html += `<div class="card"><div class="card-title">${esc(a.name)} <span class="tag tag-blue">${esc(a.asset_class)}</span> <span style="color:var(--text-dim);font-weight:400;font-size:.8rem">${a.method || 'MACRS'}</span></div>`;
+      html += `<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:.5rem;margin:.5rem 0;font-size:.82rem">
+        <div><span style="color:var(--text-dim)">Cost</span><br><strong class="mono">${fmt(a.cost)}</strong></div>
+        <div><span style="color:var(--text-dim)">Bonus</span><br><strong class="mono">${fmt(a.bonus || 0)}</strong></div>
+        <div><span style="color:var(--text-dim)">Sec. 179</span><br><strong class="mono">${fmt(a.section_179 || 0)}</strong></div></div>`;
+      if (a.schedule && a.schedule.length) {
+        html += '<div class="tbl-wrap"><table><thead><tr><th>Year</th><th class="text-right">Depreciation</th><th class="text-right">Cumulative</th><th class="text-right">Remaining</th></tr></thead><tbody>';
+        a.schedule.forEach(s => {
+          html += `<tr><td class="mono">${s.year}</td><td class="text-right mono">${fmt(s.depreciation)}</td><td class="text-right mono">${fmt(s.cumulative)}</td><td class="text-right mono" style="color:var(--text-dim)">${fmt(s.remaining || s.remaining_basis || 0)}</td></tr>`;
+        });
+        html += '</tbody></table></div>';
+      }
+      html += '</div>';
+    });
+  }
+  el.innerHTML = html;
+}
+
+/* ═══ QUARTERLY ESTIMATES ═══ */
+async function calcQuarterly() {
+  const el = $('qtr-results');
+  setLoading('btn-qtr', true);
+  showLoading(el);
+  try {
+    let data = await apiPost('/v1/estimate/quarterly', {
+      gross_income: num('qtr-income'), business_expenses: num('qtr-expenses'),
+      other_income: num('qtr-other'), filing_status: $('qtr-filing').value,
+      withholding_ytd: num('qtr-withholding'), credits: num('qtr-credits')
+    });
+    if (!data) data = clientQuarterly();
+    renderQuarterlyResults(data, el);
+  } catch (err) {
+    const data = clientQuarterly();
+    renderQuarterlyResults(data, el);
+  }
+  setLoading('btn-qtr', false);
+}
+
+function clientQuarterly() {
+  const BRACKETS = [[11600,.10],[47150,.12],[100525,.22],[191950,.24],[243725,.32],[609350,.35],[Infinity,.37]];
+  const gross = num('qtr-income'), exp = num('qtr-expenses'), other = num('qtr-other');
+  const net = gross - exp + other;
+  const se = Math.min(net * 0.9235, 168600) * 0.124 + net * 0.9235 * 0.029;
+  const filing = $('qtr-filing').value;
+  const stdDed = filing === 'married_joint' ? 29200 : filing === 'head_household' ? 21900 : 14600;
+  const taxable = Math.max(0, net - se / 2 - stdDed);
+  let fedTax = 0, prev = 0;
+  const bracketBreakdown = [];
+  for (const [ceil, rate] of BRACKETS) {
+    const portion = Math.min(taxable, ceil) - prev;
+    if (portion <= 0) break;
+    const tax = portion * rate;
+    fedTax += tax;
+    bracketBreakdown.push({bracket: `${(rate * 100).toFixed(0)}%`, rate, amount: portion, tax});
+    prev = ceil;
+  }
+  const total = fedTax + se - num('qtr-credits');
+  const remaining = Math.max(0, total - num('qtr-withholding'));
+  return {
+    annual_estimate: {gross_income: gross, business_expenses: exp, net_income: net, self_employment_tax: se, federal_income_tax: fedTax, total_estimated_tax: total, credits_applied: num('qtr-credits'), withholding_applied: num('qtr-withholding')},
+    quarterly_payments: {amount_per_quarter: Math.round(remaining / 4), due_dates: ['April 15, 2026', 'June 15, 2026', 'September 15, 2026', 'January 15, 2027'], remaining_liability: remaining},
+    bracket_breakdown: bracketBreakdown,
+    _offline: true
+  };
+}
+
+function renderQuarterlyResults(data, el) {
+  const a = data.annual_estimate || {};
+  const q = data.quarterly_payments || {};
+  let html = data._offline ? '<div class="server-hint">Client-side estimate — API offline</div>' : '';
+
+  html += '<div class="stat-grid">';
+  html += `<div class="stat-card"><div class="stat-label">Quarterly Payment</div><div class="stat-val">${fmt(q.amount_per_quarter || 0)}</div></div>`;
+  html += `<div class="stat-card"><div class="stat-label">Annual Tax</div><div class="stat-val">${fmt(a.total_estimated_tax || 0)}</div></div>`;
+  html += `<div class="stat-card"><div class="stat-label">Income Tax</div><div class="stat-val" style="color:var(--white)">${fmt(a.federal_income_tax || 0)}</div></div>`;
+  html += `<div class="stat-card"><div class="stat-label">SE Tax</div><div class="stat-val" style="color:var(--white)">${fmt(a.self_employment_tax || 0)}</div></div>`;
+  html += '</div>';
+
+  if (data.bracket_breakdown && data.bracket_breakdown.length) {
+    const colors = ['#22c55e','#86efac','#fbbf24','#f59e0b','#ef4444','#dc2626','#991b1b'];
+    const totalTaxable = data.bracket_breakdown.reduce((s, b) => s + b.amount, 0);
+    html += '<div class="result-box"><div class="stat-label" style="margin-bottom:.5rem">Tax Bracket Visualization</div>';
+    html += '<div class="bracket-bar">';
+    data.bracket_breakdown.forEach((b, i) => {
+      const w = totalTaxable > 0 ? (b.amount / totalTaxable * 100) : 0;
+      html += `<div class="bracket-seg" style="width:${w}%;background:${colors[i] || colors[6]}" title="${b.bracket}: ${fmt(b.amount)}">${w > 8 ? b.bracket : ''}</div>`;
+    });
+    html += '</div>';
+    html += '<div style="display:flex;flex-wrap:wrap;gap:.75rem;margin-top:.5rem">';
+    data.bracket_breakdown.forEach((b, i) => {
+      html += `<div style="font-size:.75rem;display:flex;align-items:center;gap:.3rem"><div style="width:10px;height:10px;border-radius:2px;background:${colors[i] || colors[6]}"></div>${b.bracket}: ${fmt(b.amount)} <span style="color:var(--text-dim)">(${fmt(b.tax)} tax)</span></div>`;
+    });
+    html += '</div></div>';
+  }
+
+  if (q.due_dates) {
+    html += '<div class="tbl-wrap"><table><thead><tr><th>Quarter</th><th>Due Date</th><th class="text-right">Amount</th><th>Status</th></tr></thead><tbody>';
+    q.due_dates.forEach((d, i) => {
+      const isPast = new Date(d) < new Date();
+      html += `<tr><td class="mono">Q${i + 1}</td><td>${d}</td><td class="text-right mono" style="font-weight:700;color:var(--gold)">${fmt(q.amount_per_quarter)}</td><td>${isPast ? '<span class="tag tag-amber">Past Due</span>' : '<span class="tag tag-green">Upcoming</span>'}</td></tr>`;
+    });
+    html += '</tbody></table></div>';
+  }
+
+  html += `<div class="rec">${data.safe_harbor_note || 'Pay at least 100% of prior year tax (110% if AGI > $150k) to avoid underpayment penalties.'}</div>`;
+  el.innerHTML = html;
 }
 
 /* ═══ AUDIT RISK ═══ */
 async function scoreAuditRisk() {
   const el = $('audit-results');
+  setLoading('btn-audit', true);
   showLoading(el);
   try {
-    const data = await apiPost('/v1/audit/risk', {
+    let data = await apiPost('/v1/audit/risk', {
       gross_income: num('aud-income'), total_deductions: num('aud-deductions'),
-      business_type: $('aud-biz').value, cash_business: $('aud-cash').value === 'true',
-      crypto: $('aud-crypto').value === 'true', foreign_accounts: $('aud-foreign').value === 'true',
-      home_office: $('aud-home').value === 'true', charitable: num('aud-charity'),
-      vehicle_deduction: num('aud-vehicle'), meals_deduction: num('aud-meals')
+      entity_type: $('aud-entity').value, home_office: $('aud-home').value === 'true',
+      cash_business: $('aud-cash').value === 'true', foreign_accounts: $('aud-foreign').value === 'true',
+      large_charitable: num('aud-charity'), crypto_transactions: $('aud-crypto').value === 'true',
+      schedule_c_loss: $('aud-loss').value === 'true'
     });
-    const score = data.risk_score ?? data.score ?? 0;
-    const color = score >= 70 ? 'var(--red)' : score >= 40 ? 'var(--amber)' : 'var(--green)';
-    const deg = (score / 100) * 180;
-    let html = `<div class="gauge-wrap">
-      <div class="gauge"><div class="gauge-bg"></div><div class="gauge-fill" style="--deg:${deg - 180}deg;border-color:${color}"></div><div class="gauge-val" style="color:${color}">${score}</div></div>
-      <div class="gauge-label">${score >= 70 ? 'High Risk' : score >= 40 ? 'Moderate Risk' : 'Low Risk'}</div>
-    </div>`;
-    if (data.factors && data.factors.length) {
-      html += '<div class="result-box"><div class="result-label">Risk Factors</div>';
-      data.factors.forEach(f => {
-        const lvl = (f.impact || f.level || '').toLowerCase();
-        const cls = lvl === 'high' ? 'tag-red' : lvl === 'medium' ? 'tag-amber' : 'tag-green';
-        html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:.4rem 0;border-bottom:1px solid var(--border)"><span>${esc(f.name || f.factor)}</span><span class="tag ${cls}">${esc(f.impact || f.level || '')}</span></div>`;
-      });
-      html += '</div>';
-    }
-    if (data.recommendations && data.recommendations.length) {
-      html += '<div class="result-box"><div class="result-label">Recommendations</div>';
-      data.recommendations.forEach(r => { html += `<div class="rec">${esc(r)}</div>`; });
-      html += '</div>';
-    }
-    el.innerHTML = html;
+    if (!data) data = demoAuditRisk();
+    renderAuditResults(data, el);
   } catch (err) { showError(el, err.message); }
+  setLoading('btn-audit', false);
 }
 
-/* ═══ QUARTERLY EST ═══ */
-async function calcQuarterly() {
-  const el = $('qtr-results');
+function demoAuditRisk() {
+  let score = 10;
+  const factors = [];
+  const ratio = num('aud-deductions') / (num('aud-income') || 1);
+  if (ratio > 0.4) { score += 15; factors.push({factor: 'High deduction ratio', impact: 15, detail: `${(ratio * 100).toFixed(0)}% of income`}); }
+  if ($('aud-home').value === 'true') { score += 8; factors.push({factor: 'Home office deduction', impact: 8, detail: 'Historically higher audit trigger'}); }
+  if ($('aud-cash').value === 'true') { score += 15; factors.push({factor: 'Cash-intensive business', impact: 15, detail: 'IRS focus area'}); }
+  if ($('aud-crypto').value === 'true') { score += 8; factors.push({factor: 'Crypto transactions', impact: 8, detail: 'Active IRS targeting'}); }
+  if (num('aud-income') > 200000) { score += 5; factors.push({factor: 'High income bracket', impact: 5, detail: 'Elevated audit rates'}); }
+  return {risk_score: Math.min(score, 100), risk_level: score > 50 ? 'Elevated' : score > 25 ? 'Moderate' : 'Low', factors, recommendations: ['Maintain thorough documentation for all deductions', 'Keep contemporaneous records for business expenses']};
+}
+
+function renderAuditResults(data, el) {
+  const score = data.risk_score || 0;
+  const color = score >= 70 ? 'var(--red)' : score >= 40 ? 'var(--amber)' : 'var(--green)';
+  const deg = (score / 100) * 180;
+  let html = !apiOnline ? '<div class="server-hint">Showing demo data — API offline</div>' : '';
+
+  html += `<div class="gauge-wrap"><div class="gauge"><div class="gauge-bg"></div><div class="gauge-fill" style="--deg:${deg - 180}deg;border-color:${color}"></div><div class="gauge-val" style="color:${color}">${score}</div></div><div class="gauge-label">${data.risk_level || 'Unknown'} Risk</div></div>`;
+
+  if (data.factors && data.factors.length) {
+    html += '<div class="result-box"><div class="stat-label" style="margin-bottom:.5rem">Risk Factors</div>';
+    data.factors.sort((a, b) => (b.impact || 0) - (a.impact || 0));
+    data.factors.forEach(f => {
+      const cls = (f.impact || 0) >= 12 ? 'tag-red' : (f.impact || 0) >= 8 ? 'tag-amber' : 'tag-green';
+      html += `<div style="display:flex;justify-content:space-between;align-items:center;padding:.5rem 0;border-bottom:1px solid var(--border)"><div><strong style="color:var(--white)">${esc(f.factor)}</strong><br><span style="font-size:.78rem;color:var(--text-dim)">${esc(f.detail || '')}</span></div><span class="tag ${cls}">+${f.impact} pts</span></div>`;
+    });
+    html += '</div>';
+  }
+
+  if (data.recommendations && data.recommendations.length) {
+    html += '<div class="result-box"><div class="stat-label" style="margin-bottom:.5rem">Recommendations</div>';
+    data.recommendations.forEach(r => { html += `<div class="rec">${esc(r)}</div>`; });
+    html += '</div>';
+  }
+  el.innerHTML = html;
+}
+
+/* ═══ STRATEGY OPTIMIZER ═══ */
+async function optimizeStrategy() {
+  const el = $('strategy-results');
+  setLoading('btn-strategy', true);
   showLoading(el);
   try {
-    const data = await apiPost('/v1/quarterly/estimate', {
-      gross_income: num('qtr-income'), business_expenses: num('qtr-expenses'),
-      filing_status: $('qtr-filing').value, additional_deductions: num('qtr-deductions'),
-      self_employed: $('qtr-se').value === 'true', state: $('qtr-state').value
+    let data = await apiPost('/v1/strategy/optimize', {
+      gross_income: num('str-income'), business_expenses: num('str-expenses'),
+      owner_salary: num('str-salary'), filing_status: $('str-filing').value,
+      entity_type: $('str-entity').value, state: $('str-state').value,
+      assets: [], expenses: []
     });
-    let html = '<div class="results">';
-    if (data.annual_tax != null || data.quarterly_payment != null) {
-      html += '<div class="cards-row">';
-      if (data.annual_tax != null) html += `<div class="card"><div class="result-label">Annual Tax</div><div class="result-value">${fmt(data.annual_tax)}</div></div>`;
-      if (data.quarterly_payment != null) html += `<div class="card"><div class="result-label">Quarterly Payment</div><div class="result-value">${fmt(data.quarterly_payment)}</div></div>`;
-      if (data.effective_rate != null) html += `<div class="card"><div class="result-label">Effective Rate</div><div class="result-value" style="font-size:1.4rem">${pct(data.effective_rate)}</div></div>`;
-      html += '</div>';
-    }
-    const quarters = data.quarters || data.schedule || [];
-    if (quarters.length) {
-      html += '<div class="result-box"><div class="result-label">Payment Schedule</div><div class="tbl-wrap"><table><thead><tr><th>Quarter</th><th>Due Date</th><th class="text-right">Amount</th><th>Status</th></tr></thead><tbody>';
-      quarters.forEach(q => {
-        const isPast = q.due_date && new Date(q.due_date) < new Date();
-        html += `<tr><td>${q.quarter || q.period}</td><td>${q.due_date || '—'}</td><td class="text-right" style="font-weight:700">${fmt(q.amount || data.quarterly_payment || 0)}</td><td>${isPast ? '<span class="tag tag-amber">Past Due</span>' : '<span class="tag tag-green">Upcoming</span>'}</td></tr>`;
-      });
-      html += '</tbody></table></div></div>';
-    }
-    if (data.breakdown) {
-      html += '<div class="result-box"><div class="result-label">Tax Breakdown</div>';
-      for (const [k, v] of Object.entries(data.breakdown)) {
-        html += `<div style="display:flex;justify-content:space-between;padding:.35rem 0;border-bottom:1px solid var(--border)"><span style="color:var(--gray)">${esc(k.replace(/_/g, ' '))}</span><span style="font-weight:600">${fmt(v)}</span></div>`;
-      }
-      html += '</div>';
-    }
-    html += '</div>';
-    el.innerHTML = html;
-  } catch (err) {
-    showError(el, err.message);
-    fallbackQuarterly(el);
-  }
+    if (!data) data = demoStrategy();
+    renderStrategyResults(data, el);
+  } catch (err) { showError(el, err.message); }
+  setLoading('btn-strategy', false);
 }
 
-/* Client-side fallback when API is unavailable */
-function fallbackQuarterly(el) {
-  const BRACKETS = [[11600,.10],[47150,.12],[100525,.22],[191950,.24],[243725,.32],[609350,.35],[Infinity,.37]];
-  const gross = num('qtr-income'), exp = num('qtr-expenses'), addl = num('qtr-deductions');
-  const isSE = $('qtr-se').value === 'true';
-  const filing = $('qtr-filing').value;
-  const net = gross - exp;
-  const se = isSE ? (Math.min(net * .9235, 168600) * .124 + net * .9235 * .029) : 0;
-  const stdDed = filing === 'married_joint' ? 29200 : filing === 'head_household' ? 21900 : 14600;
-  const taxable = Math.max(0, net - se / 2 - stdDed - addl);
-  let fedTax = 0, prev = 0;
-  for (const [ceil, rate] of BRACKETS) {
-    const portion = Math.min(taxable, ceil) - prev;
-    if (portion <= 0) break;
-    fedTax += portion * rate;
-    prev = ceil;
-  }
-  const total = fedTax + se;
-  const qtr = Math.round(total / 4);
-  const dates = ['Apr 15, 2026', 'Jun 15, 2026', 'Sep 15, 2026', 'Jan 15, 2027'];
-  let html = '<div class="results" style="margin-top:1rem"><div class="result-box"><div class="result-label">Client-Side Estimate (API offline)</div>';
-  html += '<div class="cards-row">';
-  html += `<div class="card"><div class="result-label">Annual Tax</div><div class="result-value">${fmt(total)}</div></div>`;
-  html += `<div class="card"><div class="result-label">Quarterly Payment</div><div class="result-value">${fmt(qtr)}</div></div>`;
-  html += '</div>';
-  html += '<div class="tbl-wrap"><table><thead><tr><th>Quarter</th><th>Due Date</th><th class="text-right">Amount</th></tr></thead><tbody>';
-  dates.forEach((d, i) => { html += `<tr><td>Q${i + 1}</td><td>${d}</td><td class="text-right" style="font-weight:700">${fmt(qtr)}</td></tr>`; });
-  html += '</tbody></table></div></div></div>';
-  el.innerHTML += html;
+function demoStrategy() {
+  const net = num('str-income') - num('str-expenses');
+  return {
+    current_entity: $('str-entity').value,
+    total_potential_savings: net * 0.08,
+    strategies: [
+      {strategy: 'Entity Restructuring', description: 'Switch to S-Corp to reduce SE tax on distributions', estimated_annual_savings: net * 0.04, complexity: 'Medium', timeline: '1-3 months'},
+      {strategy: 'Retirement Contribution Optimization', description: 'Maximize Solo 401(k) contributions', estimated_annual_savings: Math.min(net * 0.25, 69000) * 0.24, complexity: 'Low', timeline: 'Before year end'},
+      {strategy: 'Income Timing', description: 'Defer Q4 income to next tax year', estimated_annual_savings: net * 0.015, complexity: 'Medium', timeline: 'Q4 planning'}
+    ],
+    disclaimer: 'Estimates for planning purposes only.'
+  };
 }
 
-function num(id) { return parseFloat($(id).value) || 0; }
-function esc(s) { const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+function renderStrategyResults(data, el) {
+  let html = !apiOnline ? '<div class="server-hint">Showing demo data — API offline</div>' : '';
+
+  html += `<div class="stat-grid"><div class="stat-card"><div class="stat-label">Total Potential Savings</div><div class="stat-val">${fmt(data.total_potential_savings || 0)}</div><div class="stat-detail">across all strategies</div></div><div class="stat-card"><div class="stat-label">Current Entity</div><div class="stat-val" style="font-size:1.2rem;color:var(--white)">${esc(data.current_entity || 'N/A')}</div></div></div>`;
+
+  if (data.strategies && data.strategies.length) {
+    data.strategies.forEach((s, i) => {
+      html += `<div class="strategy-card"><div class="strategy-header"><div class="strategy-name">${i + 1}. ${esc(s.strategy)}</div><div class="strategy-savings">${fmt(s.estimated_annual_savings)}<span style="font-size:.7rem;color:var(--text-dim);font-weight:400">/yr</span></div></div>
+        <p style="font-size:.85rem;color:var(--text);margin-bottom:.5rem">${esc(s.description)}</p>
+        <div class="strategy-meta"><span class="tag ${s.complexity === 'Low' ? 'tag-green' : s.complexity === 'Medium' ? 'tag-amber' : 'tag-red'}">${esc(s.complexity)}</span><span class="tag tag-blue">${esc(s.timeline)}</span></div></div>`;
+    });
+  }
+
+  if (data.disclaimer) html += `<div class="rec warn">${esc(data.disclaimer)}</div>`;
+  el.innerHTML = html;
+}
+
+/* ═══ AI TAX ADVISOR CHAT ═══ */
+function appendChat(role, text) {
+  const el = $('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + role;
+  if (role === 'assistant') div.innerHTML = formatAI(text);
+  else div.textContent = text;
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function showTyping() {
+  const el = $('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-typing'; div.id = 'typingInd';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  el.appendChild(div); el.scrollTop = el.scrollHeight;
+}
+
+function hideTyping() { const t = $('typingInd'); if (t) t.remove(); }
+
+async function sendChat() {
+  const input = $('chatInput');
+  const question = input.value.trim();
+  if (!question) return;
+  input.value = '';
+  appendChat('user', question);
+  setLoading('btn-chat', true);
+  showTyping();
+
+  try {
+    let data = await apiPost('/v1/ai/chat', {question});
+    hideTyping();
+    if (data && data.answer) {
+      appendChat('assistant', data.answer);
+    } else if (data && data.error) {
+      appendChat('system', 'AI unavailable: ' + data.error);
+    } else {
+      appendChat('assistant', demoChatResponse(question));
+    }
+  } catch {
+    hideTyping();
+    appendChat('assistant', demoChatResponse(question));
+  }
+  setLoading('btn-chat', false);
+}
+
+function demoChatResponse(q) {
+  const lower = q.toLowerCase();
+  if (lower.includes('s-corp') || lower.includes('s corp') || lower.includes('entity')) {
+    return "**S-Corp Election Considerations** (demo mode)\n\nAn S-Corp election typically becomes beneficial when net self-employment income exceeds **$50,000-$60,000**.\n\n**Key benefits:**\n- Only pay FICA/SE tax on \"reasonable salary\" portion\n- Remaining profit distributed as dividends (no SE tax)\n- Potential savings of 15.3% on distributions\n\n**Requirements:**\n- Must pay yourself a \"reasonable salary\" (IRS scrutinizes this)\n- Additional payroll costs ($500-2,000/yr)\n- Must file Form 1120-S\n\n*IRC §1361-1379 governs S-Corp requirements.*\n\n> Connect to the API for personalized analysis. This is informational only — consult your tax professional.";
+  }
+  if (lower.includes('deduct') || lower.includes('write off') || lower.includes('expense')) {
+    return "**Common Missed Deductions** (demo mode)\n\n1. **Home Office** — Simplified method: $5/sq ft up to 300 sq ft ($1,500 max)\n2. **Health Insurance Premiums** — Self-employed can deduct 100%\n3. **Retirement Contributions** — SEP-IRA up to 25% of net SE income\n4. **Business Use of Vehicle** — 2024 rate: 67 cents/mile\n5. **Professional Development** — Courses, books, conferences\n6. **Internet/Phone** — Business-use percentage\n\n> Start the API for AI-powered deduction analysis.";
+  }
+  return "**TaxShield AI** (demo mode — API offline)\n\nI can help with:\n- **Entity selection** — S-Corp vs LLC vs C-Corp analysis\n- **Deduction optimization** — finding missed write-offs\n- **Tax planning** — retirement, timing, and strategy\n- **Audit defense** — preparation and documentation\n\n> Start the server for real AI tax advice:\n> `uvicorn server.app:app --reload --port 8000`\n\n*This is for informational purposes only — consult a qualified tax professional.*";
+}
 </script>
 </body>
 </html>

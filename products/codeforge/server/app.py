@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import sys
 import os
 import re
 from pathlib import Path
@@ -8,6 +9,9 @@ from typing import Optional
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from products._shared.ai_engine import AIEngine
 
 from .indexer import LANG_EXTENSIONS, RepoIndexer
 from .reviewer import CodeReviewer
@@ -30,6 +34,15 @@ app.add_middleware(
 indexer = RepoIndexer()
 reviewer = CodeReviewer()
 _search_engine: Optional[SemanticSearch] = None
+
+ai = AIEngine(
+    default_system=(
+        "You are CodeForge AI, an expert software architect and code reviewer. "
+        "Provide precise, actionable code analysis with specific line references, "
+        "security implications, performance considerations, and refactoring suggestions. "
+        "Use proper technical terminology for the detected language."
+    )
+)
 
 
 def _get_search_engine() -> SemanticSearch:
@@ -67,6 +80,35 @@ class ArchitectureRequest(BaseModel):
 
 class DocsRequest(BaseModel):
     file_path: str
+
+
+class AIReviewRequest(BaseModel):
+    diff: str
+    focus: str = ""
+
+
+class AIRefactorRequest(BaseModel):
+    code: str
+    language: str = "python"
+    goal: str = ""
+
+
+class AIExplainRequest(BaseModel):
+    code: str
+    language: str = ""
+    detail_level: str = "detailed"
+
+
+class AIGenerateDocsRequest(BaseModel):
+    code: str
+    language: str = "python"
+    style: str = "google"
+
+
+class AIChatRequest(BaseModel):
+    question: str
+    code_context: str = ""
+    language: str = ""
 
 
 # ---- Endpoints ----
@@ -224,4 +266,149 @@ async def generate_docs(req: DocsRequest):
         "language": lang,
         "entries": doc_entries,
         "total": len(doc_entries),
+    }
+
+
+# ---- AI-Powered Endpoints ----
+
+
+@app.post("/v1/ai/review")
+async def ai_review(req: AIReviewRequest):
+    if not req.diff.strip():
+        raise HTTPException(status_code=400, detail="Diff text is empty")
+
+    focus_clause = f"\nFocus specifically on: {req.focus}" if req.focus else ""
+    prompt = (
+        f"Perform a deep code review of the following diff. Identify:\n"
+        f"1. Security vulnerabilities (injection, auth issues, data exposure)\n"
+        f"2. Performance problems (N+1 queries, unnecessary allocations, blocking calls)\n"
+        f"3. Logic errors and edge cases\n"
+        f"4. Code style and maintainability issues\n"
+        f"5. Testing gaps\n"
+        f"{focus_clause}\n\n"
+        f"For each finding, provide: severity (critical/warning/info), category, "
+        f"file and line reference, description, and a concrete fix.\n\n"
+        f"Respond in JSON format with a top-level key \"findings\" containing an array of objects, "
+        f"each with keys: severity, category, location, description, suggestion.\n"
+        f"Also include a \"summary\" key with a brief overall assessment.\n\n"
+        f"```diff\n{req.diff}\n```"
+    )
+
+    resp = await ai.complete(prompt, temperature=0.3)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+
+    return {
+        "ai_review": resp.text,
+        "model": resp.model,
+        "tokens": {"input": resp.input_tokens, "output": resp.output_tokens},
+    }
+
+
+@app.post("/v1/ai/refactor")
+async def ai_refactor(req: AIRefactorRequest):
+    if not req.code.strip():
+        raise HTTPException(status_code=400, detail="Code snippet is empty")
+
+    goal_clause = f"\nRefactoring goal: {req.goal}" if req.goal else ""
+    prompt = (
+        f"Analyze the following {req.language} code and provide refactoring suggestions.\n"
+        f"{goal_clause}\n\n"
+        f"For each suggestion provide:\n"
+        f"1. What to change and why\n"
+        f"2. The refactored code snippet\n"
+        f"3. Impact on readability, performance, and maintainability\n\n"
+        f"```{req.language}\n{req.code}\n```"
+    )
+
+    resp = await ai.complete(prompt, temperature=0.4)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+
+    return {
+        "refactoring": resp.text,
+        "language": req.language,
+        "model": resp.model,
+        "tokens": {"input": resp.input_tokens, "output": resp.output_tokens},
+    }
+
+
+@app.post("/v1/ai/explain")
+async def ai_explain(req: AIExplainRequest):
+    if not req.code.strip():
+        raise HTTPException(status_code=400, detail="Code snippet is empty")
+
+    lang_hint = f" ({req.language})" if req.language else ""
+    prompt = (
+        f"Explain the following code{lang_hint} at a {req.detail_level} level.\n\n"
+        f"Cover:\n"
+        f"- What the code does (high-level purpose)\n"
+        f"- How it works (step-by-step logic)\n"
+        f"- Key patterns and design decisions used\n"
+        f"- Any potential issues or edge cases\n"
+        f"- Dependencies and side effects\n\n"
+        f"```{req.language}\n{req.code}\n```"
+    )
+
+    resp = await ai.complete(prompt, temperature=0.5)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+
+    return {
+        "explanation": resp.text,
+        "model": resp.model,
+        "tokens": {"input": resp.input_tokens, "output": resp.output_tokens},
+    }
+
+
+@app.post("/v1/ai/generate-docs")
+async def ai_generate_docs(req: AIGenerateDocsRequest):
+    if not req.code.strip():
+        raise HTTPException(status_code=400, detail="Code is empty")
+
+    prompt = (
+        f"Generate comprehensive documentation for the following {req.language} code "
+        f"using {req.style} docstring style.\n\n"
+        f"For each function/class/method, generate:\n"
+        f"- A clear summary line\n"
+        f"- Parameter descriptions with types\n"
+        f"- Return value description\n"
+        f"- Usage examples where helpful\n"
+        f"- Any raised exceptions\n\n"
+        f"Return the fully documented version of the code.\n\n"
+        f"```{req.language}\n{req.code}\n```"
+    )
+
+    resp = await ai.complete(prompt, temperature=0.3)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+
+    return {
+        "documented_code": resp.text,
+        "style": req.style,
+        "model": resp.model,
+        "tokens": {"input": resp.input_tokens, "output": resp.output_tokens},
+    }
+
+
+@app.post("/v1/ai/chat")
+async def ai_chat(req: AIChatRequest):
+    if not req.question.strip():
+        raise HTTPException(status_code=400, detail="Question is empty")
+
+    context_block = ""
+    if req.code_context.strip():
+        lang = req.language or "text"
+        context_block = f"\n\nCode context:\n```{lang}\n{req.code_context}\n```"
+
+    prompt = f"{req.question}{context_block}"
+
+    resp = await ai.complete(prompt, temperature=0.6)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+
+    return {
+        "answer": resp.text,
+        "model": resp.model,
+        "tokens": {"input": resp.input_tokens, "output": resp.output_tokens},
     }

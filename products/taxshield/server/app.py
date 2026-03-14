@@ -1,11 +1,16 @@
 from __future__ import annotations
 
+import sys
+import os
 from datetime import date
 from typing import Optional
 
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from products._shared.ai_engine import AIEngine
 
 from deductions import Expense, analyze_deductions
 from entity import compare_entities
@@ -23,6 +28,16 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+ai = AIEngine(
+    default_system=(
+        "You are TaxShield AI, a senior tax strategist and CPA with expertise in US "
+        "federal and state tax law. Provide specific, actionable tax planning advice "
+        "with code section references, savings estimates, and compliance considerations. "
+        "Always note that this is for informational purposes and clients should consult "
+        "their tax professional."
+    )
 )
 
 
@@ -91,6 +106,46 @@ class StrategyRequest(BaseModel):
     assets: list[AssetItem] = Field(default_factory=list)
     expenses: list[ExpenseItem] = Field(default_factory=list)
     state: str = ""
+
+
+class AIStrategyRequest(BaseModel):
+    gross_income: float
+    filing_status: str = "single"
+    entity_type: str = "sole_prop"
+    business_expenses: float = 0
+    deductions_summary: str = ""
+    state: str = ""
+    goals: str = ""
+
+
+class AIDeductionAdvisorRequest(BaseModel):
+    expenses: list[ExpenseItem]
+    gross_income: float = 100000
+    filing_status: str = "single"
+    industry: str = ""
+
+
+class AIEntityAdviceRequest(BaseModel):
+    gross_income: float
+    business_expenses: float = 0
+    owner_salary: float = 0
+    num_employees: int = 0
+    state: str = ""
+    industry: str = ""
+    growth_plans: str = ""
+
+
+class AIAuditDefenseRequest(BaseModel):
+    audit_type: str = "correspondence"
+    issues: str = ""
+    gross_income: float = 0
+    total_deductions: float = 0
+    entity_type: str = "individual"
+
+
+class AIChatRequest(BaseModel):
+    question: str
+    context: str = ""
 
 
 # ── Helpers ────────────────────────────────────────────────────────────────
@@ -408,4 +463,154 @@ def strategy_optimize(req: StrategyRequest):
         "strategies": strategies,
         "total_potential_savings": round(total_savings, 2),
         "disclaimer": "Estimates are for planning purposes only. Consult a qualified tax professional before making tax decisions.",
+    }
+
+
+# ── AI-Powered Endpoints ──────────────────────────────────────────────────
+
+
+@app.post("/v1/ai/strategy")
+async def ai_strategy(req: AIStrategyRequest):
+    deductions_info = f"\nDeductions summary: {req.deductions_summary}" if req.deductions_summary else ""
+    goals_info = f"\nClient goals: {req.goals}" if req.goals else ""
+    state_info = f"\nState: {req.state}" if req.state else ""
+
+    prompt = (
+        f"Provide a comprehensive tax strategy analysis for:\n"
+        f"- Gross income: ${req.gross_income:,.0f}\n"
+        f"- Filing status: {req.filing_status}\n"
+        f"- Entity type: {req.entity_type}\n"
+        f"- Business expenses: ${req.business_expenses:,.0f}\n"
+        f"{deductions_info}{state_info}{goals_info}\n\n"
+        f"Include:\n"
+        f"1. Immediate tax-saving opportunities with estimated dollar savings\n"
+        f"2. Entity structure recommendations with pros/cons\n"
+        f"3. Retirement contribution optimization (SEP-IRA, Solo 401k, etc.)\n"
+        f"4. Income timing and deferral strategies\n"
+        f"5. Relevant IRC code sections\n"
+        f"6. State-specific considerations if applicable\n"
+        f"7. Compliance risks to watch for\n"
+    )
+
+    resp = await ai.complete(prompt, temperature=0.4)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+
+    return {
+        "strategy": resp.text,
+        "model": resp.model,
+        "tokens": {"input": resp.input_tokens, "output": resp.output_tokens},
+    }
+
+
+@app.post("/v1/ai/deduction-advisor")
+async def ai_deduction_advisor(req: AIDeductionAdvisorRequest):
+    expense_lines = "\n".join(
+        f"  - {e.description}: ${e.amount:,.2f}" for e in req.expenses
+    )
+    industry_info = f"\nIndustry: {req.industry}" if req.industry else ""
+
+    prompt = (
+        f"Analyze these business expenses for tax deduction optimization:\n"
+        f"Gross income: ${req.gross_income:,.0f}\n"
+        f"Filing status: {req.filing_status}\n"
+        f"{industry_info}\n\n"
+        f"Expenses:\n{expense_lines}\n\n"
+        f"For each expense, advise:\n"
+        f"1. Correct IRS category and Schedule\n"
+        f"2. Deductibility percentage (100%, 50% for meals, etc.)\n"
+        f"3. Documentation requirements\n"
+        f"4. Red flags that could trigger audit\n\n"
+        f"Also suggest commonly missed deductions for this income level and profile.\n"
+    )
+
+    resp = await ai.complete(prompt, temperature=0.3)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+
+    return {
+        "advice": resp.text,
+        "model": resp.model,
+        "tokens": {"input": resp.input_tokens, "output": resp.output_tokens},
+    }
+
+
+@app.post("/v1/ai/entity-advice")
+async def ai_entity_advice(req: AIEntityAdviceRequest):
+    prompt = (
+        f"Provide entity structure recommendation for:\n"
+        f"- Gross income: ${req.gross_income:,.0f}\n"
+        f"- Business expenses: ${req.business_expenses:,.0f}\n"
+        f"- Desired owner salary: ${req.owner_salary:,.0f}\n"
+        f"- Number of employees: {req.num_employees}\n"
+        f"- State: {req.state or 'Not specified'}\n"
+        f"- Industry: {req.industry or 'Not specified'}\n"
+        f"- Growth plans: {req.growth_plans or 'Not specified'}\n\n"
+        f"Compare Sole Proprietorship, Single-Member LLC, S-Corp, and C-Corp.\n"
+        f"For each, provide:\n"
+        f"1. Estimated total tax liability\n"
+        f"2. Self-employment tax impact\n"
+        f"3. Liability protection level\n"
+        f"4. Administrative burden and costs\n"
+        f"5. Best fit scenario\n\n"
+        f"Give a clear recommendation with the reasoning.\n"
+    )
+
+    resp = await ai.complete(prompt, temperature=0.4)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+
+    return {
+        "recommendation": resp.text,
+        "model": resp.model,
+        "tokens": {"input": resp.input_tokens, "output": resp.output_tokens},
+    }
+
+
+@app.post("/v1/ai/audit-defense")
+async def ai_audit_defense(req: AIAuditDefenseRequest):
+    prompt = (
+        f"Provide audit defense strategy for:\n"
+        f"- Audit type: {req.audit_type}\n"
+        f"- Issues flagged: {req.issues or 'General review'}\n"
+        f"- Gross income: ${req.gross_income:,.0f}\n"
+        f"- Total deductions: ${req.total_deductions:,.0f}\n"
+        f"- Entity type: {req.entity_type}\n\n"
+        f"Include:\n"
+        f"1. Immediate steps to take upon receiving notice\n"
+        f"2. Documentation to gather and organize\n"
+        f"3. Common IRS strategies for this type of audit\n"
+        f"4. Rights under the Taxpayer Bill of Rights\n"
+        f"5. When to engage professional representation\n"
+        f"6. Timeline expectations\n"
+        f"7. Potential outcomes and how to prepare for each\n"
+    )
+
+    resp = await ai.complete(prompt, temperature=0.3)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+
+    return {
+        "defense_strategy": resp.text,
+        "model": resp.model,
+        "tokens": {"input": resp.input_tokens, "output": resp.output_tokens},
+    }
+
+
+@app.post("/v1/ai/chat")
+async def ai_chat(req: AIChatRequest):
+    if not req.question.strip():
+        raise HTTPException(status_code=400, detail="Question is empty")
+
+    context_block = f"\n\nAdditional context:\n{req.context}" if req.context.strip() else ""
+    prompt = f"{req.question}{context_block}"
+
+    resp = await ai.complete(prompt, temperature=0.5)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+
+    return {
+        "answer": resp.text,
+        "model": resp.model,
+        "tokens": {"input": resp.input_tokens, "output": resp.output_tokens},
     }

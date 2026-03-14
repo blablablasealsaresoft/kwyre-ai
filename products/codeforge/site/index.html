@@ -111,6 +111,34 @@
     .drop-zone{border:2px dashed var(--border);border-radius:6px;padding:2rem;text-align:center;color:var(--text-dim);font-size:.82rem;cursor:pointer;transition:all .2s;margin-bottom:1rem}
     .drop-zone:hover,.drop-zone.dragover{border-color:var(--orange);background:var(--orange-dim)}
     .drop-zone p{pointer-events:none}
+    /* AI Review section */
+    .ai-review-section{margin-top:1.5rem;border-top:1px solid var(--border);padding-top:1rem}
+    .ai-review-header{font-size:.88rem;font-weight:600;color:var(--orange);margin-bottom:.75rem;display:flex;align-items:center;gap:.5rem}
+    .ai-review-body{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1rem;font-size:.82rem;line-height:1.7;white-space:pre-wrap;color:var(--text);max-height:500px;overflow-y:auto}
+    .ai-review-body code{background:var(--surface2);padding:.1rem .35rem;border-radius:3px;font-size:.78rem;color:var(--orange)}
+    /* AI Chat */
+    .chat-container{display:flex;flex-direction:column;height:calc(100vh - 200px);max-height:700px}
+    .chat-messages{flex:1;overflow-y:auto;padding:.5rem 0;display:flex;flex-direction:column;gap:.75rem}
+    .chat-msg{max-width:85%;padding:.7rem 1rem;border-radius:8px;font-size:.82rem;line-height:1.7;word-wrap:break-word}
+    .chat-msg.user{align-self:flex-end;background:var(--orange);color:var(--bg);border-bottom-right-radius:2px}
+    .chat-msg.assistant{align-self:flex-start;background:var(--surface);border:1px solid var(--border);color:var(--text);border-bottom-left-radius:2px}
+    .chat-msg.assistant pre{background:var(--surface2);border:1px solid var(--border);border-radius:4px;padding:.5rem;margin:.4rem 0;overflow-x:auto;font-size:.78rem}
+    .chat-msg.assistant code{font-family:var(--mono);font-size:.78rem}
+    .chat-msg.system{align-self:center;background:transparent;color:var(--text-dim);font-size:.72rem;font-style:italic;padding:.3rem}
+    .chat-input-area{display:flex;gap:.5rem;margin-top:.75rem;align-items:flex-end}
+    .chat-input-area textarea{flex:1;min-height:42px;max-height:150px;resize:vertical;padding:.55rem .7rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.82rem;font-family:var(--mono)}
+    .chat-input-area textarea:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 2px var(--orange-glow)}
+    .chat-context-toggle{font-size:.72rem;color:var(--text-dim);cursor:pointer;margin-top:.35rem;display:flex;align-items:center;gap:.3rem}
+    .chat-context-toggle:hover{color:var(--orange)}
+    .chat-context-area{display:none;margin-top:.5rem}
+    .chat-context-area.open{display:block}
+    .chat-context-area textarea{width:100%;min-height:80px;padding:.5rem;background:var(--surface2);border:1px solid var(--border);border-radius:4px;color:var(--text);font-size:.78rem;font-family:var(--mono);resize:vertical}
+    .chat-context-area textarea:focus{outline:none;border-color:var(--orange)}
+    .chat-typing{display:flex;gap:4px;padding:.5rem 1rem;align-self:flex-start}
+    .chat-typing span{width:6px;height:6px;background:var(--text-dim);border-radius:50%;animation:typingBounce .6s ease-in-out infinite}
+    .chat-typing span:nth-child(2){animation-delay:.15s}
+    .chat-typing span:nth-child(3){animation-delay:.3s}
+    @keyframes typingBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
     footer{text-align:center;padding:1rem;border-top:1px solid var(--border);font-size:.68rem;color:var(--text-dim)}
     @media(max-width:640px){
       .form-row{grid-template-columns:1fr}
@@ -118,6 +146,7 @@
       .lang-badges{display:none}
       .tabs{overflow-x:auto}.tab{white-space:nowrap;flex-shrink:0}
       .rc-loc{margin-left:0;width:100%}
+      .chat-msg{max-width:95%}
     }
   </style>
 </head>
@@ -143,6 +172,7 @@
   <button class="tab" data-tab="search">Code Search</button>
   <button class="tab" data-tab="review">Code Review</button>
   <button class="tab" data-tab="arch">Architecture</button>
+  <button class="tab" data-tab="ai">AI Assistant</button>
 </div>
 
 <!-- ─── Index Repo ─── -->
@@ -233,6 +263,31 @@
     <div class="empty-state">
       <div class="icon">&#128736;</div>
       <p>Enter a repository path to analyze its architecture.</p>
+    </div>
+  </div>
+</div>
+
+<!-- ─── AI Assistant ─── -->
+<div class="panel" id="panel-ai">
+  <h2 class="section-title">AI Assistant</h2>
+  <div id="aiError" class="error-banner"></div>
+
+  <div class="chat-container">
+    <div class="chat-messages" id="chatMessages">
+      <div class="chat-msg system">Ask questions about code, request explanations, get refactoring advice, or generate documentation.</div>
+    </div>
+    <div class="chat-context-toggle" onclick="toggleCodeContext()">
+      <span id="ctxArrow">&#9654;</span> Attach code context
+    </div>
+    <div class="chat-context-area" id="codeContextArea">
+      <textarea id="codeContextInput" placeholder="Paste code here to provide context for your question..."></textarea>
+    </div>
+    <div class="chat-input-area">
+      <textarea id="chatInput" placeholder="Ask about code... e.g. 'Explain this function' or 'How can I optimize this loop?'" rows="1" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChat()}"></textarea>
+      <button class="btn-action" id="btnChat" onclick="sendChat()">
+        <div class="spinner"></div>
+        <span class="btn-text">Send</span>
+      </button>
     </div>
   </div>
 </div>
@@ -429,15 +484,43 @@ function renderSearch(data) {
   el.innerHTML = html;
 }
 
-// ─── Code Review ───
+// ─── Code Review (with AI enhancement) ───
 async function reviewCode() {
   const btn = document.getElementById('btnReview');
   setLoading(btn, true);
   const diff = document.getElementById('diffInput').value;
-  let data = await apiCall('/v1/review/diff', { diff }, 'reviewError');
+
+  const reviewPromise = apiCall('/v1/review/diff', { diff }, 'reviewError');
+  const aiPromise = apiCall('/v1/ai/review', { diff }, 'reviewError');
+
+  let data = await reviewPromise;
   if (!data) data = demoReview();
   renderReview(data);
+
+  const aiData = await aiPromise;
+  if (aiData && !aiData.error) {
+    renderAIReview(aiData);
+  }
+
   setLoading(btn, false);
+}
+
+function renderAIReview(data) {
+  const el = document.getElementById('reviewResults');
+  if (!el) return;
+  let html = '<div class="ai-review-section">';
+  html += '<div class="ai-review-header">&#9889; AI Deep Analysis <span style="font-size:.65rem;color:var(--text-dim);font-weight:400">powered by ' + (data.model || 'Claude') + '</span></div>';
+  html += '<div class="ai-review-body">' + formatAIText(data.ai_review || '') + '</div>';
+  html += '</div>';
+  el.insertAdjacentHTML('beforeend', html);
+}
+
+function formatAIText(text) {
+  let s = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  s = s.replace(/```(\w*)\n([\s\S]*?)```/g, '<pre><code>$2</code></pre>');
+  s = s.replace(/`([^`]+)`/g, '<code>$1</code>');
+  s = s.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+  return s;
 }
 
 function demoReview() {
@@ -578,6 +661,86 @@ function renderArch(data) {
   }
 
   el.innerHTML = html;
+}
+
+// ─── AI Assistant Chat ───
+const chatHistory = [];
+
+function toggleCodeContext() {
+  const area = document.getElementById('codeContextArea');
+  const arrow = document.getElementById('ctxArrow');
+  area.classList.toggle('open');
+  arrow.innerHTML = area.classList.contains('open') ? '&#9660;' : '&#9654;';
+}
+
+function appendChatMsg(role, text) {
+  const el = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-msg ' + role;
+  if (role === 'assistant') {
+    div.innerHTML = formatAIText(text);
+  } else {
+    div.textContent = text;
+  }
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function showTyping() {
+  const el = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'chat-typing';
+  div.id = 'typingIndicator';
+  div.innerHTML = '<span></span><span></span><span></span>';
+  el.appendChild(div);
+  el.scrollTop = el.scrollHeight;
+}
+
+function hideTyping() {
+  const t = document.getElementById('typingIndicator');
+  if (t) t.remove();
+}
+
+async function sendChat() {
+  const input = document.getElementById('chatInput');
+  const question = input.value.trim();
+  if (!question) return;
+
+  const codeContext = document.getElementById('codeContextInput').value.trim();
+
+  input.value = '';
+  appendChatMsg('user', question);
+
+  const btn = document.getElementById('btnChat');
+  setLoading(btn, true);
+  showTyping();
+
+  const body = { question };
+  if (codeContext) body.code_context = codeContext;
+
+  const data = await apiCall('/v1/ai/chat', body, 'aiError');
+  hideTyping();
+
+  if (data && data.answer) {
+    appendChatMsg('assistant', data.answer);
+  } else if (data && data.error) {
+    appendChatMsg('system', 'AI unavailable: ' + data.error);
+  } else {
+    appendChatMsg('assistant', demoAIResponse(question));
+  }
+
+  setLoading(btn, false);
+}
+
+function demoAIResponse(q) {
+  const lower = q.toLowerCase();
+  if (lower.includes('explain') || lower.includes('what does')) {
+    return "**Code Explanation** (demo mode — API offline)\n\nThis code appears to implement a common pattern. Here's the breakdown:\n\n1. **Initialization**: Sets up the required state and dependencies\n2. **Processing**: Iterates through the input data applying transformations\n3. **Output**: Returns the processed result\n\n> Connect to the API for real AI-powered analysis of your specific code.";
+  }
+  if (lower.includes('refactor') || lower.includes('improve')) {
+    return "**Refactoring Suggestions** (demo mode)\n\n1. **Extract Method**: Break the large function into smaller, focused helpers\n2. **Reduce Nesting**: Use early returns to flatten conditional logic\n3. **Type Safety**: Add type annotations for better IDE support\n\n```python\n# Before\ndef process(data):\n    if data:\n        if data.valid:\n            return transform(data)\n\n# After  \ndef process(data):\n    if not data or not data.valid:\n        return None\n    return transform(data)\n```\n\n> Start the API server for real AI refactoring suggestions.";
+  }
+  return "**CodeForge AI** (demo mode — API offline)\n\nI can help you with:\n- **Code explanations** — understand complex logic\n- **Refactoring advice** — improve code quality\n- **Documentation** — generate docstrings and comments\n- **Architecture** — design patterns and best practices\n\n> Start the server to enable real AI analysis:\n> `cd products/codeforge && python -m uvicorn server.app:app --port 8000`";
 }
 </script>
 </body>

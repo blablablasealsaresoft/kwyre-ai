@@ -572,6 +572,19 @@ kwyre/
 │   ├── install_linux.sh       # Linux installer (systemd + iptables)
 │   ├── install_macos.sh       # macOS installer (launchd + PF)
 │   └── install_freebsd.sh     # FreeBSD installer (rc.d + PF)
+├── products/
+│   ├── _shared/
+│   │   ├── ai_engine.py         # Shared Anthropic Claude API client (all products)
+│   │   └── analytics.py         # Shared predictive analytics (Monte Carlo, regression, Bollinger)
+│   ├── quantedge/               # QuantEdge — quantitative finance platform
+│   ├── labmind/                 # LabMind — scientific research platform
+│   ├── dentai/                  # DentAI — dental practice intelligence
+│   ├── codeforge/               # CodeForge — AI code intelligence
+│   ├── taxshield/               # TaxShield — tax strategy platform
+│   ├── launchpad/               # LaunchPad — AI career platform
+│   ├── soulsync/                # SoulSync — AI dating & matching
+│   ├── nfl-playcaller/          # NFL PlayCaller — sports analytics
+│   └── nflonr/                  # NFLonr — formation-based play prediction
 ├── finetune/                  # Domain-specific fine-tuning pipeline
 ├── docs/                      # Compliance documentation package
 ├── tests/                     # 110 security tests + integration suite
@@ -618,6 +631,14 @@ kwyre/
 - [x] Windows x86_64 + NVIDIA CUDA support — .exe installer + portable ZIP, Docker Desktop + WSL2, PowerShell training scripts
 - [x] macOS Apple Silicon + MLX support — `.pkg` installer + portable tarball, Metal MPS acceleration, native MLX inference
 - [x] FreeBSD amd64 + NVIDIA CUDA support — `.txz` package + portable tarball, PF firewall isolation, rc.d service management
+
+**v1.6.1 (Current)**
+- [x] 9 AI-backed product applications — QuantEdge, LabMind, DentAI, CodeForge, TaxShield, LaunchPad, SoulSync, NFL PlayCaller, NFLonr
+- [x] Shared AI engine — Anthropic Claude API client with retry, rate limiting, and graceful fallback (`products/_shared/ai_engine.py`)
+- [x] Shared predictive analytics — Monte Carlo forecasting, regime detection, Bollinger Bands, win probability (`products/_shared/analytics.py`)
+- [x] Production frontends — dark-themed SPAs with domain-specific UIs, Chart.js visualizations, WebSocket real-time feeds
+- [x] AI endpoints wired into all 9 product backends — 40+ new AI-powered API endpoints across all products
+- [x] NFLonr — new formation-based play prediction app with 200+ formation DB and micro-read analysis engine
 
 **v1.7 (Planned)**
 - [ ] Kwyre Cloud launch — 32B/72B models on Lambda/DO H100 GPU clusters, API access, subscription billing
@@ -705,20 +726,22 @@ The model weights (Qwen3.5-4B, Qwen3.5-9B, Qwen3.5-0.8B base) are licensed under
 
 **Mint Rail LLC** — AI infrastructure, blockchain forensics, and applied machine learning.
 
-Kwyre is one product in the Mint Rail family. Each product is a standalone platform with its own brand, built on shared ML infrastructure:
+Kwyre is one product in the Mint Rail family. Each product is a fully functional, AI-backed web application with its own FastAPI backend and production frontend, built on shared ML infrastructure:
 
-| Product | Domain | Description |
-|---------|--------|-------------|
-| **Kwyre** | Secure local AI | Air-gappable inference for regulated industries (this repo) |
-| **QuantEdge** | Quantitative finance | AI-powered factor modeling, options pricing, and portfolio optimization for quant desks |
-| **LabMind** | Scientific research | Literature synthesis, experiment design, and hypothesis generation for researchers |
-| **DentAI** | Dental practice | Treatment planning, radiograph analysis, and insurance coding for dental professionals |
-| **CodeForge** | Software engineering | Codebase-aware AI with architecture analysis, code review, and refactoring for engineering teams |
-| **TaxShield** | Tax strategy | Tax planning optimization, deduction analysis, and compliance for accountants and firms |
-| **LaunchPad** | Job placement | AI-powered resume optimization, interview coaching, and job-candidate matching platform |
-| **SoulSync** | Dating & relationships | AI-driven compatibility scoring, personality analysis, and soulmate matching platform |
+| Product | Domain | Description | Stack |
+|---------|--------|-------------|-------|
+| **Kwyre** | Secure local AI | Air-gappable inference for regulated industries (this repo) | PyTorch + 4 inference backends |
+| **QuantEdge** | Quantitative finance | Black-Scholes pricing, portfolio optimization, VaR/CVaR risk, Monte Carlo forecasting, AI market commentary | FastAPI + Chart.js + Anthropic AI |
+| **LabMind** | Scientific research | FAISS literature search, experiment design, hypothesis generation, AI paper drafting | FastAPI + SentenceTransformers + AI |
+| **DentAI** | Dental practice | Treatment planning, CDT coding, SOAP notes, radiograph analysis, AI clinical intelligence | FastAPI + Anthropic AI |
+| **CodeForge** | Software engineering | AST repo indexing, semantic code search, AI code review, refactoring, architecture analysis | FastAPI + FAISS + Anthropic AI |
+| **TaxShield** | Tax strategy | Deduction analysis, entity comparison, depreciation planning, AI tax strategy advisor | FastAPI + Anthropic AI |
+| **LaunchPad** | Job placement | ATS resume scoring, cover letter generation, interview coaching, AI career advisor | FastAPI + Anthropic AI |
+| **SoulSync** | Dating & relationships | Big Five personality matching, swipe-style discovery, WebSocket chat, AI dating coach | FastAPI + WebSocket + Anthropic AI |
+| **NFL PlayCaller** | Sports analytics | AI scouting reports, play calling, blitz prediction, live game feed, predictive analytics | FastAPI + WebSocket + Anthropic AI |
+| **NFLonr** | Play prediction | Formation-based play prediction, pre-snap micro-read analysis, player tendency profiling | FastAPI + WebSocket + Anthropic AI |
 
-Each product has its own repository, website, and documentation. Visit [mintrail.com](https://mintrail.com) for the full portfolio.
+All products live under `products/` in this repo. Each has a FastAPI backend (`server/app.py`), production frontend (`site/index.html`), and Cloudflare Pages deployment config (`wrangler.toml`). Visit [mintrail.com](https://mintrail.com) for the full portfolio.
 
 We built Kwyre because we needed it ourselves. We cannot upload active federal investigation evidence to OpenAI. Neither can you.
 

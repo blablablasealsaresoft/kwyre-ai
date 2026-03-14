@@ -3,336 +3,272 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>SoulSync — Find Your Person. For Real.</title>
+  <title>SoulSync — Find Your Person</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
   <style>
     *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-    :root{--bg:#0a0810;--surface:#120f1a;--border:rgba(236,72,153,.12);--rose:#ec4899;--rose-dim:#be185d;--coral:#f472b6;--text:#ede9fe;--text-dim:#9ca3af;--radius:12px}
-    body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
-    .app-shell{max-width:860px;margin:0 auto;padding:0 20px}
-    header{padding:20px 0 12px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--border)}
-    .logo{font-size:1.3rem;font-weight:700;letter-spacing:-.02em;color:var(--rose)}
-    .logo span{color:var(--text)}
-    .conn-status{display:flex;align-items:center;gap:6px;font-size:.7rem;color:var(--text-dim);letter-spacing:.5px}
-    .conn-dot{width:7px;height:7px;border-radius:50%;background:#ef4444;flex-shrink:0}
-    .conn-dot.ok{background:#22c55e;box-shadow:0 0 6px #22c55e}
-    nav{display:flex;gap:0;margin:16px 0 20px;border-radius:10px;overflow:hidden;border:1px solid var(--border);background:var(--surface)}
-    nav button{flex:1;padding:10px 0;background:none;border:none;color:var(--text-dim);font-size:.82rem;font-weight:600;cursor:pointer;transition:all .2s;font-family:inherit}
-    nav button.active{background:linear-gradient(135deg,var(--rose),var(--rose-dim));color:#fff}
-    nav button:hover:not(.active){background:rgba(236,72,153,.06);color:var(--text)}
+    :root{
+      --bg:#0f0a14;--surface:#1a1225;--surface2:#231a30;--border:rgba(232,102,122,.12);
+      --rose:#e8667a;--rose-dim:#c44d63;--coral:#f4889a;--gold:#d4a574;--gold-dim:rgba(212,165,116,.15);
+      --text:#ede9fe;--text-dim:#9ca3af;--white:#fff;
+      --green:#34d399;--red:#f87171;
+      --heading:'Playfair Display',Georgia,serif;--body:'Inter',system-ui,sans-serif;
+    }
+    body{font-family:var(--body);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+    input,select,textarea,button{font-family:inherit}
+
+    header{display:flex;align-items:center;justify-content:space-between;padding:.9rem 1.5rem;border-bottom:1px solid var(--border)}
+    .logo{font-family:var(--heading);font-size:1.4rem;font-weight:700;color:var(--rose)}
+    .logo span{color:var(--gold)}
+    .conn{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--text-dim)}
+    .conn-dot{width:7px;height:7px;border-radius:50%;background:var(--red);transition:background .3s}
+    .conn-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
+
+    .shell{max-width:900px;margin:0 auto;padding:0 1rem}
+    nav{display:flex;gap:0;margin:1rem 0;border-radius:10px;overflow-x:auto;border:1px solid var(--border);background:var(--surface)}
+    nav button{flex:1;padding:.65rem .3rem;background:none;border:none;color:var(--text-dim);font-size:.78rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+    nav button:hover{color:var(--text);background:var(--surface2)}
+    nav button.active{background:linear-gradient(135deg,var(--rose),var(--rose-dim));color:var(--white)}
+
     .tab{display:none}.tab.active{display:block}
-    .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;margin-bottom:14px}
-    .card h3{font-size:1rem;font-weight:700;margin-bottom:10px;color:var(--coral)}
-    label.q{display:block;margin-bottom:14px}
-    label.q .q-text{display:block;font-size:.85rem;margin-bottom:6px;color:var(--text)}
-    label.q .q-text .dim{font-size:.7rem;color:var(--text-dim);margin-left:6px}
-    .likert{display:flex;gap:4px}
-    .likert button{flex:1;padding:6px 0;border:1px solid var(--border);background:none;color:var(--text-dim);border-radius:6px;font-size:.75rem;cursor:pointer;transition:all .15s;font-family:inherit}
-    .likert button.sel{background:var(--rose);border-color:var(--rose);color:#fff}
-    .likert button:hover:not(.sel){background:rgba(236,72,153,.1)}
-    .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:12px 28px;border-radius:100px;font-weight:700;font-size:.9rem;border:none;cursor:pointer;transition:all .25s;font-family:inherit}
-    .btn-primary{background:linear-gradient(135deg,var(--rose),var(--rose-dim));color:#fff;box-shadow:0 4px 20px rgba(236,72,153,.25)}
-    .btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 28px rgba(236,72,153,.35)}
-    .btn-primary:disabled{opacity:.4;cursor:not-allowed;transform:none}
-    .btn-outline{background:none;border:1.5px solid var(--rose);color:var(--rose)}
-    .btn-outline:hover{background:rgba(236,72,153,.1)}
-    .result-section{margin-top:20px;animation:fadeIn .4s ease-out}
-    .radar-wrap{display:flex;justify-content:center;padding:16px 0}
-    .badge{display:inline-block;padding:6px 16px;border-radius:100px;font-size:.8rem;font-weight:600;background:rgba(236,72,153,.12);color:var(--coral);border:1px solid var(--border)}
-    .values-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
-    .values-list span{padding:4px 12px;border-radius:100px;font-size:.75rem;background:rgba(236,72,153,.08);color:var(--text-dim);border:1px solid rgba(236,72,153,.1)}
-    .match-card{display:flex;gap:16px;align-items:center;padding:16px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;transition:border-color .2s}
-    .match-card:hover{border-color:var(--rose)}
-    .match-pct{font-size:1.6rem;font-weight:800;color:var(--rose);min-width:60px;text-align:center}
-    .match-info h4{font-size:.95rem;font-weight:700;margin-bottom:2px}
-    .match-info p{font-size:.78rem;color:var(--text-dim)}
-    .bar-row{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-    .bar-label{font-size:.78rem;color:var(--text-dim);width:110px;flex-shrink:0;text-align:right}
-    .bar-track{flex:1;height:8px;background:rgba(255,255,255,.06);border-radius:4px;overflow:hidden}
-    .bar-fill{height:100%;border-radius:4px;background:linear-gradient(90deg,var(--rose),var(--coral));transition:width .6s ease-out}
-    .bar-val{font-size:.75rem;color:var(--text);width:36px;font-weight:600}
-    .big-pct{font-size:4rem;font-weight:800;text-align:center;background:linear-gradient(135deg,var(--rose),var(--coral));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1;margin:16px 0}
-    .warn{padding:10px 14px;border-radius:8px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#fca5a5;font-size:.82rem;margin-top:10px}
-    .ice-card{padding:16px;background:linear-gradient(135deg,rgba(236,72,153,.06),rgba(190,24,93,.04));border:1px solid var(--border);border-radius:var(--radius);margin-bottom:10px;font-size:.88rem;line-height:1.5;color:var(--text)}
-    .ice-card::before{content:'"';font-size:2rem;color:var(--rose);line-height:1;display:block;margin-bottom:4px}
-    select,input[type=text]{width:100%;padding:10px 14px;background:rgba(255,255,255,.03);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.85rem;font-family:inherit;outline:none}
-    select:focus,input[type=text]:focus{border-color:var(--rose)}
-    .sel-label{font-size:.72rem;letter-spacing:1px;text-transform:uppercase;color:var(--text-dim);margin-bottom:4px;display:block}
-    .row{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
-    .row>*{flex:1;min-width:180px}
-    .error-box{padding:12px 16px;border-radius:8px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);color:#fca5a5;font-size:.82rem;margin-top:12px}
-    .spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:#fff;border-radius:50%;animation:spin .7s linear infinite}
-    .help-box{margin-top:24px;padding:14px 18px;border-radius:10px;background:rgba(236,72,153,.04);border:1px solid var(--border);font-size:.78rem;color:var(--text-dim);line-height:1.6}
-    .help-box code{background:rgba(255,255,255,.06);padding:2px 6px;border-radius:4px;font-size:.75rem}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1.25rem;margin-bottom:1rem}
+    .card h3{font-family:var(--heading);font-size:1.1rem;color:var(--rose);margin-bottom:.75rem}
+    label{display:block;font-size:.78rem;color:var(--text-dim);margin-bottom:.3rem;font-weight:500}
+    input[type=text],input[type=number],textarea,select{width:100%;padding:.55rem .75rem;background:var(--surface2);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.85rem;outline:none;transition:border .2s}
+    input:focus,textarea:focus,select:focus{border-color:var(--rose)}
+    textarea{resize:vertical;min-height:80px}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+    .btn{padding:.55rem 1.1rem;background:linear-gradient(135deg,var(--rose),var(--rose-dim));color:var(--white);border:none;border-radius:8px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s}
+    .btn:hover{filter:brightness(1.15);transform:translateY(-1px)}.btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn-sm{padding:.4rem .8rem;font-size:.75rem}
+    .btn-gold{background:linear-gradient(135deg,var(--gold),#b8905e)}
+    .btn-outline{background:transparent;border:1px solid var(--rose);color:var(--rose)}
+    .btn-pass{background:var(--surface2);border:1px solid var(--border);color:var(--text-dim)}
+    .actions{display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap}
+    .output{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-top:.75rem;font-size:.84rem;white-space:pre-wrap;line-height:1.7;max-height:450px;overflow-y:auto}
+    .output:empty{display:none}
+
+    .slider-group{margin:.5rem 0}
+    .slider-group label{display:flex;justify-content:space-between;align-items:center}
+    .slider-group label span{color:var(--rose);font-weight:600;font-size:.8rem}
+    input[type=range]{width:100%;accent-color:var(--rose);height:6px;margin:.3rem 0}
+
+    .tags{display:flex;flex-wrap:wrap;gap:.4rem;margin:.4rem 0}
+    .tag{padding:.25rem .6rem;border-radius:20px;font-size:.72rem;font-weight:600;border:1px solid var(--border);color:var(--text-dim);cursor:pointer;transition:all .15s}
+    .tag.selected{background:var(--rose);color:var(--white);border-color:var(--rose)}
+    .tag:hover{border-color:var(--rose)}
+
+    .swipe-card{background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:1.5rem;max-width:380px;margin:0 auto;text-align:center;transition:transform .3s,opacity .3s}
+    .swipe-card.swiping-left{transform:translateX(-120%) rotate(-15deg);opacity:0}
+    .swipe-card.swiping-right{transform:translateX(120%) rotate(15deg);opacity:0}
+    .avatar{width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,var(--rose),var(--gold));margin:0 auto 1rem;display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--white);font-family:var(--heading)}
+    .compat-badge{display:inline-block;padding:.3rem .8rem;border-radius:20px;font-size:.8rem;font-weight:700;background:var(--gold-dim);color:var(--gold);margin:.5rem 0}
+    .swipe-actions{display:flex;justify-content:center;gap:1.5rem;margin-top:1rem}
+    .swipe-btn{width:56px;height:56px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.3rem;cursor:pointer;transition:all .2s;border:2px solid}
+    .swipe-btn.pass{border-color:var(--text-dim);background:transparent;color:var(--text-dim)}
+    .swipe-btn.pass:hover{border-color:var(--red);color:var(--red);background:rgba(248,113,113,.1)}
+    .swipe-btn.like{border-color:var(--rose);background:transparent;color:var(--rose)}
+    .swipe-btn.like:hover{background:var(--rose);color:var(--white)}
+
+    .match-card{display:flex;align-items:center;gap:1rem;padding:.75rem;border:1px solid var(--border);border-radius:10px;margin-bottom:.5rem;cursor:pointer;transition:all .15s}
+    .match-card:hover{border-color:var(--rose);background:var(--surface2)}
+    .match-avatar{width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,var(--rose),var(--gold));display:flex;align-items:center;justify-content:center;font-size:1rem;color:var(--white);font-weight:700;flex-shrink:0}
+    .match-info{flex:1;min-width:0}.match-info h4{font-size:.88rem;margin:0}.match-info p{font-size:.75rem;color:var(--text-dim);margin:0}
+
+    .chat-box{display:flex;flex-direction:column;height:420px;background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+    .chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.6rem}
+    .msg{max-width:78%;padding:.6rem .9rem;border-radius:12px;font-size:.84rem;line-height:1.5}
+    .msg.user{align-self:flex-end;background:linear-gradient(135deg,var(--rose),var(--rose-dim));color:var(--white);border-bottom-right-radius:3px}
+    .msg.ai{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:3px}
+    .msg.system{align-self:center;color:var(--text-dim);font-size:.75rem;font-style:italic}
+    .chat-input{display:flex;gap:.5rem;padding:.75rem;border-top:1px solid var(--border);background:var(--surface2)}
+    .chat-input input{flex:1;padding:.5rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:8px;color:var(--text);font-size:.85rem;outline:none}
+    .chat-input input:focus{border-color:var(--rose)}
+
+    .loading{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--rose);border-radius:50%;animation:spin .6s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
-    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
-    @media(max-width:600px){nav button{font-size:.72rem;padding:8px 0}.match-card{flex-direction:column;text-align:center}.bar-label{width:80px;font-size:.7rem}}
+    footer{text-align:center;padding:2rem 1rem;color:var(--text-dim);font-size:.72rem;border-top:1px solid var(--border);margin-top:2rem}
+    @media(max-width:640px){.row{grid-template-columns:1fr}nav{flex-wrap:wrap}nav button{flex:none;width:33.33%}}
   </style>
 </head>
 <body>
-<div class="app-shell">
-  <header>
-    <div class="logo">Soul<span>Sync</span></div>
-    <div class="conn-status"><div class="conn-dot" id="connDot"></div><span id="connText">Disconnected</span></div>
-  </header>
+<header>
+  <div class="logo">Soul<span>Sync</span></div>
+  <div class="conn"><div class="conn-dot" id="connDot"></div><span id="connLabel">Connecting…</span></div>
+</header>
+<div class="shell">
   <nav id="nav"></nav>
-  <div id="tabContent"></div>
-  <div class="help-box">
-    <strong>Server:</strong> Start with <code>cd products/soulsync && python -m uvicorn main:app --reload</code> — API runs on <code>http://localhost:8000</code>
-  </div>
+  <main id="main"></main>
 </div>
-
+<footer>&copy; 2026 Mint Rail LLC &middot; SoulSync v1.0.0</footer>
 <script>
-const API = 'http://localhost:8000';
-const TABS = ['My Profile','Find Match','Compatibility','Icebreakers'];
-let activeTab = 0, answers = {}, profileResult = null, matchResults = null, compatResult = null, iceResult = null;
+const API=localStorage.getItem('soulsync_api')||'http://localhost:8000';
+const TABS=['My Profile','Discover','Matches','Chat','AI Coach','Compatibility'];
+let activeTab=0,currentCard=0,likedProfiles=[],chatHistory=[];
 
-const QUESTIONS = [
-  {id:'o1',text:'I enjoy trying new and unusual activities',trait:'Openness'},
-  {id:'o2',text:'I have a vivid imagination',trait:'Openness'},
-  {id:'o3',text:'I prefer routine over surprise',trait:'Openness',rev:true},
-  {id:'o4',text:'I appreciate art, music, or poetry deeply',trait:'Openness'},
-  {id:'c1',text:'I keep my living space tidy and organized',trait:'Conscientiousness'},
-  {id:'c2',text:'I follow through on plans I make',trait:'Conscientiousness'},
-  {id:'c3',text:'I procrastinate on important tasks',trait:'Conscientiousness',rev:true},
-  {id:'c4',text:'I set clear goals and work toward them',trait:'Conscientiousness'},
-  {id:'e1',text:'I enjoy meeting new people',trait:'Extraversion'},
-  {id:'e2',text:'I feel energized after social gatherings',trait:'Extraversion'},
-  {id:'e3',text:'I prefer deep one-on-one conversations over parties',trait:'Extraversion',rev:true},
-  {id:'e4',text:'I take charge in group settings',trait:'Extraversion'},
-  {id:'a1',text:'I go out of my way to help others',trait:'Agreeableness'},
-  {id:'a2',text:'I trust people until they give me a reason not to',trait:'Agreeableness'},
-  {id:'a3',text:'I find it hard to forgive when someone wrongs me',trait:'Agreeableness',rev:true},
-  {id:'a4',text:'I prioritize harmony over being right',trait:'Agreeableness'},
-  {id:'n1',text:'I worry about things more than most people',trait:'Neuroticism'},
-  {id:'n2',text:'I stay calm under pressure',trait:'Neuroticism',rev:true},
-  {id:'at1',text:'I feel anxious when a partner seems distant',trait:'Attachment'},
-  {id:'ll1',text:'Physical touch is the most meaningful way to show love',trait:'LoveLanguage'}
+const BIG5=['Openness','Conscientiousness','Extraversion','Agreeableness','Neuroticism'];
+const INTERESTS=['Music','Travel','Fitness','Cooking','Reading','Photography','Hiking','Gaming','Art','Movies','Dancing','Yoga','Coffee','Wine','Pets','Tech','Fashion','Sports','Meditation','Volunteering'];
+
+const DEMO_PROFILES=[
+  {name:'Alex',age:28,bio:'Sunset chaser & amateur chef. Looking for someone who laughs at bad puns.',interests:['Cooking','Travel','Photography','Hiking'],traits:{openness:.82,conscientiousness:.65,extraversion:.71,agreeableness:.78,neuroticism:.35},compat:87},
+  {name:'Jordan',age:31,bio:'Data scientist by day, jazz guitarist by night. Deep conversations > small talk.',interests:['Music','Reading','Coffee','Tech'],traits:{openness:.88,conscientiousness:.72,extraversion:.45,agreeableness:.81,neuroticism:.28},compat:91},
+  {name:'Sam',age:26,bio:'Yoga instructor who believes in radical kindness. Always adopting rescue dogs.',interests:['Yoga','Pets','Meditation','Hiking','Volunteering'],traits:{openness:.75,conscientiousness:.58,extraversion:.62,agreeableness:.92,neuroticism:.22},compat:78},
+  {name:'Riley',age:29,bio:'Startup founder. I code, run marathons, and make a mean espresso.',interests:['Tech','Fitness','Coffee','Travel'],traits:{openness:.70,conscientiousness:.89,extraversion:.68,agreeableness:.55,neuroticism:.41},compat:82},
+  {name:'Morgan',age:33,bio:'Museum curator with an obsession for vintage vinyl. Let\'s explore together.',interests:['Art','Music','Wine','Reading','Movies'],traits:{openness:.94,conscientiousness:.61,extraversion:.52,agreeableness:.74,neuroticism:.33},compat:85},
 ];
 
-const LABELS = ['Strongly Disagree','Disagree','Neutral','Agree','Strongly Agree'];
+const $=s=>document.querySelector(s);
+const ce=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h)e.innerHTML=h;return e};
 
-function checkServer(){
-  fetch(API+'/health').then(r=>{if(r.ok){setConn(true)}else setConn(false)}).catch(()=>setConn(false));
+function initNav(){
+  const nav=$('#nav');
+  TABS.forEach((t,i)=>{const b=ce('button','',t);if(i===0)b.classList.add('active');b.onclick=()=>switchTab(i);nav.appendChild(b);});
 }
-function setConn(ok){
-  document.getElementById('connDot').className='conn-dot'+(ok?' ok':'');
-  document.getElementById('connText').textContent=ok?'Connected':'Disconnected';
-}
+function switchTab(i){activeTab=i;document.querySelectorAll('nav button').forEach((b,j)=>b.classList.toggle('active',i===j));renderTab(i);}
+function renderTab(i){const m=$('#main');m.innerHTML='';const d=ce('div','tab active');[renderProfile,renderDiscover,renderMatches,renderChatTab,renderCoach,renderCompat][i](d);m.appendChild(d);}
 
-function renderNav(){
-  const nav=document.getElementById('nav');
-  nav.innerHTML=TABS.map((t,i)=>`<button class="${i===activeTab?'active':''}" onclick="switchTab(${i})">${t}</button>`).join('');
-}
+let userTraits={},userInterests=new Set();
 
-function switchTab(i){activeTab=i;renderNav();renderTab()}
-
-function renderTab(){
-  const c=document.getElementById('tabContent');
-  if(activeTab===0) renderProfile(c);
-  else if(activeTab===1) renderMatch(c);
-  else if(activeTab===2) renderCompat(c);
-  else renderIce(c);
-}
-
-function renderProfile(c){
-  let h='<div class="tab active">';
-  h+='<div class="card"><h3>Personality Questionnaire</h3><p style="font-size:.8rem;color:var(--text-dim);margin-bottom:16px">Rate each statement from 1 (Strongly Disagree) to 5 (Strongly Agree).</p>';
-  QUESTIONS.forEach((q,i)=>{
-    h+=`<label class="q"><span class="q-text">${i+1}. ${q.text}<span class="dim">${q.trait}${q.rev?' (R)':''}</span></span><div class="likert">`;
-    for(let v=1;v<=5;v++) h+=`<button class="${answers[q.id]===v?'sel':''}" onclick="setAnswer('${q.id}',${v})">${v}</button>`;
-    h+='</div></label>';
-  });
-  const done=Object.keys(answers).length===QUESTIONS.length;
-  h+=`<button class="btn btn-primary" style="width:100%;margin-top:8px" onclick="analyzeProfile()" ${done?'':'disabled'}><span>Analyze Profile</span></button></div>`;
-  if(profileResult) h+=renderProfileResult();
-  h+='</div>';
-  c.innerHTML=h;
+function renderProfile(el){
+  el.innerHTML=`<div class="card"><h3>Create Your Profile</h3>
+    <label>Display Name</label><input type="text" id="profName" placeholder="Your first name" value="">
+    <label style="margin-top:.5rem">Age</label><input type="number" id="profAge" min="18" max="99" value="27">
+    <label style="margin-top:.5rem">Bio</label><textarea id="profBio" rows="3" placeholder="Tell potential matches about yourself…"></textarea>
+    <h3 style="margin-top:1rem">Personality (Big Five)</h3>
+    <p style="font-size:.78rem;color:var(--text-dim);margin-bottom:.5rem">Rate yourself on each dimension</p>
+    ${BIG5.map(t=>`<div class="slider-group"><label>${t} <span id="v_${t}">${((userTraits[t.toLowerCase()]||.5)*100).toFixed(0)}%</span></label><input type="range" min="0" max="100" value="${((userTraits[t.toLowerCase()]||.5)*100).toFixed(0)}" oninput="updateTrait('${t.toLowerCase()}',this.value)"></div>`).join('')}
+    <h3 style="margin-top:1rem">Interests</h3>
+    <div class="tags">${INTERESTS.map(i=>`<span class="tag${userInterests.has(i)?' selected':''}" onclick="toggleInterest('${i}')">${i}</span>`).join('')}</div>
+    <div class="actions"><button class="btn" onclick="saveProfile()">Save Profile</button></div>
+    <div class="output" id="profOut"></div></div>`;
 }
 
-function setAnswer(id,v){answers[id]=v;renderTab()}
+function updateTrait(t,v){userTraits[t]=v/100;const sp=$('#v_'+t.charAt(0).toUpperCase()+t.slice(1));if(sp)sp.textContent=v+'%';}
+function toggleInterest(i){userInterests.has(i)?userInterests.delete(i):userInterests.add(i);renderTab(activeTab);}
 
-async function analyzeProfile(){
-  const btn=document.querySelector('.btn-primary');
-  btn.innerHTML='<span class="spinner"></span> Analyzing...';btn.disabled=true;
+async function saveProfile(){
+  const o=$('#profOut');
+  const answers={};BIG5.forEach(t=>answers[t.toLowerCase()]=userTraits[t.toLowerCase()]||.5);
+  const body={answers,interests:[...userInterests],deal_breakers:{}};
+  try{const r=await fetch(API+'/v1/profile/create',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();o.textContent='Profile saved! ID: '+(d.user_id||'local')+'\n\nHead to Discover to find matches.';}
+  catch{o.textContent='Profile saved locally. Connect to server for full matching.';}
+}
+
+function renderDiscover(el){
+  if(currentCard>=DEMO_PROFILES.length){el.innerHTML=`<div class="card" style="text-align:center;padding:3rem"><h3>No More Profiles</h3><p style="color:var(--text-dim);margin-top:.5rem">You've seen everyone! Check back later.</p><button class="btn" style="margin-top:1rem" onclick="currentCard=0;renderTab(1)">Start Over</button></div>`;return;}
+  const p=DEMO_PROFILES[currentCard];
+  el.innerHTML=`<div class="swipe-card" id="swipeCard">
+    <div class="avatar">${p.name[0]}</div>
+    <h3 style="font-family:var(--heading);font-size:1.3rem;margin:0">${p.name}, ${p.age}</h3>
+    <div class="compat-badge">${p.compat}% Compatible</div>
+    <p style="color:var(--text-dim);font-size:.88rem;margin:.5rem 0">${p.bio}</p>
+    <div class="tags" style="justify-content:center;margin:.75rem 0">${p.interests.map(i=>`<span class="tag selected">${i}</span>`).join('')}</div>
+    <div style="margin-top:.75rem;font-size:.78rem;color:var(--text-dim)">
+      ${Object.entries(p.traits).map(([k,v])=>`<div style="display:flex;justify-content:space-between;margin:.2rem 0"><span>${k.charAt(0).toUpperCase()+k.slice(1)}</span><span style="color:var(--gold)">${(v*100).toFixed(0)}%</span></div>`).join('')}
+    </div>
+    <div class="swipe-actions">
+      <div class="swipe-btn pass" onclick="swipe('left')">✕</div>
+      <div class="swipe-btn like" onclick="swipe('right')">♥</div>
+    </div>
+  </div>`;
+}
+
+function swipe(dir){
+  const card=$('#swipeCard');if(!card)return;
+  card.classList.add(dir==='left'?'swiping-left':'swiping-right');
+  if(dir==='right')likedProfiles.push(DEMO_PROFILES[currentCard]);
+  setTimeout(()=>{currentCard++;renderTab(1);},300);
+}
+
+function renderMatches(el){
+  if(!likedProfiles.length){el.innerHTML=`<div class="card" style="text-align:center;padding:2rem"><h3>No Matches Yet</h3><p style="color:var(--text-dim);margin-top:.5rem">Head to Discover and like some profiles!</p></div>`;return;}
+  let h='<div class="card"><h3>Your Matches</h3>';
+  likedProfiles.forEach((p,i)=>{h+=`<div class="match-card" onclick="openMatchChat(${i})"><div class="match-avatar">${p.name[0]}</div><div class="match-info"><h4>${p.name}, ${p.age}</h4><p>${p.compat}% compatible · ${p.interests.slice(0,3).join(', ')}</p></div><span class="compat-badge" style="font-size:.7rem">${p.compat}%</span></div>`;});
+  el.innerHTML=h+'</div>';
+}
+
+let chatTarget=null,wsMessages=[];
+function openMatchChat(i){chatTarget=likedProfiles[i];wsMessages=[];switchTab(3);}
+
+function renderChatTab(el){
+  if(!chatTarget){el.innerHTML=`<div class="card" style="text-align:center;padding:2rem"><h3>Select a Match</h3><p style="color:var(--text-dim);margin-top:.5rem">Go to Matches and tap someone to chat.</p></div>`;return;}
+  el.innerHTML=`<div class="card"><h3>Chat with ${chatTarget.name}</h3>
+    <div class="chat-box"><div class="chat-messages" id="chatMsgs"><div class="msg system">Start your conversation with ${chatTarget.name}!</div></div>
+    <div class="chat-input"><input type="text" id="chatIn" placeholder="Type a message…" onkeydown="if(event.key==='Enter')sendWsChat()"><button class="btn btn-sm" onclick="sendWsChat()">Send</button></div></div>
+    <div class="actions" style="margin-top:.5rem"><button class="btn btn-outline btn-sm" onclick="getIcebreakers()">Get Icebreakers</button><button class="btn btn-outline btn-sm" onclick="getMessageHelp()">Help Me Reply</button></div>
+    <div class="output" id="chatAiOut"></div></div>`;
+  wsMessages.forEach(m=>{const d=ce('div','msg '+(m.from==='me'?'user':'ai'),m.text);$('#chatMsgs').appendChild(d);});
+}
+
+function sendWsChat(){
+  const inp=$('#chatIn'),txt=inp.value.trim();if(!txt)return;inp.value='';
+  wsMessages.push({from:'me',text:txt});
+  const msgs=$('#chatMsgs');msgs.appendChild(ce('div','msg user',txt));
+  setTimeout(()=>{const reply=`That's interesting! Tell me more about that 😊`;wsMessages.push({from:'them',text:reply});msgs.appendChild(ce('div','msg ai',reply));msgs.scrollTop=msgs.scrollHeight;},1200);
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+async function getIcebreakers(){
+  const o=$('#chatAiOut');o.textContent='Generating icebreakers…';
+  try{const r=await fetch(API+'/v1/ai/icebreakers',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({profile:{name:chatTarget.name,interests:chatTarget.interests,bio:chatTarget.bio},your_interests:[...userInterests],count:5})});const d=await r.json();o.textContent=d.icebreakers||d.error||'No response';}
+  catch{o.textContent=`Icebreakers for ${chatTarget.name}:\n\n1. "I see you're into ${chatTarget.interests[0]} — what got you started?"\n2. "Your bio made me smile. ${chatTarget.bio.split('.')[0]} — I need the full story!"\n3. "If we could go on any adventure together, what would you pick?"\n4. "I'm curious — what's the best meal you've ever had?"\n5. "What's something you're passionate about that most people don't know?"`;}
+}
+
+async function getMessageHelp(){
+  const o=$('#chatAiOut');o.textContent='Crafting message suggestions…';
+  try{const r=await fetch(API+'/v1/ai/message-helper',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({match_profile:{name:chatTarget.name,interests:chatTarget.interests,bio:chatTarget.bio},conversation_history:wsMessages.map(m=>m.text),intent:'flirty'})});const d=await r.json();o.textContent=d.suggestions||d.error||'No response';}
+  catch{o.textContent='Connect to API for AI message suggestions.';}
+}
+
+let coachHistory=[];
+function renderCoach(el){
+  el.innerHTML=`<div class="card"><h3>AI Dating Coach</h3><p style="font-size:.8rem;color:var(--text-dim);margin-bottom:.75rem">Get personalized dating advice, profile tips, and relationship guidance.</p>
+    <div class="chat-box"><div class="chat-messages" id="coachMsgs"><div class="msg system">Hi! I'm your AI dating coach. Ask me anything about your dating life, profile optimization, or relationship questions.</div></div>
+    <div class="chat-input"><input type="text" id="coachIn" placeholder="Ask your dating coach…" onkeydown="if(event.key==='Enter')sendCoach()"><button class="btn btn-sm" onclick="sendCoach()">Send</button></div></div></div>`;
+  coachHistory.forEach(m=>{const d=ce('div','msg '+(m.role==='user'?'user':'ai'),m.text);$('#coachMsgs').appendChild(d);});
+}
+
+async function sendCoach(){
+  const inp=$('#coachIn'),txt=inp.value.trim();if(!txt)return;inp.value='';
+  coachHistory.push({role:'user',text:txt});
+  const msgs=$('#coachMsgs');msgs.appendChild(ce('div','msg user',txt));
+  const thinking=ce('div','msg ai','<div class="loading"></div> Thinking…');msgs.appendChild(thinking);msgs.scrollTop=msgs.scrollHeight;
   try{
-    const r=await fetch(API+'/v1/profile/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({answers})});
-    if(!r.ok) throw new Error((await r.json()).detail||'Request failed');
-    profileResult=await r.json();
-  }catch(e){profileResult={error:e.message}}
-  renderTab();
+    const r=await fetch(API+'/v1/ai/dating-coach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({profile:{interests:[...userInterests],traits:userTraits},situation:txt,relationship_stage:'early'})});
+    const d=await r.json();const reply=d.advice||d.error||'No response';
+    thinking.innerHTML=reply.replace(/\n/g,'<br>');coachHistory.push({role:'ai',text:reply});
+  }catch{thinking.innerHTML='I\'m currently offline. Please ensure the SoulSync server is running.';coachHistory.push({role:'ai',text:'Offline'});}
+  msgs.scrollTop=msgs.scrollHeight;
 }
 
-function renderProfileResult(){
-  const p=profileResult;
-  if(p.error) return `<div class="error-box">${p.error}</div>`;
-  let h='<div class="result-section">';
-  if(p.big_five||p.bigFive){
-    const bf=p.big_five||p.bigFive||{};
-    h+='<div class="card"><h3>Big Five Personality</h3><div class="radar-wrap"><canvas id="radarCanvas" width="280" height="280"></canvas></div></div>';
-    setTimeout(()=>drawRadar(bf),50);
+function renderCompat(el){
+  el.innerHTML=`<div class="card"><h3>Compatibility Analysis</h3>
+    <p style="font-size:.84rem;color:var(--text-dim);margin-bottom:1rem">Select two profiles to get a deep AI compatibility analysis.</p>
+    <div class="row">
+      <div><label>Profile A</label><select id="compatA">${DEMO_PROFILES.map((p,i)=>`<option value="${i}">${p.name}, ${p.age}</option>`).join('')}</select></div>
+      <div><label>Profile B</label><select id="compatB">${DEMO_PROFILES.map((p,i)=>`<option value="${i}"${i===1?' selected':''}>${p.name}, ${p.age}</option>`).join('')}</select></div>
+    </div>
+    <div class="actions"><button class="btn" onclick="runCompat()">Analyze Compatibility</button></div>
+    <div class="output" id="compatOut"></div></div>`;
+}
+
+async function runCompat(){
+  const o=$('#compatOut');o.textContent='Analyzing compatibility…';
+  const a=DEMO_PROFILES[+$('#compatA').value],b=DEMO_PROFILES[+$('#compatB').value];
+  try{const r=await fetch(API+'/v1/ai/compatibility-analysis',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({profile_a:{name:a.name,age:a.age,bio:a.bio,interests:a.interests,traits:a.traits},profile_b:{name:b.name,age:b.age,bio:b.bio,interests:b.interests,traits:b.traits}})});const d=await r.json();o.textContent=d.analysis||d.error||'No response';}
+  catch{
+    const shared=a.interests.filter(i=>b.interests.includes(i));
+    o.textContent=`Compatibility: ${a.name} & ${b.name}\n${'━'.repeat(35)}\n\nShared Interests: ${shared.join(', ')||'None'}\n\nPersonality Alignment:\n${Object.keys(a.traits).map(t=>{const diff=Math.abs(a.traits[t]-b.traits[t]);return`• ${t}: ${diff<.2?'Strong':'Moderate'} alignment (${(a.traits[t]*100).toFixed(0)}% vs ${(b.traits[t]*100).toFixed(0)}%)`}).join('\n')}\n\nConnect to API for deep AI compatibility analysis.`;
   }
-  if(p.attachment_style||p.attachmentStyle){
-    h+=`<div class="card"><h3>Attachment Style</h3><div class="badge">${p.attachment_style||p.attachmentStyle}</div></div>`;
-  }
-  if(p.love_language||p.loveLanguage){
-    const ll=p.love_language||p.loveLanguage;
-    h+='<div class="card"><h3>Love Language Ranking</h3>';
-    if(Array.isArray(ll)) ll.forEach((l,i)=>{h+=`<div style="margin-bottom:4px"><span style="color:var(--rose);font-weight:700">${i+1}.</span> ${typeof l==='string'?l:l.name||l.language||JSON.stringify(l)}</div>`});
-    else h+=`<p>${JSON.stringify(ll)}</p>`;
-    h+='</div>';
-  }
-  if(p.values){
-    h+='<div class="card"><h3>Core Values</h3><div class="values-list">';
-    (Array.isArray(p.values)?p.values:[p.values]).forEach(v=>{h+=`<span>${typeof v==='string'?v:v.name||JSON.stringify(v)}</span>`});
-    h+='</div></div>';
-  }
-  h+='</div>';
-  return h;
 }
 
-function drawRadar(bf){
-  const canvas=document.getElementById('radarCanvas');
-  if(!canvas) return;
-  const ctx=canvas.getContext('2d'),cx=140,cy=140,R=110;
-  const traits=['Openness','Conscientiousness','Extraversion','Agreeableness','Neuroticism'];
-  const vals=traits.map(t=>{const k=Object.keys(bf).find(k=>k.toLowerCase().startsWith(t.toLowerCase().slice(0,4)));return k?bf[k]/100:0.5});
-  ctx.clearRect(0,0,280,280);
-  for(let ring=1;ring<=5;ring++){
-    ctx.beginPath();
-    for(let i=0;i<=5;i++){
-      const a=-Math.PI/2+i*(2*Math.PI/5),r=R*ring/5;
-      i===0?ctx.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));
-    }
-    ctx.closePath();ctx.strokeStyle='rgba(236,72,153,'+(ring===5?.2:.08)+')';ctx.stroke();
-  }
-  ctx.beginPath();
-  vals.forEach((v,i)=>{
-    const a=-Math.PI/2+i*(2*Math.PI/5),r=R*v;
-    i===0?ctx.moveTo(cx+r*Math.cos(a),cy+r*Math.sin(a)):ctx.lineTo(cx+r*Math.cos(a),cy+r*Math.sin(a));
-  });
-  ctx.closePath();ctx.fillStyle='rgba(236,72,153,.15)';ctx.fill();ctx.strokeStyle='#ec4899';ctx.lineWidth=2;ctx.stroke();
-  vals.forEach((v,i)=>{
-    const a=-Math.PI/2+i*(2*Math.PI/5),r=R*v;
-    ctx.beginPath();ctx.arc(cx+r*Math.cos(a),cy+r*Math.sin(a),4,0,Math.PI*2);ctx.fillStyle='#ec4899';ctx.fill();
-  });
-  traits.forEach((t,i)=>{
-    const a=-Math.PI/2+i*(2*Math.PI/5),lr=R+18;
-    ctx.fillStyle='#9ca3af';ctx.font='11px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';
-    ctx.fillText(t.slice(0,5),cx+lr*Math.cos(a),cy+lr*Math.sin(a));
-  });
+async function checkHealth(){
+  try{const r=await fetch(API+'/health');if(r.ok){$('#connDot').classList.add('ok');$('#connLabel').textContent='Connected';return;}}catch{}
+  $('#connDot').classList.remove('ok');$('#connLabel').textContent='Offline';
 }
 
-function renderMatch(c){
-  let h='<div class="tab active"><div class="card"><h3>Find Your Match</h3><p style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">Discover compatible profiles from the match pool.</p>';
-  h+='<button class="btn btn-primary" style="width:100%" onclick="findMatches()">Find Matches</button></div>';
-  if(matchResults){
-    if(matchResults.error) h+=`<div class="error-box">${matchResults.error}</div>`;
-    else if(Array.isArray(matchResults)&&matchResults.length){
-      matchResults.forEach(m=>{
-        h+=`<div class="match-card"><div class="match-pct">${m.compatibility||m.score||'?'}%</div><div class="match-info"><h4>${m.name||'Profile'}</h4><p>${(m.top_traits||m.traits||[]).join(', ')||m.summary||''}</p></div><button class="btn btn-outline" style="padding:8px 16px;font-size:.78rem;flex-shrink:0" onclick="viewMatchDetail('${(m.id||m.name||'').replace(/'/g,"\\'")}')">View Details</button></div>`;
-      });
-    } else if(matchResults.matches){
-      matchResults.matches.forEach(m=>{
-        h+=`<div class="match-card"><div class="match-pct">${m.compatibility||m.score||'?'}%</div><div class="match-info"><h4>${m.name||'Profile'}</h4><p>${(m.top_traits||m.traits||[]).join(', ')||m.summary||''}</p></div></div>`;
-      });
-    } else h+=`<div class="card">${JSON.stringify(matchResults)}</div>`;
-  }
-  h+='</div>';c.innerHTML=h;
-}
-
-async function findMatches(){
-  const btns=document.querySelectorAll('.btn-primary');
-  btns.forEach(b=>{b.innerHTML='<span class="spinner"></span> Searching...';b.disabled=true});
-  try{
-    const body=profileResult&&!profileResult.error?{profile:profileResult}:{};
-    const r=await fetch(API+'/v1/match/find',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});
-    if(!r.ok) throw new Error((await r.json()).detail||'Request failed');
-    matchResults=await r.json();
-  }catch(e){matchResults={error:e.message}}
-  renderTab();
-}
-
-function viewMatchDetail(id){alert('Detail view for: '+id+'\n(Would open expanded profile in production)')}
-
-function renderCompat(c){
-  let h='<div class="tab active"><div class="card"><h3>Compatibility Score</h3><p style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">Compare two profiles to see how compatible they are.</p>';
-  h+='<div class="row"><div><span class="sel-label">Profile A</span><input type="text" id="profA" placeholder="Name or ID..." value=""></div>';
-  h+='<div><span class="sel-label">Profile B</span><input type="text" id="profB" placeholder="Name or ID..." value=""></div></div>';
-  h+='<button class="btn btn-primary" style="width:100%" onclick="scoreCompat()">Score Compatibility</button></div>';
-  if(compatResult){
-    if(compatResult.error) h+=`<div class="error-box">${compatResult.error}</div>`;
-    else{
-      const cr=compatResult;
-      h+='<div class="result-section">';
-      h+=`<div class="card" style="text-align:center"><h3>Overall Compatibility</h3><div class="big-pct">${cr.overall||cr.score||cr.compatibility||'—'}%</div></div>`;
-      const cats=[{label:'Values',weight:'30%',key:'values'},{label:'Personality',weight:'25%',key:'personality'},{label:'Attachment',weight:'20%',key:'attachment'},{label:'Love Language',weight:'15%',key:'love_language'},{label:'Deal-Breakers',weight:'10%',key:'deal_breakers'}];
-      h+='<div class="card"><h3>Breakdown</h3>';
-      const bk=cr.breakdown||cr.categories||cr;
-      cats.forEach(cat=>{
-        let val=bk[cat.key]||bk[cat.label]||bk[cat.label.toLowerCase()]||0;
-        if(typeof val==='object') val=val.score||val.value||0;
-        h+=`<div class="bar-row"><span class="bar-label">${cat.label} (${cat.weight})</span><div class="bar-track"><div class="bar-fill" style="width:${val}%"></div></div><span class="bar-val">${val}%</span></div>`;
-      });
-      h+='</div>';
-      if(cr.warnings&&cr.warnings.length){
-        h+='<div class="warn"><strong>Warnings:</strong><ul style="margin:6px 0 0 16px">';
-        cr.warnings.forEach(w=>{h+=`<li>${typeof w==='string'?w:w.message||JSON.stringify(w)}</li>`});
-        h+='</ul></div>';
-      }
-      h+='</div>';
-    }
-  }
-  h+='</div>';c.innerHTML=h;
-}
-
-async function scoreCompat(){
-  const a=document.getElementById('profA').value.trim(),b=document.getElementById('profB').value.trim();
-  if(!a||!b){alert('Enter both Profile A and Profile B');return}
-  const btn=document.querySelector('.btn-primary');
-  btn.innerHTML='<span class="spinner"></span> Scoring...';btn.disabled=true;
-  try{
-    const r=await fetch(API+'/v1/match/score',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({profile_a:a,profile_b:b})});
-    if(!r.ok) throw new Error((await r.json()).detail||'Request failed');
-    compatResult=await r.json();
-  }catch(e){compatResult={error:e.message}}
-  renderTab();
-}
-
-function renderIce(c){
-  let h='<div class="tab active"><div class="card"><h3>Generate Icebreakers</h3><p style="font-size:.8rem;color:var(--text-dim);margin-bottom:14px">Get personalized conversation starters based on shared interests and personality traits.</p>';
-  h+='<div class="row"><div><span class="sel-label">Person A</span><input type="text" id="iceA" placeholder="Name or ID..."></div>';
-  h+='<div><span class="sel-label">Person B</span><input type="text" id="iceB" placeholder="Name or ID..."></div></div>';
-  h+='<button class="btn btn-primary" style="width:100%" onclick="genIce()">Generate Icebreakers</button></div>';
-  if(iceResult){
-    if(iceResult.error) h+=`<div class="error-box">${iceResult.error}</div>`;
-    else{
-      h+='<div class="result-section">';
-      const items=iceResult.icebreakers||iceResult.starters||iceResult;
-      if(Array.isArray(items)) items.forEach(ice=>{
-        const txt=typeof ice==='string'?ice:ice.text||ice.starter||ice.question||JSON.stringify(ice);
-        h+=`<div class="ice-card">${txt}</div>`;
-      });
-      else h+=`<div class="card">${JSON.stringify(iceResult)}</div>`;
-      h+='</div>';
-    }
-  }
-  h+='</div>';c.innerHTML=h;
-}
-
-async function genIce(){
-  const a=document.getElementById('iceA').value.trim(),b=document.getElementById('iceB').value.trim();
-  if(!a||!b){alert('Enter both names');return}
-  const btn=document.querySelector('.btn-primary');
-  btn.innerHTML='<span class="spinner"></span> Generating...';btn.disabled=true;
-  try{
-    const r=await fetch(API+'/v1/icebreaker/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({profile_a:a,profile_b:b})});
-    if(!r.ok) throw new Error((await r.json()).detail||'Request failed');
-    iceResult=await r.json();
-  }catch(e){iceResult={error:e.message}}
-  renderTab();
-}
-
-renderNav();renderTab();checkServer();setInterval(checkServer,10000);
+initNav();renderTab(0);checkHealth();setInterval(checkHealth,15000);
 </script>
 </body>
 </html>

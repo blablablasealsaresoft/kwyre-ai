@@ -2,9 +2,15 @@
 
 from __future__ import annotations
 
+import sys
+import os
+
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel, Field
+
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
+from products._shared.ai_engine import AIEngine
 
 from .literature import EmbeddingIndex
 from .experiment import ExperimentRequest, design_experiment
@@ -22,6 +28,16 @@ app.add_middleware(
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
+)
+
+ai = AIEngine(
+    default_system=(
+        "You are LabMind AI, a multidisciplinary research scientist with expertise "
+        "across biology, chemistry, physics, and data science. Provide rigorous "
+        "scientific analysis, experimental design with proper controls, statistical "
+        "methodology recommendations, and literature synthesis. Cite methodological "
+        "standards and statistical best practices."
+    )
 )
 
 index = EmbeddingIndex()
@@ -324,3 +340,141 @@ def _section_guidance(section: str) -> str:
         "literature_review": "Synthesize, don't just list. Identify themes and gaps.",
         "references": "Use consistent citation format (APA 7th recommended).",
     }.get(section, "Follow journal-specific guidelines for this section.")
+
+
+# ---------------------------------------------------------------------------
+# AI-Powered Endpoints
+# ---------------------------------------------------------------------------
+
+class AISynthesizeRequest(BaseModel):
+    topic: str = Field(..., min_length=5)
+    papers: list[str] = Field(default_factory=list, description="Paper summaries or abstracts")
+    focus: str = ""
+
+class AIHypothesisRequest(BaseModel):
+    observations: list[str] = Field(..., min_length=1)
+    domain: str = "general"
+    existing_theories: list[str] = Field(default_factory=list)
+
+class AIMethodologyRequest(BaseModel):
+    research_question: str = Field(..., min_length=10)
+    proposed_method: str = ""
+    constraints: list[str] = Field(default_factory=list)
+
+class AIPaperDraftRequest(BaseModel):
+    title: str = Field(..., min_length=5)
+    section: str = Field("introduction", description="introduction, methods, results, discussion")
+    key_points: list[str] = Field(..., min_length=1)
+    context: str = ""
+
+class AIStatsAdvisorRequest(BaseModel):
+    research_question: str = Field(..., min_length=10)
+    data_description: str = ""
+    sample_size: int = 0
+    variables: list[str] = Field(default_factory=list)
+    data_type: str = Field("continuous", description="continuous, categorical, ordinal, mixed")
+
+
+@app.post("/v1/ai/synthesize")
+async def ai_synthesize(req: AISynthesizeRequest):
+    papers_text = "\n\n".join(f"Paper {i+1}: {p}" for i, p in enumerate(req.papers)) if req.papers else "No specific papers provided"
+    prompt = (
+        f"Synthesize the literature on the following topic.\n\n"
+        f"Topic: {req.topic}\n"
+        f"Focus Area: {req.focus or 'General synthesis'}\n\n"
+        f"Source Material:\n{papers_text}\n\n"
+        "Provide:\n"
+        "1. Thematic synthesis of key findings\n"
+        "2. Areas of consensus and controversy\n"
+        "3. Methodological trends\n"
+        "4. Research gaps identified\n"
+        "5. Suggested future directions"
+    )
+    resp = await ai.complete(prompt, temperature=0.4)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"synthesis": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}
+
+
+@app.post("/v1/ai/hypothesis")
+async def ai_hypothesis(req: AIHypothesisRequest):
+    obs_text = "\n".join(f"- {o}" for o in req.observations)
+    theories_text = "\n".join(f"- {t}" for t in req.existing_theories) if req.existing_theories else "None specified"
+    prompt = (
+        f"Refine hypotheses and develop testing strategies.\n\n"
+        f"Domain: {req.domain}\n"
+        f"Observations:\n{obs_text}\n"
+        f"Existing Theories:\n{theories_text}\n\n"
+        "For each observation, provide:\n"
+        "1. Refined testable hypothesis (H1 and H0)\n"
+        "2. Predicted outcomes\n"
+        "3. Suggested experimental design\n"
+        "4. Required controls\n"
+        "5. Potential confounds to address"
+    )
+    resp = await ai.complete(prompt, temperature=0.5)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"hypotheses": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}
+
+
+@app.post("/v1/ai/methodology")
+async def ai_methodology(req: AIMethodologyRequest):
+    prompt = (
+        f"Critique and improve the research methodology.\n\n"
+        f"Research Question: {req.research_question}\n"
+        f"Proposed Method: {req.proposed_method or 'Not yet determined — suggest approaches'}\n"
+        f"Constraints: {', '.join(req.constraints) if req.constraints else 'None specified'}\n\n"
+        "Provide:\n"
+        "1. Methodology assessment (if provided) or recommended approaches\n"
+        "2. Validity threats (internal and external)\n"
+        "3. Suggested improvements or alternatives\n"
+        "4. Required sample size estimation\n"
+        "5. Data collection protocol recommendations"
+    )
+    resp = await ai.complete(prompt, temperature=0.4)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"methodology": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}
+
+
+@app.post("/v1/ai/paper-draft")
+async def ai_paper_draft(req: AIPaperDraftRequest):
+    points_text = "\n".join(f"- {p}" for p in req.key_points)
+    prompt = (
+        f"Draft a {req.section} section for an academic paper.\n\n"
+        f"Paper Title: {req.title}\n"
+        f"Section: {req.section.title()}\n"
+        f"Key Points to Cover:\n{points_text}\n"
+        f"Additional Context: {req.context or 'None'}\n\n"
+        "Write in formal academic style. Follow standard conventions for this section type. "
+        "Include placeholders for citations as [Author, Year]."
+    )
+    resp = await ai.complete(prompt, temperature=0.5)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"draft": resp.text, "section": req.section, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}
+
+
+@app.post("/v1/ai/stats-advisor")
+async def ai_stats_advisor(req: AIStatsAdvisorRequest):
+    vars_text = ", ".join(req.variables) if req.variables else "Not specified"
+    prompt = (
+        f"Recommend statistical analysis approaches.\n\n"
+        f"Research Question: {req.research_question}\n"
+        f"Data Description: {req.data_description or 'Not specified'}\n"
+        f"Sample Size: {req.sample_size or 'Not determined'}\n"
+        f"Variables: {vars_text}\n"
+        f"Data Type: {req.data_type}\n\n"
+        "Provide:\n"
+        "1. Recommended primary statistical test with justification\n"
+        "2. Assumptions to verify\n"
+        "3. Alternative tests if assumptions are violated\n"
+        "4. Effect size measures to report\n"
+        "5. Power analysis recommendations\n"
+        "6. Multiple comparison corrections if needed"
+    )
+    resp = await ai.complete(prompt, temperature=0.3)
+    if not resp.ok:
+        return {"error": resp.error, "ai_available": ai.available}
+    return {"stats_advice": resp.text, "model": resp.model, "tokens": resp.input_tokens + resp.output_tokens}

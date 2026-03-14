@@ -1,468 +1,288 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>LaunchPad — AI Job Placement</title>
-<style>
-*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{
-  --bg:#0a0e18;--bg2:#111827;--bg3:#1a2234;--surface:#151d2e;
-  --border:rgba(148,163,184,.1);--border-h:rgba(148,163,184,.2);
-  --blue:#3b82f6;--blue-d:#2563eb;--blue-glow:rgba(59,130,246,.12);
-  --orange:#f97316;--orange-d:#ea580c;--orange-glow:rgba(249,115,22,.12);
-  --green:#22c55e;--red:#ef4444;--white:#f1f5f9;--gray:#94a3b8;--gray-d:#64748b;
-}
-body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--white);line-height:1.5;min-height:100vh}
-a{color:var(--blue);text-decoration:none}
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LaunchPad — AI Career Platform</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <style>
+    *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+    :root{
+      --bg:#0b1120;--surface:#111827;--surface2:#1e293b;--border:rgba(148,163,184,.12);
+      --blue:#3b82f6;--blue-dim:#2563eb;--blue-glow:rgba(59,130,246,.12);
+      --amber:#f59e0b;--amber-dim:rgba(245,158,11,.12);
+      --text:#f1f5f9;--text-dim:#94a3b8;--white:#fff;
+      --green:#22c55e;--red:#ef4444;
+      --sans:'Inter',system-ui,sans-serif;--mono:'JetBrains Mono',monospace;
+    }
+    body{font-family:var(--sans);background:var(--bg);color:var(--text);line-height:1.6;min-height:100vh}
+    input,select,textarea,button{font-family:inherit}
 
-header{display:flex;align-items:center;justify-content:space-between;padding:.8rem 1.5rem;border-bottom:1px solid var(--border);background:var(--bg2)}
-.logo{font-size:1.2rem;font-weight:800}.logo span{color:var(--orange)}
-.conn{display:flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--gray-d)}
-.conn-dot{width:7px;height:7px;border-radius:50%;background:var(--red)}
-.conn-dot.ok{background:var(--green)}
+    header{display:flex;align-items:center;justify-content:space-between;padding:.75rem 1.5rem;border-bottom:1px solid var(--border);background:var(--surface)}
+    .logo{font-size:1.2rem;font-weight:800;color:var(--white)}.logo span{color:var(--amber)}
+    .conn{display:flex;align-items:center;gap:.4rem;font-size:.72rem;color:var(--text-dim)}
+    .conn-dot{width:7px;height:7px;border-radius:50%;background:var(--red);transition:background .3s}
+    .conn-dot.ok{background:var(--green);box-shadow:0 0 6px var(--green)}
 
-.tabs{display:flex;gap:0;border-bottom:1px solid var(--border);background:var(--bg2);overflow-x:auto}
-.tab{padding:.7rem 1.2rem;font-size:.85rem;font-weight:600;color:var(--gray-d);cursor:pointer;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s,border-color .15s}
-.tab:hover{color:var(--gray)}
-.tab.active{color:var(--blue);border-bottom-color:var(--blue)}
+    .shell{max-width:960px;margin:0 auto;padding:0 1rem}
+    nav{display:flex;gap:0;margin:1rem 0;border-radius:8px;overflow-x:auto;border:1px solid var(--border);background:var(--surface)}
+    nav button{flex:1;min-width:0;padding:.6rem .15rem;background:none;border:none;color:var(--text-dim);font-size:.7rem;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap}
+    nav button:hover{color:var(--text);background:var(--surface2)}
+    nav button.active{background:var(--blue);color:var(--white)}
 
-.panels{max-width:1100px;margin:0 auto;padding:1.5rem}
-.panel{display:none}.panel.active{display:block}
-.panel-title{font-size:1.3rem;font-weight:700;margin-bottom:.3rem}
-.panel-desc{color:var(--gray-d);font-size:.88rem;margin-bottom:1.5rem}
+    .tab{display:none}.tab.active{display:block}
+    .card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.25rem;margin-bottom:1rem}
+    .card h3{font-size:.95rem;color:var(--blue);margin-bottom:.75rem;font-weight:700}
+    label{display:block;font-size:.78rem;color:var(--text-dim);margin-bottom:.3rem;font-weight:500}
+    input[type=text],input[type=number],textarea,select{width:100%;padding:.55rem .75rem;background:var(--surface2);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;outline:none;transition:border .2s}
+    input:focus,textarea:focus,select:focus{border-color:var(--blue)}
+    textarea{resize:vertical;min-height:100px;font-family:var(--mono);font-size:.8rem}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:.75rem}
+    .btn{padding:.55rem 1.1rem;background:var(--blue);color:var(--white);border:none;border-radius:6px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s}
+    .btn:hover{filter:brightness(1.15)}.btn:disabled{opacity:.5;cursor:not-allowed}
+    .btn-sm{padding:.4rem .8rem;font-size:.75rem}
+    .btn-amber{background:var(--amber);color:#000}
+    .btn-outline{background:transparent;border:1px solid var(--blue);color:var(--blue)}
+    .btn-outline:hover{background:var(--blue-glow)}
+    .actions{display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap}
+    .output{background:rgba(0,0,0,.3);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-top:.75rem;font-family:var(--mono);font-size:.8rem;white-space:pre-wrap;line-height:1.7;max-height:500px;overflow-y:auto}
+    .output:empty{display:none}
 
-.form-row{display:flex;gap:1rem;flex-wrap:wrap;margin-bottom:1rem}
-.form-group{display:flex;flex-direction:column;gap:.3rem;flex:1;min-width:180px}
-.form-group label{font-size:.78rem;color:var(--gray);text-transform:uppercase;letter-spacing:.04em}
-input,select,textarea{padding:.55rem .8rem;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--white);font-size:.9rem;outline:none;transition:border-color .15s;font-family:inherit}
-input:focus,select:focus,textarea:focus{border-color:var(--blue)}
-textarea{resize:vertical;line-height:1.5}
-select{cursor:pointer}option{background:var(--bg2)}
+    .gauge-wrap{display:flex;align-items:center;justify-content:center;margin:1rem 0}
+    .gauge{position:relative;width:140px;height:140px}
+    .gauge svg{transform:rotate(-90deg)}
+    .gauge-label{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+    .gauge-score{font-size:2rem;font-weight:800;color:var(--blue)}
+    .gauge-text{font-size:.7rem;color:var(--text-dim);text-transform:uppercase;letter-spacing:.05em}
 
-.btn{padding:.55rem 1.3rem;border-radius:6px;border:none;font-weight:600;font-size:.88rem;cursor:pointer;transition:all .15s;display:inline-flex;align-items:center;gap:.4rem}
-.btn-primary{background:var(--blue);color:#fff}.btn-primary:hover{background:var(--blue-d)}
-.btn-orange{background:var(--orange);color:#fff}.btn-orange:hover{background:var(--orange-d)}
-.btn-sm{padding:.4rem .9rem;font-size:.8rem}
-.btn:disabled{opacity:.5;cursor:not-allowed}
+    .job-card{background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:1rem;margin-bottom:.6rem;transition:border .2s}
+    .job-card:hover{border-color:var(--blue)}
+    .job-header{display:flex;justify-content:space-between;align-items:flex-start}
+    .job-header h4{font-size:.9rem;margin:0;color:var(--white)}.job-header .match-pct{font-size:.8rem;font-weight:700;color:var(--amber)}
+    .job-meta{font-size:.75rem;color:var(--text-dim);margin:.3rem 0}
+    .job-tags{display:flex;flex-wrap:wrap;gap:.3rem;margin-top:.4rem}
+    .job-tag{padding:.15rem .5rem;border-radius:4px;font-size:.68rem;font-weight:600;background:var(--blue-glow);color:var(--blue)}
 
-table{width:100%;border-collapse:collapse;font-size:.85rem}
-th{text-align:left;padding:.5rem .7rem;background:var(--bg2);color:var(--gray);font-weight:600;text-transform:uppercase;font-size:.72rem;letter-spacing:.04em;border-bottom:1px solid var(--border)}
-td{padding:.5rem .7rem;border-bottom:1px solid var(--border)}
-tr:hover td{background:rgba(255,255,255,.02)}
-.text-right{text-align:right}.text-center{text-align:center}
+    .interview-q{background:var(--surface2);border-left:3px solid var(--blue);padding:.8rem 1rem;border-radius:0 8px 8px 0;margin-bottom:.6rem}
+    .interview-q .q-type{font-size:.68rem;color:var(--amber);text-transform:uppercase;font-weight:700;margin-bottom:.2rem}
+    .interview-q .q-text{font-size:.88rem;color:var(--white)}
 
-.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1.2rem}
-.card-title{font-size:.95rem;font-weight:700;margin-bottom:.6rem}
-.cards-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:1rem;margin:1rem 0}
+    .chat-box{display:flex;flex-direction:column;height:420px;background:var(--surface);border:1px solid var(--border);border-radius:10px;overflow:hidden}
+    .chat-messages{flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:.6rem}
+    .msg{max-width:80%;padding:.6rem .9rem;border-radius:10px;font-size:.84rem;line-height:1.5}
+    .msg.user{align-self:flex-end;background:var(--blue);color:var(--white);border-bottom-right-radius:3px}
+    .msg.ai{align-self:flex-start;background:var(--surface2);border:1px solid var(--border);border-bottom-left-radius:3px}
+    .msg.system{align-self:center;color:var(--text-dim);font-size:.75rem;font-style:italic}
+    .chat-input{display:flex;gap:.5rem;padding:.75rem;border-top:1px solid var(--border);background:var(--surface2)}
+    .chat-input input{flex:1;padding:.5rem .75rem;background:var(--bg);border:1px solid var(--border);border-radius:6px;color:var(--text);font-size:.85rem;outline:none}
+    .chat-input input:focus{border-color:var(--blue)}
 
-.result-box{background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:1.2rem;margin-bottom:1rem}
-.result-label{font-size:.72rem;color:var(--gray-d);text-transform:uppercase;letter-spacing:.05em;margin-bottom:.3rem}
-.result-value{font-size:1.6rem;font-weight:800;color:var(--blue)}
-.result-detail{font-size:.82rem;color:var(--gray);margin-top:.2rem}
-
-/* Circular gauge */
-.circ-gauge{position:relative;width:130px;height:130px;margin:0 auto 1rem}
-.circ-gauge svg{transform:rotate(-90deg)}
-.circ-gauge .bg{fill:none;stroke:var(--border);stroke-width:10}
-.circ-gauge .fill{fill:none;stroke-width:10;stroke-linecap:round;transition:stroke-dashoffset .8s ease-out}
-.circ-gauge .val{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.8rem;font-weight:800}
-.circ-gauge .lbl{text-align:center;font-size:.78rem;color:var(--gray-d)}
-
-.tag{display:inline-block;padding:.2rem .6rem;border-radius:4px;font-size:.75rem;font-weight:600;margin:.15rem}
-.tag-blue{background:var(--blue-glow);color:var(--blue)}
-.tag-orange{background:var(--orange-glow);color:var(--orange)}
-.tag-green{background:rgba(34,197,94,.12);color:var(--green)}
-.tag-red{background:rgba(239,68,68,.12);color:var(--red)}
-
-/* Skill tags input */
-.tags-input{display:flex;flex-wrap:wrap;gap:.3rem;padding:.4rem;min-height:38px;border:1px solid var(--border);border-radius:6px;background:var(--bg);cursor:text}
-.tags-input:focus-within{border-color:var(--blue)}
-.tags-input input{border:none;background:none;color:var(--white);outline:none;font-size:.85rem;flex:1;min-width:80px;padding:.15rem .3rem}
-.skill-tag{display:flex;align-items:center;gap:.3rem;padding:.15rem .5rem;background:var(--blue-glow);color:var(--blue);border-radius:4px;font-size:.78rem;font-weight:600}
-.skill-tag .rm{cursor:pointer;opacity:.6;font-size:.9rem}.skill-tag .rm:hover{opacity:1}
-
-/* Expandable */
-.expandable{border:1px solid var(--border);border-radius:6px;margin-bottom:.5rem;overflow:hidden}
-.expand-head{padding:.6rem .8rem;cursor:pointer;display:flex;justify-content:space-between;align-items:center;background:var(--bg3);font-size:.88rem;font-weight:600}
-.expand-head:hover{background:var(--surface)}
-.expand-body{padding:.8rem;display:none;font-size:.85rem;color:var(--gray);line-height:1.6;border-top:1px solid var(--border)}
-.expandable.open .expand-body{display:block}
-.expand-arrow{transition:transform .2s;font-size:.7rem}
-.expandable.open .expand-arrow{transform:rotate(90deg)}
-
-.rec{padding:.8rem 1rem;border-left:3px solid var(--blue);background:var(--blue-glow);border-radius:0 6px 6px 0;margin:.6rem 0;font-size:.88rem}
-
-.spinner{display:inline-block;width:16px;height:16px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .6s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-.loading-msg{display:flex;align-items:center;gap:.5rem;color:var(--gray);font-size:.88rem;margin:1rem 0}
-
-.error-box{padding:.8rem 1rem;background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.2);border-radius:6px;color:var(--red);font-size:.85rem;margin:1rem 0}
-.server-hint{margin-top:1rem;padding:1rem;background:var(--bg2);border:1px dashed var(--border-h);border-radius:8px;font-size:.82rem;color:var(--gray-d)}
-.server-hint code{background:var(--bg);padding:.15rem .4rem;border-radius:3px;font-size:.8rem;color:var(--blue)}
-
-footer{text-align:center;padding:2rem;border-top:1px solid var(--border);color:var(--gray-d);font-size:.78rem;margin-top:3rem}
-
-@media(max-width:640px){
-  .tab{padding:.6rem .8rem;font-size:.78rem}
-  .form-row{flex-direction:column}.form-group{min-width:0}
-  .cards-row{grid-template-columns:1fr}
-}
-</style>
+    .loading{display:inline-block;width:14px;height:14px;border:2px solid var(--border);border-top-color:var(--blue);border-radius:50%;animation:spin .6s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    footer{text-align:center;padding:2rem 1rem;color:var(--text-dim);font-size:.72rem;border-top:1px solid var(--border);margin-top:2rem}
+    @media(max-width:640px){.row{grid-template-columns:1fr}nav{flex-wrap:wrap}nav button{flex:none;width:25%}}
+  </style>
 </head>
 <body>
-
 <header>
   <div class="logo">Launch<span>Pad</span></div>
-  <div class="conn"><div class="conn-dot" id="connDot"></div><span id="connText">Checking...</span></div>
+  <div class="conn"><div class="conn-dot" id="connDot"></div><span id="connLabel">Connecting…</span></div>
 </header>
-
-<div class="tabs" id="tabBar">
-  <div class="tab active" data-tab="resume">Resume Analyzer</div>
-  <div class="tab" data-tab="interview">Interview Prep</div>
-  <div class="tab" data-tab="matching">Job Matching</div>
-  <div class="tab" data-tab="salary">Salary Negotiation</div>
+<div class="shell">
+  <nav id="nav"></nav>
+  <main id="main"></main>
 </div>
-
-<div class="panels">
-
-<!-- ═══ RESUME ANALYZER ═══ -->
-<div class="panel active" id="p-resume">
-  <h2 class="panel-title">Resume Analyzer</h2>
-  <p class="panel-desc">Paste your resume text for ATS scoring and improvement suggestions. Optionally add a job description for keyword matching.</p>
-
-  <div class="form-group" style="margin-bottom:1rem">
-    <label>Resume Text</label>
-    <textarea id="res-text" rows="8" placeholder="Paste your full resume text here..."></textarea>
-  </div>
-  <div class="form-group" style="margin-bottom:1rem">
-    <label>Job Description (optional)</label>
-    <textarea id="res-jd" rows="4" placeholder="Paste the target job description for keyword matching..."></textarea>
-  </div>
-  <div style="display:flex;gap:.8rem;flex-wrap:wrap">
-    <button class="btn btn-primary" onclick="analyzeResume()" id="btn-resume">Analyze Resume</button>
-    <button class="btn btn-orange" onclick="optimizeResume()" id="btn-optimize" disabled>Optimize for Job</button>
-  </div>
-  <div id="resume-results"></div>
-</div>
-
-<!-- ═══ INTERVIEW PREP ═══ -->
-<div class="panel" id="p-interview">
-  <h2 class="panel-title">Interview Preparation</h2>
-  <p class="panel-desc">Generate role-specific interview questions with model STAR answers.</p>
-
-  <div class="form-row">
-    <div class="form-group"><label>Role</label>
-      <select id="int-role">
-        <option>Software Engineer</option><option>Product Manager</option><option>Data Scientist</option>
-        <option>Sales</option><option>Marketing</option><option>Finance</option><option>Consulting</option>
-        <option>Design</option><option>Operations</option>
-      </select>
-    </div>
-    <div class="form-group"><label>Company Name</label><input id="int-company" placeholder="Google, Stripe, etc."></div>
-    <div class="form-group"><label>Level</label>
-      <select id="int-level"><option value="junior">Junior</option><option value="mid" selected>Mid-Level</option><option value="senior">Senior</option><option value="staff">Staff / Lead</option></select>
-    </div>
-  </div>
-  <button class="btn btn-primary" onclick="prepInterview()" id="btn-interview">Generate Questions</button>
-  <div id="interview-results"></div>
-</div>
-
-<!-- ═══ JOB MATCHING ═══ -->
-<div class="panel" id="p-matching">
-  <h2 class="panel-title">Job Matching</h2>
-  <p class="panel-desc">Enter your skills and preferences to find matching opportunities ranked by fit.</p>
-
-  <div class="form-group" style="margin-bottom:1rem">
-    <label>Skills (type and press Enter)</label>
-    <div class="tags-input" id="skill-tags" onclick="this.querySelector('input').focus()">
-      <input type="text" id="skill-input" placeholder="Add a skill...">
-    </div>
-  </div>
-  <div class="form-row">
-    <div class="form-group"><label>Years of Experience</label><input type="number" id="match-exp" placeholder="5" value="5"></div>
-    <div class="form-group"><label>Preferred Location</label><input id="match-loc" placeholder="Remote, San Francisco, NYC..."></div>
-    <div class="form-group"><label>Min Salary ($)</label><input type="number" id="match-sal-min" placeholder="100000" value="100000"></div>
-    <div class="form-group"><label>Max Salary ($)</label><input type="number" id="match-sal-max" placeholder="180000" value="180000"></div>
-  </div>
-  <button class="btn btn-primary" onclick="matchJobs()" id="btn-match">Find Matches</button>
-  <div id="match-results"></div>
-</div>
-
-<!-- ═══ SALARY NEGOTIATION ═══ -->
-<div class="panel" id="p-salary">
-  <h2 class="panel-title">Salary Negotiation Strategy</h2>
-  <p class="panel-desc">Input your current offer and market data to generate a negotiation playbook.</p>
-
-  <h3 style="font-size:.9rem;color:var(--blue);margin-bottom:.6rem">Current Offer</h3>
-  <div class="form-row">
-    <div class="form-group"><label>Base Salary ($)</label><input type="number" id="sal-base" placeholder="130000" value="130000"></div>
-    <div class="form-group"><label>Equity/RSU ($)</label><input type="number" id="sal-equity" placeholder="40000" value="40000"></div>
-    <div class="form-group"><label>Signing Bonus ($)</label><input type="number" id="sal-bonus" placeholder="10000" value="10000"></div>
-    <div class="form-group"><label>Benefits Value ($)</label><input type="number" id="sal-benefits" placeholder="15000" value="15000"></div>
-  </div>
-
-  <h3 style="font-size:.9rem;color:var(--orange);margin-bottom:.6rem;margin-top:.5rem">Market Context</h3>
-  <div class="form-row">
-    <div class="form-group"><label>Target Salary ($)</label><input type="number" id="sal-target" placeholder="155000" value="155000"></div>
-    <div class="form-group"><label>Competing Offers?</label><select id="sal-competing"><option value="0">None</option><option value="1">1 offer</option><option value="2" selected>2 offers</option><option value="3">3+ offers</option></select></div>
-    <div class="form-group"><label>Role / Title</label><input id="sal-role" placeholder="Senior Software Engineer"></div>
-    <div class="form-group"><label>Company</label><input id="sal-company" placeholder="Acme Corp"></div>
-  </div>
-  <button class="btn btn-primary" onclick="negotiateSalary()" id="btn-salary">Generate Strategy</button>
-  <div id="salary-results"></div>
-</div>
-
-</div>
-
-<footer>&copy; 2026 Mint Rail LLC. LaunchPad is an AI-powered career tool — not employment advice.</footer>
-
+<footer>&copy; 2026 Mint Rail LLC &middot; LaunchPad v1.0.0</footer>
 <script>
-const API = window.location.origin;
-const skills = [];
+const API=localStorage.getItem('launchpad_api')||'http://localhost:8000';
+const TABS=['Resume Analyzer','Resume Optimizer','Cover Letter','Interview Coach','Job Matcher','Salary Negotiator','AI Career Coach'];
+let activeTab=0,chatHistory=[];
 
-/* ── Connection ── */
-async function checkConn() {
-  const dot = document.getElementById('connDot');
-  const txt = document.getElementById('connText');
-  try {
-    const r = await fetch(API + '/health', { signal: AbortSignal.timeout(3000) });
-    if (r.ok) { dot.classList.add('ok'); txt.textContent = 'API Connected'; return; }
-  } catch {}
-  dot.classList.remove('ok');
-  txt.textContent = 'API Offline';
+const SAMPLE_RESUME=`JANE DOE
+Senior Software Engineer | jane.doe@email.com | (555) 123-4567
+
+EXPERIENCE
+Senior Software Engineer — Acme Corp (2021–Present)
+• Led migration of monolith to microservices, reducing deployment time by 60%
+• Architected real-time data pipeline processing 2M events/day using Kafka
+• Mentored 4 junior engineers, all promoted within 18 months
+
+Software Engineer — StartupXYZ (2018–2021)
+• Built React dashboard serving 50K daily active users
+• Implemented CI/CD pipeline reducing release cycles from weekly to daily
+• Optimized API response times by 40% through caching and query optimization
+
+EDUCATION
+B.S. Computer Science — MIT (2018)
+
+SKILLS
+Python, JavaScript, React, Node.js, AWS, Docker, Kubernetes, PostgreSQL, Redis`;
+
+const $=s=>document.querySelector(s);
+const ce=(t,c,h)=>{const e=document.createElement(t);if(c)e.className=c;if(h)e.innerHTML=h;return e};
+
+function initNav(){
+  const nav=$('#nav');
+  TABS.forEach((t,i)=>{const b=ce('button','',t);if(i===0)b.classList.add('active');b.onclick=()=>switchTab(i);nav.appendChild(b);});
 }
-checkConn(); setInterval(checkConn, 15000);
+function switchTab(i){activeTab=i;document.querySelectorAll('nav button').forEach((b,j)=>b.classList.toggle('active',i===j));renderTab(i);}
+function renderTab(i){const m=$('#main');m.innerHTML='';const d=ce('div','tab active');[renderAnalyzer,renderOptimizer,renderCoverLetter,renderInterview,renderJobMatch,renderSalary,renderChat][i](d);m.appendChild(d);}
 
-/* ── Tabs ── */
-document.getElementById('tabBar').addEventListener('click', e => {
-  const t = e.target.closest('.tab');
-  if (!t) return;
-  document.querySelectorAll('.tab').forEach(x => x.classList.remove('active'));
-  document.querySelectorAll('.panel').forEach(x => x.classList.remove('active'));
-  t.classList.add('active');
-  document.getElementById('p-' + t.dataset.tab).classList.add('active');
-});
-
-/* ── Skills tags ── */
-document.getElementById('skill-input').addEventListener('keydown', e => {
-  if (e.key === 'Enter' || e.key === ',') {
-    e.preventDefault();
-    const v = e.target.value.trim().replace(/,$/,'');
-    if (v && !skills.includes(v)) { skills.push(v); renderSkills(); }
-    e.target.value = '';
-  }
-});
-
-function renderSkills() {
-  const wrap = document.getElementById('skill-tags');
-  wrap.querySelectorAll('.skill-tag').forEach(el => el.remove());
-  const input = document.getElementById('skill-input');
-  skills.forEach((s, i) => {
-    const tag = document.createElement('span');
-    tag.className = 'skill-tag';
-    tag.innerHTML = `${esc(s)} <span class="rm" onclick="rmSkill(${i})">×</span>`;
-    wrap.insertBefore(tag, input);
-  });
+function gaugeHTML(score){
+  const r=60,c=2*Math.PI*r,pct=score/100,offset=c*(1-pct);
+  const color=score>=80?'var(--green)':score>=60?'var(--amber)':'var(--red)';
+  return`<div class="gauge-wrap"><div class="gauge"><svg width="140" height="140" viewBox="0 0 140 140"><circle cx="70" cy="70" r="${r}" fill="none" stroke="var(--surface2)" stroke-width="10"/><circle cx="70" cy="70" r="${r}" fill="none" stroke="${color}" stroke-width="10" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${offset}" style="transition:stroke-dashoffset .8s ease"/></svg><div class="gauge-label"><div class="gauge-score" style="color:${color}">${score}</div><div class="gauge-text">ATS Score</div></div></div></div>`;
 }
 
-function rmSkill(i) { skills.splice(i, 1); renderSkills(); }
-
-/* ── Helpers ── */
-const $ = id => document.getElementById(id);
-const fmt = n => '$' + Number(n).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
-
-function showLoading(el) { el.innerHTML = '<div class="loading-msg"><span class="spinner"></span>Calling API...</div>'; }
-function showError(el, err) { el.innerHTML = `<div class="error-box">${err}</div><div class="server-hint">Make sure the API server is running:<br><code>cd products/launchpad && uvicorn server.app:app --reload --port 8001</code></div>`; }
-
-async function apiPost(endpoint, body) {
-  const r = await fetch(API + endpoint, {
-    method: 'POST', headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(body)
-  });
-  if (!r.ok) { const e = await r.json().catch(() => ({})); throw new Error(e.detail || `HTTP ${r.status}`); }
-  return r.json();
+function renderAnalyzer(el){
+  el.innerHTML=`<div class="card"><h3>Resume Analyzer</h3>
+    <label>Paste Your Resume</label><textarea id="resText" rows="10">${SAMPLE_RESUME}</textarea>
+    <label style="margin-top:.5rem">Target Job Description (optional)</label><textarea id="resJD" rows="4" placeholder="Paste the job description to check keyword alignment…"></textarea>
+    <div class="actions"><button class="btn" onclick="analyzeResume()">Analyze Resume</button></div>
+    <div id="resOut"></div></div>`;
 }
 
-function circGauge(score, max = 100) {
-  const pct = score / max;
-  const color = pct >= .7 ? 'var(--green)' : pct >= .45 ? 'var(--orange)' : 'var(--red)';
-  const r = 54, c = 2 * Math.PI * r;
-  const offset = c * (1 - pct);
-  return `<div class="circ-gauge"><svg width="130" height="130" viewBox="0 0 130 130"><circle class="bg" cx="65" cy="65" r="${r}"/><circle class="fill" cx="65" cy="65" r="${r}" stroke="${color}" stroke-dasharray="${c}" stroke-dashoffset="${offset}"/></svg><div class="val" style="color:${color}">${score}</div></div><div class="circ-gauge lbl">out of ${max}</div>`;
+async function analyzeResume(){
+  const o=$('#resOut');o.innerHTML='<div class="loading" style="margin:1rem auto;display:block"></div>';
+  const body={resume_text:$('#resText').value,job_description:$('#resJD').value};
+  try{const r=await fetch(API+'/v1/resume/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});const d=await r.json();
+    o.innerHTML=gaugeHTML(d.ats_score)+`<div class="output"><h4 style="color:var(--blue);margin-bottom:.4rem">Breakdown</h4>Keyword Match: ${d.breakdown.keyword_match}%\nFormatting: ${d.breakdown.formatting}%\nAchievements: ${d.breakdown.achievements}%\nAction Verbs: ${d.breakdown.action_verbs}%\n\nSections Found: ${d.sections_found.join(', ')}\n${d.missing_keywords.length?'\nMissing Keywords: '+d.missing_keywords.join(', '):''}\n\nImprovements:\n${d.improvements.map(i=>'• '+i).join('\n')}</div>`;
+  }catch{o.innerHTML=gaugeHTML(72)+`<div class="output">Demo Analysis (offline)\n\nKeyword Match: 68%\nFormatting: 80%\nAchievements: 75%\n\nConnect to API for full analysis.</div>`;}
 }
 
-/* ═══ RESUME ANALYZER ═══ */
-async function analyzeResume() {
-  const text = $('res-text').value.trim();
-  if (text.length < 20) { alert('Paste at least 20 characters of resume text.'); return; }
-  const el = $('resume-results');
-  showLoading(el);
-  try {
-    const jd = $('res-jd').value.trim();
-    const data = await apiPost('/v1/resume/analyze', { resume_text: text, job_description: jd || undefined });
-    let html = '<div style="margin-top:1.5rem">';
-    const score = data.ats_score ?? data.score ?? 0;
-    html += circGauge(score);
-    html += '<div style="text-align:center;font-size:.82rem;color:var(--gray);margin-bottom:1.5rem">ATS Compatibility Score</div>';
-    if (data.breakdown) {
-      const b = data.breakdown;
-      html += '<div class="cards-row">';
-      const keys = { formatting: 'Formatting', keyword_match: 'Keywords', keywords: 'Keywords', achievements: 'Achievements', action_verbs: 'Action Verbs' };
-      for (const [k, label] of Object.entries(keys)) {
-        if (b[k] != null) html += `<div class="card"><div class="result-label">${label}</div><div class="result-value" style="font-size:1.3rem">${b[k]}/100</div></div>`;
-      }
-      html += '</div>';
-    }
-    if (data.improvements && data.improvements.length) {
-      html += '<div class="result-box"><div class="result-label">Improvement Suggestions</div>';
-      data.improvements.forEach(tip => { html += `<div class="rec">${esc(tip)}</div>`; });
-      html += '</div>';
-    }
-    if (data.missing_keywords && data.missing_keywords.length) {
-      html += '<div class="result-box"><div class="result-label">Missing Keywords</div><div style="display:flex;flex-wrap:wrap;gap:.3rem">';
-      data.missing_keywords.forEach(kw => { html += `<span class="tag tag-orange">${esc(kw)}</span>`; });
-      html += '</div></div>';
-    }
-    html += '</div>';
-    el.innerHTML = html;
-    $('btn-optimize').disabled = false;
-  } catch (err) { showError(el, err.message); }
+function renderOptimizer(el){
+  el.innerHTML=`<div class="card"><h3>AI Resume Optimizer</h3>
+    <label>Your Resume</label><textarea id="optRes" rows="8">${SAMPLE_RESUME}</textarea>
+    <label style="margin-top:.5rem">Target Role</label><input type="text" id="optRole" placeholder="e.g. Senior Backend Engineer" value="Staff Software Engineer">
+    <label style="margin-top:.3rem">Target Company</label><input type="text" id="optCo" placeholder="e.g. Google (optional)">
+    <div class="actions"><button class="btn" onclick="optimizeResume()">Rewrite Resume with AI</button></div>
+    <div class="output" id="optOut"></div></div>`;
 }
 
-async function optimizeResume() {
-  const text = $('res-text').value.trim();
-  const jd = $('res-jd').value.trim();
-  if (!text) return;
-  const el = $('resume-results');
-  const prev = el.innerHTML;
-  el.innerHTML += '<div class="loading-msg"><span class="spinner"></span>Optimizing resume...</div>';
-  try {
-    const data = await apiPost('/v1/resume/optimize', { resume_text: text, job_description: jd || undefined });
-    const optimized = data.optimized_resume || data.resume || data.text || '';
-    el.innerHTML = prev + `<div class="result-box" style="margin-top:1rem"><div class="result-label">Optimized Resume</div><pre style="white-space:pre-wrap;font-size:.85rem;color:var(--white);line-height:1.6;margin-top:.5rem">${esc(optimized)}</pre></div>`;
-    if (data.changes && data.changes.length) {
-      let ch = '<div class="result-box"><div class="result-label">Changes Made</div>';
-      data.changes.forEach(c => { ch += `<div class="rec">${esc(c)}</div>`; });
-      ch += '</div>';
-      el.innerHTML += ch;
-    }
-  } catch (err) { el.innerHTML = prev; showError(el, err.message); }
+async function optimizeResume(){
+  const o=$('#optOut');o.textContent='AI is rewriting your resume…';
+  try{const r=await fetch(API+'/v1/ai/resume-rewrite',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resume_text:$('#optRes').value,target_role:$('#optRole').value,target_company:$('#optCo').value})});const d=await r.json();o.textContent=d.rewritten_resume||d.error||'No response';}
+  catch{o.textContent='Connect to API for AI resume rewriting.';}
 }
 
-/* ═══ INTERVIEW PREP ═══ */
-async function prepInterview() {
-  const el = $('interview-results');
-  showLoading(el);
-  try {
-    const data = await apiPost('/v1/interview/prepare', {
-      role: $('int-role').value, company: $('int-company').value.trim() || undefined,
-      level: $('int-level').value
-    });
-    const groups = data.questions || data.question_groups || data;
-    let html = '<div style="margin-top:1.5rem">';
-    const sections = Array.isArray(groups) ? [{ type: 'Questions', items: groups }] :
-      Object.entries(groups).map(([type, items]) => ({ type, items: Array.isArray(items) ? items : [items] }));
-    sections.forEach(sec => {
-      html += `<div class="result-box"><div class="result-label">${esc(sec.type.replace(/_/g, ' '))}</div>`;
-      (sec.items || []).forEach((q, i) => {
-        const question = typeof q === 'string' ? q : q.question || q.text || '';
-        const answer = typeof q === 'object' ? (q.answer || q.model_answer || q.star_answer || '') : '';
-        html += `<div class="expandable"><div class="expand-head" onclick="this.parentElement.classList.toggle('open')"><span>Q${i + 1}: ${esc(question)}</span><span class="expand-arrow">▶</span></div>`;
-        if (answer) html += `<div class="expand-body">${esc(answer)}</div>`;
-        html += '</div>';
-      });
-      html += '</div>';
-    });
-    html += '</div>';
-    el.innerHTML = html;
-  } catch (err) { showError(el, err.message); }
+function renderCoverLetter(el){
+  el.innerHTML=`<div class="card"><h3>AI Cover Letter Generator</h3>
+    <label>Your Resume</label><textarea id="clRes" rows="6">${SAMPLE_RESUME}</textarea>
+    <label style="margin-top:.5rem">Job Description</label><textarea id="clJD" rows="5" placeholder="Paste the full job description…">We are looking for a Staff Software Engineer to lead our platform engineering team. You will design scalable distributed systems, mentor engineers, and drive technical strategy. Required: 5+ years experience, strong in Python/Go, cloud infrastructure (AWS/GCP), and distributed systems.</textarea>
+    <div class="row" style="margin-top:.5rem"><div><label>Company Name</label><input type="text" id="clCo" placeholder="e.g. Acme Inc"></div>
+    <div><label>Tone</label><select id="clTone"><option value="professional">Professional</option><option value="enthusiastic">Enthusiastic</option><option value="conversational">Conversational</option></select></div></div>
+    <div class="actions"><button class="btn" onclick="genCoverLetter()">Generate with AI</button><button class="btn btn-outline" onclick="genLocalCover()">Quick Generate</button></div>
+    <div class="output" id="clOut"></div></div>`;
 }
 
-/* ═══ JOB MATCHING ═══ */
-async function matchJobs() {
-  if (!skills.length) { alert('Add at least one skill.'); return; }
-  const el = $('match-results');
-  showLoading(el);
-  try {
-    const data = await apiPost('/v1/match/jobs', {
-      skills, experience_years: parseInt($('match-exp').value) || 0,
-      preferred_location: $('match-loc').value.trim() || undefined,
-      salary_min: parseInt($('match-sal-min').value) || undefined,
-      salary_max: parseInt($('match-sal-max').value) || undefined
-    });
-    const jobs = data.matches || data.jobs || data;
-    let html = '<div style="margin-top:1.5rem">';
-    if (!jobs.length) { html += '<div class="result-box">No matches found. Try adjusting your skills or preferences.</div>'; }
-    (Array.isArray(jobs) ? jobs : []).forEach(job => {
-      const score = job.fit_score ?? job.score ?? 0;
-      const scoreColor = score >= 80 ? 'var(--green)' : score >= 60 ? 'var(--blue)' : 'var(--orange)';
-      html += `<div class="card" style="margin-bottom:1rem"><div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:.5rem">
-        <div><div class="card-title" style="font-size:1.05rem">${esc(job.title || job.role || '')}</div>
-        <div style="font-size:.85rem;color:var(--gray)">${esc(job.company || '')} ${job.location ? '· ' + esc(job.location) : ''}</div></div>
-        <div style="text-align:right"><div style="font-size:1.4rem;font-weight:800;color:${scoreColor}">${score}%</div><div style="font-size:.72rem;color:var(--gray-d)">FIT SCORE</div></div>
-      </div>`;
-      if (job.salary_range || job.salary) html += `<div style="margin-top:.6rem;font-size:.88rem;font-weight:600;color:var(--green)">${esc(job.salary_range || job.salary)}</div>`;
-      html += '<div style="margin-top:.5rem;display:flex;flex-wrap:wrap;gap:.3rem">';
-      (job.matched_skills || []).forEach(s => { html += `<span class="tag tag-green">${esc(s)}</span>`; });
-      (job.missing_skills || []).forEach(s => { html += `<span class="tag tag-red">${esc(s)}</span>`; });
-      html += '</div></div>';
-    });
-    html += '</div>';
-    el.innerHTML = html;
-  } catch (err) { showError(el, err.message); }
+async function genCoverLetter(){
+  const o=$('#clOut');o.textContent='Crafting your cover letter…';
+  try{const r=await fetch(API+'/v1/ai/cover-letter',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resume_text:$('#clRes').value,job_description:$('#clJD').value,company_name:$('#clCo').value,tone:$('#clTone').value})});const d=await r.json();o.textContent=d.cover_letter||d.error||'No response';}
+  catch{o.textContent='Connect to API for AI cover letter generation.';}
+}
+async function genLocalCover(){
+  const o=$('#clOut');o.textContent='Generating…';
+  try{const r=await fetch(API+'/v1/cover-letter/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({resume_text:$('#clRes').value,job_description:$('#clJD').value,tone:$('#clTone').value})});const d=await r.json();o.textContent=d.cover_letter||'No response';}
+  catch{o.textContent='API offline. Use AI Generate with server connected.';}
 }
 
-/* ═══ SALARY NEGOTIATION ═══ */
-async function negotiateSalary() {
-  const el = $('salary-results');
-  showLoading(el);
-  try {
-    const data = await apiPost('/v1/salary/negotiate', {
-      current_offer: {
-        base: num('sal-base'), equity: num('sal-equity'),
-        bonus: num('sal-bonus'), benefits: num('sal-benefits')
-      },
-      target_salary: num('sal-target'),
-      competing_offers: parseInt($('sal-competing').value) || 0,
-      role: $('sal-role').value.trim() || undefined,
-      company: $('sal-company').value.trim() || undefined
-    });
-    let html = '<div style="margin-top:1.5rem">';
-    if (data.counter_offer) {
-      const co = data.counter_offer;
-      html += '<div class="result-box"><div class="result-label">Recommended Counter-Offer</div><div class="cards-row">';
-      if (co.base) html += `<div class="card"><div class="result-label">Base</div><div class="result-value">${fmt(co.base)}</div></div>`;
-      if (co.equity) html += `<div class="card"><div class="result-label">Equity</div><div class="result-value" style="color:var(--orange)">${fmt(co.equity)}</div></div>`;
-      if (co.bonus) html += `<div class="card"><div class="result-label">Bonus</div><div class="result-value" style="color:var(--green)">${fmt(co.bonus)}</div></div>`;
-      if (co.total) html += `<div class="card"><div class="result-label">Total Comp</div><div class="result-value">${fmt(co.total)}</div></div>`;
-      html += '</div></div>';
-    }
-    if (data.script || data.negotiation_script) {
-      html += `<div class="result-box"><div class="result-label">Negotiation Script</div><div style="white-space:pre-wrap;font-size:.88rem;line-height:1.6;margin-top:.5rem">${esc(data.script || data.negotiation_script)}</div></div>`;
-    }
-    if (data.talking_points && data.talking_points.length) {
-      html += '<div class="result-box"><div class="result-label">Key Talking Points</div>';
-      data.talking_points.forEach((p, i) => {
-        html += `<div class="rec" style="margin:.4rem 0"><strong>${i + 1}.</strong> ${esc(typeof p === 'string' ? p : p.point || p.text)}</div>`;
-      });
-      html += '</div>';
-    }
-    if (data.strategy) {
-      html += `<div class="result-box"><div class="result-label">Overall Strategy</div><div style="font-size:.88rem;line-height:1.6;margin-top:.4rem">${esc(data.strategy)}</div></div>`;
-    }
-    if (data.tips && data.tips.length) {
-      html += '<div class="result-box"><div class="result-label">Pro Tips</div>';
-      data.tips.forEach(t => { html += `<div class="rec">${esc(t)}</div>`; });
-      html += '</div>';
-    }
-    html += '</div>';
-    el.innerHTML = html;
-  } catch (err) { showError(el, err.message); }
+function renderInterview(el){
+  el.innerHTML=`<div class="card"><h3>AI Interview Coach</h3>
+    <div class="row"><div><label>Target Role</label><input type="text" id="ivRole" value="Software Engineer"></div>
+    <div><label>Level</label><select id="ivLevel"><option value="junior">Junior</option><option value="mid" selected>Mid</option><option value="senior">Senior</option><option value="staff">Staff</option></select></div></div>
+    <div class="actions" style="margin-top:.5rem"><button class="btn" onclick="genQuestions()">Generate Practice Questions</button></div>
+    <div id="ivQuestions"></div>
+    <h3 style="margin-top:1.5rem">Practice & Get Feedback</h3>
+    <label>Interview Question</label><input type="text" id="ivQ" placeholder="Enter or pick a question above" value="Tell me about a time you led a difficult technical project">
+    <label style="margin-top:.5rem">Your Answer</label><textarea id="ivA" rows="5" placeholder="Type your answer here for AI feedback…"></textarea>
+    <div class="actions"><button class="btn" onclick="getCoaching()">Get AI Coaching</button></div>
+    <div class="output" id="ivOut"></div></div>`;
 }
 
-function num(id) { return parseFloat($(id).value) || 0; }
-function esc(s) { if (!s) return ''; const d = document.createElement('div'); d.textContent = s; return d.innerHTML; }
+async function genQuestions(){
+  const o=$('#ivQuestions');o.innerHTML='<div class="loading" style="margin:.5rem"></div>';
+  try{const r=await fetch(API+'/v1/interview/prepare',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:$('#ivRole').value.toLowerCase().replace(/ /g,'_'),level:$('#ivLevel').value,count:6})});const d=await r.json();
+    o.innerHTML=d.questions.map(q=>`<div class="interview-q" onclick="document.getElementById('ivQ').value='${q.question.replace(/'/g,"\\'")}'" style="cursor:pointer"><div class="q-type">${q.category}</div><div class="q-text">${q.question}</div></div>`).join('');
+  }catch{o.innerHTML=['Tell me about yourself','Describe a challenging bug you solved','How do you handle disagreements with teammates?','Walk me through your system design process','What\'s your greatest technical achievement?','Why should we hire you?'].map(q=>`<div class="interview-q" onclick="document.getElementById('ivQ').value='${q}'" style="cursor:pointer"><div class="q-type">Practice</div><div class="q-text">${q}</div></div>`).join('');}
+}
+
+async function getCoaching(){
+  const o=$('#ivOut');o.textContent='Getting AI coaching feedback…';
+  try{const r=await fetch(API+'/v1/ai/interview-coach',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:$('#ivRole').value,question:$('#ivQ').value,your_answer:$('#ivA').value,level:$('#ivLevel').value})});const d=await r.json();o.textContent=d.coaching||d.error||'No response';}
+  catch{o.textContent='Connect to API for AI interview coaching.';}
+}
+
+function renderJobMatch(el){
+  el.innerHTML=`<div class="card"><h3>Job Matcher</h3>
+    <label>Your Skills (comma-separated)</label><input type="text" id="jmSkills" value="Python, JavaScript, React, AWS, Docker, PostgreSQL">
+    <div class="row" style="margin-top:.5rem"><div><label>Experience (years)</label><input type="number" id="jmExp" value="5" min="0"></div>
+    <div><label>Preferred Location</label><input type="text" id="jmLoc" placeholder="e.g. Remote, San Francisco"></div></div>
+    <div class="row" style="margin-top:.3rem"><div><label>Min Salary ($)</label><input type="number" id="jmSalMin" value="120000"></div>
+    <div><label>Max Salary ($)</label><input type="number" id="jmSalMax" value="200000"></div></div>
+    <div class="actions"><button class="btn" onclick="matchJobs()">Find Matching Jobs</button></div>
+    <div id="jmOut"></div></div>`;
+}
+
+async function matchJobs(){
+  const o=$('#jmOut');o.innerHTML='<div class="loading" style="margin:.5rem"></div>';
+  const skills=$('#jmSkills').value.split(',').map(s=>s.trim()).filter(Boolean);
+  try{const r=await fetch(API+'/v1/match/jobs',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({skills,experience_years:+$('#jmExp').value,preferred_locations:[$('#jmLoc').value].filter(Boolean),salary_min:+$('#jmSalMin').value,salary_max:+$('#jmSalMax').value,limit:8})});const d=await r.json();
+    o.innerHTML=d.matches.map(j=>`<div class="job-card"><div class="job-header"><h4>${j.title}</h4><span class="match-pct">${j.match_score}% match</span></div><div class="job-meta">${j.company} · ${j.location} · $${(j.salary_min/1000).toFixed(0)}K–$${(j.salary_max/1000).toFixed(0)}K</div><div class="job-tags">${j.matching_skills.map(s=>`<span class="job-tag">${s}</span>`).join('')}</div></div>`).join('');
+  }catch{o.innerHTML=[{title:'Senior Software Engineer',company:'TechCorp',location:'Remote',match:92,salary:'140K–180K',skills:['Python','AWS','Docker']},{title:'Staff Engineer',company:'StartupAI',location:'San Francisco',match:87,salary:'160K–220K',skills:['React','PostgreSQL','Python']},{title:'Platform Engineer',company:'CloudScale',location:'Remote',match:78,salary:'130K–170K',skills:['Docker','AWS','JavaScript']}].map(j=>`<div class="job-card"><div class="job-header"><h4>${j.title}</h4><span class="match-pct">${j.match}% match</span></div><div class="job-meta">${j.company} · ${j.location} · $${j.salary}</div><div class="job-tags">${j.skills.map(s=>`<span class="job-tag">${s}</span>`).join('')}</div></div>`).join('');}
+}
+
+function renderSalary(el){
+  el.innerHTML=`<div class="card"><h3>Salary Negotiator</h3>
+    <div class="row"><div><label>Role</label><input type="text" id="salRole" value="Senior Software Engineer"></div>
+    <div><label>Location</label><input type="text" id="salLoc" value="San Francisco"></div></div>
+    <div class="row" style="margin-top:.3rem"><div><label>Offer Base Salary ($)</label><input type="number" id="salBase" value="165000"></div>
+    <div><label>Years Experience</label><input type="number" id="salExp" value="6"></div></div>
+    <div class="row" style="margin-top:.3rem"><div><label>Equity</label><input type="text" id="salEq" placeholder="e.g. 50K RSUs over 4 years"></div>
+    <div><label>Bonus</label><input type="text" id="salBonus" placeholder="e.g. 15% annual target"></div></div>
+    <div class="actions"><button class="btn btn-amber" onclick="negotiateSalary()">Get Negotiation Strategy</button><button class="btn btn-outline" onclick="aiSalaryAnalysis()">Deep AI Analysis</button></div>
+    <div class="output" id="salOut"></div></div>`;
+}
+
+async function negotiateSalary(){
+  const o=$('#salOut');o.textContent='Building negotiation strategy…';
+  try{const r=await fetch(API+'/v1/salary/negotiate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({base_salary:+$('#salBase').value,equity:$('#salEq').value,bonus:$('#salBonus').value,role:$('#salRole').value,location:$('#salLoc').value,years_experience:+$('#salExp').value})});const d=await r.json();
+    o.textContent=`Salary Negotiation Strategy\n${'━'.repeat(35)}\nCurrent Offer: $${d.current_offer.base.toLocaleString()}\nRecommended Counter: $${d.recommended_counter.toLocaleString()}\nConfidence: ${d.confidence_level}\n\nStrategies:\n${d.strategies.map(s=>`\n▸ ${s.strategy}\n  ${s.description}`).join('\n')}\n\nTalking Points:\n${d.talking_points.map(t=>'• '+t).join('\n')}${d.equity_notes.length?'\n\nEquity Notes:\n'+d.equity_notes.map(n=>'• '+n).join('\n'):''}`;
+  }catch{o.textContent='Connect to API for negotiation strategies.';}
+}
+
+async function aiSalaryAnalysis(){
+  const o=$('#salOut');o.textContent='Running AI compensation analysis…';
+  try{const r=await fetch(API+'/v1/ai/salary-analysis',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({role:$('#salRole').value,location:$('#salLoc').value,experience_years:+$('#salExp').value,offer_salary:+$('#salBase').value,skills:[]})});const d=await r.json();o.textContent=d.salary_analysis||d.error||'No response';}
+  catch{o.textContent='Connect to API for AI salary analysis.';}
+}
+
+function renderChat(el){
+  el.innerHTML=`<div class="card"><h3>AI Career Coach</h3><p style="font-size:.8rem;color:var(--text-dim);margin-bottom:.75rem">Get personalized career advice, skill gap analysis, and strategic guidance.</p>
+    <div class="chat-box"><div class="chat-messages" id="chatMsgs"><div class="msg system">Hi! I'm your AI career coach. Ask me about career transitions, skill development, interview prep, salary negotiation, or anything career-related.</div></div>
+    <div class="chat-input"><input type="text" id="chatIn" placeholder="Ask your career coach…" onkeydown="if(event.key==='Enter')sendChat()"><button class="btn btn-sm" onclick="sendChat()">Send</button></div></div></div>`;
+  chatHistory.forEach(m=>{const d=ce('div','msg '+(m.role==='user'?'user':'ai'),m.text);$('#chatMsgs').appendChild(d);});
+}
+
+async function sendChat(){
+  const inp=$('#chatIn'),txt=inp.value.trim();if(!txt)return;inp.value='';
+  chatHistory.push({role:'user',text:txt});
+  const msgs=$('#chatMsgs');msgs.appendChild(ce('div','msg user',txt));
+  const thinking=ce('div','msg ai','<div class="loading"></div> Thinking…');msgs.appendChild(thinking);msgs.scrollTop=msgs.scrollHeight;
+  try{
+    const r=await fetch(API+'/v1/ai/career-advice',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({current_role:'',skills:[],experience_years:0,interests:[],goals:txt})});
+    const d=await r.json();const reply=d.career_advice||d.error||'No response';
+    thinking.innerHTML=reply.replace(/\n/g,'<br>');chatHistory.push({role:'ai',text:reply});
+  }catch{thinking.innerHTML='I\'m currently offline. Please ensure the LaunchPad server is running.';chatHistory.push({role:'ai',text:'Offline'});}
+  msgs.scrollTop=msgs.scrollHeight;
+}
+
+async function checkHealth(){
+  try{const r=await fetch(API+'/health');if(r.ok){$('#connDot').classList.add('ok');$('#connLabel').textContent='Connected';return;}}catch{}
+  $('#connDot').classList.remove('ok');$('#connLabel').textContent='Offline';
+}
+
+initNav();renderTab(0);checkHealth();setInterval(checkHealth,15000);
 </script>
 </body>
 </html>
